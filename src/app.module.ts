@@ -5,6 +5,10 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import {Connection} from 'typeorm';
 import {User} from "./modules/user/user.entity";
 import {UserModule} from "./modules/user/user.module";
+import {Appointment} from "./modules/appointment/appointment.entity";
+import {AppointmentModule} from "./modules/appointment/appointment.module";
+import {EnrollmentModule} from "./modules/enrollment/enrollment.module";
+import {Enrollment} from "./modules/enrollment/enrollment.entity";
 
 @Module({
     imports: [TypeOrmModule.forRoot({
@@ -14,10 +18,13 @@ import {UserModule} from "./modules/user/user.module";
         username: 'root',
         password: '',
         database: 'anmeldesystem-api',
-        entities: [User],
+        entities: [User, Appointment, Enrollment
+        ],
         synchronize: true
     }),
-        UserModule
+        UserModule,
+        AppointmentModule,
+        EnrollmentModule,
     ],
     controllers: [AppController],
     providers: [AppService],
