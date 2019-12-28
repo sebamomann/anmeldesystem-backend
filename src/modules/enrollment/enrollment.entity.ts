@@ -1,6 +1,7 @@
-import {Column, Entity, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, Index, PrimaryGeneratedColumn} from 'typeorm';
 
 @Entity()
+@Index("index_unique_name_appointment", ["name", "appointment"], {unique: true}) // first style
 export class Enrollment {
     @PrimaryGeneratedColumn('uuid')
     id: string;
