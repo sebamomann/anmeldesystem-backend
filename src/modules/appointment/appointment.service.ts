@@ -16,7 +16,6 @@ export class AppointmentService {
     }
 
     async find(link: string) {
-        console.log(link);
         return await this.appointmentRepository.findOne({where: {link: link}});
     }
 

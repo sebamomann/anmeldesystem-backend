@@ -6,7 +6,6 @@ exports.cryptPassword = function (password) {
             throw Error;
 
         bcrypt.hash(password, salt, function (err, hash) {
-            console.log('In function Hash' + hash);
             return hash;
         });
     });
