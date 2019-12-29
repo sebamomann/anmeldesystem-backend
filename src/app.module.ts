@@ -9,6 +9,10 @@ import {Appointment} from "./modules/appointment/appointment.entity";
 import {AppointmentModule} from "./modules/appointment/appointment.module";
 import {EnrollmentModule} from "./modules/enrollment/enrollment.module";
 import {Enrollment} from "./modules/enrollment/enrollment.entity";
+import {AdditionController} from './modules/addition/addition.controller';
+import {AdditionService} from './modules/addition/addition.service';
+import {Addition} from "./modules/addition/addition.entity";
+import {AdditionModule} from "./modules/addition/addition.module";
 
 @Module({
     imports: [TypeOrmModule.forRoot({
@@ -18,16 +22,17 @@ import {Enrollment} from "./modules/enrollment/enrollment.entity";
         username: 'root',
         password: '',
         database: 'anmeldesystem-api',
-        entities: [User, Appointment, Enrollment
+        entities: [User, Appointment, Enrollment, Addition
         ],
         synchronize: true
     }),
         UserModule,
         AppointmentModule,
         EnrollmentModule,
+        AdditionModule
     ],
-    controllers: [AppController],
-    providers: [AppService],
+    controllers: [AppController, AdditionController],
+    providers: [AppService, AdditionService],
 })
 export class AppModule {
     constructor(private readonly connection: Connection) {

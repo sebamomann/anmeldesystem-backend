@@ -2,12 +2,15 @@ import {Injectable} from '@nestjs/common';
 import {Appointment} from "./appointment.entity";
 import {Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
+import {Addition} from "../addition/addition.entity";
 
 @Injectable()
 export class AppointmentService {
     constructor(
         @InjectRepository(Appointment)
         private readonly appointmentRepository: Repository<Appointment>,
+        @InjectRepository(Addition)
+        private readonly additionRepository: Repository<Addition>
     ) {
     }
 
@@ -15,11 +18,13 @@ export class AppointmentService {
         return this.appointmentRepository.find();
     }
 
-    async find(link: string) {
-        return await this.appointmentRepository.findOne({where: {link: link}});
+    async find(link: string): Promise<Appointment> {
+        return await this.appointmentRepository.findOne({
+            where: {link: link['link']}
+        })
     }
 
-    create(appointment: Appointment) {
+    async create(appointment: Appointment) {
         let appointmentToDb = new Appointment();
         appointmentToDb.title = appointment.title;
         appointmentToDb.description = appointment.description;
@@ -29,6 +34,16 @@ export class AppointmentService {
         appointmentToDb.deadline = appointment.deadline;
         appointmentToDb.maxEnrollments = appointment.maxEnrollments;
         appointmentToDb.driverAddition = appointment.driverAddition;
+
+        let additionsToDb = [];
+        for (const fAddition of appointment.additions) {
+            let _addition: Addition = new Addition();
+            _addition.name = fAddition.name;
+            await this.additionRepository.save(_addition);
+            additionsToDb.push(_addition);
+        }
+
+        appointmentToDb.additions = additionsToDb;
 
         return this.appointmentRepository.save(appointmentToDb);
     }

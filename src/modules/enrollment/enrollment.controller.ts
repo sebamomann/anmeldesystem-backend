@@ -10,9 +10,8 @@ export class EnrollmentController {
     }
 
     @Get()
-    @UseInterceptors(ClassSerializerInterceptor)
-    find(@Query() link: string): Promise<Enrollment[]> {
-        return this.enrollmentService.find(link);
+    find(@Query() id: string): Promise<Enrollment> {
+        return this.enrollmentService.find(id);
     }
 
     @Post()

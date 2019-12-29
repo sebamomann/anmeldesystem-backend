@@ -13,9 +13,8 @@ export class EnrollmentService {
 
     }
 
-    async find(link: string) {
-        const appointment: Appointment = await this.appointmentService.find(link);
-        return this.enrollmentRepository.find({where: {appointment: appointment.id}});
+    async find(id: string) {
+        return await this.enrollmentRepository.findOne({where: {id: id['id']}});
     }
 
     async create(enrollment: Enrollment, link: string) {
@@ -26,7 +25,7 @@ export class EnrollmentService {
         enrollmentToDb.comment = enrollment.comment;
         // enrollmentToDb.driver = enrollment.driver;
         // enrollmentToDb.passenger = enrollment.passenger;
-        enrollmentToDb.appointment = appointment.id;
+        enrollmentToDb.appointment = appointment;
 
         return this.enrollmentRepository.save(enrollmentToDb);
     }

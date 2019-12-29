@@ -1,4 +1,5 @@
-import {Column, Entity, Index, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
+import {Appointment} from "../appointment/appointment.entity";
 
 @Entity()
 @Index("index_unique_name_appointment", ["name", "appointment"], {unique: true}) // first style
@@ -24,8 +25,9 @@ export class Enrollment {
     // @Column()
     // additions: Addition[];
 
-    @Column()
-    appointment: string;
+    @ManyToOne(type => Appointment,
+        appointment => appointment.enrollments)
+    appointment: Appointment;
 
     @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
     iat: Date;

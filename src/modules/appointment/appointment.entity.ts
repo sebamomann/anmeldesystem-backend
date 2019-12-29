@@ -1,4 +1,6 @@
-import {Column, Entity, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {Enrollment} from "../enrollment/enrollment.entity";
+import {Addition} from "../addition/addition.entity";
 
 @Entity()
 export class Appointment {
@@ -26,8 +28,18 @@ export class Appointment {
     @Column('int')
     maxEnrollments: number;
 
-    // @Column()
-    // additions: Addition[];
+    @OneToMany(type => Enrollment,
+        enrollment => enrollment.appointment, {
+            eager: true
+        })
+    enrollments: Enrollment[];
+
+    @OneToMany(type => Addition,
+        addition => addition.appointment,
+        {
+            eager: true,
+        })
+    additions: Addition[];
 
     @Column('smallint', {default: false})
     driverAddition: boolean;
