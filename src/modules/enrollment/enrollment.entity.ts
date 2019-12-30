@@ -1,5 +1,8 @@
-import {Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, Index, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
 import {Appointment} from "../appointment/appointment.entity";
+import {Addition} from "../addition/addition.entity";
+import {Driver} from "../driver/driver.entity";
+import {Passenger} from "../passenger/passenger.entity";
 
 @Entity()
 @Index("index_unique_name_appointment", ["name", "appointment"], {unique: true}) // first style
@@ -16,14 +19,17 @@ export class Enrollment {
     // @Column()
     // comments: Comment[];
 
-    // @Column({nullable: true})
-    // driver: Driver;
+    @OneToOne(type => Driver, driver => driver.enrollment)
+    @JoinTable()
+    driver: Driver;
 
-    // @Column({nullable: true})
-    // passenger: Passenger;
+    @OneToOne(type => Passenger, passenger => passenger.enrollment)
+    @JoinTable()
+    passenger: Passenger;
 
-    // @Column()
-    // additions: Addition[];
+    @ManyToMany(type => Addition)
+    @JoinTable({name: 'enrollment_addition'})
+    additions: Addition[];
 
     @ManyToOne(type => Appointment,
         appointment => appointment.enrollments)

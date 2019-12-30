@@ -1,6 +1,7 @@
 import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
 import {Enrollment} from "../enrollment/enrollment.entity";
 import {Addition} from "../addition/addition.entity";
+import {File} from "../file/file.entity";
 
 @Entity()
 export class Appointment {
@@ -25,7 +26,7 @@ export class Appointment {
     @Column('timestamp', {default: null})
     deadline: Date;
 
-    @Column('int')
+    @Column('int', {default: null})
     maxEnrollments: number;
 
     @OneToMany(type => Enrollment,
@@ -47,8 +48,12 @@ export class Appointment {
     // @Column()
     // administrations: User[]
 
-    // @Column()
-    // files: File[]
+    @OneToMany(type => File,
+        file => file.appointment,
+        {
+            eager: true,
+        })
+    files: File[];
 
     // @Column()
     // creator: User

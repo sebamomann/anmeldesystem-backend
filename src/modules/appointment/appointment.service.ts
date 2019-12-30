@@ -3,6 +3,7 @@ import {Appointment} from "./appointment.entity";
 import {Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Addition} from "../addition/addition.entity";
+import {File} from "../file/file.entity";
 
 @Injectable()
 export class AppointmentService {
@@ -10,7 +11,9 @@ export class AppointmentService {
         @InjectRepository(Appointment)
         private readonly appointmentRepository: Repository<Appointment>,
         @InjectRepository(Addition)
-        private readonly additionRepository: Repository<Addition>
+        private readonly additionRepository: Repository<Addition>,
+        @InjectRepository(File)
+        private readonly fileRepository: Repository<File>
     ) {
     }
 
@@ -20,7 +23,7 @@ export class AppointmentService {
 
     async find(link: string): Promise<Appointment> {
         return await this.appointmentRepository.findOne({
-            where: {link: link['link']}
+            where: {link: link}
         })
     }
 
@@ -28,7 +31,13 @@ export class AppointmentService {
         let appointmentToDb = new Appointment();
         appointmentToDb.title = appointment.title;
         appointmentToDb.description = appointment.description;
-        appointmentToDb.link = appointment.link;
+
+        if (appointment.link === null || appointment.link.length < 5) {
+            appointmentToDb.link = this.makeid(5);
+        } else {
+            appointmentToDb.link = appointment.link;
+        }
+
         appointmentToDb.location = appointment.location;
         appointmentToDb.date = appointment.date;
         appointmentToDb.deadline = appointment.deadline;
@@ -45,6 +54,34 @@ export class AppointmentService {
 
         appointmentToDb.additions = additionsToDb;
 
+        let filesToDb = [];
+        for (const fFile of appointment.files) {
+            let _file: File = new File();
+            _file.name = fFile.name;
+            _file.data = fFile.data;
+            await this.fileRepository.save(_file);
+            filesToDb.push(_file);
+        }
+
+        appointmentToDb.files = filesToDb;
+
         return this.appointmentRepository.save(appointmentToDb);
     }
+
+    arrayBufferToBase64(buffer) {
+        console.log(String.fromCharCode.apply(null, new Uint16Array(buffer)));
+        return String.fromCharCode.apply(null, new Uint16Array(buffer));
+    }
+
+    makeid(length) {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+
+
 }

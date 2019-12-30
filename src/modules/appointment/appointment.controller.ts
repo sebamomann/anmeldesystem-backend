@@ -19,7 +19,7 @@ export class AppointmentController {
         return this.appointmentService.create(appointment);
     }
 
-    @Get()
+    @Get('get')
     findByLink(@Query() link: string): Promise<Appointment> {
         return this.appointmentService.find(link);
     }
