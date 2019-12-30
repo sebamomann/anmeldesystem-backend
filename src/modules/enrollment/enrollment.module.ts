@@ -9,13 +9,16 @@ import {Addition} from "../addition/addition.entity";
 import {File} from "../file/file.entity";
 import {AdditionService} from "../addition/addition.service";
 import {FileService} from "../file/file.service";
-import {Driver} from "../driver/driver.entity";
-import {Passenger} from "../passenger/passenger.entity";
+import {Driver} from "./driver/driver.entity";
+import {Passenger} from "./passenger/passenger.entity";
+import {CommentService} from "./comment/comment.service";
+import {Comment} from "./comment/comment.entity";
+import {DriverService} from "./driver/driver.service";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Enrollment, Appointment, Addition, File, Driver, Passenger])],
-    providers: [EnrollmentService, AppointmentService, AdditionService, FileService],
-    exports: [EnrollmentService, AppointmentService, AdditionService, FileService],
+    imports: [TypeOrmModule.forFeature([Enrollment, Appointment, Addition, File, Driver, Passenger, Comment])],
+    providers: [EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService],
+    exports: [EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService],
     controllers: [EnrollmentController],
 })
 export class EnrollmentModule {

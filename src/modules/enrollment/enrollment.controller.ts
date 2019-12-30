@@ -17,10 +17,9 @@ export class EnrollmentController {
 
     @Post()
     async create(@Query() link: string, @Body() enrollment: Enrollment, @Res() res: Response) {
-        let dbEnrollment: Promise<Enrollment> = this.enrollmentService.create(enrollment, link);
-
-        dbEnrollment.then(tEntrollment => {
+        this.enrollmentService.create(enrollment, link).then(tEntrollment => {
             delete tEntrollment.appointment;
+            res.status(HttpStatus.CREATED).json(tEntrollment);
         }).catch((err) => {
             let error = {error: {}};
             if (err.code === 'ER_DUP_ENTRY') {
@@ -31,7 +30,5 @@ export class EnrollmentController {
 
             res.status(HttpStatus.BAD_REQUEST).json(error);
         });
-
-        res.status(HttpStatus.CREATED).json(await dbEnrollment);
     }
 }

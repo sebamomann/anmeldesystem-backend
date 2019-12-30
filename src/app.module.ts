@@ -13,9 +13,12 @@ import {Addition} from "./modules/addition/addition.entity";
 import {AdditionModule} from "./modules/addition/addition.module";
 import {FileModule} from "./modules/file/file.module";
 import {File} from "./modules/file/file.entity";
-import {DriverModule} from "./modules/driver/driver.module";
-import {Driver} from "./modules/driver/driver.entity";
-import {Passenger} from "./modules/passenger/passenger.entity";
+import {DriverModule} from "./modules/enrollment/driver/driver.module";
+import {Driver} from "./modules/enrollment/driver/driver.entity";
+import {Passenger} from "./modules/enrollment/passenger/passenger.entity";
+import {CommentModule} from "./modules/enrollment/comment/comment.module";
+import {Comment} from "./modules/enrollment/comment/comment.entity";
+import {PassengerModule} from "./modules/enrollment/passenger/passenger.module";
 
 @Module({
     imports: [TypeOrmModule.forRoot({
@@ -25,7 +28,7 @@ import {Passenger} from "./modules/passenger/passenger.entity";
         username: 'root',
         password: '',
         database: 'anmeldesystem-api',
-        entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger],
+        entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment],
         synchronize: true
     }),
         UserModule,
@@ -34,7 +37,8 @@ import {Passenger} from "./modules/passenger/passenger.entity";
         AdditionModule,
         FileModule,
         DriverModule,
-        Passenger
+        PassengerModule,
+        CommentModule
     ],
     controllers: [AppController],
     providers: [AppService],

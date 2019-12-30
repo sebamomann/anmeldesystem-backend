@@ -1,5 +1,5 @@
 import {Controller} from '@nestjs/common';
 
-@Controller('addition')
+@Controller('passenger')
 export class PassengerController {
 }

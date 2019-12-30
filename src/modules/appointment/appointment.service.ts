@@ -23,7 +23,7 @@ export class AppointmentService {
 
     async find(link: string): Promise<Appointment> {
         return await this.appointmentRepository.findOne({
-            where: {link: link}
+            where: {link: link['link']}
         })
     }
 

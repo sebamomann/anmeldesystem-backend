@@ -6,8 +6,8 @@ import {Appointment} from "../appointment/appointment.entity";
 import {AppointmentService} from "../appointment/appointment.service";
 import {AdditionService} from "../addition/addition.service";
 import {Addition} from "../addition/addition.entity";
-import {Driver} from "../driver/driver.entity";
-import {Passenger} from "../passenger/passenger.entity";
+import {Driver} from "./driver/driver.entity";
+import {Passenger} from "./passenger/passenger.entity";
 
 @Injectable()
 export class EnrollmentService {
@@ -27,7 +27,7 @@ export class EnrollmentService {
     }
 
     async create(enrollment: Enrollment, link: string) {
-        const appointment: Appointment = await this.appointmentService.find(link['link'].toString());
+        const appointment: Appointment = await this.appointmentService.find(link);
 
         let enrollmentToDb = new Enrollment();
         enrollmentToDb.name = enrollment.name;

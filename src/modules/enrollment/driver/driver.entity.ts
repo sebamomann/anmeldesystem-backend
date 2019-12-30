@@ -1,15 +1,18 @@
 import {Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
-import {Enrollment} from "../enrollment/enrollment.entity";
+import {Enrollment} from "../enrollment.entity";
 
 @Entity()
-export class Passenger {
+export class Driver {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column({type: "smallint", nullable: false})
-    requirement: number;
+    service: number;
 
-    @OneToOne(type => Enrollment, enrollment => enrollment.passenger)
+    @Column({type: "smallint", nullable: false})
+    seats: number;
+
+    @OneToOne(type => Enrollment, enrollment => enrollment.driver)
     @JoinColumn()
     enrollment: Enrollment;
 }
