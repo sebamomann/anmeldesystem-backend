@@ -4,6 +4,7 @@ import {Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Addition} from "../addition/addition.entity";
 import {File} from "../file/file.entity";
+import {User} from "../user/user.entity";
 
 @Injectable()
 export class AppointmentService {
@@ -27,7 +28,7 @@ export class AppointmentService {
         })
     }
 
-    async create(appointment: Appointment) {
+    async create(appointment: Appointment, user: User) {
         let appointmentToDb = new Appointment();
         appointmentToDb.title = appointment.title;
         appointmentToDb.description = appointment.description;
@@ -43,6 +44,7 @@ export class AppointmentService {
         appointmentToDb.deadline = appointment.deadline;
         appointmentToDb.maxEnrollments = appointment.maxEnrollments;
         appointmentToDb.driverAddition = appointment.driverAddition;
+        appointmentToDb.creator = user;
 
         let additionsToDb = [];
         for (const fAddition of appointment.additions) {

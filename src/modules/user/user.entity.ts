@@ -1,5 +1,6 @@
-import {Column, Entity, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
 import {Exclude} from 'class-transformer';
+import {Appointment} from "../appointment/appointment.entity";
 
 @Entity()
 export class User {
@@ -23,4 +24,8 @@ export class User {
 
     @Column({length: 16})
     chat_id: string;
+
+    @OneToMany(type => Appointment,
+        appointment => appointment.creator)
+    appointments: Appointment[];
 }
