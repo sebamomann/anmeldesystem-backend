@@ -1,5 +1,4 @@
 import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
-import {Exclude} from 'class-transformer';
 import {Appointment} from "../appointment/appointment.entity";
 
 @Entity()
@@ -10,8 +9,7 @@ export class User {
     @Column()
     username: string;
 
-    @Column()
-    @Exclude({toPlainOnly: true})
+    @Column({select: false})
     password: string;
 
     @Column({

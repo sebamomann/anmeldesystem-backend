@@ -1,4 +1,4 @@
-import {Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
 import {Enrollment} from "../enrollment/enrollment.entity";
 import {Addition} from "../addition/addition.entity";
 import {File} from "../file/file.entity";
@@ -59,8 +59,11 @@ export class Appointment {
     @ManyToOne(type => User,
         user => user.appointments,
         {
-            eager: true,
+            eager: true
         })
-    creator: User
+    @JoinColumn()
+    creator: User;
 
+    @Column()
+    creatorUsername: string;
 }
