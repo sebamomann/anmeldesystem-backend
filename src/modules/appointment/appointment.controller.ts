@@ -7,12 +7,15 @@ import {
     Post,
     Query,
     Res,
+    UseGuards,
     UseInterceptors
 } from '@nestjs/common';
 import {Appointment} from "./appointment.entity";
 import {AppointmentService} from "./appointment.service";
 import {Response} from "express";
+import {AuthGuard} from "@nestjs/passport";
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('appointment')
 export class AppointmentController {
     constructor(private appointmentService: AppointmentService) {

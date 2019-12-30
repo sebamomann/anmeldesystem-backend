@@ -40,7 +40,7 @@ import {AuthModule} from './auth/auth.module';
         DriverModule,
         PassengerModule,
         CommentModule,
-        AuthModule
+        AuthModule,
     ],
     controllers: [AppController],
     providers: [AppService],
