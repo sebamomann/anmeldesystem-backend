@@ -16,7 +16,7 @@ export class EnrollmentController {
     }
 
     @Post()
-    create(@Query() link: string, @Body() enrollment: Enrollment, @Res() res: Response): Promise<Enrollment> {
+    async create(@Query() link: string, @Body() enrollment: Enrollment, @Res() res: Response) {
         let dbEnrollment: Promise<Enrollment> = this.enrollmentService.create(enrollment, link);
 
         dbEnrollment.then(tEntrollment => {
@@ -32,6 +32,6 @@ export class EnrollmentController {
             res.status(HttpStatus.BAD_REQUEST).json(error);
         });
 
-        return dbEnrollment;
+        res.status(HttpStatus.CREATED).json(await dbEnrollment);
     }
 }
