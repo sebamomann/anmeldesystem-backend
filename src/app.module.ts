@@ -19,6 +19,7 @@ import {Passenger} from "./modules/enrollment/passenger/passenger.entity";
 import {CommentModule} from "./modules/enrollment/comment/comment.module";
 import {Comment} from "./modules/enrollment/comment/comment.entity";
 import {PassengerModule} from "./modules/enrollment/passenger/passenger.module";
+import {AuthModule} from './auth/auth.module';
 
 @Module({
     imports: [TypeOrmModule.forRoot({
@@ -38,7 +39,8 @@ import {PassengerModule} from "./modules/enrollment/passenger/passenger.module";
         FileModule,
         DriverModule,
         PassengerModule,
-        CommentModule
+        CommentModule,
+        AuthModule
     ],
     controllers: [AppController],
     providers: [AppService],
