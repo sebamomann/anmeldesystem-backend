@@ -4,8 +4,10 @@ import {
     Controller,
     Get,
     HttpStatus,
+    Inject,
     Post,
     Query,
+    Request,
     Res,
     UseGuards,
     UseInterceptors
@@ -14,11 +16,14 @@ import {Appointment} from "./appointment.entity";
 import {AppointmentService} from "./appointment.service";
 import {Response} from "express";
 import {AuthGuard} from "@nestjs/passport";
+import {REQUEST} from "@nestjs/core";
+import {Usr} from "../user/user.decorator";
+import {User} from "../user/user.entity";
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('appointment')
 export class AppointmentController {
-    constructor(private appointmentService: AppointmentService) {
+    constructor(@Inject(REQUEST) private readonly request: Request, private appointmentService: AppointmentService) {
 
     }
 
@@ -29,8 +34,8 @@ export class AppointmentController {
     }
 
     @Post()
-    register(@Body() appointment: Appointment, @Res() res: Response) {
-        return this.appointmentService.create(appointment).then(tAppointment => {
+    create(@Body() appointment: Appointment, @Res() res: Response, @Usr() user: User) {
+        return this.appointmentService.create(appointment, user).then(tAppointment => {
             delete tAppointment.files;
             res.status(HttpStatus.CREATED).json(tAppointment);
         }).catch((err) => {
@@ -53,7 +58,7 @@ export class AppointmentController {
     }
 
     @Get('get')
-    findByLink(@Query() link: string): Promise<Appointment> {
+    findByLink(@Query() link: string, @Request() req: Request): Promise<Appointment> {
         return this.appointmentService.find(link);
     }
 }
