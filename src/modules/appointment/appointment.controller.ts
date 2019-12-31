@@ -53,7 +53,12 @@ export class AppointmentController {
                     ]
                 };
             } else {
-                error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
+                error.error = {
+                    undefined: {
+                        message: "Some error occurred. Please try again later or contact the support",
+                        error: err
+                    }
+                };
             }
 
             res.status(HttpStatus.BAD_REQUEST).json(error);
@@ -70,6 +75,7 @@ export class AppointmentController {
                 res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
             }
         }).catch((err) => {
+
             let error = {error: {}};
             error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
 
