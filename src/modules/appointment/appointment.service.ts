@@ -19,7 +19,6 @@ export class AppointmentService {
     }
 
     findAll(user: User): Promise<Appointment[]> {
-        console.log(user.id);
         return this.appointmentRepository.find({relations: ["creator"], where: {creator: user}});
     }
 
