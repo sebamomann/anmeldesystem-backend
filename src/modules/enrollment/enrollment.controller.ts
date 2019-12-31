@@ -23,7 +23,14 @@ export class EnrollmentController {
         }).catch((err) => {
             let error = {error: {}};
             if (err.code === 'ER_DUP_ENTRY') {
-                error.error = {columns: {name: {duplicate: true}}};
+                error.error = {
+                    columns: [
+                        {
+                            name: "name",
+                            error: "duplicate"
+                        }
+                    ]
+                };
             } else {
                 error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
             }
