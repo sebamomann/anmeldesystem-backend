@@ -5,8 +5,8 @@ import {
     Get,
     HttpStatus,
     Inject,
+    Param,
     Post,
-    Query,
     Request,
     Res,
     UseGuards,
@@ -27,15 +27,15 @@ export class AppointmentController {
 
     }
 
-    @UseGuards(AuthGuard('jwt'))
     @Get()
+    @UseGuards(AuthGuard('jwt'))
     @UseInterceptors(ClassSerializerInterceptor)
     findAll(@Usr() user: User): Promise<Appointment[]> {
         return this.appointmentService.findAll(user);
     }
 
-    @UseGuards(AuthGuard('jwt'))
     @Post()
+    @UseGuards(AuthGuard('jwt'))
     create(@Body() appointment: Appointment, @Res() res: Response, @Usr() user: User) {
         return this.appointmentService.create(appointment, user).then(tAppointment => {
             delete tAppointment.files;
@@ -60,8 +60,8 @@ export class AppointmentController {
         });
     }
 
-    @Get('get')
-    findByLink(@Query() link: string, @Request() req: Request, @Res() res: Response) {
+    @Get(':link')
+    findByLink(@Param() link: string, @Request() req: Request, @Res() res: Response) {
         return this.appointmentService.find(link).then(tAppointment => {
             if (tAppointment != null) {
                 tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
