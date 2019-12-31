@@ -30,8 +30,8 @@ export class AppointmentController {
 
     @Get()
     @UseInterceptors(ClassSerializerInterceptor)
-    findAll(): Promise<Appointment[]> {
-        return this.appointmentService.findAll();
+    findAll(@Usr() user: User): Promise<Appointment[]> {
+        return this.appointmentService.findAll(user);
     }
 
     @Post()
@@ -66,7 +66,7 @@ export class AppointmentController {
 
                 delete tAppointment.files;
                 tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
-                res.status(HttpStatus.CREATED).json(tAppointment);
+                res.status(HttpStatus.OK).json(tAppointment);
             } else {
                 res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
             }
