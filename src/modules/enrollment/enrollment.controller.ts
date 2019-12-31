@@ -32,10 +32,27 @@ export class EnrollmentController {
                     ]
                 };
             } else {
-                error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
+                let id = this.makeid(10);
+                console.log('Code:' + id + ' - ' + err);
+                error.error = {
+                    undefined: {
+                        message: "Some error occurred. Please try again later or contact the support",
+                        code: id
+                    }
+                };
             }
 
             res.status(HttpStatus.BAD_REQUEST).json(error);
         });
+    }
+
+    makeid(length) {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
     }
 }
