@@ -21,19 +21,20 @@ import {Usr} from "../user/user.decorator";
 import {User} from "../user/user.entity";
 import {UserUtil} from "../../util/userUtil.util";
 
-@UseGuards(AuthGuard('jwt'))
 @Controller('appointment')
 export class AppointmentController {
     constructor(@Inject(REQUEST) private readonly request: Request, private appointmentService: AppointmentService) {
 
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get()
     @UseInterceptors(ClassSerializerInterceptor)
     findAll(@Usr() user: User): Promise<Appointment[]> {
         return this.appointmentService.findAll(user);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Post()
     create(@Body() appointment: Appointment, @Res() res: Response, @Usr() user: User) {
         return this.appointmentService.create(appointment, user).then(tAppointment => {
