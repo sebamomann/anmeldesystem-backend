@@ -42,7 +42,13 @@ export class AppointmentService {
         appointmentToDb.location = appointment.location;
         appointmentToDb.date = appointment.date;
         appointmentToDb.deadline = appointment.deadline;
-        appointmentToDb.maxEnrollments = appointment.maxEnrollments;
+
+        if (appointment.maxEnrollments === 0) {
+            appointmentToDb.maxEnrollments = null;
+        } else {
+            appointmentToDb.maxEnrollments = appointment.maxEnrollments;
+        }
+
         appointmentToDb.driverAddition = appointment.driverAddition;
         appointmentToDb.creator = user;
 
@@ -61,8 +67,9 @@ export class AppointmentService {
             let _file: File = new File();
             _file.name = fFile.name;
             _file.data = fFile.data;
-            await this.fileRepository.save(_file);
-            filesToDb.push(_file);
+
+            const createdFile = await this.fileRepository.save(_file);
+            filesToDb.push(createdFile);
         }
 
         appointmentToDb.files = filesToDb;
