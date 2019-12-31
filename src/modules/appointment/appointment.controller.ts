@@ -63,8 +63,6 @@ export class AppointmentController {
     findByLink(@Query() link: string, @Request() req: Request, @Res() res: Response) {
         return this.appointmentService.find(link).then(tAppointment => {
             if (tAppointment != null) {
-
-                delete tAppointment.files;
                 tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
                 res.status(HttpStatus.OK).json(tAppointment);
             } else {
