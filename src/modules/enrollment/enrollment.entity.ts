@@ -27,9 +27,6 @@ export class Enrollment {
     @Column({nullable: true})
     comment: string;
 
-    // @Column()
-    // comments: Comment[];
-
     @OneToOne(type => Driver, driver => driver.enrollment, {eager: true})
     @JoinTable()
     driver: Driver;

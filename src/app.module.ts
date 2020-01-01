@@ -24,10 +24,10 @@ import {AuthModule} from './auth/auth.module';
 @Module({
     imports: [TypeOrmModule.forRoot({
         type: 'mysql',
-        host: 'localhost',
+        host: 'cp.dankoe.de',
         port: 3306,
-        username: 'root',
-        password: '',
+        username: 'anmeldesystem-api',
+        password: 'X1_HLi2#qQt@PB%YzJAm',
         database: 'anmeldesystem-api',
         entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment],
         synchronize: true
