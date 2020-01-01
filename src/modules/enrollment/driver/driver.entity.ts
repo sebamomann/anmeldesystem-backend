@@ -12,7 +12,11 @@ export class Driver {
     @Column({type: "smallint", nullable: false})
     seats: number;
 
-    @OneToOne(type => Enrollment, enrollment => enrollment.driver)
+    @OneToOne(type => Enrollment,
+        enrollment => enrollment.driver,
+        {
+            onDelete: "CASCADE"
+        })
     @JoinColumn()
     enrollment: Enrollment;
 }

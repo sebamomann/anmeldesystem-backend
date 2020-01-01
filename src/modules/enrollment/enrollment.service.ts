@@ -1,6 +1,6 @@
 import {Injectable} from '@nestjs/common';
 import {Enrollment} from "./enrollment.entity";
-import {getConnection, Repository} from 'typeorm';
+import {getConnection, getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Appointment} from "../appointment/appointment.entity";
 import {AppointmentService} from "../appointment/appointment.service";
@@ -23,7 +23,15 @@ export class EnrollmentService {
     }
 
     async find(id: string) {
-        return await this.enrollmentRepository.findOne({where: {id: id['id']}});
+        return getRepository(Enrollment)
+            .createQueryBuilder("enrollment")
+            .where("enrollment.id = :id", {id: id['id']})
+            .leftJoinAndSelect("enrollment.appointment", "appointment")
+            .leftJoinAndSelect("appointment.administrators", "appointment_administrators")
+            .leftJoinAndSelect("enrollment.additions", "enrollment_additions")
+            .leftJoinAndSelect("appointment.creator", "appointment_creator")
+            .select(["enrollment", "appointment", "appointment_administrators.mail", "appointment_creator.id", "enrollment_additions"])
+            .getOne();
     }
 
     async create(enrollment: Enrollment, link: string) {

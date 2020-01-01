@@ -27,11 +27,18 @@ export class Enrollment {
     @Column({nullable: true})
     comment: string;
 
-    @OneToOne(type => Driver, driver => driver.enrollment, {eager: true})
+    @OneToOne(type => Driver, driver => driver.enrollment,
+        {
+            eager: true,
+        })
     @JoinTable()
     driver: Driver;
 
-    @OneToOne(type => Passenger, passenger => passenger.enrollment, {eager: true})
+    @OneToOne(type => Passenger,
+        passenger => passenger.enrollment,
+        {
+            eager: true,
+        })
     @JoinTable()
     passenger: Passenger;
 

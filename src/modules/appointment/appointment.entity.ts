@@ -48,9 +48,7 @@ export class Appointment {
 
     @ManyToMany(type => User,
         user => user.administrations,
-        {
-            eager: true
-        })
+        {eager: false})
     administrators: User[];
 
     @OneToMany(type => File,

@@ -1,23 +1,39 @@
-import {Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, Res} from '@nestjs/common';
+import {Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, Res, UseGuards} from '@nestjs/common';
 import {Response} from 'express';
 import {EnrollmentService} from "./enrollment.service";
 import {Enrollment} from "./enrollment.entity";
+import {AuthGuard} from "@nestjs/passport";
+import {Usr} from "../user/user.decorator";
+import {User} from "../user/user.entity";
 
 @Controller('enrollment')
 export class EnrollmentController {
 
     constructor(private enrollmentService: EnrollmentService) {
-
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get()
     find(@Query() id: string): Promise<Enrollment> {
         return this.enrollmentService.find(id);
     }
 
     @Delete(':id')
-    delete(@Param() id: string): Promise<void> {
-        return this.enrollmentService.delete(id);
+    @UseGuards(AuthGuard('jwt'))
+    async delete(@Param() id: string, @Usr() user: User, @Res() res: Response) {
+        const enrollment: Enrollment = await this.enrollmentService.find(id);
+        if (user !== null && user !== undefined) {
+            if (user.id === enrollment.appointment.creator.id
+                || enrollment.appointment.administrators.some(iAdministrators => {
+                    return iAdministrators.mail === user.mail
+                })) {
+
+                await this.enrollmentService.delete(id);
+                res.status(HttpStatus.OK).json();
+            }
+        }
+
+        res.status(HttpStatus.FORBIDDEN).json();
     }
 
     @Post()
