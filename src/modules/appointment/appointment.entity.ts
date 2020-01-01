@@ -46,7 +46,11 @@ export class Appointment {
     @Column('smallint', {default: false})
     driverAddition: boolean;
 
-    @ManyToMany(type => User, user => user.administrations)
+    @ManyToMany(type => User,
+        user => user.administrations,
+        {
+            eager: true
+        })
     administrators: User[];
 
     @OneToMany(type => File,
@@ -57,13 +61,7 @@ export class Appointment {
     files: File[];
 
     @ManyToOne(type => User,
-        user => user.appointments,
-        {
-            eager: true
-        })
+        user => user.appointments)
     @JoinColumn()
     creator: User;
-
-    @Column()
-    creatorUsername: string;
 }

@@ -27,7 +27,8 @@ export class User {
         appointment => appointment.creator)
     appointments: Appointment[];
 
-    @ManyToMany(type => Appointment, appointment => appointment.administrators)
+    @ManyToMany(type => Appointment,
+        appointment => appointment.administrators)
     @JoinTable()
     administrations: Appointment[];
 }

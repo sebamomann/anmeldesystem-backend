@@ -1,12 +1,13 @@
-class UnknownUsersException implements Error {
+export class UnknownUsersException implements Error {
     readonly columnNumber: number;
     readonly fileName: string;
     readonly lineNumber: number;
     message: string;
     name: string;
     data: string[];
+    code: string;
 
-    constructor(message: string, data: string[]) {
+    constructor(code: string, message: string, data: string[]) {
         this.message = message;
         this.data = data;
     }

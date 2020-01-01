@@ -20,6 +20,7 @@ import {REQUEST} from "@nestjs/core";
 import {Usr} from "../user/user.decorator";
 import {User} from "../user/user.entity";
 import {UserUtil} from "../../util/userUtil.util";
+import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
 
 @Controller('appointment')
 export class AppointmentController {
@@ -37,59 +38,47 @@ export class AppointmentController {
     @Post()
     @UseGuards(AuthGuard('jwt'))
     create(@Body() appointment: Appointment, @Res() res: Response, @Usr() user: User) {
-        try {
-            return this.appointmentService.create(appointment, user).then(tAppointment => {
-                delete tAppointment.files;
-                tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
-                res.status(HttpStatus.CREATED).json(tAppointment);
-            }).catch((err) => {
-                let error = {error: {}};
-                if (err.code === 'ER_DUP_ENTRY') {
-                    error.error = {
-                        columns: [
-                            {
-                                name: "link",
-                                error: "duplicate"
-                            }
-                        ]
-                    };
-                } else {
-                    error.error = {
-                        undefined: {
-                            message: "Some error occurred. Please try again later or contact the support",
-                            error: err
-                        }
-                    };
-                }
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
-            });
-        } catch (e) {
-            let error = {error: {}};
-            if (e instanceof UnknownUsersException) {
+        return this.appointmentService.create(appointment, user).then(tAppointment => {
+            delete tAppointment.files;
+            tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
+            res.status(HttpStatus.CREATED).json(tAppointment);
+        }).catch((err) => {
+            console.log(err);
+            let error = {code: '', error: {}};
+            if (err.code === 'ER_DUP_ENTRY') {
+                error.code = 'ER_DUP_ENTRY';
                 error.error = {
-                    notFound: {
-                        message: "There are no users with the following mail addresses.",
-                        administrators: e.data
+                    columns: ["link"]
+                };
+            } else if (err instanceof UnknownUsersException) {
+                error.code = "ADMINISTRATORS_NOT_FOUND";
+                error.error = {
+                    values: err.data
+                };
+            } else {
+                error.error = {
+                    undefined: {
+                        message: "Some error occurred. Please try again later or contact the support",
+                        error: err
                     }
-                }
+                };
             }
 
-            res.status(HttpStatus.NOT_FOUND).json(error);
-        }
+            res.status(HttpStatus.BAD_REQUEST).json(error);
+        });
     }
 
     @Get(':link')
     findByLink(@Param() link: string, @Request() req: Request, @Res() res: Response) {
         return this.appointmentService.find(link).then(tAppointment => {
             if (tAppointment != null) {
-                tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
+                // tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
                 res.status(HttpStatus.OK).json(tAppointment);
             } else {
                 res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
             }
         }).catch((err) => {
-
+            console.log(err);
             let error = {error: {}};
             error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
 

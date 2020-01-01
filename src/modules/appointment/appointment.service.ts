@@ -1,10 +1,11 @@
 import {Injectable} from '@nestjs/common';
 import {Appointment} from "./appointment.entity";
-import {Repository} from 'typeorm';
+import {Connection, getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Addition} from "../addition/addition.entity";
 import {File} from "../file/file.entity";
 import {User} from "../user/user.entity";
+import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
 
 @Injectable()
 export class AppointmentService {
@@ -16,7 +17,8 @@ export class AppointmentService {
         @InjectRepository(File)
         private readonly fileRepository: Repository<File>,
         @InjectRepository(User)
-        private readonly userRepository: Repository<User>
+        private readonly userRepository: Repository<User>,
+        private connection: Connection
     ) {
     }
 
@@ -25,9 +27,16 @@ export class AppointmentService {
     }
 
     async find(link: string): Promise<Appointment> {
-        return await this.appointmentRepository.findOne({
-            where: {link: link['link']}
-        })
+        return await getRepository(Appointment)
+            .createQueryBuilder("appointment")
+            .where("appointment.link = :link", {link: link['link']})
+            .leftJoinAndSelect("appointment.creator", "creator")
+            .leftJoinAndSelect("appointment.additions", "additions")
+            .leftJoinAndSelect("appointment.enrollments", "enrollments")
+            .leftJoinAndSelect("appointment.files", "files")
+            .leftJoinAndSelect("appointment.administrators", "administrators")
+            .select(["appointment", "additions", "enrollments", "creator.username", "files", "administrators.mail"])
+            .getOne();
     }
 
     async create(appointment: Appointment, user: User) {
@@ -64,17 +73,19 @@ export class AppointmentService {
 
         // Administrators
         let faultyAdministratorMails = [];
+        let administratorsToDb = [];
         for (const fAdmin of appointment.administrators) {
             const _user: User = await this.userRepository.findOne({where: {mail: fAdmin}});
             if (_user !== null && _user !== undefined) {
-                appointmentToDb.administrators.push(_user);
+                administratorsToDb.push(_user);
             } else {
                 faultyAdministratorMails.push(fAdmin);
             }
         }
         if (faultyAdministratorMails.length > 0) {
-            throw new UnknownUsersException(`Users not found by mail`, faultyAdministratorMails);
+            throw new UnknownUsersException('NOT_FOUND', `Users not found by mail`, faultyAdministratorMails);
         }
+        appointmentToDb.administrators = administratorsToDb;
 
         appointmentToDb.additions = additionsToDb;
 
@@ -91,7 +102,7 @@ export class AppointmentService {
 
         appointmentToDb.files = filesToDb;
 
-        return this.appointmentRepository.save(appointmentToDb);
+        return await this.appointmentRepository.save(appointmentToDb);
     }
 
     arrayBufferToBase64(buffer) {
