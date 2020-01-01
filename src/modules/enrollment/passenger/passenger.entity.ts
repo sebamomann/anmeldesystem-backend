@@ -9,7 +9,11 @@ export class Passenger {
     @Column({type: "smallint", nullable: false})
     requirement: number;
 
-    @OneToOne(type => Enrollment, enrollment => enrollment.passenger)
+    @OneToOne(type => Enrollment,
+        enrollment => enrollment.passenger,
+        {
+            onDelete: "CASCADE"
+        })
     @JoinColumn()
     enrollment: Enrollment;
 }
