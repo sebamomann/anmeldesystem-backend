@@ -24,11 +24,15 @@ export class User {
     chat_id: string;
 
     @OneToMany(type => Appointment,
-        appointment => appointment.creator)
+        appointment => appointment.creator,
+    )
     appointments: Appointment[];
 
     @ManyToMany(type => Appointment,
-        appointment => appointment.administrators)
+        appointment => appointment.administrators,
+        {
+            eager: true
+        })
     @JoinTable()
     administrations: Appointment[];
 }
