@@ -1,6 +1,6 @@
 import {Injectable} from '@nestjs/common';
 import {Enrollment} from "./enrollment.entity";
-import {Repository} from 'typeorm';
+import {getConnection, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Appointment} from "../appointment/appointment.entity";
 import {AppointmentService} from "../appointment/appointment.service";
@@ -63,4 +63,12 @@ export class EnrollmentService {
         return this.enrollmentRepository.save(await enrollmentToDb);
     }
 
+    async delete(id: string) {
+        await getConnection()
+            .createQueryBuilder()
+            .delete()
+            .from(Enrollment)
+            .where("id = :id", {id: id['id']})
+            .execute();
+    }
 }

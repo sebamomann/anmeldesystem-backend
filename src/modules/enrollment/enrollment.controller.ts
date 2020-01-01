@@ -1,4 +1,4 @@
-import {Body, Controller, Get, HttpStatus, Post, Query, Res} from '@nestjs/common';
+import {Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, Res} from '@nestjs/common';
 import {Response} from 'express';
 import {EnrollmentService} from "./enrollment.service";
 import {Enrollment} from "./enrollment.entity";
@@ -13,6 +13,11 @@ export class EnrollmentController {
     @Get()
     find(@Query() id: string): Promise<Enrollment> {
         return this.enrollmentService.find(id);
+    }
+
+    @Delete(':id')
+    delete(@Param() id: string): Promise<void> {
+        return this.enrollmentService.delete(id);
     }
 
     @Post()
