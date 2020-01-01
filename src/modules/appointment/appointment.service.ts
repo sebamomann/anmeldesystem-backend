@@ -33,10 +33,13 @@ export class AppointmentService {
             .leftJoinAndSelect("appointment.creator", "creator")
             .leftJoinAndSelect("appointment.additions", "additions")
             .leftJoinAndSelect("appointment.enrollments", "enrollments")
+            .leftJoinAndSelect("enrollments.passenger", "enrollment_passenger")
+            .leftJoinAndSelect("enrollments.driver", "enrollment_driver")
             .leftJoinAndSelect("enrollments.additions", "enrollment_additions")
             .leftJoinAndSelect("appointment.files", "files")
             .leftJoinAndSelect("appointment.administrators", "administrators")
             .select(["appointment", "additions", "enrollments",
+                "enrollment_passenger", "enrollment_driver",
                 "creator.username", "files", "administrators.mail",
                 "enrollment_additions"])
             .getOne();
