@@ -8,9 +8,10 @@ import {Appointment} from "../appointment/appointment.entity";
 import {AppointmentService} from "../appointment/appointment.service";
 import {File} from "../file/file.entity";
 import {FileService} from "../file/file.service";
+import {User} from "../user/user.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Addition, Enrollment, Appointment, File])],
+    imports: [TypeOrmModule.forFeature([Addition, Enrollment, Appointment, File, User])],
     providers: [AdditionService, AppointmentService, FileService],
     exports: [AdditionService, AppointmentService, FileService],
     controllers: [AdditionController],

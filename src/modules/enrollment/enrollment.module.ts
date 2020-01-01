@@ -14,9 +14,10 @@ import {Passenger} from "./passenger/passenger.entity";
 import {CommentService} from "./comment/comment.service";
 import {Comment} from "./comment/comment.entity";
 import {DriverService} from "./driver/driver.service";
+import {User} from "../user/user.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Enrollment, Appointment, Addition, File, Driver, Passenger, Comment])],
+    imports: [TypeOrmModule.forFeature([Enrollment, Appointment, Addition, File, Driver, Passenger, Comment, User])],
     providers: [EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService],
     exports: [EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService],
     controllers: [EnrollmentController],
