@@ -1,4 +1,4 @@
-import {Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
 import {Enrollment} from "../enrollment/enrollment.entity";
 import {Addition} from "../addition/addition.entity";
 import {File} from "../file/file.entity";
@@ -46,8 +46,8 @@ export class Appointment {
     @Column('smallint', {default: false})
     driverAddition: boolean;
 
-    // @Column()
-    // administrations: User[]
+    @ManyToMany(type => User, user => user.administrations)
+    administrators: User[];
 
     @OneToMany(type => File,
         file => file.appointment,

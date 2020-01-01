@@ -14,7 +14,9 @@ export class AppointmentService {
         @InjectRepository(Addition)
         private readonly additionRepository: Repository<Addition>,
         @InjectRepository(File)
-        private readonly fileRepository: Repository<File>
+        private readonly fileRepository: Repository<File>,
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>
     ) {
     }
 
@@ -60,8 +62,23 @@ export class AppointmentService {
             additionsToDb.push(_addition);
         }
 
+        // Administrators
+        let faultyAdministratorMails = [];
+        for (const fAdmin of appointment.administrators) {
+            const _user: User = await this.userRepository.findOne({where: {mail: fAdmin}});
+            if (_user !== null && _user !== undefined) {
+                appointmentToDb.administrators.push(_user);
+            } else {
+                faultyAdministratorMails.push(fAdmin);
+            }
+        }
+        if (faultyAdministratorMails.length > 0) {
+            throw new UnknownUsersException(`Users not found by mail`, faultyAdministratorMails);
+        }
+
         appointmentToDb.additions = additionsToDb;
 
+        // Files
         let filesToDb = [];
         for (const fFile of appointment.files) {
             let _file: File = new File();

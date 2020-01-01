@@ -37,32 +37,46 @@ export class AppointmentController {
     @Post()
     @UseGuards(AuthGuard('jwt'))
     create(@Body() appointment: Appointment, @Res() res: Response, @Usr() user: User) {
-        return this.appointmentService.create(appointment, user).then(tAppointment => {
-            delete tAppointment.files;
-            tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
-            res.status(HttpStatus.CREATED).json(tAppointment);
-        }).catch((err) => {
-            let error = {error: {}};
-            if (err.code === 'ER_DUP_ENTRY') {
-                error.error = {
-                    columns: [
-                        {
-                            name: "link",
-                            error: "duplicate"
+        try {
+            return this.appointmentService.create(appointment, user).then(tAppointment => {
+                delete tAppointment.files;
+                tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
+                res.status(HttpStatus.CREATED).json(tAppointment);
+            }).catch((err) => {
+                let error = {error: {}};
+                if (err.code === 'ER_DUP_ENTRY') {
+                    error.error = {
+                        columns: [
+                            {
+                                name: "link",
+                                error: "duplicate"
+                            }
+                        ]
+                    };
+                } else {
+                    error.error = {
+                        undefined: {
+                            message: "Some error occurred. Please try again later or contact the support",
+                            error: err
                         }
-                    ]
-                };
-            } else {
+                    };
+                }
+
+                res.status(HttpStatus.BAD_REQUEST).json(error);
+            });
+        } catch (e) {
+            let error = {error: {}};
+            if (e instanceof UnknownUsersException) {
                 error.error = {
-                    undefined: {
-                        message: "Some error occurred. Please try again later or contact the support",
-                        error: err
+                    notFound: {
+                        message: "There are no users with the following mail addresses.",
+                        administrators: e.data
                     }
-                };
+                }
             }
 
-            res.status(HttpStatus.BAD_REQUEST).json(error);
-        });
+            res.status(HttpStatus.NOT_FOUND).json(error);
+        }
     }
 
     @Get(':link')

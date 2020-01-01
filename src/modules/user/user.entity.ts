@@ -1,4 +1,4 @@
-import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
 import {Appointment} from "../appointment/appointment.entity";
 
 @Entity()
@@ -26,4 +26,8 @@ export class User {
     @OneToMany(type => Appointment,
         appointment => appointment.creator)
     appointments: Appointment[];
+
+    @ManyToMany(type => Appointment, appointment => appointment.administrators)
+    @JoinTable()
+    administrations: Appointment[];
 }
