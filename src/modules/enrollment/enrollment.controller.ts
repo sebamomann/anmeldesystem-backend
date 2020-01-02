@@ -42,19 +42,16 @@ export class EnrollmentController {
             delete tEntrollment.appointment;
             res.status(HttpStatus.CREATED).json(tEntrollment);
         }).catch((err) => {
-            let error = {error: {}};
+            let id = this.makeid(10);
+            console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${err}`);
+
+            let error = {error: {}, code: ''};
             if (err.code === 'ER_DUP_ENTRY') {
+                error.code = 'DUPLICATE_ENTRY';
                 error.error = {
-                    columns: [
-                        {
-                            name: "name",
-                            error: "duplicate"
-                        }
-                    ]
+                    columns: ["name"]
                 };
             } else {
-                let id = this.makeid(10);
-                console.log('Code:' + id + ' - ' + err);
                 error.error = {
                     undefined: {
                         message: "Some error occurred. Please try again later or contact the support",
