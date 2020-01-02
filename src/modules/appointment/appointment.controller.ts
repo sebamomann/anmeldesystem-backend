@@ -43,7 +43,6 @@ export class AppointmentController {
             tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
             res.status(HttpStatus.CREATED).json(tAppointment);
         }).catch((err) => {
-            console.log(err);
             let error = {code: '', error: {}};
             if (err.code === 'ER_DUP_ENTRY') {
                 error.code = 'ER_DUP_ENTRY';
