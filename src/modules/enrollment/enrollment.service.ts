@@ -8,6 +8,7 @@ import {AdditionService} from "../addition/addition.service";
 import {Addition} from "../addition/addition.entity";
 import {Driver} from "./driver/driver.entity";
 import {Passenger} from "./passenger/passenger.entity";
+import {EmptyFieldsException} from "../../exceptions/EmptyFieldsException";
 
 @Injectable()
 export class EnrollmentService {
@@ -38,6 +39,11 @@ export class EnrollmentService {
         const appointment: Appointment = await this.appointmentService.find(link);
 
         let enrollmentToDb = new Enrollment();
+
+        if (enrollment.name === "" || enrollment.name === null) {
+            throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', ['name']);
+        }
+
         enrollmentToDb.name = enrollment.name;
         enrollmentToDb.comment = enrollment.comment === "" ? null : enrollment.comment;
 
