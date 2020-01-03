@@ -12,7 +12,8 @@ export class Passenger {
     @OneToOne(type => Enrollment,
         enrollment => enrollment.passenger,
         {
-            onDelete: "CASCADE"
+            onDelete: "CASCADE",
+            onUpdate: "CASCADE"
         })
     @JoinColumn()
     enrollment: Enrollment;

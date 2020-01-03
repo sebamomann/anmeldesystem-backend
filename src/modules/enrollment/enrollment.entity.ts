@@ -31,15 +31,14 @@ export class Enrollment {
         {
             eager: true,
         })
-    @JoinTable()
     driver: Driver;
 
     @OneToOne(type => Passenger,
         passenger => passenger.enrollment,
         {
             eager: true,
+            onUpdate: "CASCADE"
         })
-    @JoinTable()
     passenger: Passenger;
 
     @ManyToMany(type => Addition, {eager: true})

@@ -43,10 +43,10 @@ export class EnrollmentController {
             res.status(HttpStatus.CREATED).json(tEntrollment);
         }).catch((err) => {
             let id = this.makeid(10);
-            console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${err}`);
+            console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
 
             let error = {error: {}, code: ''};
-            if (err.code === 'ER_DUP_ENTRY') {
+            if (err.code === 'DUPLICATE_ENTRY') {
                 error.code = 'DUPLICATE_ENTRY';
                 error.error = {
                     columns: ["name"]

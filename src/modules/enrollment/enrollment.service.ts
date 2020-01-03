@@ -44,6 +44,10 @@ export class EnrollmentService {
             throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', ['name']);
         }
 
+        if (this.existsByName(enrollment.name, appointment)) {
+            throw new EmptyFieldsException('DUPLICATE_ENTRY', 'Following values are already taken', ['name']);
+        }
+
         enrollmentToDb.name = enrollment.name;
         enrollmentToDb.comment = enrollment.comment === "" ? null : enrollment.comment;
 
@@ -74,7 +78,7 @@ export class EnrollmentService {
 
         enrollmentToDb.appointment = appointment;
 
-        return this.enrollmentRepository.save(await enrollmentToDb);
+        return this.enrollmentRepository.save(await enrollmentToDb)
     }
 
     async delete(id: string) {
@@ -84,5 +88,29 @@ export class EnrollmentService {
             .from(Enrollment)
             .where("id = :id", {id: id['id']})
             .execute();
+    }
+
+    clear(enrollment: Enrollment) {
+        if (enrollment.passenger !== null && enrollment.passenger !== undefined) {
+            getConnection()
+                .createQueryBuilder()
+                .delete()
+                .from(Passenger)
+                .where("id = :id", {id: enrollment.passenger.id})
+                .execute();
+        }
+
+        if (enrollment.driver !== null && enrollment.driver !== undefined) {
+            getConnection()
+                .createQueryBuilder()
+                .delete()
+                .from(Driver)
+                .where("id = :id", {id: enrollment.driver.id})
+                .execute();
+        }
+    }
+
+    private existsByName(name: string, appointment: Appointment) {
+        return this.enrollmentRepository.findOne({where: {name: name, appointment: appointment}}) !== undefined;
     }
 }

@@ -8,6 +8,7 @@ export class EmptyFieldsException implements Error {
     code: string;
 
     constructor(code: string, message: string, data: string[]) {
+        this.code = code;
         this.message = message;
         this.data = data;
     }
