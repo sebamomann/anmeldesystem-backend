@@ -44,7 +44,7 @@ export class EnrollmentService {
             throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', ['name']);
         }
 
-        if (this.existsByName(enrollment.name, appointment)) {
+        if (await this.existsByName(enrollment.name, appointment)) {
             throw new EmptyFieldsException('DUPLICATE_ENTRY', 'Following values are already taken', ['name']);
         }
 
@@ -110,7 +110,7 @@ export class EnrollmentService {
         }
     }
 
-    private existsByName(name: string, appointment: Appointment) {
-        return this.enrollmentRepository.findOne({where: {name: name, appointment: appointment}}) !== undefined;
+    private async existsByName(name: string, appointment: Appointment) {
+        return await this.enrollmentRepository.findOne({where: {name: name, appointment: appointment}}) !== undefined;
     }
 }
