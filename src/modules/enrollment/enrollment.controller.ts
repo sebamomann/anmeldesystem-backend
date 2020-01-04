@@ -47,18 +47,16 @@ export class EnrollmentController {
             let id = this.makeid(10);
             console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
 
-            let error = {error: {}, code: ''};
-            if (err.code === 'DUPLICATE_ENTRY') {
-                error.code = 'DUPLICATE_ENTRY';
-                error.error = {
-                    columns: ["name"]
-                };
+            let error: any = {};
+            if (err.code === 'DUPLICATE_ENTRY'
+                || err.code === 'EMPTY_FIELDS') {
+                error.code = err.code;
+                error.error = err.data
             } else {
+                error.code = "UNDEFINED";
                 error.error = {
-                    undefined: {
-                        message: "Some error occurred. Please try again later or contact the support",
-                        code: id
-                    }
+                    message: "Some error occurred. Please try again later or contact the support",
+                    id: id
                 };
             }
 

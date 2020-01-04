@@ -9,6 +9,7 @@ import {Addition} from "../addition/addition.entity";
 import {Driver} from "./driver/driver.entity";
 import {Passenger} from "./passenger/passenger.entity";
 import {EmptyFieldsException} from "../../exceptions/EmptyFieldsException";
+import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
 import {User} from "../user/user.entity";
 import {Key} from "./key/key.entity";
 
@@ -42,25 +43,23 @@ export class EnrollmentService {
     async create(enrollment: Enrollment, link: string, user: User) {
         const appointment: Appointment = await this.appointmentService.find(link);
 
-        let enrollmentToDb = new Enrollment();
-
-        let errorData = [];
+        let emptyValues = [];
         if (enrollment.name === "" || enrollment.name === null) {
-            errorData.push('name');
+            emptyValues.push('name');
         }
-
-        if (!!user === false && (enrollment.key.key == "" || enrollment.key.key == null)) {
-            errorData.push('key');
+        if (!!user === false && (enrollment.editKey == "" || enrollment.editKey == null)) {
+            emptyValues.push('key');
         }
-
-        if (errorData.length > 0) {
-            throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', errorData);
+        if (emptyValues.length > 0) {
+            throw  new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', emptyValues);
         }
 
         if (await this.existsByName(enrollment.name, appointment)) {
-            throw new EmptyFieldsException('DUPLICATE_ENTRY', 'Following values are already taken', ['name']);
+            throw new DuplicateValueException('DUPLICATE_ENTRY', 'Following values are already taken', ['name']);
         }
 
+
+        let enrollmentToDb = new Enrollment();
         enrollmentToDb.name = enrollment.name;
         enrollmentToDb.comment = enrollment.comment === "" ? null : enrollment.comment;
 

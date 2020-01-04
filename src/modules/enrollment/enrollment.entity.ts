@@ -68,4 +68,6 @@ export class Enrollment {
     @OneToOne(type => Key,
         key => key.enrollment)
     key: Key;
+
+    editKey: string;
 }
