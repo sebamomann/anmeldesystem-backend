@@ -10,6 +10,7 @@ import {Driver} from "./driver/driver.entity";
 import {Passenger} from "./passenger/passenger.entity";
 import {EmptyFieldsException} from "../../exceptions/EmptyFieldsException";
 import {User} from "../user/user.entity";
+import {Key} from "./key/key.entity";
 
 @Injectable()
 export class EnrollmentService {
@@ -20,7 +21,9 @@ export class EnrollmentService {
                 @InjectRepository(Driver)
                 private readonly driverRepository: Repository<Driver>,
                 @InjectRepository(Passenger)
-                private readonly passengerRepository: Repository<Passenger>) {
+                private readonly passengerRepository: Repository<Passenger>,
+                @InjectRepository(Key)
+                private readonly keyRepository: Repository<Key>) {
 
     }
 
@@ -46,7 +49,7 @@ export class EnrollmentService {
             errorData.push('name');
         }
 
-        if (!!user === false && (enrollment.key == "" || enrollment.key == null)) {
+        if (!!user === false && (enrollment.key.key == "" || enrollment.key.key == null)) {
             errorData.push('key');
         }
 
@@ -88,9 +91,11 @@ export class EnrollmentService {
 
         // If user is set
         if (!!user !== false) {
-
+            enrollmentToDb.creator = user;
         } else {
-
+            const key = new Key();
+            key.key = enrollment.key.key;
+            enrollmentToDb.key = await this.keyRepository.save(key);
         }
 
         enrollmentToDb.appointment = appointment;

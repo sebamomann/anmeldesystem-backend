@@ -1,5 +1,6 @@
 import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
 import {Appointment} from "../appointment/appointment.entity";
+import {Enrollment} from "../enrollment/enrollment.entity";
 
 @Entity()
 export class User {
@@ -35,4 +36,7 @@ export class User {
         })
     @JoinTable()
     administrations: Appointment[];
+
+    @ManyToMany(type => Enrollment)
+    enrollments: Enrollment[];
 }

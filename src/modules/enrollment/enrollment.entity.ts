@@ -14,6 +14,8 @@ import {Addition} from "../addition/addition.entity";
 import {Driver} from "./driver/driver.entity";
 import {Passenger} from "./passenger/passenger.entity";
 import {Comment} from "./comment/comment.entity";
+import {User} from "../user/user.entity";
+import {Key} from "./key/key.entity";
 
 @Entity()
 @Index("index_unique_name_appointment", ["name", "appointment"], {unique: true}) // first style
@@ -59,5 +61,11 @@ export class Enrollment {
     @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
     iat: Date;
 
-    key: string;
+    @ManyToMany(type => User)
+    @JoinTable({name: 'enrollment_creator'})
+    creator: User;
+
+    @OneToOne(type => Key,
+        key => key.enrollment)
+    key: Key;
 }
