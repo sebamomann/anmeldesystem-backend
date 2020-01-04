@@ -109,16 +109,22 @@ export class EnrollmentService {
     async delete(id: string, key: string, user: User) {
         const enrollment: Enrollment = await this.find(id);
 
-        if (user !== null && user !== undefined) {
-            if (!(user.id === enrollment.appointment.creator.id
-                || enrollment.appointment.administrators.some(iAdministrators => {
-                    return iAdministrators.mail === user.mail
-                }))
-                && (enrollment.key !== null
-                    && key !== enrollment.key.key)
-                && enrollment.creator.id !== user.id) {
-                throw new Error();
-            }
+        let isAppointmentCreator = (enrollment.appointment.creator !== null
+            && user.id === enrollment.appointment.creator.id);
+        let isAppointmentAdministrator = (enrollment.appointment.administrators !== null
+            && enrollment.appointment.administrators.some(iAdministrators => {
+                return iAdministrators.mail === user.mail
+            }));
+        let isEnrollmentCreator = (enrollment.creator !== null
+            && enrollment.creator.id === user.id);
+        let isAllowedByKey = (enrollment.key !== null
+            && key === enrollment.key.key);
+
+        if (!isAppointmentCreator
+            && !isAppointmentAdministrator
+            && !isEnrollmentCreator
+            && !isAllowedByKey) {
+            throw new Error();
         }
 
         await getConnection()

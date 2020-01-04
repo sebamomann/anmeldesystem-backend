@@ -21,14 +21,13 @@ export class EnrollmentController {
 
     @Delete(':id')
     @UseGuards(JwtOptStrategy)
-    async delete(@Param() id: string, @Body() body: { key: string }, @Usr() user: User, @Res() res: Response) {
+    async delete(@Param() id: string, @Body() body: any, @Usr() user: User, @Res() res: Response) {
         await this.enrollmentService
             .delete(id, body.key, user)
             .then(result => {
                 res.status(HttpStatus.OK).json();
             })
             .catch(err => {
-                console.log(err);
                 res.status(HttpStatus.FORBIDDEN).json();
             });
     }
