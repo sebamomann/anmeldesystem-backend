@@ -5,6 +5,7 @@ import {Enrollment} from "./enrollment.entity";
 import {AuthGuard} from "@nestjs/passport";
 import {Usr} from "../user/user.decorator";
 import {User} from "../user/user.entity";
+import {JwtOptStrategy} from "../../auth/jwt-opt.strategy";
 
 @Controller('enrollment')
 export class EnrollmentController {
@@ -36,9 +37,10 @@ export class EnrollmentController {
         res.status(HttpStatus.FORBIDDEN).json();
     }
 
+    @UseGuards(JwtOptStrategy)
     @Post()
-    async create(@Query() link: string, @Body() enrollment: Enrollment, @Res() res: Response) {
-        this.enrollmentService.create(enrollment, link).then(tEntrollment => {
+    async create(@Query() link: string, @Body() enrollment: Enrollment, @Usr() user: User, @Res() res: Response) {
+        this.enrollmentService.create(enrollment, link, user).then(tEntrollment => {
             delete tEntrollment.appointment;
             res.status(HttpStatus.CREATED).json(tEntrollment);
         }).catch((err) => {
@@ -63,6 +65,33 @@ export class EnrollmentController {
             res.status(HttpStatus.BAD_REQUEST).json(error);
         });
     }
+
+    // async create(@Query() link: string, @Body() enrollment: Enrollment, @Res() res: Response) {
+    //     this.enrollmentService.create(enrollment, link).then(tEntrollment => {
+    //         delete tEntrollment.appointment;
+    //         res.status(HttpStatus.CREATED).json(tEntrollment);
+    //     }).catch((err) => {
+    //         let id = this.makeid(10);
+    //         console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
+    //
+    //         let error: any = {error: {}};
+    //         if (err.code === 'DUPLICATE_ENTRY') {
+    //             error.error.code = 'DUPLICATE_ENTRY';
+    //             error.error.data = {
+    //                 columns: ["name"]
+    //             };
+    //         } else {
+    //             error.error = {
+    //                 undefined: {
+    //                     message: "Some error occurred. Please try again later or contact the support",
+    //                     code: id
+    //                 }
+    //             };
+    //         }
+    //
+    //         res.status(HttpStatus.BAD_REQUEST).json(new HttpException(error, HttpStatus.BAD_REQUEST));
+    //     });
+    // }
 
     makeid(length) {
         var result = '';
