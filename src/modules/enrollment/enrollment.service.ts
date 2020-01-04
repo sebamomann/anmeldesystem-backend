@@ -9,6 +9,7 @@ import {Addition} from "../addition/addition.entity";
 import {Driver} from "./driver/driver.entity";
 import {Passenger} from "./passenger/passenger.entity";
 import {EmptyFieldsException} from "../../exceptions/EmptyFieldsException";
+import {User} from "../user/user.entity";
 
 @Injectable()
 export class EnrollmentService {
@@ -35,13 +36,22 @@ export class EnrollmentService {
             .getOne();
     }
 
-    async create(enrollment: Enrollment, link: string) {
+    async create(enrollment: Enrollment, link: string, user: User) {
         const appointment: Appointment = await this.appointmentService.find(link);
 
         let enrollmentToDb = new Enrollment();
 
+        let errorData = [];
         if (enrollment.name === "" || enrollment.name === null) {
-            throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', ['name']);
+            errorData.push('name');
+        }
+
+        if (!!user === false && (enrollment.key == "" || enrollment.key == null)) {
+            errorData.push('key');
+        }
+
+        if (errorData.length > 0) {
+            throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', errorData);
         }
 
         if (await this.existsByName(enrollment.name, appointment)) {
@@ -74,6 +84,13 @@ export class EnrollmentService {
 
                 enrollmentToDb.passenger = await this.passengerRepository.save(passenger);
             }
+        }
+
+        // If user is set
+        if (!!user !== false) {
+
+        } else {
+
         }
 
         enrollmentToDb.appointment = appointment;

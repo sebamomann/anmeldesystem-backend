@@ -58,4 +58,6 @@ export class Enrollment {
 
     @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
     iat: Date;
+
+    key: string;
 }
