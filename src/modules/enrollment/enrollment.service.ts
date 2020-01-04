@@ -120,6 +120,8 @@ export class EnrollmentService {
         let isAllowedByKey = (enrollment.key !== null
             && key === enrollment.key.key);
 
+        console.log(`${isAppointmentCreator}_${isAppointmentAdministrator}_${isEnrollmentCreator}_${isAllowedByKey}`);
+
         if (!isAppointmentCreator
             && !isAppointmentAdministrator
             && !isEnrollmentCreator

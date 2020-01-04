@@ -14,6 +14,9 @@ export class Comment {
 
     @ManyToOne(type => Enrollment,
         enrollment => enrollment.comments,
+        {
+            onDelete: "CASCADE"
+        }
     )
     enrollment: Enrollment;
 
