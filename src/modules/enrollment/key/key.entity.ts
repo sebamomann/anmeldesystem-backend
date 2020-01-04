@@ -10,7 +10,8 @@ export class Key {
     key: string;
 
     @OneToOne(type => Enrollment,
-        enrollment => enrollment.key)
+        enrollment => enrollment.key,
+        {onDelete: "CASCADE"})
     @JoinColumn()
     enrollment: Enrollment;
 }

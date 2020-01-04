@@ -61,12 +61,14 @@ export class Enrollment {
     @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
     iat: Date;
 
-    @ManyToMany(type => User)
+    @ManyToOne(type => User,
+        {onDelete: "CASCADE"})
     @JoinTable({name: 'enrollment_creator'})
     creator: User;
 
     @OneToOne(type => Key,
-        key => key.enrollment)
+        key => key.enrollment,
+        {onDelete: "CASCADE"})
     key: Key;
 
     editKey: string;

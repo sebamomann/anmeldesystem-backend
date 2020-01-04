@@ -34,9 +34,13 @@ export class EnrollmentService {
             .where("enrollment.id = :id", {id: id['id']})
             .leftJoinAndSelect("enrollment.appointment", "appointment")
             .leftJoinAndSelect("appointment.administrators", "appointment_administrators")
+            .leftJoinAndSelect("enrollment.creator", "enrollment_creator")
+            .leftJoinAndSelect("enrollment.key", "enrollment_key")
             .leftJoinAndSelect("enrollment.additions", "enrollment_additions")
             .leftJoinAndSelect("appointment.creator", "appointment_creator")
-            .select(["enrollment", "appointment", "appointment_administrators.mail", "appointment_creator.id", "enrollment_additions"])
+            .select(["enrollment", "enrollment_creator", "enrollment_key",
+                "appointment", "appointment_administrators.mail",
+                "appointment_creator.id", "enrollment_additions"])
             .getOne();
     }
 
@@ -93,7 +97,7 @@ export class EnrollmentService {
             enrollmentToDb.creator = user;
         } else {
             const key = new Key();
-            key.key = enrollment.key.key;
+            key.key = enrollment.editKey;
             enrollmentToDb.key = await this.keyRepository.save(key);
         }
 
@@ -102,33 +106,27 @@ export class EnrollmentService {
         return this.enrollmentRepository.save(await enrollmentToDb)
     }
 
-    async delete(id: string) {
+    async delete(id: string, key: string, user: User) {
+        const enrollment: Enrollment = await this.find(id);
+
+        if (user !== null && user !== undefined) {
+            if (!(user.id === enrollment.appointment.creator.id
+                || enrollment.appointment.administrators.some(iAdministrators => {
+                    return iAdministrators.mail === user.mail
+                }))
+                && (enrollment.key !== null
+                    && key !== enrollment.key.key)
+                && enrollment.creator.id !== user.id) {
+                throw new Error();
+            }
+        }
+
         await getConnection()
             .createQueryBuilder()
             .delete()
             .from(Enrollment)
             .where("id = :id", {id: id['id']})
             .execute();
-    }
-
-    clear(enrollment: Enrollment) {
-        if (enrollment.passenger !== null && enrollment.passenger !== undefined) {
-            getConnection()
-                .createQueryBuilder()
-                .delete()
-                .from(Passenger)
-                .where("id = :id", {id: enrollment.passenger.id})
-                .execute();
-        }
-
-        if (enrollment.driver !== null && enrollment.driver !== undefined) {
-            getConnection()
-                .createQueryBuilder()
-                .delete()
-                .from(Driver)
-                .where("id = :id", {id: enrollment.driver.id})
-                .execute();
-        }
     }
 
     private async existsByName(name: string, appointment: Appointment) {

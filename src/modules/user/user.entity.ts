@@ -37,6 +37,7 @@ export class User {
     @JoinTable()
     administrations: Appointment[];
 
-    @ManyToMany(type => Enrollment)
+    @OneToMany(type => Enrollment,
+        enrollment => enrollment.creator)
     enrollments: Enrollment[];
 }
