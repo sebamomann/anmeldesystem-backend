@@ -44,15 +44,15 @@ export class EnrollmentController {
             delete tEntrollment.appointment;
             res.status(HttpStatus.CREATED).json(tEntrollment);
         }).catch((err) => {
-            let id = this.makeid(10);
-            console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
             let error: any = {};
             if (err.code === 'DUPLICATE_ENTRY'
                 || err.code === 'EMPTY_FIELDS') {
                 error.code = err.code;
                 error.error = err.data
             } else {
+                let id = this.makeid(10);
+                console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
+
                 error.code = "UNDEFINED";
                 error.error = {
                     message: "Some error occurred. Please try again later or contact the support",
