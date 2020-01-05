@@ -24,10 +24,10 @@ export class EnrollmentController {
     async delete(@Param() id: string, @Body() body: any, @Usr() user: User, @Res() res: Response) {
         await this.enrollmentService
             .delete(id, body.key, user)
-            .then(result => {
+            .then(() => {
                 res.status(HttpStatus.OK).json();
             })
-            .catch(err => {
+            .catch(() => {
                 res.status(HttpStatus.FORBIDDEN).json();
             });
     }
