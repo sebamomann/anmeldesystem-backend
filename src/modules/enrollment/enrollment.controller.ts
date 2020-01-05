@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, Res, UseGuards} from '@nestjs/common';
+import {Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Query, Res, UseGuards} from '@nestjs/common';
 import {Response} from 'express';
 import {EnrollmentService} from "./enrollment.service";
 import {Enrollment} from "./enrollment.entity";
@@ -28,6 +28,20 @@ export class EnrollmentController {
                 res.status(HttpStatus.OK).json();
             })
             .catch(() => {
+                res.status(HttpStatus.FORBIDDEN).json();
+            });
+    }
+
+    @Put(':id')
+    @UseGuards(JwtOptStrategy)
+    async update(@Param() id: string, @Body() enrollment: Enrollment, @Usr() user: User, @Res() res: Response) {
+        await this.enrollmentService
+            .update(id, enrollment, user)
+            .then(() => {
+                res.status(HttpStatus.OK).json();
+            })
+            .catch((err) => {
+                console.log(JSON.stringify(err));
                 res.status(HttpStatus.FORBIDDEN).json();
             });
     }
