@@ -28,7 +28,6 @@ export class EnrollmentController {
                 res.status(HttpStatus.OK).json();
             })
             .catch(err => {
-                console.log(err);
                 res.status(HttpStatus.FORBIDDEN).json();
             });
     }
