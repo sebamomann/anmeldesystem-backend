@@ -12,6 +12,8 @@ import {EmptyFieldsException} from "../../exceptions/EmptyFieldsException";
 import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
 import {User} from "../user/user.entity";
 import {Key} from "./key/key.entity";
+import {PassengerService} from "./passenger/passenger.service";
+import {DriverService} from "./driver/driver.service";
 
 @Injectable()
 export class EnrollmentService {
@@ -19,6 +21,8 @@ export class EnrollmentService {
                 private readonly enrollmentRepository: Repository<Enrollment>,
                 private readonly appointmentService: AppointmentService,
                 private readonly additionService: AdditionService,
+                private readonly passengerService: PassengerService,
+                private readonly driverService: DriverService,
                 @InjectRepository(Driver)
                 private readonly driverRepository: Repository<Driver>,
                 @InjectRepository(Passenger)
@@ -102,40 +106,15 @@ export class EnrollmentService {
             .execute();
     }
 
-    async update(id: string, enrollment: Enrollment, user: User) {
-        try {
-            EnrollmentService.checkForEmptyValues(enrollment, user);
-        } catch (e) {
-            throw e;
+    private static async deletePassenger(enrollment: Enrollment) {
+        if (enrollment.id !== null && enrollment.id !== undefined) {
+            await getConnection()
+                .createQueryBuilder()
+                .delete()
+                .from(Driver)
+                .where("enrollmentId = :id", {id: enrollment.id})
+                .execute();
         }
-
-        const enrollmentFromDb: Enrollment = await this.find(id);
-        const appointment: Appointment = enrollmentFromDb.appointment;
-
-        if (!this.allowedToEdit(enrollmentFromDb, user, enrollment.editKey)) {
-            throw new Error();
-        }
-
-        if (enrollmentFromDb.name != enrollment.name) {
-            if (await this.existsByName(enrollment.name, appointment)) {
-                throw new DuplicateValueException('DUPLICATE_ENTRY',
-                    'Following values are already taken',
-                    ['name']);
-            }
-        }
-
-        let enrollmentToDb = await this.createEnrollmentObjectForDB(enrollment, appointment);
-        enrollmentToDb.id = enrollmentFromDb.id;
-        if (enrollmentFromDb.creator != null) {
-            enrollmentToDb.creator = enrollmentFromDb.creator;
-        }
-        if (enrollmentFromDb.key != null) {
-            enrollmentToDb.key = enrollmentFromDb.key;
-        }
-
-        console.log(enrollmentToDb);
-
-        await this.enrollmentRepository.save(enrollmentToDb);
     }
 
     private allowedToEdit(enrollment: Enrollment, user: User, key: string) {
@@ -156,6 +135,54 @@ export class EnrollmentService {
             || isAllowedByKey)
     }
 
+    private static async deleteDriver(enrollment: Enrollment) {
+        if (enrollment.id !== null && enrollment.id !== undefined) {
+            await getConnection()
+                .createQueryBuilder()
+                .delete()
+                .from(Passenger)
+                .where("enrollmentId = :id", {id: enrollment.id})
+                .execute();
+        }
+    }
+
+    async update(id: string, enrollment: Enrollment, user: User) {
+        try {
+            EnrollmentService.checkForEmptyValues(enrollment, user);
+        } catch (e) {
+            console.log("Empty Values");
+            throw e;
+        }
+
+        const enrollmentFromDb: Enrollment = await this.find(id);
+        const appointment: Appointment = enrollmentFromDb.appointment;
+
+        if (!this.allowedToEdit(enrollmentFromDb, user, enrollment.editKey)) {
+            console.log("No edit allowed");
+            throw new Error();
+        }
+
+        if (enrollmentFromDb.name != enrollment.name) {
+            if (await this.existsByName(enrollment.name, appointment)) {
+                throw new DuplicateValueException('DUPLICATE_ENTRY',
+                    'Following values are already taken',
+                    ['name']);
+            }
+        }
+
+
+        let enrollmentToDb = await this.createEnrollmentObjectForDB(enrollment, appointment);
+        enrollmentToDb.id = enrollmentFromDb.id;
+        if (enrollmentFromDb.creator != null) {
+            enrollmentToDb.creator = enrollmentFromDb.creator;
+        }
+        if (enrollmentFromDb.key != null) {
+            enrollmentToDb.key = enrollmentFromDb.key;
+        }
+
+        await this.enrollmentRepository.save(enrollmentToDb);
+    }
+
     private async createEnrollmentObjectForDB(enrollment: Enrollment, appointment: Appointment) {
         let enrollmentToDb = new Enrollment();
         enrollmentToDb.name = enrollment.name;
@@ -172,23 +199,50 @@ export class EnrollmentService {
         /* Needed due to malicious comparison fo tinyint to boolean */
         if (!!appointment.driverAddition === true) {
             if (enrollment.driver !== null && enrollment.driver !== undefined) {
-                let driver: Driver = new Driver();
-                driver.seats = enrollment.driver.seats;
-                driver.service = enrollment.driver.service;
-
-                enrollmentToDb.driver = await this.driverRepository.save(driver);
+                enrollmentToDb.driver = await this.handleDriverRelation(enrollment);
             } else {
-                let passenger: Passenger = new Passenger();
-                passenger.requirement = enrollment.passenger.requirement;
-
-                enrollmentToDb.passenger = await this.passengerRepository.save(passenger);
+                enrollmentToDb.passenger = await this.handlePassengerRelation(enrollment);
             }
         }
 
         return enrollmentToDb;
     }
 
+    private async handlePassengerRelation(enrollment: Enrollment) {
+        await EnrollmentService.deleteDriver(enrollment);
+
+        let passenger: Passenger = new Passenger();
+        const _passenger = await this.passengerService.findByEnrollment(enrollment);
+        if (_passenger !== undefined) {
+            passenger = _passenger;
+        }
+
+        passenger.requirement = enrollment.passenger.requirement;
+
+        return await this.passengerRepository.save(passenger);
+    }
+
+    private async handleDriverRelation(enrollment: Enrollment) {
+        await EnrollmentService.deletePassenger(enrollment);
+        let driver: Driver = new Driver();
+        const _driver = await this.driverService.findByEnrollment(enrollment);
+        if (_driver !== undefined) {
+            driver = _driver;
+        }
+
+        driver.seats = enrollment.driver.seats;
+        driver.service = enrollment.driver.service;
+
+        return await this.driverRepository.save(driver);
+    }
+
     private async existsByName(name: string, appointment: Appointment) {
-        return await this.enrollmentRepository.findOne({where: {name: name, appointment: appointment}}) !== undefined;
+        return await this.enrollmentRepository.findOne({
+            where:
+                {
+                    name: name,
+                    appointment: appointment
+                }
+        }) !== undefined;
     }
 }

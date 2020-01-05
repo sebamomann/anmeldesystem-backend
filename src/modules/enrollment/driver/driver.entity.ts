@@ -15,7 +15,8 @@ export class Driver {
     @OneToOne(type => Enrollment,
         enrollment => enrollment.driver,
         {
-            onDelete: "CASCADE"
+            onDelete: "CASCADE",
+            onUpdate: "CASCADE"
         })
     @JoinColumn()
     enrollment: Enrollment;

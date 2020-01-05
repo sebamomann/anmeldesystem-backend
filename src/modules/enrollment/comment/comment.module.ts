@@ -15,12 +15,14 @@ import {Passenger} from "../passenger/passenger.entity";
 import {Driver} from "../driver/driver.entity";
 import {User} from "../../user/user.entity";
 import {Key} from "../key/key.entity";
+import {PassengerService} from "../passenger/passenger.service";
+import {DriverService} from "../driver/driver.service";
 
 @Module({
     imports: [TypeOrmModule.forFeature([Comment, Addition, Enrollment, Appointment,
         File, Comment, Driver, Passenger, User, Key])],
-    providers: [CommentService, AppointmentService, FileService, EnrollmentService, AdditionService],
-    exports: [CommentService, AppointmentService, FileService, EnrollmentService, AdditionService],
+    providers: [CommentService, AppointmentService, FileService, EnrollmentService, AdditionService, PassengerService, DriverService],
+    exports: [CommentService, AppointmentService, FileService, EnrollmentService, AdditionService, PassengerService, DriverService],
     controllers: [CommentController],
 })
 export class CommentModule {
