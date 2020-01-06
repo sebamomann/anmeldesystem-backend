@@ -22,8 +22,17 @@ export class AppointmentService {
     ) {
     }
 
-    findAll(user: User): Promise<Appointment[]> {
-        return this.appointmentRepository.find({relations: ["creator"], where: {creator: user}});
+    async findAll(user: User, slim = false): Promise<Appointment[]> {
+        let appointments = await this.appointmentRepository.find({relations: ["creator"], where: {creator: user}});
+        if (slim) {
+            appointments = appointments.map(fAppointment => {
+                delete fAppointment.enrollments;
+                delete fAppointment.files;
+                return fAppointment;
+            });
+        }
+
+        return appointments;
     }
 
     async find(link: string): Promise<Appointment> {

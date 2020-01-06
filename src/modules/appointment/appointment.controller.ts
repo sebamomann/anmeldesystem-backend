@@ -7,6 +7,7 @@ import {
     Inject,
     Param,
     Post,
+    Query,
     Request,
     Res,
     UseGuards,
@@ -31,8 +32,9 @@ export class AppointmentController {
     @Get()
     @UseGuards(AuthGuard('jwt'))
     @UseInterceptors(ClassSerializerInterceptor)
-    findAll(@Usr() user: User): Promise<Appointment[]> {
-        return this.appointmentService.findAll(user);
+    findAll(@Query('slim') slim: string, @Usr() user: User): Promise<Appointment[]> {
+        let _slim = slim === "true";
+        return this.appointmentService.findAll(user, _slim);
     }
 
     @Post()
