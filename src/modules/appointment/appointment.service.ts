@@ -23,7 +23,11 @@ export class AppointmentService {
     }
 
     async findAll(user: User, slim = false): Promise<Appointment[]> {
-        let appointments = await this.appointmentRepository.find({relations: ["creator"], where: {creator: user}});
+        let appointments = await this.appointmentRepository.find({
+            relations: ["creator"],
+            where: {creator: user},
+            order: {date: "DESC"}
+        });
         if (slim) {
             appointments = appointments.map(fAppointment => {
                 delete fAppointment.enrollments;
