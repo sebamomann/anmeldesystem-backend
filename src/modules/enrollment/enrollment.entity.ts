@@ -32,6 +32,7 @@ export class Enrollment {
     @OneToOne(type => Driver, driver => driver.enrollment,
         {
             eager: true,
+            onUpdate: "CASCADE",
         })
     driver: Driver;
 
@@ -39,7 +40,7 @@ export class Enrollment {
         passenger => passenger.enrollment,
         {
             eager: true,
-            onUpdate: "CASCADE"
+            onUpdate: "CASCADE",
         })
     passenger: Passenger;
 

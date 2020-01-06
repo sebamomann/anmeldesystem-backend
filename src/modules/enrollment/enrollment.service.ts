@@ -106,46 +106,6 @@ export class EnrollmentService {
             .execute();
     }
 
-    private static async deletePassenger(enrollment: Enrollment) {
-        if (enrollment.id !== null && enrollment.id !== undefined) {
-            await getConnection()
-                .createQueryBuilder()
-                .delete()
-                .from(Driver)
-                .where("enrollmentId = :id", {id: enrollment.id})
-                .execute();
-        }
-    }
-
-    private allowedToEdit(enrollment: Enrollment, user: User, key: string) {
-        let isAppointmentCreator = (enrollment.appointment.creator !== null
-            && user.id === enrollment.appointment.creator.id);
-        let isAppointmentAdministrator = (enrollment.appointment.administrators !== null
-            && enrollment.appointment.administrators.some(iAdministrators => {
-                return iAdministrators.mail === user.mail
-            }));
-        let isEnrollmentCreator = (enrollment.creator !== null
-            && enrollment.creator.id === user.id);
-        let isAllowedByKey = (enrollment.key !== null
-            && key === enrollment.key.key);
-
-        return (isAppointmentCreator
-            || isAppointmentAdministrator
-            || isEnrollmentCreator
-            || isAllowedByKey)
-    }
-
-    private static async deleteDriver(enrollment: Enrollment) {
-        if (enrollment.id !== null && enrollment.id !== undefined) {
-            await getConnection()
-                .createQueryBuilder()
-                .delete()
-                .from(Passenger)
-                .where("enrollmentId = :id", {id: enrollment.id})
-                .execute();
-        }
-    }
-
     async update(id: string, enrollment: Enrollment, user: User) {
         try {
             EnrollmentService.checkForEmptyValues(enrollment, user);
@@ -200,8 +160,10 @@ export class EnrollmentService {
         if (!!appointment.driverAddition === true) {
             if (enrollment.driver !== null && enrollment.driver !== undefined) {
                 enrollmentToDb.driver = await this.handleDriverRelation(enrollment);
+                enrollmentToDb.passenger = null;
             } else {
                 enrollmentToDb.passenger = await this.handlePassengerRelation(enrollment);
+                enrollmentToDb.driver = null;
             }
         }
 
@@ -209,8 +171,6 @@ export class EnrollmentService {
     }
 
     private async handlePassengerRelation(enrollment: Enrollment) {
-        await EnrollmentService.deleteDriver(enrollment);
-
         let passenger: Passenger = new Passenger();
         const _passenger = await this.passengerService.findByEnrollment(enrollment);
         if (_passenger !== undefined) {
@@ -223,7 +183,6 @@ export class EnrollmentService {
     }
 
     private async handleDriverRelation(enrollment: Enrollment) {
-        await EnrollmentService.deletePassenger(enrollment);
         let driver: Driver = new Driver();
         const _driver = await this.driverService.findByEnrollment(enrollment);
         if (_driver !== undefined) {
@@ -244,5 +203,23 @@ export class EnrollmentService {
                     appointment: appointment
                 }
         }) !== undefined;
+    }
+
+    private allowedToEdit(enrollment: Enrollment, user: User, key: string) {
+        let isAppointmentCreator = (enrollment.appointment.creator !== null
+            && user.id === enrollment.appointment.creator.id);
+        let isAppointmentAdministrator = (enrollment.appointment.administrators !== null
+            && enrollment.appointment.administrators.some(iAdministrators => {
+                return iAdministrators.mail === user.mail
+            }));
+        let isEnrollmentCreator = (enrollment.creator !== null
+            && enrollment.creator.id === user.id);
+        let isAllowedByKey = (enrollment.key !== null
+            && key === enrollment.key.key);
+
+        return (isAppointmentCreator
+            || isAppointmentAdministrator
+            || isEnrollmentCreator
+            || isAllowedByKey)
     }
 }
