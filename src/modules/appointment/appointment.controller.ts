@@ -70,8 +70,9 @@ export class AppointmentController {
     }
 
     @Get(':link')
-    findByLink(@Param() link: string, @Request() req: Request, @Res() res: Response) {
-        return this.appointmentService.find(link).then(tAppointment => {
+    findByLink(@Query('slim') slim: string, @Param() link: string, @Request() req: Request, @Res() res: Response) {
+        let _slim = slim === "true";
+        return this.appointmentService.find(link, _slim).then(tAppointment => {
             if (tAppointment != null) {
                 // tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
                 res.status(HttpStatus.OK).json(tAppointment);

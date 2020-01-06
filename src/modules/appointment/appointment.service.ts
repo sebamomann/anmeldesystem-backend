@@ -35,8 +35,8 @@ export class AppointmentService {
         return appointments;
     }
 
-    async find(link: string): Promise<Appointment> {
-        return await getRepository(Appointment)
+    async find(link: string, slim: boolean = false): Promise<Appointment> {
+        let appointment = await getRepository(Appointment)
             .createQueryBuilder("appointment")
             .where("appointment.link = :link", {link: link['link']})
             .leftJoinAndSelect("appointment.creator", "creator")
@@ -52,6 +52,12 @@ export class AppointmentService {
                 "creator.username", "files", "administrators.mail",
                 "enrollment_additions"])
             .getOne();
+
+        if (slim) {
+            delete appointment.files;
+        }
+
+        return appointment;
     }
 
     async create(appointment: Appointment, user: User) {
