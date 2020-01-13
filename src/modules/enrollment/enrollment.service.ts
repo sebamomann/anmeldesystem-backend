@@ -77,13 +77,15 @@ export class EnrollmentService {
 
         let enrollmentToDb = await this.createEnrollmentObjectForDB(enrollment, appointment);
 
-        // If user is set
-        if (!!user !== false) {
-            enrollmentToDb.creator = user;
-        } else {
+        // If user is not set
+        if (enrollment.editKey != null && enrollment.editKey != "") {
             const key = new Key();
             key.key = enrollment.editKey;
             enrollmentToDb.key = await this.keyRepository.save(key);
+        } else if (!!user === false) {
+            enrollmentToDb.creator = user;
+        } else {
+            throw  new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', ['key']);
         }
 
         enrollmentToDb.appointment = appointment;
