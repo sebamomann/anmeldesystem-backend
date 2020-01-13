@@ -15,7 +15,7 @@ export class EnrollmentController {
 
     @UseGuards(AuthGuard('jwt'))
     @Get()
-    find(@Query() id: string): Promise<Enrollment> {
+    async find(@Query() id: string) {
         return this.enrollmentService.find(id);
     }
 
@@ -74,6 +74,33 @@ export class EnrollmentController {
 
                 res.status(HttpStatus.BAD_REQUEST).json(error);
             });
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('/:id/allowEdit')
+    async checkUser(@Param() params: string, @Usr() user: User, @Res() res: Response) {
+        this.enrollmentService.find(params)
+            .then(tEnrollment => {
+                if (EnrollmentService.allowEditByUserId(tEnrollment, user)) {
+                    res.status(HttpStatus.OK).json();
+                }
+
+                res.status(HttpStatus.FORBIDDEN).json();
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    @Post('/:id/validateKey')
+    async validateKey(@Param() params: String, @Body() body: String, @Res() res: Response) {
+        this.enrollmentService.find(params['id']).then(tEnrollment => {
+            if (EnrollmentService.allowEditByKey(tEnrollment, params['key'])) {
+                res.status(HttpStatus.OK).json();
+            }
+
+            res.status(HttpStatus.FORBIDDEN).json();
+        })
     }
 
     // Util

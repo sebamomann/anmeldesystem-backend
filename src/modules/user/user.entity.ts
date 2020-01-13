@@ -1,4 +1,4 @@
-import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
 import {Appointment} from "../appointment/appointment.entity";
 import {Enrollment} from "../enrollment/enrollment.entity";
 
@@ -34,7 +34,6 @@ export class User {
         {
             eager: true
         })
-    @JoinTable()
     administrations: Appointment[];
 
     @OneToMany(type => Enrollment,

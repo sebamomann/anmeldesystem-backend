@@ -91,56 +91,24 @@ export class EnrollmentService {
         return this.enrollmentRepository.save(await enrollmentToDb)
     }
 
-    async delete(id: string, key: string, user: User) {
-        const enrollment: Enrollment = await this.find(id);
-
-        if (!this.allowedToEdit(enrollment, user, key)) {
-            throw new Error();
-        }
-
-        await getConnection()
-            .createQueryBuilder()
-            .delete()
-            .from(Enrollment)
-            .where("id = :id", {id: id['id']})
-            .execute();
+    public static allowEditByKey(enrollment: Enrollment, key: string) {
+        return enrollment.key !== null
+            && key === enrollment.key.key;
     }
 
-    async update(id: string, enrollment: Enrollment, user: User) {
-        try {
-            EnrollmentService.checkForEmptyValues(enrollment, user);
-        } catch (e) {
-            console.log("Empty Values");
-            throw e;
-        }
+    public static allowEditByUserId(enrollment: Enrollment, user: User) {
+        console.log(enrollment);
+        let isAppointmentCreator = (enrollment.appointment.creator !== null
+            && user.id === enrollment.appointment.creator.id);
+        console.log(enrollment.appointment.administrators);
+        let isAppointmentAdministrator = (enrollment.appointment.administrators !== null
+            && enrollment.appointment.administrators.some(iAdministrators => {
+                return iAdministrators.mail === user.mail
+            }));
+        let isEnrollmentCreator = (enrollment.creator !== null
+            && enrollment.creator.id === user.id);
 
-        const enrollmentFromDb: Enrollment = await this.find(id);
-        const appointment: Appointment = enrollmentFromDb.appointment;
-
-        if (!this.allowedToEdit(enrollmentFromDb, user, enrollment.editKey)) {
-            console.log("No edit allowed");
-            throw new Error();
-        }
-
-        if (enrollmentFromDb.name != enrollment.name) {
-            if (await this.existsByName(enrollment.name, appointment)) {
-                throw new DuplicateValueException('DUPLICATE_ENTRY',
-                    'Following values are already taken',
-                    ['name']);
-            }
-        }
-
-
-        let enrollmentToDb = await this.createEnrollmentObjectForDB(enrollment, appointment);
-        enrollmentToDb.id = enrollmentFromDb.id;
-        if (enrollmentFromDb.creator != null) {
-            enrollmentToDb.creator = enrollmentFromDb.creator;
-        }
-        if (enrollmentFromDb.key != null) {
-            enrollmentToDb.key = enrollmentFromDb.key;
-        }
-
-        await this.enrollmentRepository.save(enrollmentToDb);
+        return isAppointmentCreator || isAppointmentAdministrator || isEnrollmentCreator;
     }
 
     private async createEnrollmentObjectForDB(enrollment: Enrollment, appointment: Appointment) {
@@ -205,21 +173,65 @@ export class EnrollmentService {
         }) !== undefined;
     }
 
-    private allowedToEdit(enrollment: Enrollment, user: User, key: string) {
-        let isAppointmentCreator = (enrollment.appointment.creator !== null
-            && user.id === enrollment.appointment.creator.id);
-        let isAppointmentAdministrator = (enrollment.appointment.administrators !== null
-            && enrollment.appointment.administrators.some(iAdministrators => {
-                return iAdministrators.mail === user.mail
-            }));
-        let isEnrollmentCreator = (enrollment.creator !== null
-            && enrollment.creator.id === user.id);
-        let isAllowedByKey = (enrollment.key !== null
-            && key === enrollment.key.key);
+    private static allowedToEdit(enrollment: Enrollment, user: User, key: string) {
+        let allowEditByUserId = EnrollmentService.allowEditByUserId(enrollment, user);
+        let isAllowedByKey = EnrollmentService.allowEditByKey(enrollment, key);
 
-        return (isAppointmentCreator
-            || isAppointmentAdministrator
-            || isEnrollmentCreator
+        return (allowEditByUserId
             || isAllowedByKey)
     }
+
+    async delete(id: string, key: string, user: User) {
+        const enrollment: Enrollment = await this.find(id);
+
+        if (!EnrollmentService.allowedToEdit(enrollment, user, key)) {
+            throw new Error();
+        }
+
+        await getConnection()
+            .createQueryBuilder()
+            .delete()
+            .from(Enrollment)
+            .where("id = :id", {id: id['id']})
+            .execute();
+    }
+
+    async update(id: string, enrollment: Enrollment, user: User) {
+        try {
+            EnrollmentService.checkForEmptyValues(enrollment, user);
+        } catch (e) {
+            console.log("Empty Values");
+            throw e;
+        }
+
+        const enrollmentFromDb: Enrollment = await this.find(id);
+        const appointment: Appointment = enrollmentFromDb.appointment;
+
+        if (!EnrollmentService.allowedToEdit(enrollmentFromDb, user, enrollment.editKey)) {
+            console.log("No edit allowed");
+            throw new Error();
+        }
+
+        if (enrollmentFromDb.name != enrollment.name) {
+            if (await this.existsByName(enrollment.name, appointment)) {
+                throw new DuplicateValueException('DUPLICATE_ENTRY',
+                    'Following values are already taken',
+                    ['name']);
+            }
+        }
+
+
+        let enrollmentToDb = await this.createEnrollmentObjectForDB(enrollment, appointment);
+        enrollmentToDb.id = enrollmentFromDb.id;
+        if (enrollmentFromDb.creator != null) {
+            enrollmentToDb.creator = enrollmentFromDb.creator;
+        }
+        if (enrollmentFromDb.key != null) {
+            enrollmentToDb.key = enrollmentFromDb.key;
+        }
+
+        await this.enrollmentRepository.save(enrollmentToDb);
+    }
+
+
 }
