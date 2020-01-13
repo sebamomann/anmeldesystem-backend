@@ -79,10 +79,15 @@ export class EnrollmentController {
     @UseGuards(AuthGuard('jwt'))
     @Get('/:id/allowEdit')
     async checkUser(@Param() params: string, @Usr() user: User, @Res() res: Response) {
-        this.enrollmentService.find(params)
+        this.enrollmentService
+            .find(params)
             .then(tEnrollment => {
-                if (EnrollmentService.allowEditByUserId(tEnrollment, user)) {
-                    res.status(HttpStatus.OK).json();
+                if (tEnrollment != undefined) {
+                    if (EnrollmentService.allowEditByUserId(tEnrollment, user)) {
+                        res.status(HttpStatus.OK).json();
+                    }
+                } else {
+                    res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Enrollment not found"}});
                 }
 
                 res.status(HttpStatus.FORBIDDEN).json();
@@ -93,14 +98,22 @@ export class EnrollmentController {
     }
 
     @Post('/:id/validateKey')
-    async validateKey(@Param() params: String, @Body() body: String, @Res() res: Response) {
-        this.enrollmentService.find(params['id']).then(tEnrollment => {
-            if (EnrollmentService.allowEditByKey(tEnrollment, params['key'])) {
-                res.status(HttpStatus.OK).json();
-            }
+    async validateKey(@Param() params: string, @Body() body: { key: string }, @Res() res: Response) {
+        this.enrollmentService
+            .find(params)
+            .then(tEnrollment => {
+                if (tEnrollment != undefined) {
+                    if (EnrollmentService.allowEditByKey(tEnrollment, body.key)) {
+                        res.status(HttpStatus.OK).json();
+                    }
+                } else {
+                    res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Enrollment not found"}});
+                }
 
-            res.status(HttpStatus.FORBIDDEN).json();
-        })
+                res.status(HttpStatus.FORBIDDEN).json();
+            }).catch(err => {
+            console.log(err);
+        });
     }
 
     // Util

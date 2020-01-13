@@ -91,26 +91,6 @@ export class EnrollmentService {
         return this.enrollmentRepository.save(await enrollmentToDb)
     }
 
-    public static allowEditByKey(enrollment: Enrollment, key: string) {
-        return enrollment.key !== null
-            && key === enrollment.key.key;
-    }
-
-    public static allowEditByUserId(enrollment: Enrollment, user: User) {
-        console.log(enrollment);
-        let isAppointmentCreator = (enrollment.appointment.creator !== null
-            && user.id === enrollment.appointment.creator.id);
-        console.log(enrollment.appointment.administrators);
-        let isAppointmentAdministrator = (enrollment.appointment.administrators !== null
-            && enrollment.appointment.administrators.some(iAdministrators => {
-                return iAdministrators.mail === user.mail
-            }));
-        let isEnrollmentCreator = (enrollment.creator !== null
-            && enrollment.creator.id === user.id);
-
-        return isAppointmentCreator || isAppointmentAdministrator || isEnrollmentCreator;
-    }
-
     private async createEnrollmentObjectForDB(enrollment: Enrollment, appointment: Appointment) {
         let enrollmentToDb = new Enrollment();
         enrollmentToDb.name = enrollment.name;
@@ -173,14 +153,6 @@ export class EnrollmentService {
         }) !== undefined;
     }
 
-    private static allowedToEdit(enrollment: Enrollment, user: User, key: string) {
-        let allowEditByUserId = EnrollmentService.allowEditByUserId(enrollment, user);
-        let isAllowedByKey = EnrollmentService.allowEditByKey(enrollment, key);
-
-        return (allowEditByUserId
-            || isAllowedByKey)
-    }
-
     async delete(id: string, key: string, user: User) {
         const enrollment: Enrollment = await this.find(id);
 
@@ -234,4 +206,32 @@ export class EnrollmentService {
     }
 
 
+    public static allowEditByKey(enrollment: Enrollment, key: string) {
+        return enrollment.key !== null && key !== undefined
+            && (key === enrollment.key.key);
+    }
+
+    public static allowEditByUserId(enrollment: Enrollment, user: User) {
+        console.log(enrollment);
+        let isAppointmentCreator = (enrollment.appointment.creator !== null
+            && user.id === enrollment.appointment.creator.id);
+        console.log(enrollment.appointment.administrators);
+        let isAppointmentAdministrator = (enrollment.appointment.administrators !== null
+            && enrollment.appointment.administrators.some(iAdministrators => {
+                return iAdministrators.mail === user.mail
+            }));
+        let isEnrollmentCreator = (enrollment.creator !== null
+            && enrollment.creator.id === user.id);
+
+        return isAppointmentCreator || isAppointmentAdministrator || isEnrollmentCreator;
+    }
+
+    // UTIL
+    private static allowedToEdit(enrollment: Enrollment, user: User, key: string) {
+        let allowEditByUserId = EnrollmentService.allowEditByUserId(enrollment, user);
+        let isAllowedByKey = EnrollmentService.allowEditByKey(enrollment, key);
+
+        return (allowEditByUserId
+            || isAllowedByKey)
+    }
 }
