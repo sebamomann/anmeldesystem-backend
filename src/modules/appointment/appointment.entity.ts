@@ -1,4 +1,4 @@
-import {Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
 import {Enrollment} from "../enrollment/enrollment.entity";
 import {Addition} from "../addition/addition.entity";
 import {File} from "../file/file.entity";
@@ -49,6 +49,7 @@ export class Appointment {
     @ManyToMany(type => User,
         user => user.administrations,
         {eager: false})
+    @JoinTable()
     administrators: User[];
 
     @OneToMany(type => File,
