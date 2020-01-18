@@ -212,10 +212,8 @@ export class EnrollmentService {
     }
 
     public static allowEditByUserId(enrollment: Enrollment, user: User) {
-        console.log(enrollment);
         let isAppointmentCreator = (enrollment.appointment.creator !== null
             && user.id === enrollment.appointment.creator.id);
-        console.log(enrollment.appointment.administrators);
         let isAppointmentAdministrator = (enrollment.appointment.administrators !== null
             && enrollment.appointment.administrators.some(iAdministrators => {
                 return iAdministrators.mail === user.mail
