@@ -1,5 +1,6 @@
 import {
     Column,
+    CreateDateColumn,
     Entity,
     Index,
     JoinTable,
@@ -7,7 +8,8 @@ import {
     ManyToOne,
     OneToMany,
     OneToOne,
-    PrimaryGeneratedColumn
+    PrimaryGeneratedColumn,
+    UpdateDateColumn
 } from 'typeorm';
 import {Appointment} from "../appointment/appointment.entity";
 import {Addition} from "../addition/addition.entity";
@@ -16,6 +18,7 @@ import {Passenger} from "./passenger/passenger.entity";
 import {Comment} from "./comment/comment.entity";
 import {User} from "../user/user.entity";
 import {Key} from "./key/key.entity";
+import {Exclude} from "class-transformer";
 
 @Entity()
 @Index("index_unique_name_appointment", ["name", "appointment"], {unique: true}) // first style
@@ -59,7 +62,7 @@ export class Enrollment {
         })
     comments: Comment[];
 
-    @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
+    @CreateDateColumn()
     iat: Date;
 
     @ManyToOne(type => User,
@@ -71,6 +74,10 @@ export class Enrollment {
         key => key.enrollment,
         {onDelete: "CASCADE"})
     key: Key;
+
+    @UpdateDateColumn({name: 'lud', nullable: true})
+    @Exclude({toPlainOnly: true})
+    lud: Date;
 
     editKey: string;
 }

@@ -1,8 +1,20 @@
-import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    JoinColumn,
+    JoinTable,
+    ManyToMany,
+    ManyToOne,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn
+} from 'typeorm';
 import {Enrollment} from "../enrollment/enrollment.entity";
 import {Addition} from "../addition/addition.entity";
 import {File} from "../file/file.entity";
 import {User} from "../user/user.entity";
+import {Exclude} from "class-transformer";
 
 @Entity()
 export class Appointment {
@@ -63,4 +75,12 @@ export class Appointment {
         user => user.appointments)
     @JoinColumn()
     creator: User;
+
+    @CreateDateColumn()
+    @Exclude({toPlainOnly: true})
+    iat: Date;
+
+    @UpdateDateColumn({name: 'lud', nullable: true})
+    @Exclude({toPlainOnly: true})
+    lud: Date;
 }
