@@ -4,6 +4,10 @@
   "description": "",
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sebamomann/anmeldesystem-backend.git"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
@@ -39,7 +43,6 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^6.9.0",
-    "@nestjs/common": "^6.7.2",
     "@nestjs/schematics": "^6.7.0",
     "@nestjs/testing": "^6.7.1",
     "@nestjs/typeorm": "^6.2.0",
