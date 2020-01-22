@@ -26,7 +26,7 @@ export class Enrollment {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({nullable: false, unique: true})
+    @Column({nullable: false})
     name: string;
 
     @Column({nullable: true})
