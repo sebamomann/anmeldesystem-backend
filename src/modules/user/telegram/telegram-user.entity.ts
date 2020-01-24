@@ -1,10 +1,10 @@
-import {Column, CreateDateColumn, Entity, JoinColumn, OneToOne} from 'typeorm';
-import {Enrollment} from "../../enrollment/enrollment.entity";
+import {Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryColumn} from 'typeorm';
 import {User} from "../user.entity";
 
 @Entity({name: "telegram_user"})
 export class TelegramUser {
     @Column()
+    @PrimaryColumn()
     id: string;
 
     @Column()
@@ -26,5 +26,5 @@ export class TelegramUser {
         user => user.telegramUser,
         {onDelete: "CASCADE"})
     @JoinColumn()
-    enrollment: Enrollment;
+    user: User;
 }

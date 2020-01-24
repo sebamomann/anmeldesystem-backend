@@ -22,9 +22,6 @@ export class User {
     @Column('smallint')
     activated: boolean;
 
-    @Column({length: 16})
-    chat_id: string;
-
     @OneToMany(type => Appointment,
         appointment => appointment.creator,
     )
@@ -43,7 +40,7 @@ export class User {
 
 
     @OneToOne(type => TelegramUser,
-        telegramUser => telegramUser.enrollment,
+        telegramUser => telegramUser.user,
         {onDelete: "CASCADE"})
     telegramUser: TelegramUser;
 }

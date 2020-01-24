@@ -12,6 +12,8 @@ export class UserService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        @InjectRepository(TelegramUser)
+        private readonly telegramUserRepository: Repository<TelegramUser>
     ) {
     }
 
@@ -40,8 +42,9 @@ export class UserService {
     }
 
     async addTelegramUser(telegramUser: TelegramUser, user: User) {
+        let savedTelegramUser = await this.telegramUserRepository.save(telegramUser);
         let userFromDb = await this.find(user.id);
-        userFromDb.telegramUser = telegramUser;
+        userFromDb.telegramUser = savedTelegramUser;
         return this.userRepository.save(userFromDb);
     }
 

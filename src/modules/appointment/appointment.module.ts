@@ -17,9 +17,10 @@ import {UserService} from "../user/user.service";
 import {User} from "../user/user.entity";
 import {Key} from "../enrollment/key/key.entity";
 import {PassengerService} from "../enrollment/passenger/passenger.service";
+import {TelegramUser} from "../user/telegram/telegram-user.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Appointment, Addition, File, Comment, Enrollment, Driver, Passenger, User, Key])],
+    imports: [TypeOrmModule.forFeature([Appointment, Addition, File, Comment, Enrollment, Driver, Passenger, User, Key, TelegramUser])],
     providers: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService],
     exports: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService],
     controllers: [AppointmentController],

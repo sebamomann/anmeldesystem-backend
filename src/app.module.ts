@@ -21,6 +21,7 @@ import {Comment} from "./modules/enrollment/comment/comment.entity";
 import {PassengerModule} from "./modules/enrollment/passenger/passenger.module";
 import {AuthModule} from './auth/auth.module';
 import {Key} from "./modules/enrollment/key/key.entity";
+import {TelegramUser} from "./modules/user/telegram/telegram-user.entity";
 
 @Module({
     imports: [TypeOrmModule.forRoot({
@@ -30,7 +31,7 @@ import {Key} from "./modules/enrollment/key/key.entity";
         username: 'anmeldesystem-api',
         password: 'X1_HLi2#qQt@PB%YzJAm',
         database: 'anmeldesystem-api',
-        entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key],
+        entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key, TelegramUser],
         synchronize: true
     }),
         UserModule,
