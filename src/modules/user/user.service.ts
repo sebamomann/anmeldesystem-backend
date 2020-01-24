@@ -2,6 +2,7 @@ import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {User} from "./user.entity";
 import {Repository} from 'typeorm';
+import {TelegramUser} from "./telegram/telegram-user.entity";
 
 var bcrypt = require('bcryptjs');
 
@@ -36,5 +37,15 @@ export class UserService {
             where: {mail: email},
             select: ["id", "username", "mail", "password"]
         });
+    }
+
+    async addTelegramUser(telegramUser: TelegramUser, user: User) {
+        let userFromDb = await this.find(user.id);
+        userFromDb.telegramUser = telegramUser;
+        return this.userRepository.save(userFromDb);
+    }
+
+    private async find(id: number) {
+        return await this.userRepository.findOne({where: {id: id}});
     }
 }

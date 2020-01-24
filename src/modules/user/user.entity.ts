@@ -1,6 +1,7 @@
-import {Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
 import {Appointment} from "../appointment/appointment.entity";
 import {Enrollment} from "../enrollment/enrollment.entity";
+import {TelegramUser} from "./telegram/telegram-user.entity";
 
 @Entity()
 export class User {
@@ -39,4 +40,10 @@ export class User {
     @OneToMany(type => Enrollment,
         enrollment => enrollment.creator)
     enrollments: Enrollment[];
+
+
+    @OneToOne(type => TelegramUser,
+        telegramUser => telegramUser.enrollment,
+        {onDelete: "CASCADE"})
+    telegramUser: TelegramUser;
 }
