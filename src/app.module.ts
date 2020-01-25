@@ -26,10 +26,10 @@ import {TelegramUser} from "./modules/user/telegram/telegram-user.entity";
 @Module({
     imports: [TypeOrmModule.forRoot({
         type: 'mysql',
-        host: 'cp.dankoe.de',
+        host: 'localhost',
         port: 3306,
-        username: 'anmeldesystem-api',
-        password: 'X1_HLi2#qQt@PB%YzJAm',
+        username: 'root',
+        password: '',
         database: 'anmeldesystem-api',
         entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key, TelegramUser],
         synchronize: true
