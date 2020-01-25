@@ -29,6 +29,12 @@ export class AppointmentController {
 
     }
 
+    @Post('lalala')
+    lola(@Body() body) {
+        console.log("okay");
+        console.log(JSON.stringify(body))
+    }
+
     @Get()
     @UseGuards(AuthGuard('jwt'))
     @UseInterceptors(ClassSerializerInterceptor)
