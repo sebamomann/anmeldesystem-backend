@@ -23,6 +23,12 @@ import {AuthModule} from './auth/auth.module';
 import {Key} from "./modules/enrollment/key/key.entity";
 import {TelegramUser} from "./modules/user/telegram/telegram-user.entity";
 import {MigrationModule} from "./modules/migration/migration.module";
+import {HandlebarsAdapter, MailerModule} from "@nest-modules/mailer";
+import {PasswordReset} from "./modules/user/password-reset/password-reset.entity";
+import * as path from 'path';
+
+require('dotenv').config();
+const password = process.env.MAIL_ECA_PASSWORD;
 
 @Module({
     imports: [TypeOrmModule.forRoot({
@@ -32,9 +38,22 @@ import {MigrationModule} from "./modules/migration/migration.module";
         username: process.env.API_USERNAME != null ? process.env.API_USERNAME : "root",
         password: process.env.API_PASSWORD != null ? process.env.API_PASSWORD : "",
         database: process.env.API_DATABASE != null ? process.env.API_DATABASE : "anmeldesystem-api",
-        entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key, TelegramUser],
+        entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key, TelegramUser, PasswordReset],
         synchronize: true
     }),
+        MailerModule.forRoot({
+            transport: 'smtps://no-reply@eca.cg-hh.de:' + password + '@cp.dankoe.de',
+            defaults: {
+                from: '"Seba Momann" <no-reply@eca.cg-hh.de>',
+            },
+            template: {
+                dir: path.resolve(__dirname, 'templates'),
+                adapter: new HandlebarsAdapter(), // or new PugAdapter()
+                options: {
+                    strict: true,
+                },
+            },
+        }),
         UserModule,
         AppointmentModule,
         EnrollmentModule,
