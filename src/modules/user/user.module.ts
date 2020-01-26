@@ -4,9 +4,10 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import {UserController} from "./user.controller";
 import {UserService} from "./user.service";
 import {TelegramUser} from "./telegram/telegram-user.entity";
+import {PasswordReset} from "./password-reset/password-reset.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([User, TelegramUser])],
+    imports: [TypeOrmModule.forFeature([User, TelegramUser, PasswordReset])],
     providers: [UserService],
     exports: [UserService],
     controllers: [UserController],

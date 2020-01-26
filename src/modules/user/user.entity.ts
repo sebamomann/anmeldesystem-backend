@@ -2,6 +2,7 @@ import {Column, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn}
 import {Appointment} from "../appointment/appointment.entity";
 import {Enrollment} from "../enrollment/enrollment.entity";
 import {TelegramUser} from "./telegram/telegram-user.entity";
+import {PasswordReset} from "./password-reset/password-reset.entity";
 
 @Entity()
 export class User {
@@ -43,4 +44,9 @@ export class User {
         telegramUser => telegramUser.user,
         {onDelete: "CASCADE"})
     telegramUser: TelegramUser;
+
+    @OneToMany(type => PasswordReset,
+        passwordReset => passwordReset.user,
+        {onDelete: "CASCADE"})
+    passwordReset: PasswordReset;
 }

@@ -97,31 +97,33 @@ export class AppointmentController {
     @Post('newcontent/:link')
     updateAvailable(@Param() link: string, @Body("lastUpdated") lud: Date, @Request() req: Request, @Res() res: Response) {
         const date = new Date(lud).getTime();
-        return this.appointmentService.find(link).then(tAppointment => {
-            if (tAppointment != null) {
-                const appointmentDate = tAppointment.lud.getTime();
-                const enrollments = tAppointment.enrollments.filter(fEnrollment => {
-                    if (fEnrollment.lud.getTime() > date) {
-                        return fEnrollment;
+        return this.appointmentService
+            .find(link)
+            .then(tAppointment => {
+                if (tAppointment != null) {
+                    const appointmentDate = tAppointment.lud.getTime();
+                    const enrollments = tAppointment.enrollments.filter(fEnrollment => {
+                        if (fEnrollment.lud.getTime() > date) {
+                            return fEnrollment;
+                        }
+                    });
+                    console.log(`${appointmentDate} ${date}`);
+
+                    if (enrollments.length > 0 || appointmentDate > date) {
+                        res.status(HttpStatus.OK).json(tAppointment);
+                    } else {
+                        res.status(HttpStatus.NOT_MODIFIED).json();
                     }
-                });
-                console.log(`${appointmentDate} ${date}`);
 
-                if (enrollments.length > 0 || appointmentDate > date) {
-                    res.status(HttpStatus.OK).json(tAppointment);
                 } else {
-                    res.status(HttpStatus.NOT_MODIFIED).json();
+                    res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
                 }
+            }).catch((err) => {
+                console.log(err);
+                let error = {error: {}};
+                error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
 
-            } else {
-                res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
-            }
-        }).catch((err) => {
-            console.log(err);
-            let error = {error: {}};
-            error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
-
-            res.status(HttpStatus.BAD_REQUEST).json(error);
-        });
+                res.status(HttpStatus.BAD_REQUEST).json(error);
+            });
     }
 }

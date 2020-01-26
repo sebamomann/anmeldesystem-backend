@@ -1,4 +1,4 @@
-import {Body, Controller, HttpStatus, Post, Res, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, HttpStatus, Param, Post, Put, Res, UseGuards} from '@nestjs/common';
 import {UserService} from "./user.service";
 import {User} from "./user.entity";
 import {TelegramUser} from "./telegram/telegram-user.entity";
@@ -24,7 +24,9 @@ export class UserController {
 
     @UseGuards(AuthGuard('jwt'))
     @Post('/telegram')
-    addTelegramUser(@Body() telegramUser: TelegramUser, @Usr() user: User, @Res() res: Response) {
+    addTelegramUser(@Body() telegramUser: TelegramUser,
+                    @Usr() user: User,
+                    @Res() res: Response) {
         this.userService
             .addTelegramUser(telegramUser, user)
             .then(result => {
@@ -40,6 +42,55 @@ export class UserController {
                     id: id
                 };
                 return res.status(HttpStatus.BAD_REQUEST).json();
+            });
+    }
+
+    @Post('/passwordreset')
+    resetPasswordInit(@Body('mail') mail: string,
+                      @Res() res: Response) {
+        this.userService
+            .resetPasswordInit(mail)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
+            });
+    }
+
+    @Put('/passwordreset/:mail/:token')
+    setNewPassword(@Param('mail') mail: string,
+                   @Param('token') token: string,
+                   @Body('password') pass: string,
+                   @Res() res: Response) {
+        this.userService
+            .updatePassword(mail, token, pass)
+            .then(result => {
+                return res.status(HttpStatus.NO_CONTENT).json();
+            })
+            .catch(err => {
+                let error: any = {};
+                if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED') {
+                    error.code = err.code;
+                    error.message = err.message;
+                }
+
+                return res.status(HttpStatus.BAD_REQUEST).json(error);
+            });
+    }
+
+    @Get('/passwordreset/validate/:mail/:token')
+    validatePasswordresetToken(@Param('mail') mail: string, @Param('token') token: string, @Res() res: Response) {
+        this.userService
+            .validatePasswordresetToken(mail, token)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
+            })
+            .catch(err => {
+                let error: any = {};
+                if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED') {
+                    error.code = err.code;
+                    error.message = err.message;
+                }
+
+                return res.status(HttpStatus.BAD_REQUEST).json(error);
             });
     }
 
