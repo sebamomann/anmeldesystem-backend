@@ -27,11 +27,11 @@ import {MigrationModule} from "./modules/migration/migration.module";
 @Module({
     imports: [TypeOrmModule.forRoot({
         type: 'mysql',
-        host: process.env.API_HOST,
+        host: process.env.API_HOST != null ? process.env.API_HOST : "localhost",
         port: 3306,
-        username: process.env.API_USERNAME,
-        password: process.env.API_PASSWORD,
-        database: process.env.API_DATABASE,
+        username: process.env.API_USERNAME != null ? process.env.API_USERNAME : "root",
+        password: process.env.API_PASSWORD != null ? process.env.API_PASSWORD : "",
+        database: process.env.API_DATABASE != null ? process.env.API_DATABASE : "anmeldesystem-api",
         entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key, TelegramUser],
         synchronize: true
     }),
