@@ -22,15 +22,16 @@ import {PassengerModule} from "./modules/enrollment/passenger/passenger.module";
 import {AuthModule} from './auth/auth.module';
 import {Key} from "./modules/enrollment/key/key.entity";
 import {TelegramUser} from "./modules/user/telegram/telegram-user.entity";
+import {MigrationModule} from "./modules/migration/migration.module";
 
 @Module({
     imports: [TypeOrmModule.forRoot({
         type: 'mysql',
-        host: 'localhost',
+        host: process.env.API_HOST,
         port: 3306,
-        username: 'root',
-        password: '',
-        database: 'anmeldesystem-api',
+        username: process.env.API_USERNAME,
+        password: process.env.API_PASSWORD,
+        database: process.env.API_DATABASE,
         entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key, TelegramUser],
         synchronize: true
     }),
@@ -43,6 +44,7 @@ import {TelegramUser} from "./modules/user/telegram/telegram-user.entity";
         PassengerModule,
         CommentModule,
         AuthModule,
+        MigrationModule
     ],
     controllers: [AppController],
     providers: [AppService],
