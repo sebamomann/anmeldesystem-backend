@@ -6,7 +6,6 @@ import {
     JoinTable,
     ManyToMany,
     ManyToOne,
-    OneToMany,
     OneToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn
@@ -55,7 +54,7 @@ export class Enrollment {
         appointment => appointment.enrollments)
     appointment: Appointment;
 
-    @OneToMany(type => Comment,
+    @ManyToMany(type => Comment,
         comment => comment.enrollment,
         {
             eager: true

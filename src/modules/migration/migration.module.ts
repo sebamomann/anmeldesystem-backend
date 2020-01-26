@@ -1,8 +1,5 @@
 import {Module} from '@nestjs/common';
 import {TypeOrmModule} from '@nestjs/typeorm';
-import {AppointmentController} from "./appointment.controller";
-import {Appointment} from "./appointment.entity";
-import {AppointmentService} from "./appointment.service";
 import {Addition} from "../addition/addition.entity";
 import {File} from "../file/file.entity";
 import {AdditionService} from "../addition/addition.service";
@@ -18,14 +15,16 @@ import {User} from "../user/user.entity";
 import {Key} from "../enrollment/key/key.entity";
 import {PassengerService} from "../enrollment/passenger/passenger.service";
 import {TelegramUser} from "../user/telegram/telegram-user.entity";
-import {MigrationController} from "../migration/migration.controller";
-import {MigrationService} from "../migration/migration.service";
+import {AppointmentService} from "../appointment/appointment.service";
+import {Appointment} from "../appointment/appointment.entity";
+import {AppointmentController} from "../appointment/appointment.controller";
+import {MigrationService} from "./migration.service";
 
 @Module({
     imports: [TypeOrmModule.forFeature([Appointment, Addition, File, Comment, Enrollment, Driver, Passenger, User, Key, TelegramUser])],
     providers: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService],
     exports: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService],
-    controllers: [AppointmentController, MigrationController],
+    controllers: [AppointmentController],
 })
-export class AppointmentModule {
+export class MigrationModule {
 }
