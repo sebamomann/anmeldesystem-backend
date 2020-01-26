@@ -7,7 +7,7 @@ async function bootstrap() {
     app.use(bodyParser.json({limit: '50mb'}));
     app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
     app.use(function (req, res, next) {
-        var allowedOrigins = ['http://127.0.0.1:3000', 'http://localhost:3000', 'https://api.eca.cg-hh.de', 'http://localhost:9000'];
+        var allowedOrigins = ['http://127.0.0.1:3000', 'http://localhost:3000', 'https://neu.eca.cg-hh.de', 'http://localhost:9000'];
         var origin = req.headers.origin;
         if (allowedOrigins.indexOf(origin) > -1) {
             res.setHeader('Access-Control-Allow-Origin', origin);
