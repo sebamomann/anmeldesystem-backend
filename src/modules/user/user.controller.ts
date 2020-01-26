@@ -51,7 +51,7 @@ export class UserController {
         this.userService
             .resetPasswordInit(mail)
             .then(result => {
-                return res.status(HttpStatus.OK).json();
+                return res.status(HttpStatus.NO_CONTENT).json();
             });
     }
 
@@ -66,13 +66,7 @@ export class UserController {
                 return res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                let error: any = {};
-                if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED') {
-                    error.code = err.code;
-                    error.message = err.message;
-                }
-
-                return res.status(HttpStatus.BAD_REQUEST).json(error);
+                return this.passwordresetErrorHandler(err, res);
             });
     }
 
@@ -84,14 +78,19 @@ export class UserController {
                 return res.status(HttpStatus.OK).json();
             })
             .catch(err => {
-                let error: any = {};
-                if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED') {
-                    error.code = err.code;
-                    error.message = err.message;
-                }
-
-                return res.status(HttpStatus.BAD_REQUEST).json(error);
+                return this.passwordresetErrorHandler(err, res);
             });
+    }
+
+    passwordresetErrorHandler(err: any, res: Response) {
+        let error: any = {};
+        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED') {
+            error.code = err.code;
+            error.message = err.message;
+            error.error = err.data;
+        }
+
+        return res.status(HttpStatus.BAD_REQUEST).json(error);
     }
 
     makeid(length) {

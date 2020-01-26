@@ -112,7 +112,7 @@ export class UserService {
                 if (passwordReset.used === null) {
                     return true;
                 } else {
-                    throw new InvalidTokenException('USED', 'Provided token was already used', null);
+                    throw new InvalidTokenException('USED', 'Provided token was already used', {date: passwordReset.used});
                 }
             }
 
@@ -144,7 +144,6 @@ export class UserService {
                     return resolve(true);
                 })
                 .catch(err => {
-                    console.log(err);
                     reject(err);
                 });
         });
