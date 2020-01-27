@@ -63,19 +63,18 @@ export class UserService {
         const user = await this.findByEmail(mail);
         console.log(user);
         if (user != null) {
-            console.log(process.env.MAIL_TOKEN_SALT);
+            let query = await this.passwordResetRepository.query("UPDATE user_password_reset " +
+                "SET oldPassword = 'invalid' " +
+                "WHERE used IS NULL " +
+                "AND oldPassword IS NULL " +
+                "AND userId = ?", [user.id]);
+
             let token = crypto.createHmac('sha256', mail + process.env.MAIL_TOKEN_SALT + Date.now()).digest('hex');
             const passwordReset = new PasswordReset();
             passwordReset.user = user;
             passwordReset.token = token;
 
             await this.passwordResetRepository.save(passwordReset);
-            let query = await this.passwordResetRepository.query("UPDATE user_password_reset " +
-                "SET oldPassword = 'invalid' " +
-                "WHERE used IS NULL " +
-                "AND oldPassword IS NULL " +
-                "AND userId = ?", [user.id]);
-            console.log(query.raw);
 
             this.mailerService
                 .sendMail({
@@ -120,7 +119,7 @@ export class UserService {
                     return true;
                 }
 
-                throw new InvalidTokenException('USED', 'Provided token was already used', {date: passwordReset.used});
+                throw new InvalidTokenException('USED', 'Provided token was already used', {date: new Date(passwordReset.used)});
             }
 
             throw new InvalidTokenException('EXPIRED', 'Provided token expired', null);
@@ -129,7 +128,7 @@ export class UserService {
         throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
     }
 
-    async updatePassword(mail: string, token: string, pass: string) {
+    async updatePassword(mail: string, token: string, pass: string): Promise<boolean> {
         var self = this;
         return new Promise(function (resolve, reject) {
             self.validatePasswordresetToken(mail, token)
@@ -148,6 +147,7 @@ export class UserService {
                         .set({used: new Date(Date.now()), oldPassword: currentPassword})
                         .where("token = :token", {token: token})
                         .execute();
+
                     return resolve(true);
                 })
                 .catch(err => {

@@ -72,7 +72,9 @@ export class UserController {
     }
 
     @Get('/passwordreset/validate/:mail/:token')
-    validatePasswordresetToken(@Param('mail') mail: string, @Param('token') token: string, @Res() res: Response) {
+    validatePasswordresetToken(@Param('mail') mail: string,
+                               @Param('token') token: string,
+                               @Res() res: Response) {
         this.userService
             .validatePasswordresetToken(mail, token)
             .then(result => {
