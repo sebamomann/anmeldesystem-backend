@@ -110,10 +110,12 @@ export class UserService {
         if (passwordReset != undefined) {
             if ((passwordReset.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
                 if (passwordReset.used === null) {
+                    throw new InvalidTokenException('OUTDATED', 'Provided token was already replaced by a new one', null);
+                } else if (isNaN(passwordReset.used.getTime())) {
                     return true;
-                } else {
-                    throw new InvalidTokenException('USED', 'Provided token was already used', {date: passwordReset.used});
                 }
+
+                throw new InvalidTokenException('USED', 'Provided token was already used', {date: passwordReset.used});
             }
 
             throw new InvalidTokenException('EXPIRED', 'Provided token expired', null);

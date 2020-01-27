@@ -79,13 +79,14 @@ export class UserController {
                 return res.status(HttpStatus.OK).json();
             })
             .catch(err => {
+                console.log(err);
                 return this.passwordresetErrorHandler(err, res);
             });
     }
 
     passwordresetErrorHandler(err: any, res: Response) {
         let error: any = {};
-        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED') {
+        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED' || err.code === 'OUTDATED') {
             error.code = err.code;
             error.message = err.message;
             error.error = err.data;
