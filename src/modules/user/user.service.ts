@@ -70,9 +70,14 @@ export class UserService {
             passwordReset.token = token;
 
             await this.passwordResetRepository.save(passwordReset);
+            let query = await this.passwordResetRepository.query("UPDATE user_password_reset " +
+                "SET oldPassword = 'invalid' " +
+                "WHERE used IS NULL " +
+                "AND oldPassword IS NULL " +
+                "AND userId = ?", [user.id]);
+            console.log(query.raw);
 
-            this
-                .mailerService
+            this.mailerService
                 .sendMail({
                     to: mail,
                     from: 'no-reply@eca.cg-hh.de',
@@ -109,9 +114,9 @@ export class UserService {
             .getOne();
         if (passwordReset != undefined) {
             if ((passwordReset.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
-                if (passwordReset.used === null) {
+                if (passwordReset.oldPassword === 'invalid') {
                     throw new InvalidTokenException('OUTDATED', 'Provided token was already replaced by a new one', null);
-                } else if (isNaN(passwordReset.used.getTime())) {
+                } else if (passwordReset.used === null) {
                     return true;
                 }
 
