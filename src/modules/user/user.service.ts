@@ -165,7 +165,7 @@ export class UserService {
             "LIMIT 1", [user.id]);
         console.log(res);
         if (res) {
-            if (bcrypt.compare(pass, res[0].oldPassword)) {
+            if (await bcrypt.compare(pass, res[0].oldPassword)) {
                 console.log("is old pass");
                 console.log(res[0].used);
                 return res[0].used;
