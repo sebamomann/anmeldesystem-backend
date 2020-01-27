@@ -155,4 +155,21 @@ export class UserService {
                 });
         });
     }
+
+    async getLastPasswordDate(user: User, pass: string) {
+        const res = await this.userRepository.query("SELECT * " +
+            "FROM user_password_reset " +
+            "WHERE oldPassword IS NOT NULL " +
+            "AND userId = ? " +
+            "ORDER BY iat DESC " +
+            "LIMIT 1", [user.id]);
+        console.log(res);
+        if (res) {
+            if (bcrypt.compare(pass, res[0].oldPassword)) {
+                console.log("is old pass");
+                console.log(res[0].used);
+                return res[0].used;
+            }
+        }
+    }
 }
