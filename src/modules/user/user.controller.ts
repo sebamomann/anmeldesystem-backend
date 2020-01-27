@@ -47,9 +47,10 @@ export class UserController {
 
     @Post('/passwordreset')
     resetPasswordInit(@Body('mail') mail: string,
+                      @Body('domain') domain: string,
                       @Res() res: Response) {
         this.userService
-            .resetPasswordInit(mail)
+            .resetPasswordInit(mail, domain)
             .then(result => {
                 return res.status(HttpStatus.NO_CONTENT).json();
             });

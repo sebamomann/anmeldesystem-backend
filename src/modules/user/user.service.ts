@@ -59,7 +59,7 @@ export class UserService {
         return await this.userRepository.findOne({where: {id: id}});
     }
 
-    async resetPasswordInit(mail: string) {
+    async resetPasswordInit(mail: string, domain: string) {
         const user = await this.findByEmail(mail);
         console.log(user);
         if (user != null) {
@@ -80,7 +80,7 @@ export class UserService {
                     template: 'passwordreset', // The `.pug` or `.hbs` extension is appended automatically.
                     context: {  // Data to be sent to template engine.
                         name: user.username,
-                        url: `https://${process.env.DOMAIN}user/passwordreset/${mail}/${token}`
+                        url: `${domain}/${mail}/${token}`
                     },
                 })
                 .then(() => {
