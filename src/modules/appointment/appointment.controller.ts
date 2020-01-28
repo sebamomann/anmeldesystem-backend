@@ -40,7 +40,8 @@ export class AppointmentController {
     @UseInterceptors(ClassSerializerInterceptor)
     findAll(@Query('slim') slim: string, @Usr() user: User): Promise<Appointment[]> {
         let _slim = slim === "true";
-        return this.appointmentService.findAll(user, _slim);
+        return this.appointmentService
+            .findAll(user, _slim);
     }
 
     @Post()

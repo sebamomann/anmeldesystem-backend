@@ -17,6 +17,7 @@ export class AppController {
             error.error = req.user;
             return res.status(HttpStatus.UNAUTHORIZED).json(error);
         }
-        return this.authService.login(req.user);
+
+        return res.status(200).json(await this.authService.login(req.user));
     }
 }

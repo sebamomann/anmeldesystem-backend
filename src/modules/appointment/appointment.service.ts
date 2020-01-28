@@ -23,11 +23,25 @@ export class AppointmentService {
     }
 
     async findAll(user: User, slim = false): Promise<Appointment[]> {
-        let appointments = await this.appointmentRepository.find({
-            relations: ["creator"],
-            where: {creator: user},
-            order: {date: "DESC"}
-        });
+        let appointments = await getRepository(Appointment)
+            .createQueryBuilder("appointment")
+            .leftJoinAndSelect("appointment.creator", "creator")
+            .leftJoinAndSelect("appointment.additions", "additions")
+            .leftJoinAndSelect("appointment.enrollments", "enrollments")
+            .leftJoinAndSelect("enrollments.passenger", "enrollment_passenger")
+            .leftJoinAndSelect("enrollments.driver", "enrollment_driver")
+            .leftJoinAndSelect("enrollments.additions", "enrollment_additions")
+            .leftJoinAndSelect("appointment.files", "files")
+            .leftJoinAndSelect("appointment.administrators", "administrators")
+            .select(["appointment", "additions", "enrollments",
+                "enrollment_passenger", "enrollment_driver",
+                "creator.username", "files", "administrators.mail", "administrators.username",
+                "enrollment_additions"])
+            .where("creator.id = :creatorId", {creatorId: user.id})
+            .orWhere("administrators.id = :admin", {admin: user.id})
+            .orWhere("enrollments.creatorId = :user", {user: user.id})
+            .getMany();
+
         if (slim) {
             appointments = appointments.map(fAppointment => {
                 delete fAppointment.enrollments;
