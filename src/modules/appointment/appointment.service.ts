@@ -69,13 +69,14 @@ export class AppointmentService {
             .leftJoinAndSelect("appointment.creator", "creator")
             .leftJoinAndSelect("appointment.additions", "additions")
             .leftJoinAndSelect("appointment.enrollments", "enrollments")
+            .leftJoinAndSelect("enrollments.creator", "enrollment_creator")
             .leftJoinAndSelect("enrollments.passenger", "enrollment_passenger")
             .leftJoinAndSelect("enrollments.driver", "enrollment_driver")
             .leftJoinAndSelect("enrollments.additions", "enrollment_additions")
             .leftJoinAndSelect("appointment.files", "files")
             .leftJoinAndSelect("appointment.administrators", "administrators")
             .select(["appointment", "additions", "enrollments",
-                "enrollment_passenger", "enrollment_driver",
+                "enrollment_passenger", "enrollment_driver", "enrollment_creator",
                 "creator.username", "files", "administrators.mail",
                 "enrollment_additions"])
             .getOne();
@@ -83,6 +84,12 @@ export class AppointmentService {
         if (slim) {
             delete appointment.files;
         }
+
+        appointment.enrollments.map(mEnrollment => {
+            mEnrollment.createdByUser = mEnrollment.creator != null;
+            delete mEnrollment.creator;
+            return mEnrollment;
+        });
 
         return appointment;
     }
