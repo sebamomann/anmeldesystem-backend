@@ -80,4 +80,5 @@ export class Enrollment {
     lud: Date;
 
     editKey: string;
+    createdByUser: boolean;
 }
