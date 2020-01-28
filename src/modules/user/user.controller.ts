@@ -47,9 +47,10 @@ export class UserController {
 
     @Post('/passwordreset')
     resetPasswordInit(@Body('mail') mail: string,
+                      @Body('domain') domain: string,
                       @Res() res: Response) {
         this.userService
-            .resetPasswordInit(mail)
+            .resetPasswordInit(mail, domain)
             .then(result => {
                 return res.status(HttpStatus.NO_CONTENT).json();
             });
@@ -71,20 +72,23 @@ export class UserController {
     }
 
     @Get('/passwordreset/validate/:mail/:token')
-    validatePasswordresetToken(@Param('mail') mail: string, @Param('token') token: string, @Res() res: Response) {
+    validatePasswordresetToken(@Param('mail') mail: string,
+                               @Param('token') token: string,
+                               @Res() res: Response) {
         this.userService
             .validatePasswordresetToken(mail, token)
             .then(result => {
                 return res.status(HttpStatus.OK).json();
             })
             .catch(err => {
+                console.log(err);
                 return this.passwordresetErrorHandler(err, res);
             });
     }
 
     passwordresetErrorHandler(err: any, res: Response) {
         let error: any = {};
-        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED') {
+        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED' || err.code === 'OUTDATED') {
             error.code = err.code;
             error.message = err.message;
             error.error = err.data;

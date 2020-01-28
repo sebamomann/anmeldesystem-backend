@@ -59,11 +59,16 @@ export class UserService {
         return await this.userRepository.findOne({where: {id: id}});
     }
 
-    async resetPasswordInit(mail: string) {
+    async resetPasswordInit(mail: string, domain: string) {
         const user = await this.findByEmail(mail);
         console.log(user);
         if (user != null) {
-            console.log(process.env.MAIL_TOKEN_SALT);
+            let query = await this.passwordResetRepository.query("UPDATE user_password_reset " +
+                "SET oldPassword = 'invalid' " +
+                "WHERE used IS NULL " +
+                "AND oldPassword IS NULL " +
+                "AND userId = ?", [user.id]);
+
             let token = crypto.createHmac('sha256', mail + process.env.MAIL_TOKEN_SALT + Date.now()).digest('hex');
             const passwordReset = new PasswordReset();
             passwordReset.user = user;
@@ -71,8 +76,7 @@ export class UserService {
 
             await this.passwordResetRepository.save(passwordReset);
 
-            this
-                .mailerService
+            this.mailerService
                 .sendMail({
                     to: mail,
                     from: 'no-reply@eca.cg-hh.de',
@@ -80,7 +84,7 @@ export class UserService {
                     template: 'passwordreset', // The `.pug` or `.hbs` extension is appended automatically.
                     context: {  // Data to be sent to template engine.
                         name: user.username,
-                        url: `https://${process.env.DOMAIN}user/passwordreset/${mail}/${token}`
+                        url: `${domain}/${mail}/${token}`
                     },
                 })
                 .then(() => {
@@ -109,11 +113,13 @@ export class UserService {
             .getOne();
         if (passwordReset != undefined) {
             if ((passwordReset.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
-                if (passwordReset.used === null) {
+                if (passwordReset.oldPassword === 'invalid') {
+                    throw new InvalidTokenException('OUTDATED', 'Provided token was already replaced by a new one', null);
+                } else if (passwordReset.used === null) {
                     return true;
-                } else {
-                    throw new InvalidTokenException('USED', 'Provided token was already used', {date: passwordReset.used});
                 }
+
+                throw new InvalidTokenException('USED', 'Provided token was already used', {date: new Date(passwordReset.used)});
             }
 
             throw new InvalidTokenException('EXPIRED', 'Provided token expired', null);
@@ -122,7 +128,7 @@ export class UserService {
         throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
     }
 
-    async updatePassword(mail: string, token: string, pass: string) {
+    async updatePassword(mail: string, token: string, pass: string): Promise<boolean> {
         var self = this;
         return new Promise(function (resolve, reject) {
             self.validatePasswordresetToken(mail, token)
@@ -141,11 +147,29 @@ export class UserService {
                         .set({used: new Date(Date.now()), oldPassword: currentPassword})
                         .where("token = :token", {token: token})
                         .execute();
+
                     return resolve(true);
                 })
                 .catch(err => {
                     reject(err);
                 });
         });
+    }
+
+    async getLastPasswordDate(user: User, pass: string) {
+        const res = await this.userRepository.query("SELECT * " +
+            "FROM user_password_reset " +
+            "WHERE oldPassword IS NOT NULL " +
+            "AND userId = ? " +
+            "ORDER BY iat DESC " +
+            "LIMIT 1", [user.id]);
+        console.log(res);
+        if (res) {
+            if (await bcrypt.compare(pass, res[0].oldPassword)) {
+                console.log("is old pass");
+                console.log(res[0].used);
+                return res[0].used;
+            }
+        }
     }
 }

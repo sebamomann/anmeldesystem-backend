@@ -26,4 +26,7 @@ export class PasswordReset {
 
     @Column({default: null})
     oldPassword: string;
+
+    @Column({default: true})
+    valid: boolean
 }
