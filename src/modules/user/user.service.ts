@@ -84,7 +84,7 @@ export class UserService {
                     template: 'passwordreset', // The `.pug` or `.hbs` extension is appended automatically.
                     context: {  // Data to be sent to template engine.
                         name: user.username,
-                        url: `${domain}/${mail}/${token}`
+                        url: `https://${domain}/${mail}/${token}`
                     },
                 })
                 .then(() => {
