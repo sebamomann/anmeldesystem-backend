@@ -76,10 +76,10 @@ export class AppointmentService {
             .leftJoinAndSelect("appointment.files", "files")
             .leftJoinAndSelect("appointment.administrators", "administrators")
             .select(["appointment", "additions", "enrollments",
-                "enrollment_passenger", "enrollment_driver", "enrollment_creator",
+                "enrollment_passenger", "enrollment_driver", "enrollment_creator", "enrollments.iat",
                 "creator.username", "files", "administrators.mail",
                 "enrollment_additions"])
-            .orderBy("enrollment.iat", "DESC")
+            .orderBy("enrollments.iat", "DESC")
             .getOne();
 
         if (slim) {
