@@ -79,7 +79,7 @@ export class AppointmentService {
                 "enrollment_passenger", "enrollment_driver", "enrollment_creator", "enrollments.iat",
                 "creator.username", "files", "administrators.mail",
                 "enrollment_additions"])
-            .orderBy("enrollments.iat", "DESC")
+            .orderBy("enrollments.iat", "ASC")
             .getOne();
 
         if (slim) {
