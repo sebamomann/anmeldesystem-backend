@@ -44,7 +44,7 @@ const password = process.env.MAIL_ECA_PASSWORD;
         MailerModule.forRoot({
             transport: 'smtps://no-reply@eca.cg-hh.de:' + password + '@cp.dankoe.de',
             defaults: {
-                from: '"Seba Momann" <no-reply@eca.cg-hh.de>',
+                from: '"ECA-Bot" <no-reply@eca.cg-hh.de>',
             },
             template: {
                 dir: path.resolve(__dirname, 'templates'),
