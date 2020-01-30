@@ -79,20 +79,22 @@ export class AppointmentController {
     @Get(':link')
     findByLink(@Query('slim') slim: string, @Param() link: string, @Request() req: Request, @Res() res: Response) {
         let _slim = slim === "true";
-        return this.appointmentService.find(link, _slim).then(tAppointment => {
-            if (tAppointment != null) {
-                // tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
-                res.status(HttpStatus.OK).json(tAppointment);
-            } else {
-                res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
-            }
-        }).catch((err) => {
-            console.log(err);
-            let error = {error: {}};
-            error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
+        return this.appointmentService
+            .find(link, _slim)
+            .then(tAppointment => {
+                if (tAppointment != null) {
+                    // tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
+                    res.status(HttpStatus.OK).json(tAppointment);
+                } else {
+                    res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
+                }
+            }).catch((err) => {
+                console.log(err);
+                let error = {error: {}};
+                error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
 
-            res.status(HttpStatus.BAD_REQUEST).json(error);
-        });
+                res.status(HttpStatus.BAD_REQUEST).json(error);
+            });
     }
 
     @Post('newcontent/:link')
