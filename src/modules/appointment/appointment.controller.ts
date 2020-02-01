@@ -22,6 +22,7 @@ import {Usr} from "../user/user.decorator";
 import {User} from "../user/user.entity";
 import {UserUtil} from "../../util/userUtil.util";
 import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
+import {Etag} from "../../util/etag";
 
 @Controller('appointment')
 export class AppointmentController {
@@ -83,8 +84,13 @@ export class AppointmentController {
             .find(link, _slim)
             .then(tAppointment => {
                 if (tAppointment != null) {
-                    // tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
-                    res.status(HttpStatus.OK).json(tAppointment);
+                    const etag = Etag.generate(JSON.stringify(tAppointment));
+                    if (req.headers['if-none-match'] && req.headers['if-none-match'] == etag) {
+                        res.status(HttpStatus.NOT_MODIFIED).json();
+                    } else {
+                        res.header('etag', "W/" + '"' + etag + '"');
+                        res.status(HttpStatus.OK).json(tAppointment);
+                    }
                 } else {
                     res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
                 }

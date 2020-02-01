@@ -10,8 +10,7 @@ async function bootstrap() {
         var allowedOrigins = ['http://127.0.0.1:3000', 'http://localhost:3000', 'https://neu.eca.cg-hh.de', 'http://localhost:9000'];
         var origin = req.headers.origin;
         if (allowedOrigins.indexOf(origin) > -1) {
-            // CHANGE
-            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Origin', origin);
         }
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.header('Access-Control-Allow-Methods', 'GET, OPTIONS, POST, PUT, DELETE');
