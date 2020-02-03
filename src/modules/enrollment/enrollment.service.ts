@@ -93,7 +93,8 @@ export class EnrollmentService {
 
     private async createEnrollmentObjectForDB(enrollment: Enrollment, appointment: Appointment) {
         let enrollmentToDb = new Enrollment();
-        delete enrollmentToDb.id;
+        delete enrollment.id;
+
         enrollmentToDb.name = enrollment.name;
         enrollmentToDb.comment = enrollment.comment === "" ? null : enrollment.comment;
         enrollmentToDb.additions = [];
@@ -134,7 +135,7 @@ export class EnrollmentService {
     private async handleDriverRelation(enrollment: Enrollment) {
         let driver: Driver = new Driver();
         const _driver = await this.driverService.findByEnrollment(enrollment);
-        if (_driver !== undefined) {
+        if (_driver !== undefined && _driver != null) {
             driver = _driver;
         }
 
