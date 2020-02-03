@@ -19,9 +19,8 @@ export class PassengerService {
     async findByEnrollment(enrollment: Enrollment) {
         return await getRepository(Passenger)
             .createQueryBuilder('passenger')
-            .leftJoinAndSelect("passenger.enrollment", "enrollment", "enrollment.id = :id", {
-                id: enrollment.id
-            })
+            .leftJoinAndSelect("passenger.enrollment", "enrollment")
+            .where("enrollment.id = :enrollmentId", {enrollmentId: enrollment.id})
             .select('passenger')
             .getOne();
     }
