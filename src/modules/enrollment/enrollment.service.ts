@@ -93,6 +93,7 @@ export class EnrollmentService {
 
     private async createEnrollmentObjectForDB(enrollment: Enrollment, appointment: Appointment) {
         let enrollmentToDb = new Enrollment();
+        enrollmentToDb.id = '';
         enrollmentToDb.name = enrollment.name;
         enrollmentToDb.comment = enrollment.comment === "" ? null : enrollment.comment;
         enrollmentToDb.additions = [];

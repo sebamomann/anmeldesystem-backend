@@ -36,7 +36,6 @@ export class EnrollmentController {
     @UseGuards(JwtOptStrategy)
     async update(@Param() id: string, @Body() enrollment: Enrollment, @Usr() user: User, @Res() res: Response) {
         await this.enrollmentService
-
             .update(id, enrollment, user)
             .then(() => {
                 res.status(HttpStatus.OK).json();
