@@ -33,7 +33,7 @@ export class Appointment {
     @Column({nullable: false})
     location: string;
 
-    @Column('timestamp', {nullable: false})
+    @Column('timestamp', {nullable: false, default: () => "CURRENT_TIMESTAMP"})
     date: Date;
 
     @Column('timestamp', {default: null})
