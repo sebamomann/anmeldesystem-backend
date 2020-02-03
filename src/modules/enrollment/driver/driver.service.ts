@@ -19,9 +19,8 @@ export class DriverService {
     async findByEnrollment(enrollment: Enrollment) {
         return await getRepository(Driver)
             .createQueryBuilder('driver')
-            .leftJoinAndSelect("driver.enrollment", "enrollment", "enrollment.id = :id", {
-                id: enrollment.id
-            })
+            .leftJoinAndSelect("driver.enrollment", "enrollment")
+            .where("enrollment.id = :enrollmentId", {enrollmentId: enrollment.id})
             .select('driver')
             .getOne();
     }

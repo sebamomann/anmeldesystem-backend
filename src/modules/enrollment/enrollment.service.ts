@@ -75,6 +75,7 @@ export class EnrollmentService {
             throw new DuplicateValueException('DUPLICATE_ENTRY', 'Following values are already taken', ['name']);
         }
 
+        enrollment.id = "";
         let enrollmentToDb = await this.createEnrollmentObjectForDB(enrollment, appointment);
 
         // If user is not set
@@ -93,7 +94,6 @@ export class EnrollmentService {
 
     private async createEnrollmentObjectForDB(enrollment: Enrollment, appointment: Appointment) {
         let enrollmentToDb = new Enrollment();
-        delete enrollment.id;
 
         enrollmentToDb.name = enrollment.name;
         enrollmentToDb.comment = enrollment.comment === "" ? null : enrollment.comment;
