@@ -57,6 +57,11 @@ export class EnrollmentController {
                 res.status(HttpStatus.CREATED).json(tEntrollment);
             })
             .catch((err) => {
+                if (err.code === 'EMPTY_FIELDS' && err.data.indexOf('key') === 0) {
+                    res.status(HttpStatus.UNAUTHORIZED).json();
+                    return;
+                }
+
                 let error: any = {};
                 if (err.code === 'DUPLICATE_ENTRY'
                     || err.code === 'EMPTY_FIELDS') {

@@ -16,6 +16,7 @@ async function bootstrap() {
         res.header('Access-Control-Allow-Methods', 'GET, OPTIONS, POST, PUT, DELETE');
         res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         res.header('Access-Control-Allow-Credentials', true);
+        res.header('access-control-expose-headers', "etag");
         return next();
     });
     await app.listen(3000);

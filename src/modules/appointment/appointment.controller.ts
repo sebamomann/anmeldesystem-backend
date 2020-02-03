@@ -85,9 +85,11 @@ export class AppointmentController {
             .then(tAppointment => {
                 if (tAppointment != null) {
                     const etag = Etag.generate(JSON.stringify(tAppointment));
-                    if (req.headers['if-none-match'] && req.headers['if-none-match'] == etag) {
+                    if (req.headers['if-none-match'] && req.headers['if-none-match'] == "W/" + '"' + etag + '"') {
+                        console.log(`appointment ${link['link']} not modified`);
                         res.status(HttpStatus.NOT_MODIFIED).json();
                     } else {
+                        console.log(`appointment ${link['link']} modified`);
                         res.header('etag', "W/" + '"' + etag + '"');
                         res.status(HttpStatus.OK).json(tAppointment);
                     }
