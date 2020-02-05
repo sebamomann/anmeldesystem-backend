@@ -46,7 +46,9 @@ export class UserService {
             console.log(e);
         }
 
-        let token = crypto.createHmac('sha256', user.mail + process.env.MAIL_TOKEN_SALT + user.username).digest('hex');
+        let token = crypto.createHmac('sha256',
+            user.mail + process.env.MAIL_TOKEN_SALT + user.username + Date.now())
+            .digest('hex');
 
         this.mailerService
             .sendMail({
@@ -68,12 +70,26 @@ export class UserService {
         return await this.userRepository.save(userToDb);
     }
 
+    async verifyAccountByEmail(mail: string, token: string) {
+        let user = await this.findByEmail(mail);
+        if (user != undefined) {
+            if (!!user.activated === false) {
+                user.activated = true;
+                await this.userRepository.save(user);
+                return true;
+            }
+
+            throw new InvalidTokenException('USED', 'User is already verified', null);
+        }
+
+        throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
+    }
+
     async findByEmail(mail: string): Promise<User | undefined> {
         return this.userRepository.findOne({
             where: {
                 mail: mail
-            },
-            select: ["id", "username", "mail", "password"]
+            }
         });
     }
 
@@ -116,9 +132,10 @@ export class UserService {
     private async checkForDuplicateValues(user: User) {
         let duplicateValues = [];
         if (await this.existsByUsername(user.username)) {
-            duplicateValues.push('name');
+            duplicateValues.push('username');
         }
 
+        console.log(user.mail);
         if (await this.existsByMail(user.mail)) {
             duplicateValues.push('mail');
         }

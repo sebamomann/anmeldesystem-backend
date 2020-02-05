@@ -1,4 +1,4 @@
-import {Column, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, CreateDateColumn, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
 import {Appointment} from "../appointment/appointment.entity";
 import {Enrollment} from "../enrollment/enrollment.entity";
 import {TelegramUser} from "./telegram/telegram-user.entity";
@@ -20,7 +20,7 @@ export class User {
     })
     mail: string;
 
-    @Column('smallint', {default: 0})
+    @Column('smallint', {default: false})
     activated: boolean;
 
     @OneToMany(type => Appointment,
@@ -49,4 +49,7 @@ export class User {
         passwordReset => passwordReset.user,
         {onDelete: "CASCADE"})
     passwordReset: PasswordReset;
+
+    @CreateDateColumn()
+    iat: Date;
 }

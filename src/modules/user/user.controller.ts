@@ -42,6 +42,21 @@ export class UserController {
             });
     }
 
+    @Get('/verify/:mail/:token')
+    verifyAccountByEmail(@Param('mail') mail: string,
+                         @Param('token') token: string,
+                         @Res() res: Response) {
+        this.userService
+            .verifyAccountByEmail(mail, token)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
+            })
+            .catch(err => {
+                console.log(err);
+                return UserController.passwordresetErrorHandler(err, res);
+            });
+    }
+
     @Post('/passwordreset')
     resetPasswordInit(@Body('mail') mail: string,
                       @Body('domain') domain: string,
