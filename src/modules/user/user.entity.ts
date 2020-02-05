@@ -3,6 +3,7 @@ import {Appointment} from "../appointment/appointment.entity";
 import {Enrollment} from "../enrollment/enrollment.entity";
 import {TelegramUser} from "./telegram/telegram-user.entity";
 import {PasswordReset} from "./password-reset/password-reset.entity";
+import {Exclude} from "class-transformer";
 
 @Entity()
 export class User {
@@ -12,7 +13,8 @@ export class User {
     @Column()
     username: string;
 
-    @Column({select: false})
+    @Column({select: true})
+    @Exclude({toPlainOnly: true})
     password: string;
 
     @Column({

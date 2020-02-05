@@ -86,11 +86,10 @@ export class UserService {
     }
 
     async findByEmail(mail: string): Promise<User | undefined> {
-        return this.userRepository.findOne({
-            where: {
-                mail: mail
-            }
-        });
+        return await this.userRepository
+            .createQueryBuilder("user")
+            .where("user.mail = :mail", {mail: mail})
+            .getOne();
     }
 
     async resetPasswordInit(mail: string, domain: string) {
