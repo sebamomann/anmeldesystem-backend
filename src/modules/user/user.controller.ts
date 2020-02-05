@@ -17,31 +17,28 @@ export class UserController {
     //     return this.userService.findAll();
     // }
 
-    @Post('/register')
-    register(@Body() user: User): Promise<User> {
-        return this.userService.register(user);
+    private static passwordresetErrorHandler(err: any, res: Response) {
+        let error: any = {};
+        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED' || err.code === 'OUTDATED') {
+            error.code = err.code;
+            error.message = err.message;
+            error.error = err.data;
+        }
+
+        return res.status(HttpStatus.BAD_REQUEST).json(error);
     }
 
-    @UseGuards(AuthGuard('jwt'))
-    @Post('/telegram')
-    addTelegramUser(@Body() telegramUser: TelegramUser,
-                    @Usr() user: User,
-                    @Res() res: Response) {
-        this.userService
-            .addTelegramUser(telegramUser, user)
+    @Post()
+    register(@Body('user') user: User,
+             @Body('domain') domain: string,
+             @Res() res: Response) {
+        return this.userService
+            .register(user, domain)
             .then(result => {
-                return res.status(HttpStatus.CREATED).json();
+                return res.status(HttpStatus.CREATED).json(result);
             })
-            .catch((err) => {
-                let id = this.makeid(10);
-                console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
-                err.code = "UNDEFINED";
-                err.error = {
-                    message: "Some error occurred. Please try again later or contact the support",
-                    id: id
-                };
-                return res.status(HttpStatus.BAD_REQUEST).json();
+            .catch(err => {
+                return this.defaultErrorResponseHandler(err, res);
             });
     }
 
@@ -56,6 +53,21 @@ export class UserController {
             });
     }
 
+    @UseGuards(AuthGuard('jwt'))
+    @Post('/telegram')
+    addTelegramUser(@Body() telegramUser: TelegramUser,
+                    @Usr() user: User,
+                    @Res() res: Response) {
+        this.userService
+            .addTelegramUser(telegramUser, user)
+            .then(result => {
+                return res.status(HttpStatus.CREATED).json();
+            })
+            .catch((err) => {
+                return this.defaultErrorResponseHandler(err, res);
+            });
+    }
+
     @Put('/passwordreset/:mail/:token')
     setNewPassword(@Param('mail') mail: string,
                    @Param('token') token: string,
@@ -67,7 +79,7 @@ export class UserController {
                 return res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                return this.passwordresetErrorHandler(err, res);
+                return UserController.passwordresetErrorHandler(err, res);
             });
     }
 
@@ -82,18 +94,27 @@ export class UserController {
             })
             .catch(err => {
                 console.log(err);
-                return this.passwordresetErrorHandler(err, res);
+                return UserController.passwordresetErrorHandler(err, res);
             });
     }
 
-    passwordresetErrorHandler(err: any, res: Response) {
+    private defaultErrorResponseHandler(err, res: Response) {
         let error: any = {};
-        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED' || err.code === 'OUTDATED') {
-            error.code = err.code;
-            error.message = err.message;
-            error.error = err.data;
-        }
 
+        if (err.code === 'DUPLICATE_ENTRY'
+            || err.code === 'EMPTY_FIELDS') {
+            error.code = err.code;
+            error.error = err.data
+        } else {
+            let id = this.makeid(10);
+            console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
+
+            error.code = "UNDEFINED";
+            error.error = {
+                message: "Some error occurred. Please try again later or contact the support",
+                id: id
+            };
+        }
         return res.status(HttpStatus.BAD_REQUEST).json(error);
     }
 

@@ -20,7 +20,7 @@ export class User {
     })
     mail: string;
 
-    @Column('smallint')
+    @Column('smallint', {default: 0})
     activated: boolean;
 
     @OneToMany(type => Appointment,

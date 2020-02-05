@@ -6,6 +6,7 @@ import {TelegramUser} from "./telegram/telegram-user.entity";
 import {MailerService} from "@nest-modules/mailer";
 import {PasswordReset} from "./password-reset/password-reset.entity";
 import {InvalidTokenException} from "../../exceptions/InvalidTokenException";
+import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
 
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
@@ -28,42 +29,59 @@ export class UserService {
         return this.userRepository.find();
     }
 
-    register(user: User): Promise<User> {
+    public async register(user: User, domain: string) {
         const userToDb = new User();
         userToDb.username = user.username;
         userToDb.mail = user.mail;
+
+        try {
+            await this.checkForDuplicateValues(user);
+        } catch (e) {
+            throw e;
+        }
+
         try {
             userToDb.password = bcrypt.hashSync(user.password, 10);
         } catch (e) {
             console.log(e);
         }
 
-        return this.userRepository.save(userToDb);
+        let token = crypto.createHmac('sha256', user.mail + process.env.MAIL_TOKEN_SALT + user.username).digest('hex');
+
+        this.mailerService
+            .sendMail({
+                to: user.mail,
+                from: 'no-reply@eca.cg-hh.de',
+                subject: 'Neuer Account',
+                template: 'register', // The `.pug` or `.hbs` extension is appended automatically.
+                context: {  // Data to be sent to template engine.
+                    name: user.username,
+                    url: `https://${domain}/${user.mail}/${token}`
+                },
+            })
+            .then(() => {
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+
+        return await this.userRepository.save(userToDb);
     }
 
-    async findByEmail(email: string): Promise<User | undefined> {
+    async findByEmail(mail: string): Promise<User | undefined> {
         return this.userRepository.findOne({
-            where: {mail: email},
+            where: {
+                mail: mail
+            },
             select: ["id", "username", "mail", "password"]
         });
-    }
-
-    async addTelegramUser(telegramUser: TelegramUser, user: User) {
-        let savedTelegramUser = await this.telegramUserRepository.save(telegramUser);
-        let userFromDb = await this.find(user.id);
-        userFromDb.telegramUser = savedTelegramUser;
-        return this.userRepository.save(userFromDb);
-    }
-
-    private async find(id: number) {
-        return await this.userRepository.findOne({where: {id: id}});
     }
 
     async resetPasswordInit(mail: string, domain: string) {
         const user = await this.findByEmail(mail);
         console.log(user);
         if (user != null) {
-            let query = await this.passwordResetRepository.query("UPDATE user_password_reset " +
+            await this.passwordResetRepository.query("UPDATE user_password_reset " +
                 "SET oldPassword = 'invalid' " +
                 "WHERE used IS NULL " +
                 "AND oldPassword IS NULL " +
@@ -93,6 +111,46 @@ export class UserService {
                     console.log(err);
                 });
         }
+    }
+
+    private async checkForDuplicateValues(user: User) {
+        let duplicateValues = [];
+        if (await this.existsByUsername(user.username)) {
+            duplicateValues.push('name');
+        }
+
+        if (await this.existsByMail(user.mail)) {
+            duplicateValues.push('mail');
+        }
+
+        if (duplicateValues.length > 0) {
+            throw new DuplicateValueException('DUPLICATE_ENTRY',
+                'Following values are already taken',
+                duplicateValues);
+        }
+    }
+
+    private async existsByUsername(username: string) {
+        return await this.userRepository.findOne({
+            where: {
+                username: username
+            },
+        }) !== undefined;
+    }
+
+    async addTelegramUser(telegramUser: TelegramUser, user: User) {
+        let savedTelegramUser = await this.telegramUserRepository.save(telegramUser);
+        let userFromDb = await this.find(user.id);
+        userFromDb.telegramUser = savedTelegramUser;
+        return this.userRepository.save(userFromDb);
+    }
+
+    private async find(id: number) {
+        return await this.userRepository.findOne({where: {id: id}});
+    }
+
+    private async existsByMail(mail: string) {
+        return await this.findByEmail(mail).catch() !== undefined;
     }
 
     makeid(length) {

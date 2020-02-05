@@ -48,33 +48,36 @@ export class AppointmentController {
     @Post()
     @UseGuards(AuthGuard('jwt'))
     create(@Body() appointment: Appointment, @Res() res: Response, @Usr() user: User) {
-        return this.appointmentService.create(appointment, user).then(tAppointment => {
-            delete tAppointment.files;
-            tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
-            res.status(HttpStatus.CREATED).json(tAppointment);
-        }).catch((err) => {
-            let error = {code: '', error: {}};
-            if (err.code === 'ER_DUP_ENTRY') {
-                error.code = 'ER_DUP_ENTRY';
-                error.error = {
-                    columns: ["link"]
-                };
-            } else if (err instanceof UnknownUsersException) {
-                error.code = "ADMINISTRATORS_NOT_FOUND";
-                error.error = {
-                    values: err.data
-                };
-            } else {
-                error.error = {
-                    undefined: {
-                        message: "Some error occurred. Please try again later or contact the support",
-                        error: err
-                    }
-                };
-            }
+        return this.appointmentService
+            .create(appointment, user)
+            .then(tAppointment => {
+                delete tAppointment.files;
+                tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
+                res.status(HttpStatus.CREATED).json(tAppointment);
+            })
+            .catch((err) => {
+                let error = {code: '', error: {}};
+                if (err.code === 'ER_DUP_ENTRY') {
+                    error.code = 'ER_DUP_ENTRY';
+                    error.error = {
+                        columns: ["link"]
+                    };
+                } else if (err instanceof UnknownUsersException) {
+                    error.code = "ADMINISTRATORS_NOT_FOUND";
+                    error.error = {
+                        values: err.data
+                    };
+                } else {
+                    error.error = {
+                        undefined: {
+                            message: "Some error occurred. Please try again later or contact the support",
+                            error: err
+                        }
+                    };
+                }
 
-            res.status(HttpStatus.BAD_REQUEST).json(error);
-        });
+                res.status(HttpStatus.BAD_REQUEST).json(error);
+            });
     }
 
     @Get(':link')
