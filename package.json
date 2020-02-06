@@ -34,6 +34,7 @@
     "body-parser": "latest",
     "class-transformer": "^0.2.3",
     "dotenv": "^8.2.0",
+    "ical-generator": "^1.9.2",
     "mysql": "^2.17.1",
     "nestjs-easyconfig": "^1.7.0",
     "passport": "^0.4.1",

@@ -26,6 +26,7 @@ import {MigrationModule} from "./modules/migration/migration.module";
 import {HandlebarsAdapter, MailerModule} from "@nest-modules/mailer";
 import {PasswordReset} from "./modules/user/password-reset/password-reset.entity";
 import * as path from 'path';
+import {IcalModule} from "./modules/ical/ical.module";
 
 require('dotenv').config();
 const password = process.env.MAIL_ECA_PASSWORD;
@@ -63,7 +64,8 @@ const password = process.env.MAIL_ECA_PASSWORD;
         PassengerModule,
         CommentModule,
         AuthModule,
-        MigrationModule
+        MigrationModule,
+        IcalModule
     ],
     controllers: [AppController],
     providers: [AppService],
