@@ -110,10 +110,10 @@ export class AppointmentService {
         appointmentToDb.date = appointment.date;
         appointmentToDb.deadline = appointment.deadline;
 
-        if (appointment.maxEnrollments === 0) {
-            appointmentToDb.maxEnrollments = null;
-        } else {
+        if (appointment.maxEnrollments > 0) {
             appointmentToDb.maxEnrollments = appointment.maxEnrollments;
+        } else {
+            appointmentToDb.maxEnrollments = null;
         }
 
         appointmentToDb.driverAddition = appointment.driverAddition;
