@@ -204,7 +204,7 @@ export class EnrollmentService {
             enrollmentToDb.key = enrollmentFromDb.key;
         }
 
-        await this.enrollmentRepository.save(enrollmentToDb);
+        return await this.enrollmentRepository.save(enrollmentToDb);
     }
 
 
