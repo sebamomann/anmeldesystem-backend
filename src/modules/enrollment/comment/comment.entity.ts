@@ -22,7 +22,6 @@ export class Comment {
     enrollment: Enrollment;
 
     @CreateDateColumn()
-    @Exclude({toPlainOnly: true})
     iat: Date;
 
     @UpdateDateColumn({name: 'lud', nullable: true})

@@ -27,6 +27,8 @@ import {HandlebarsAdapter, MailerModule} from "@nest-modules/mailer";
 import {PasswordReset} from "./modules/user/password-reset/password-reset.entity";
 import * as path from 'path';
 import {IcalModule} from "./modules/ical/ical.module";
+import {ReleasenoteModule} from './modules/releasenote/releasenote.module';
+import {Releasenote} from "./modules/releasenote/releasenote.entity";
 
 require('dotenv').config();
 const password = process.env.MAIL_ECA_PASSWORD;
@@ -39,7 +41,8 @@ const password = process.env.MAIL_ECA_PASSWORD;
         username: process.env.API_USERNAME != null ? process.env.API_USERNAME : "root",
         password: process.env.API_PASSWORD != null ? process.env.API_PASSWORD : "",
         database: process.env.API_DATABASE != null ? process.env.API_DATABASE : "anmeldesystem-api",
-        entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key, TelegramUser, PasswordReset],
+        entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key,
+            TelegramUser, PasswordReset, Releasenote],
         synchronize: true
     }),
         MailerModule.forRoot({
@@ -65,7 +68,8 @@ const password = process.env.MAIL_ECA_PASSWORD;
         CommentModule,
         AuthModule,
         MigrationModule,
-        IcalModule
+        IcalModule,
+        ReleasenoteModule,
     ],
     controllers: [AppController],
     providers: [AppService],
