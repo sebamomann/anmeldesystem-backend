@@ -77,7 +77,7 @@ export class AppointmentService {
             .leftJoinAndSelect("appointment.administrators", "administrators")
             .select(["appointment", "additions", "enrollments",
                 "enrollment_passenger", "enrollment_driver", "enrollment_creator", "enrollments.iat",
-                "creator.username", "files", "administrators.mail",
+                "creator.username", "files.name", "files.id", "administrators.mail",
                 "enrollment_additions"])
             .orderBy("enrollments.iat", "ASC")
             .getOne();
