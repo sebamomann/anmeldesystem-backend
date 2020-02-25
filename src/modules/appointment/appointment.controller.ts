@@ -6,6 +6,7 @@ import {
     Get,
     HttpStatus,
     Inject,
+    NotFoundException,
     Param,
     Post,
     Put,
@@ -138,6 +139,10 @@ export class AppointmentController {
                     res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
                 }
             }).catch((err) => {
+                if (err instanceof NotFoundException) {
+                    throw err;
+                }
+
                 console.log(err);
                 let error = {error: {}};
                 error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
@@ -171,6 +176,10 @@ export class AppointmentController {
                     res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
                 }
             }).catch((err) => {
+                if (err instanceof NotFoundException) {
+                    throw err;
+                }
+                
                 console.log(err);
                 let error = {error: {}};
                 error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};

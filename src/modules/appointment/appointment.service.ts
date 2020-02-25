@@ -1,4 +1,4 @@
-import {ForbiddenException, Injectable} from '@nestjs/common';
+import {ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
 import {Appointment} from "./appointment.entity";
 import {getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
@@ -83,6 +83,10 @@ export class AppointmentService {
                 "enrollment_additions"])
             .orderBy("enrollments.iat", "ASC")
             .getOne();
+
+        if (appointment === undefined) {
+            throw new NotFoundException();
+        }
 
         if (slim) {
             delete appointment.files;
