@@ -104,8 +104,9 @@ export class AppointmentController {
                     error.error = {
                         values: err.data
                     };
-                } else if (err instanceof ForbiddenException) {
-                    throw err;
+                } else if (err instanceof NotFoundException
+                    || err instanceof ForbiddenException) {
+                    throw err
                 } else {
                     error.error = {
                         undefined: {
@@ -179,7 +180,7 @@ export class AppointmentController {
                 if (err instanceof NotFoundException) {
                     throw err;
                 }
-                
+
                 console.log(err);
                 let error = {error: {}};
                 error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
