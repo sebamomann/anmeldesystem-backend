@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common';
+import {ForbiddenException, Injectable} from '@nestjs/common';
 import {Appointment} from "./appointment.entity";
 import {Connection, getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
@@ -65,7 +65,7 @@ export class AppointmentService {
     async find(link: string, slim: boolean = false): Promise<Appointment> {
         let appointment = await getRepository(Appointment)
             .createQueryBuilder("appointment")
-            .where("appointment.link = :link", {link: link['link']})
+            .where("appointment.link = :link", {link: link})
             .leftJoinAndSelect("appointment.creator", "creator")
             .leftJoinAndSelect("appointment.additions", "additions")
             .leftJoinAndSelect("appointment.enrollments", "enrollments")
@@ -93,6 +93,18 @@ export class AppointmentService {
         });
 
         return appointment;
+    }
+
+    async findBasic(link: string): Promise<Appointment> {
+        return await getRepository(Appointment)
+            .createQueryBuilder("appointment")
+            .where("appointment.link = :link", {link: link})
+            .leftJoinAndSelect("appointment.additions", "additions")
+            .leftJoinAndSelect("appointment.files", "files")
+            .leftJoinAndSelect("appointment.administrators", "administrators")
+            .leftJoinAndSelect("appointment.creator", "creator")
+            .select(["appointment", "additions", "files.name", "files.id", "administrators", "creator"])
+            .getOne();
     }
 
     async create(appointment: Appointment, user: User) {
@@ -161,6 +173,26 @@ export class AppointmentService {
         return await this.appointmentRepository.save(appointmentToDb);
     }
 
+    async update(toChange: any, link: string, user: User) {
+        let appointment = await this.findBasic(link);
+
+        if (appointment.creator.id !== user.id) {
+            throw new ForbiddenException("FORBIDDEN");
+        }
+
+        for (const [key, value] of Object.entries(toChange)) {
+            if (key in appointment && appointment[key] !== value) {
+                console.log(`${key} changed from ${appointment[key]} to ${value}`);
+                appointment[key] = value;
+            }
+        }
+
+        await this.appointmentRepository.save(appointment);
+
+        return await this.find(appointment.link);
+    }
+
+
     arrayBufferToBase64(buffer) {
         console.log(String.fromCharCode.apply(null, new Uint16Array(buffer)));
         return String.fromCharCode.apply(null, new Uint16Array(buffer));
@@ -175,6 +207,4 @@ export class AppointmentService {
         }
         return result;
     }
-
-
 }

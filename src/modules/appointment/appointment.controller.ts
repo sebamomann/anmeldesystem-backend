@@ -2,11 +2,13 @@ import {
     Body,
     ClassSerializerInterceptor,
     Controller,
+    ForbiddenException,
     Get,
     HttpStatus,
     Inject,
     Param,
     Post,
+    Put,
     Query,
     Request,
     Res,
@@ -74,8 +76,43 @@ export class AppointmentController {
             });
     }
 
+    @Put(':link')
+    @UseGuards(AuthGuard('jwt'))
+    update(@Body() toChange: any, @Param('link') link: string, @Res() res: Response, @Usr() user: User) {
+        return this.appointmentService
+            .update(toChange, link, user)
+            .then(tAppointment => {
+                res.status(HttpStatus.OK).json(tAppointment);
+            })
+            .catch((err) => {
+                let error = {code: '', error: {}};
+                if (err.code === 'ER_DUP_ENTRY') {
+                    error.code = 'ER_DUP_ENTRY';
+                    error.error = {
+                        columns: ["link"]
+                    };
+                } else if (err instanceof UnknownUsersException) {
+                    error.code = "ADMINISTRATORS_NOT_FOUND";
+                    error.error = {
+                        values: err.data
+                    };
+                } else if (err instanceof ForbiddenException) {
+                    throw err;
+                } else {
+                    error.error = {
+                        undefined: {
+                            message: "Some error occurred. Please try again later or contact the support",
+                            error: err
+                        }
+                    };
+                }
+
+                res.status(HttpStatus.BAD_REQUEST).json(error);
+            });
+    }
+
     @Get(':link')
-    findByLink(@Query('slim') slim: string, @Param() link: string, @Request() req: Request, @Res() res: Response) {
+    findByLink(@Query('slim') slim: string, @Param('link') link: string, @Request() req: Request, @Res() res: Response) {
         let _slim = slim === "true";
         return this.appointmentService
             .find(link, _slim)
@@ -83,10 +120,10 @@ export class AppointmentController {
                 if (tAppointment != null) {
                     const etag = Etag.generate(JSON.stringify(tAppointment));
                     if (req.headers['if-none-match'] && req.headers['if-none-match'] == "W/" + '"' + etag + '"') {
-                        console.log(`appointment ${link['link']} not modified`);
+                        console.log(`appointment ${link} not modified`);
                         res.status(HttpStatus.NOT_MODIFIED).json();
                     } else {
-                        console.log(`appointment ${link['link']} modified`);
+                        console.log(`appointment ${link} modified`);
                         res.header('etag', "W/" + '"' + etag + '"');
                         res.status(HttpStatus.OK).json(tAppointment);
                     }
@@ -103,7 +140,7 @@ export class AppointmentController {
     }
 
     @Post('newcontent/:link')
-    updateAvailable(@Param() link: string, @Body("lastUpdated") lud: Date, @Request() req: Request, @Res() res: Response) {
+    updateAvailable(@Param('link') link: string, @Body("lastUpdated") lud: Date, @Request() req: Request, @Res() res: Response) {
         const date = new Date(lud).getTime();
         return this.appointmentService
             .find(link)
