@@ -11,11 +11,12 @@ import {DriverService} from "./driver.service";
 import {Addition} from "../../addition/addition.entity";
 import {User} from "../../user/user.entity";
 import {Key} from "../key/key.entity";
+import {AdditionService} from "../../addition/addition.service";
 
 @Module({
     imports: [TypeOrmModule.forFeature([Driver, Addition, Enrollment, Appointment, File, User, Key])],
-    providers: [DriverService, AppointmentService, FileService],
-    exports: [DriverService, AppointmentService, FileService],
+    providers: [DriverService, AdditionService, AppointmentService, FileService],
+    exports: [DriverService, AdditionService, AppointmentService, FileService],
     controllers: [DriverController],
 })
 export class DriverModule {

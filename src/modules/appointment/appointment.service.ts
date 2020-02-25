@@ -1,11 +1,12 @@
 import {ForbiddenException, Injectable} from '@nestjs/common';
 import {Appointment} from "./appointment.entity";
-import {Connection, getRepository, Repository} from 'typeorm';
+import {getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Addition} from "../addition/addition.entity";
 import {File} from "../file/file.entity";
 import {User} from "../user/user.entity";
 import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
+import {AdditionService} from "../addition/addition.service";
 
 @Injectable()
 export class AppointmentService {
@@ -18,7 +19,7 @@ export class AppointmentService {
         private readonly fileRepository: Repository<File>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
-        private connection: Connection
+        private additionService: AdditionService,
     ) {
     }
 
@@ -182,8 +183,13 @@ export class AppointmentService {
 
         for (const [key, value] of Object.entries(toChange)) {
             if (key in appointment && appointment[key] !== value) {
-                console.log(`${key} changed from ${appointment[key]} to ${value}`);
-                appointment[key] = value;
+                let _value = value;
+                if (key === "additions") {
+                    _value = await this.handleAdditions(value, appointment);
+                }
+                console.log(`${key} changed from ${JSON.stringify(appointment[key])} to ${JSON.stringify(_value)}`);
+
+                appointment[key] = _value;
             }
         }
 
@@ -192,6 +198,26 @@ export class AppointmentService {
         return await this.find(appointment.link);
     }
 
+
+    private async handleAdditions(value, appointment: Appointment) {
+        let additions = [];
+        let _additions: { name: string }[];
+        _additions = value;
+
+        for (let fAddition of _additions) {
+            let _addition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
+            if (_addition !== undefined) {
+                additions.push(_addition);
+            } else {
+                _addition = new Addition();
+                _addition.name = fAddition.name;
+                await this.additionRepository.save(_addition);
+                additions.push(_addition);
+            }
+        }
+
+        return additions;
+    }
 
     arrayBufferToBase64(buffer) {
         console.log(String.fromCharCode.apply(null, new Uint16Array(buffer)));

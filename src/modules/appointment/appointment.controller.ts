@@ -85,6 +85,8 @@ export class AppointmentController {
                 res.status(HttpStatus.OK).json(tAppointment);
             })
             .catch((err) => {
+                console.log(err);
+
                 let error = {code: '', error: {}};
                 if (err.code === 'ER_DUP_ENTRY') {
                     error.code = 'ER_DUP_ENTRY';
