@@ -47,7 +47,10 @@ export class Enrollment {
         })
     passenger: Passenger;
 
-    @ManyToMany(type => Addition, {eager: true})
+    @ManyToMany(type => Addition, {
+        eager: true,
+        onDelete: 'CASCADE'
+    })
     @JoinTable({name: 'enrollment_addition'})
     additions: Addition[];
 
