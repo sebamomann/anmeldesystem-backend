@@ -7,6 +7,7 @@ import {File} from "../file/file.entity";
 import {User} from "../user/user.entity";
 import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
 import {AdditionService} from "../addition/addition.service";
+import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
 
 @Injectable()
 export class AppointmentService {
@@ -114,7 +115,13 @@ export class AppointmentService {
         appointmentToDb.description = appointment.description;
 
         if (appointment.link === null || appointment.link.length < 5) {
-            appointmentToDb.link = this.makeid(5);
+            let link;
+
+            do {
+                link = this.makeid(5);
+            } while (await this.linkInUse(link));
+
+            appointmentToDb.link = link;
         } else {
             appointmentToDb.link = appointment.link;
         }
@@ -187,6 +194,15 @@ export class AppointmentService {
                 if (key === "additions") {
                     _value = await this.handleAdditions(value, appointment);
                 }
+                if (key === "link") {
+                    if (await this.linkInUse(value)) {
+                        console.log("Link in use " + value);
+                        throw new DuplicateValueException('DUPLICATE_ENTRY',
+                            'Following values are already taken',
+                            ['link']);
+                    }
+                    _value = value;
+                }
                 console.log(`${key} changed from ${JSON.stringify(appointment[key])} to ${JSON.stringify(_value)}`);
 
                 appointment[key] = _value;
@@ -217,6 +233,10 @@ export class AppointmentService {
         }
 
         return additions;
+    }
+
+    private async linkInUse(link) {
+        return await this.findBasic(link) !== undefined;
     }
 
     arrayBufferToBase64(buffer) {

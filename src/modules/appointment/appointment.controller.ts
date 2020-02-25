@@ -93,6 +93,11 @@ export class AppointmentController {
                     error.error = {
                         columns: ["link"]
                     };
+                } else if (err.code === 'DUPLICATE_ENTRY') {
+                    error.code = 'ER_DUP_ENTRY';
+                    error.error = {
+                        columns: err.data
+                    };
                 } else if (err instanceof UnknownUsersException) {
                     error.code = "ADMINISTRATORS_NOT_FOUND";
                     error.error = {
