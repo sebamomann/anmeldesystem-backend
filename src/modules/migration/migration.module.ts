@@ -20,11 +20,12 @@ import {Appointment} from "../appointment/appointment.entity";
 import {AppointmentController} from "../appointment/appointment.controller";
 import {MigrationService} from "./migration.service";
 import {PasswordReset} from "../user/password-reset/password-reset.entity";
+import {FileService} from "../file/file.service";
 
 @Module({
     imports: [TypeOrmModule.forFeature([Appointment, Addition, File, Comment, Enrollment, Driver, Passenger, User, Key, TelegramUser, PasswordReset])],
-    providers: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService],
-    exports: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService],
+    providers: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService, FileService],
+    exports: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService, FileService],
     controllers: [AppointmentController],
 })
 export class MigrationModule {

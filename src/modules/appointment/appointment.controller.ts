@@ -44,6 +44,18 @@ export class AppointmentController {
             .findAll(user, _slim);
     }
 
+    @Get(":link/permission")
+    @UseGuards(AuthGuard('jwt'))
+    permission(@Param('link') link: string,
+               @Usr() user: User,
+               @Res() res: Response) {
+        this.appointmentService
+            .hasPermission(link, user)
+            .then(result => {
+                res.status(HttpStatus.OK).json(result);
+            });
+    }
+
     @Post()
     @UseGuards(AuthGuard('jwt'))
     create(@Body() appointment: Appointment, @Res() res: Response, @Usr() user: User) {
@@ -218,6 +230,40 @@ export class AppointmentController {
                         @Res() res: Response) {
         return this.appointmentService
             .removeAdministrator(link, username)
+            .then(result => {
+                res.status(HttpStatus.OK).json();
+            })
+    }
+
+    @Post(':link/file')
+    addFile(@Param('link') link: string,
+            @Body() data: { name: string, data: string },
+            @Request() req: Request,
+            @Res() res: Response) {
+        return this.appointmentService
+            .addFile(link, data)
+            .then(result => {
+                res.status(HttpStatus.OK).json();
+            }).catch((err) => {
+                if (err instanceof NotFoundException) {
+                    throw err;
+                }
+
+                console.log(err);
+                let error = {error: {}};
+                error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
+
+                res.status(HttpStatus.BAD_REQUEST).json(error);
+            });
+    }
+
+    @Delete(':link/file/:id')
+    deleteFile(@Param('link') link: string,
+               @Param('id') id: string,
+               @Request() req: Request,
+               @Res() res: Response) {
+        return this.appointmentService
+            .removeFile(link, id)
             .then(result => {
                 res.status(HttpStatus.OK).json();
             })

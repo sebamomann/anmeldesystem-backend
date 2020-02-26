@@ -9,6 +9,7 @@ import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
 import {AdditionService} from "../addition/addition.service";
 import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
 import {UserService} from "../user/user.service";
+import {FileService} from "../file/file.service";
 
 @Injectable()
 export class AppointmentService {
@@ -22,8 +23,22 @@ export class AppointmentService {
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
         private additionService: AdditionService,
-        private userService: UserService
+        private userService: UserService,
+        private fileService: FileService
     ) {
+    }
+
+    async hasPermission(link: string, user: User): Promise<boolean> {
+        let appointment;
+        try {
+            appointment = await this.findBasic(link);
+        } catch (e) {
+            return false;
+        }
+
+        return appointment !== undefined && (appointment.creator.id === user.id || appointment.administrators.some(sAdministrator => {
+            return sAdministrator.id === user.id;
+        }));
     }
 
     async findAll(user: User, slim = false): Promise<Appointment[]> {
@@ -260,7 +275,7 @@ export class AppointmentService {
         return result;
     }
 
-    async addAdministrator(link: string, username: string) {
+    public async addAdministrator(link: string, username: string) {
         const appointment = await this.find(link);
 
         const user = await this.userService.findByUsername(username);
@@ -273,7 +288,7 @@ export class AppointmentService {
         return this.appointmentRepository.save(appointment);
     }
 
-    async removeAdministrator(link: string, username: string) {
+    public async removeAdministrator(link: string, username: string) {
         const appointment = await this.find(link);
 
         appointment.administrators = appointment.administrators.filter(fAdministrator => {
@@ -281,5 +296,23 @@ export class AppointmentService {
         });
 
         return this.appointmentRepository.save(appointment);
+    }
+
+    public async addFile(link: string, data: any) {
+        const appointment = await this.find(link);
+        console.log("add file", data.name, data.data.length);
+
+        const file = new File();
+        file.name = data.name;
+        file.data = data.data;
+        const _file = await this.fileRepository.save(file);
+        appointment.files.push(_file);
+
+        return this.appointmentRepository.save(appointment);
+    }
+
+    async removeFile(link: string, id: string) {
+        const file = await this.fileService.findById(id);
+        return this.fileRepository.remove(file);
     }
 }
