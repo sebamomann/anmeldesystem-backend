@@ -1,4 +1,4 @@
-import {ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
+import {BadRequestException, ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
 import {Appointment} from "./appointment.entity";
 import {getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
@@ -8,6 +8,7 @@ import {User} from "../user/user.entity";
 import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
 import {AdditionService} from "../addition/addition.service";
 import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
+import {UserService} from "../user/user.service";
 
 @Injectable()
 export class AppointmentService {
@@ -21,6 +22,7 @@ export class AppointmentService {
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
         private additionService: AdditionService,
+        private userService: UserService
     ) {
     }
 
@@ -256,5 +258,18 @@ export class AppointmentService {
             result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
         return result;
+    }
+
+    async addAdministrator(link: string, username: string) {
+        const appointment = await this.find(link);
+
+        const user = await this.userService.findByUsername(username);
+        if (user === undefined) {
+            throw new BadRequestException('Username not found');
+        }
+
+        appointment.administrators.push(user);
+
+        return this.appointmentRepository.save(appointment);
     }
 }

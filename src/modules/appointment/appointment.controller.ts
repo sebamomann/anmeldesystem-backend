@@ -188,4 +188,24 @@ export class AppointmentController {
                 res.status(HttpStatus.BAD_REQUEST).json(error);
             });
     }
+
+    @Post(':link/administrator')
+    addAdministrator(@Param('link') link: string, @Body("username") username: string,
+                     @Request() req: Request, @Res() res: Response) {
+        return this.appointmentService
+            .addAdministrator(link, username)
+            .then(result => {
+                res.status(HttpStatus.OK).json();
+            }).catch((err) => {
+                if (err instanceof NotFoundException) {
+                    throw err;
+                }
+
+                console.log(err);
+                let error = {error: {}};
+                error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
+
+                res.status(HttpStatus.BAD_REQUEST).json(error);
+            });
+    }
 }
