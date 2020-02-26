@@ -10,11 +10,14 @@ import {File} from "../file/file.entity";
 import {FileService} from "../file/file.service";
 import {User} from "../user/user.entity";
 import {Key} from "../enrollment/key/key.entity";
+import {UserService} from "../user/user.service";
+import {TelegramUser} from "../user/telegram/telegram-user.entity";
+import {PasswordReset} from "../user/password-reset/password-reset.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Addition, Enrollment, Appointment, File, User, Key])],
-    providers: [AdditionService, AppointmentService, FileService],
-    exports: [AdditionService, AppointmentService, FileService],
+    imports: [TypeOrmModule.forFeature([Addition, Enrollment, Appointment, File, User, Key, TelegramUser, PasswordReset])],
+    providers: [AdditionService, AppointmentService, FileService, UserService],
+    exports: [AdditionService, AppointmentService, FileService, UserService],
     controllers: [AdditionController],
 })
 export class AdditionModule {

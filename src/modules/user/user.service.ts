@@ -85,10 +85,17 @@ export class UserService {
         throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
     }
 
-    async findByEmail(mail: string): Promise<User | undefined> {
+    public async findByEmail(mail: string): Promise<User | undefined> {
         return await this.userRepository
             .createQueryBuilder("user")
             .where("user.mail = :mail", {mail: mail})
+            .getOne();
+    }
+
+    public async findByUsername(username: string): Promise<User | undefined> {
+        return await this.userRepository
+            .createQueryBuilder("user")
+            .where("user.username = :username", {username: username})
             .getOne();
     }
 

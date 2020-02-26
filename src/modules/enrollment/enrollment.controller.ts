@@ -48,7 +48,7 @@ export class EnrollmentController {
 
     @UseGuards(JwtOptStrategy)
     @Post()
-    async create(@Query() link: string, @Body() enrollment: Enrollment, @Usr() user: User, @Res() res: Response) {
+    async create(@Query('link') link: string, @Body() enrollment: Enrollment, @Usr() user: User, @Res() res: Response) {
         this.enrollmentService
             .create(enrollment, link, user)
             .then(tEntrollment => {

@@ -17,11 +17,14 @@ import {DriverService} from "./driver/driver.service";
 import {User} from "../user/user.entity";
 import {Key} from "./key/key.entity";
 import {PassengerService} from "./passenger/passenger.service";
+import {UserService} from "../user/user.service";
+import {TelegramUser} from "../user/telegram/telegram-user.entity";
+import {PasswordReset} from "../user/password-reset/password-reset.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Enrollment, Appointment, Addition, File, Driver, Passenger, Comment, User, Key])],
-    providers: [EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService, PassengerService],
-    exports: [EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService, PassengerService],
+    imports: [TypeOrmModule.forFeature([Enrollment, Appointment, Addition, File, Driver, Passenger, Comment, User, Key, TelegramUser, PasswordReset])],
+    providers: [EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService, PassengerService, UserService],
+    exports: [EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService, PassengerService, UserService],
     controllers: [EnrollmentController],
 })
 export class EnrollmentModule {

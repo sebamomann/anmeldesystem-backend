@@ -1,11 +1,15 @@
-import {Injectable} from '@nestjs/common';
+import {BadRequestException, ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
 import {Appointment} from "./appointment.entity";
-import {Connection, getRepository, Repository} from 'typeorm';
+import {getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Addition} from "../addition/addition.entity";
 import {File} from "../file/file.entity";
 import {User} from "../user/user.entity";
 import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
+import {AdditionService} from "../addition/addition.service";
+import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
+import {UserService} from "../user/user.service";
+import {FileService} from "../file/file.service";
 
 @Injectable()
 export class AppointmentService {
@@ -18,8 +22,23 @@ export class AppointmentService {
         private readonly fileRepository: Repository<File>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
-        private connection: Connection
+        private additionService: AdditionService,
+        private userService: UserService,
+        private fileService: FileService
     ) {
+    }
+
+    async hasPermission(link: string, user: User): Promise<boolean> {
+        let appointment;
+        try {
+            appointment = await this.findBasic(link);
+        } catch (e) {
+            return false;
+        }
+
+        return appointment !== undefined && (appointment.creator.id === user.id || appointment.administrators.some(sAdministrator => {
+            return sAdministrator.id === user.id;
+        }));
     }
 
     async findAll(user: User, slim = false): Promise<Appointment[]> {
@@ -65,7 +84,7 @@ export class AppointmentService {
     async find(link: string, slim: boolean = false): Promise<Appointment> {
         let appointment = await getRepository(Appointment)
             .createQueryBuilder("appointment")
-            .where("appointment.link = :link", {link: link['link']})
+            .where("appointment.link = :link", {link: link})
             .leftJoinAndSelect("appointment.creator", "creator")
             .leftJoinAndSelect("appointment.additions", "additions")
             .leftJoinAndSelect("appointment.enrollments", "enrollments")
@@ -77,10 +96,14 @@ export class AppointmentService {
             .leftJoinAndSelect("appointment.administrators", "administrators")
             .select(["appointment", "additions", "enrollments",
                 "enrollment_passenger", "enrollment_driver", "enrollment_creator", "enrollments.iat",
-                "creator.username", "files.name", "files.id", "administrators.mail",
+                "creator.username", "files.name", "files.id", "administrators.mail", "administrators.username",
                 "enrollment_additions"])
             .orderBy("enrollments.iat", "ASC")
             .getOne();
+
+        if (appointment === undefined) {
+            throw new NotFoundException();
+        }
 
         if (slim) {
             delete appointment.files;
@@ -95,13 +118,31 @@ export class AppointmentService {
         return appointment;
     }
 
+    async findBasic(link: string): Promise<Appointment> {
+        return await getRepository(Appointment)
+            .createQueryBuilder("appointment")
+            .where("appointment.link = :link", {link: link})
+            .leftJoinAndSelect("appointment.additions", "additions")
+            .leftJoinAndSelect("appointment.files", "files")
+            .leftJoinAndSelect("appointment.administrators", "administrators")
+            .leftJoinAndSelect("appointment.creator", "creator")
+            .select(["appointment", "additions", "files.name", "files.id", "administrators", "creator"])
+            .getOne();
+    }
+
     async create(appointment: Appointment, user: User) {
         let appointmentToDb = new Appointment();
         appointmentToDb.title = appointment.title;
         appointmentToDb.description = appointment.description;
 
         if (appointment.link === null || appointment.link.length < 5) {
-            appointmentToDb.link = this.makeid(5);
+            let link;
+
+            do {
+                link = this.makeid(5);
+            } while (await this.linkInUse(link));
+
+            appointmentToDb.link = link;
         } else {
             appointmentToDb.link = appointment.link;
         }
@@ -161,6 +202,64 @@ export class AppointmentService {
         return await this.appointmentRepository.save(appointmentToDb);
     }
 
+    async update(toChange: any, link: string, user: User) {
+        let appointment = await this.findBasic(link);
+
+        if (!this.hasPermission(link, user)) {
+            throw new ForbiddenException("FORBIDDEN");
+        }
+
+        for (const [key, value] of Object.entries(toChange)) {
+            if (key in appointment && appointment[key] !== value) {
+                let _value = value;
+                if (key === "additions") {
+                    _value = await this.handleAdditions(value, appointment);
+                }
+                if (key === "link") {
+                    if (await this.linkInUse(value)) {
+                        console.log("Link in use " + value);
+                        throw new DuplicateValueException('DUPLICATE_ENTRY',
+                            'Following values are already taken',
+                            ['link']);
+                    }
+                    _value = value;
+                }
+                console.log(`${key} changed from ${JSON.stringify(appointment[key])} to ${JSON.stringify(_value)}`);
+
+                appointment[key] = _value;
+            }
+        }
+
+        await this.appointmentRepository.save(appointment);
+
+        return await this.find(appointment.link);
+    }
+
+
+    private async handleAdditions(value, appointment: Appointment) {
+        let additions = [];
+        let _additions: { name: string }[];
+        _additions = value;
+
+        for (let fAddition of _additions) {
+            let _addition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
+            if (_addition !== undefined) {
+                additions.push(_addition);
+            } else {
+                _addition = new Addition();
+                _addition.name = fAddition.name;
+                await this.additionRepository.save(_addition);
+                additions.push(_addition);
+            }
+        }
+
+        return additions;
+    }
+
+    private async linkInUse(link) {
+        return await this.findBasic(link) !== undefined;
+    }
+
     arrayBufferToBase64(buffer) {
         console.log(String.fromCharCode.apply(null, new Uint16Array(buffer)));
         return String.fromCharCode.apply(null, new Uint16Array(buffer));
@@ -176,5 +275,44 @@ export class AppointmentService {
         return result;
     }
 
+    public async addAdministrator(link: string, username: string) {
+        const appointment = await this.find(link);
 
+        const user = await this.userService.findByUsername(username);
+        if (user === undefined) {
+            throw new BadRequestException('Username not found');
+        }
+
+        appointment.administrators.push(user);
+
+        return this.appointmentRepository.save(appointment);
+    }
+
+    public async removeAdministrator(link: string, username: string) {
+        const appointment = await this.find(link);
+
+        appointment.administrators = appointment.administrators.filter(fAdministrator => {
+            return fAdministrator.username != username;
+        });
+
+        return this.appointmentRepository.save(appointment);
+    }
+
+    public async addFile(link: string, data: any) {
+        const appointment = await this.find(link);
+        console.log("add file", data.name, data.data.length);
+
+        const file = new File();
+        file.name = data.name;
+        file.data = data.data;
+        const _file = await this.fileRepository.save(file);
+        appointment.files.push(_file);
+
+        return this.appointmentRepository.save(appointment);
+    }
+
+    async removeFile(link: string, id: string) {
+        const file = await this.fileService.findById(id);
+        return this.fileRepository.remove(file);
+    }
 }
