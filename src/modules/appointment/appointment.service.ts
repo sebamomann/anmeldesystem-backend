@@ -81,7 +81,7 @@ export class AppointmentService {
             .leftJoinAndSelect("appointment.administrators", "administrators")
             .select(["appointment", "additions", "enrollments",
                 "enrollment_passenger", "enrollment_driver", "enrollment_creator", "enrollments.iat",
-                "creator.username", "files.name", "files.id", "administrators.mail",
+                "creator.username", "files.name", "files.id", "administrators.mail", "administrators.username",
                 "enrollment_additions"])
             .orderBy("enrollments.iat", "ASC")
             .getOne();
@@ -269,6 +269,16 @@ export class AppointmentService {
         }
 
         appointment.administrators.push(user);
+
+        return this.appointmentRepository.save(appointment);
+    }
+
+    async removeAdministrator(link: string, username: string) {
+        const appointment = await this.find(link);
+
+        appointment.administrators = appointment.administrators.filter(fAdministrator => {
+            return fAdministrator.username != username;
+        });
 
         return this.appointmentRepository.save(appointment);
     }

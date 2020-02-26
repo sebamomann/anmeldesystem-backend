@@ -1,7 +1,9 @@
 import {
+    BadRequestException,
     Body,
     ClassSerializerInterceptor,
     Controller,
+    Delete,
     ForbiddenException,
     Get,
     HttpStatus,
@@ -197,7 +199,7 @@ export class AppointmentController {
             .then(result => {
                 res.status(HttpStatus.OK).json();
             }).catch((err) => {
-                if (err instanceof NotFoundException) {
+                if (err instanceof NotFoundException || err instanceof BadRequestException) {
                     throw err;
                 }
 
@@ -207,5 +209,17 @@ export class AppointmentController {
 
                 res.status(HttpStatus.BAD_REQUEST).json(error);
             });
+    }
+
+    @Delete(':link/administrator/:username')
+    deleteAdministrator(@Param('link') link: string,
+                        @Param('username') username: string,
+                        @Request() req: Request,
+                        @Res() res: Response) {
+        return this.appointmentService
+            .removeAdministrator(link, username)
+            .then(result => {
+                res.status(HttpStatus.OK).json();
+            })
     }
 }
