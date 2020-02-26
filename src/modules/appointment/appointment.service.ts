@@ -205,7 +205,7 @@ export class AppointmentService {
     async update(toChange: any, link: string, user: User) {
         let appointment = await this.findBasic(link);
 
-        if (appointment.creator.id !== user.id) {
+        if (!this.hasPermission(link, user)) {
             throw new ForbiddenException("FORBIDDEN");
         }
 
