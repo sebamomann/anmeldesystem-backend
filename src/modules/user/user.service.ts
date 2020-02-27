@@ -31,6 +31,7 @@ export class UserService {
 
     public async register(user: User, domain: string) {
         const userToDb = new User();
+        userToDb.name = user.name;
         userToDb.username = user.username;
         userToDb.mail = user.mail;
 
@@ -141,7 +142,6 @@ export class UserService {
             duplicateValues.push('username');
         }
 
-        console.log(user.mail);
         if (await this.existsByMail(user.mail)) {
             duplicateValues.push('mail');
         }
