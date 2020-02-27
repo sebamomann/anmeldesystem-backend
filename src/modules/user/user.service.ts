@@ -21,7 +21,7 @@ export class UserService {
         private readonly telegramUserRepository: Repository<TelegramUser>,
         @InjectRepository(PasswordReset)
         private readonly passwordResetRepository: Repository<PasswordReset>,
-        private readonly mailerService: MailerService
+        private readonly mailerService: MailerService,
     ) {
     }
 
@@ -31,6 +31,7 @@ export class UserService {
 
     public async register(user: User, domain: string) {
         const userToDb = new User();
+        userToDb.name = user.name;
         userToDb.username = user.username;
         userToDb.mail = user.mail;
 
@@ -141,7 +142,6 @@ export class UserService {
             duplicateValues.push('username');
         }
 
-        console.log(user.mail);
         if (await this.existsByMail(user.mail)) {
             duplicateValues.push('mail');
         }
@@ -252,5 +252,31 @@ export class UserService {
                 return res[0].used;
             }
         }
+    }
+
+    async update(toChange: any, user: User) {
+        let _user = await this.find(user.id);
+
+        for (const [key, value] of Object.entries(toChange)) {
+            if (key in _user && _user[key] !== value) {
+                let _value = value;
+                if (key === "username") {
+                }
+                if (key === "email") {
+                }
+                if (key === "password") {
+                }
+                console.log(`${key} changed from ${JSON.stringify(_user[key])} to ${JSON.stringify(_value)}`);
+
+                _user[key] = _value;
+            }
+        }
+
+        let ret_user = await this.userRepository.save(_user);
+
+        delete ret_user.activated;
+        delete ret_user.password;
+
+        return ret_user;
     }
 }

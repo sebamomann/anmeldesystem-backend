@@ -11,6 +11,11 @@ export class User {
     id: number;
 
     @Column()
+    name: string;
+
+    @Column({
+        unique: true
+    })
     username: string;
 
     @Column({select: true})
@@ -27,13 +32,16 @@ export class User {
 
     @OneToMany(type => Appointment,
         appointment => appointment.creator,
+        {
+            eager: false
+        }
     )
     appointments: Appointment[];
 
     @ManyToMany(type => Appointment,
         appointment => appointment.administrators,
         {
-            eager: true
+            eager: false
         })
     administrations: Appointment[];
 

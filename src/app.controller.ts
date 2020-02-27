@@ -9,11 +9,12 @@ export class AppController {
 
     @UseGuards(AuthGuard('local'))
     @Post('auth/login')
-    async login(@Request() req, @Res() res) {
+    async login(@Request() req,
+                @Res() res) {
         if (req.user instanceof Date) {
             let error: any = {};
             error.code = "OLDPASSWORD";
-            error.message = "This password has bees changed at " + req.user;
+            error.message = "This password has been changed at " + req.user;
             error.error = req.user;
             return res.status(HttpStatus.UNAUTHORIZED).json(error);
         }
