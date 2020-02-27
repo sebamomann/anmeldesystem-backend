@@ -1,14 +1,27 @@
-import {Body, Controller, Get, HttpStatus, Param, Post, Put, Res, UseGuards} from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    ForbiddenException,
+    Get,
+    HttpStatus,
+    NotFoundException,
+    Param,
+    Post,
+    Put,
+    Res,
+    UseGuards
+} from '@nestjs/common';
 import {UserService} from "./user.service";
 import {User} from "./user.entity";
 import {TelegramUser} from "./telegram/telegram-user.entity";
 import {Usr} from "./user.decorator";
 import {AuthGuard} from "@nestjs/passport";
 import {Response} from "express";
+import {AuthService} from "../../auth/auth.service";
 
 @Controller('user')
 export class UserController {
-    constructor(private readonly userService: UserService,) {
+    constructor(private readonly userService: UserService, private authService: AuthService) {
     }
 
     // @Get()
@@ -39,6 +52,42 @@ export class UserController {
             })
             .catch(err => {
                 return this.defaultErrorResponseHandler(err, res);
+            });
+    }
+
+    @Put()
+    @UseGuards(AuthGuard('jwt'))
+    update(@Body() toChange: any,
+           @Res() res: Response,
+           @Usr() user: User) {
+        return this.userService
+            .update(toChange, user)
+            .then(async tUser => {
+                tUser = await this.authService.login(tUser);
+                res.status(HttpStatus.OK).json(tUser);
+            })
+            .catch((err) => {
+                console.log(err);
+
+                let error = {code: '', error: {}};
+                if (err.code === 'DUPLICATE_ENTRY') {
+                    error.code = 'ER_DUP_ENTRY';
+                    error.error = {
+                        columns: err.data
+                    };
+                } else if (err instanceof NotFoundException
+                    || err instanceof ForbiddenException) {
+                    throw err
+                } else {
+                    error.error = {
+                        undefined: {
+                            message: "Some error occurred. Please try again later or contact the support",
+                            error: err
+                        }
+                    };
+                }
+
+                res.status(HttpStatus.BAD_REQUEST).json(error);
             });
     }
 
@@ -116,10 +165,14 @@ export class UserController {
     private defaultErrorResponseHandler(err, res: Response) {
         let error: any = {};
 
-        if (err.code === 'DUPLICATE_ENTRY'
-            || err.code === 'EMPTY_FIELDS') {
+        if (err.code === 'EMPTY_FIELDS') {
             error.code = err.code;
             error.error = err.data
+        } else if (err.code === 'DUPLICATE_ENTRY') {
+            error.code = 'ER_DUP_ENTRY';
+            error.error = {
+                columns: err.data
+            };
         } else {
             let id = this.makeid(10);
             console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);

@@ -32,13 +32,16 @@ export class User {
 
     @OneToMany(type => Appointment,
         appointment => appointment.creator,
+        {
+            eager: false
+        }
     )
     appointments: Appointment[];
 
     @ManyToMany(type => Appointment,
         appointment => appointment.administrators,
         {
-            eager: true
+            eager: false
         })
     administrations: Appointment[];
 
