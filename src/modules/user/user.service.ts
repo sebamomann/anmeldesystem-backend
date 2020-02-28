@@ -1,7 +1,7 @@
 import {BadRequestException, Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {User} from "./user.entity";
-import {Repository} from 'typeorm';
+import {getRepository, Repository} from 'typeorm';
 import {TelegramUser} from "./telegram/telegram-user.entity";
 import {MailerService} from "@nest-modules/mailer";
 import {PasswordReset} from "./password-reset/password-reset.entity";
@@ -28,8 +28,15 @@ export class UserService {
     ) {
     }
 
-    findAll(): Promise<User[]> {
-        return this.userRepository.find();
+    async get(user) {
+        const _user = await this.userRepository.findByIds(user.id);
+        const __user = _user[0];
+        __user.emailChange = __user.emailChange.filter(fEmailChange =>
+            (fEmailChange.iat.getTime()) + (24 * 60 * 60 * 1000) > Date.now()
+            && fEmailChange.oldMail != 'invalid'
+            && fEmailChange.used === null);
+
+        return __user;
     }
 
     public async register(user: User, domain: string) {
@@ -100,6 +107,13 @@ export class UserService {
         return await this.userRepository
             .createQueryBuilder("user")
             .where("user.username = :username", {username: username})
+            .getOne();
+    }
+
+    public async findById(id: string): Promise<User | undefined> {
+        return await this.userRepository
+            .createQueryBuilder("user")
+            .where("user.id = :id", {id: id})
             .getOne();
     }
 
@@ -215,7 +229,7 @@ export class UserService {
         let emailChange = await this.emailChangeRepository
             .createQueryBuilder("emailChange")
             .where("emailChange.token = :token", {token: token})
-            .andWhere("emailChange.mail = :mail", {mail: mail})
+            .andWhere("emailChange.newMail = :mail", {mail: mail})
             .getOne();
         if (emailChange != undefined) {
             if ((emailChange.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
@@ -297,8 +311,9 @@ export class UserService {
                     _value = _user.mail;
                 }
                 if (key === "password") {
-                    _value = _user.password;
+                    _value = bcrypt.hashSync(_value, 10);
                 }
+
                 console.log(`${key} changed from ${JSON.stringify(_user[key])} to ${JSON.stringify(_value)}`);
 
                 _user[key] = _value;
@@ -313,8 +328,8 @@ export class UserService {
         return ret_user;
     }
 
-    public activateMail(mail: string, token: string) {
-        var self = this;
+    public verifyMailChange(mail: string, token: string) {
+        const self = this;
         return new Promise(function (resolve, reject) {
             self.validateMailChangeToken(mail, token)
                 .then(async res => {
@@ -354,7 +369,6 @@ export class UserService {
         }
 
         if (_user != null) {
-            console.log("user found");
             await this.emailChangeRepository.query("UPDATE user_mail_change " +
                 "SET oldMail = 'invalid' " +
                 "WHERE used IS NULL " +
@@ -388,4 +402,18 @@ export class UserService {
                 });
         }
     }
+
+    async resendMailChange(user, domain: string) {
+        let emailChange = await getRepository(EmailChange)
+            .createQueryBuilder("emailChange")
+            .where("emailChange.oldMail NOT LIKE :oldMail", {oldMail: 'invalid'})
+            .andWhere("emailChange.used IS NULL")
+            .orderBy("emailChange.iat", "DESC")
+            .getOne();
+
+        if (emailChange !== undefined) {
+            this.handleEmailChange(user, {mail: emailChange.newMail, domain: domain});
+        }
+    }
+
 }

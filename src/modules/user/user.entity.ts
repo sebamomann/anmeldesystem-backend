@@ -55,11 +55,14 @@ export class User {
     enrollments: Enrollment[];
 
     @OneToMany(type => PasswordReset,
-        passwordReset => passwordReset.user)
+        passwordReset => passwordReset.user,)
     passwordReset: PasswordReset[];
 
     @OneToMany(type => EmailChange,
-        emailChange => emailChange.user)
+        emailChange => emailChange.user,
+        {
+            eager: true
+        })
     emailChange: EmailChange[];
 
     @CreateDateColumn()

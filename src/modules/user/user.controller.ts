@@ -24,11 +24,19 @@ export class UserController {
     constructor(private readonly userService: UserService, private authService: AuthService) {
     }
 
-    // @Get()
-    // @UseInterceptors(ClassSerializerInterceptor)
-    // findAll(): Promise<User[]> {
-    //     return this.userService.findAll();
-    // }
+    @Get()
+    @UseGuards(AuthGuard('jwt'))
+    findAll(@Usr() user: User,
+            @Res() res: Response) {
+        return this.userService
+            .get(user)
+            .then(result => {
+                res.status(200).json(result);
+            })
+            .catch(err => {
+
+            });
+    }
 
     private static passwordresetErrorHandler(err: any, res: Response) {
         let error: any = {};
@@ -162,17 +170,32 @@ export class UserController {
             });
     }
 
-    @Get('/mail/activate/:mail/:token')
-    activateMail(@Param('mail') mail: string,
-                 @Param('token') token: string,
-                 @Res() res: Response) {
+    @Get('/mail/verify/:mail/:token')
+    verifyMailChange(@Param('mail') mail: string,
+                     @Param('token') token: string,
+                     @Res() res: Response) {
         this.userService
-            .activateMail(mail, token)
+            .verifyMailChange(mail, token)
             .then(result => {
                 return res.status(HttpStatus.OK).json();
             })
             .catch(err => {
                 return UserController.passwordresetErrorHandler(err, res);
+            });
+    }
+
+    @Post('/mail/change/resend')
+    @UseGuards(AuthGuard('jwt'))
+    resendMailChange(@Body('domain') domain: string,
+                     @Usr() user: User,
+                     @Res() res: Response) {
+        this.userService
+            .resendMailChange(user, domain)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
+            })
+            .catch(err => {
+                console.log(err);
             });
     }
 
