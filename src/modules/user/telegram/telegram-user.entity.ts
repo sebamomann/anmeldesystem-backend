@@ -25,6 +25,6 @@ export class TelegramUser {
     @OneToOne(type => User,
         user => user.telegramUser,
         {onDelete: "CASCADE"})
-    @JoinColumn()
+    @JoinColumn({name: 'telegram-user_user'})
     user: User;
 }

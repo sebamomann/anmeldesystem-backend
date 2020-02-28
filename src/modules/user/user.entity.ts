@@ -4,6 +4,7 @@ import {Enrollment} from "../enrollment/enrollment.entity";
 import {TelegramUser} from "./telegram/telegram-user.entity";
 import {PasswordReset} from "./password-reset/password-reset.entity";
 import {Exclude} from "class-transformer";
+import {EmailChange} from "./email-change/email-change.entity";
 
 @Entity()
 export class User {
@@ -45,20 +46,21 @@ export class User {
         })
     administrations: Appointment[];
 
+    @OneToOne(type => TelegramUser,
+        telegramUser => telegramUser.user)
+    telegramUser: TelegramUser;
+
     @OneToMany(type => Enrollment,
         enrollment => enrollment.creator)
     enrollments: Enrollment[];
 
-
-    @OneToOne(type => TelegramUser,
-        telegramUser => telegramUser.user,
-        {onDelete: "CASCADE"})
-    telegramUser: TelegramUser;
-
     @OneToMany(type => PasswordReset,
-        passwordReset => passwordReset.user,
-        {onDelete: "CASCADE"})
-    passwordReset: PasswordReset;
+        passwordReset => passwordReset.user)
+    passwordReset: PasswordReset[];
+
+    @OneToMany(type => EmailChange,
+        emailChange => emailChange.user)
+    emailChange: EmailChange[];
 
     @CreateDateColumn()
     iat: Date;

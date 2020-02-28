@@ -106,17 +106,6 @@ export class UserController {
             });
     }
 
-    @Post('/passwordreset')
-    resetPasswordInit(@Body('mail') mail: string,
-                      @Body('domain') domain: string,
-                      @Res() res: Response) {
-        this.userService
-            .resetPasswordInit(mail, domain)
-            .then(result => {
-                return res.status(HttpStatus.NO_CONTENT).json();
-            });
-    }
-
     @UseGuards(AuthGuard('jwt'))
     @Post('/telegram')
     addTelegramUser(@Body() telegramUser: TelegramUser,
@@ -129,6 +118,17 @@ export class UserController {
             })
             .catch((err) => {
                 return this.defaultErrorResponseHandler(err, res);
+            });
+    }
+
+    @Post('/passwordreset')
+    resetPasswordInit(@Body('mail') mail: string,
+                      @Body('domain') domain: string,
+                      @Res() res: Response) {
+        this.userService
+            .resetPasswordInit(mail, domain)
+            .then(result => {
+                return res.status(HttpStatus.NO_CONTENT).json();
             });
     }
 
@@ -158,6 +158,20 @@ export class UserController {
             })
             .catch(err => {
                 console.log(err);
+                return UserController.passwordresetErrorHandler(err, res);
+            });
+    }
+
+    @Get('/mail/activate/:mail/:token')
+    activateMail(@Param('mail') mail: string,
+                 @Param('token') token: string,
+                 @Res() res: Response) {
+        this.userService
+            .activateMail(mail, token)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
+            })
+            .catch(err => {
                 return UserController.passwordresetErrorHandler(err, res);
             });
     }

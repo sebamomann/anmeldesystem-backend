@@ -13,9 +13,10 @@ import {Key} from "../enrollment/key/key.entity";
 import {UserService} from "../user/user.service";
 import {TelegramUser} from "../user/telegram/telegram-user.entity";
 import {PasswordReset} from "../user/password-reset/password-reset.entity";
+import {EmailChange} from "../user/email-change/email-change.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Addition, Enrollment, Appointment, File, User, Key, TelegramUser, PasswordReset])],
+    imports: [TypeOrmModule.forFeature([Addition, Enrollment, Appointment, File, User, Key, TelegramUser, PasswordReset, EmailChange])],
     providers: [AdditionService, AppointmentService, FileService, UserService],
     exports: [AdditionService, AppointmentService, FileService, UserService],
     controllers: [AdditionController],

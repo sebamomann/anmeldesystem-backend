@@ -2,7 +2,6 @@ import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
 import {Appointment} from "../appointment/appointment.entity";
 
 @Entity()
-// @Index("index_unique_name_appointment", ["name", "appointment", "data"], {unique: true}) // first style
 export class File {
     @PrimaryGeneratedColumn('uuid')
     id: string;
