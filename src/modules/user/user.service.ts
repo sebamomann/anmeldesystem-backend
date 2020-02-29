@@ -36,6 +36,10 @@ export class UserService {
             && fEmailChange.oldMail != 'invalid'
             && fEmailChange.used === null);
 
+        if (JSON.stringify(__user.emailChange) === JSON.stringify([])) {
+            delete __user.emailChange;
+        }
+
         return __user;
     }
 
@@ -322,10 +326,7 @@ export class UserService {
 
         let ret_user = await this.userRepository.save(_user);
 
-        delete ret_user.activated;
-        delete ret_user.password;
-
-        return ret_user;
+        return await this.get(ret_user);
     }
 
     public verifyMailChange(mail: string, token: string) {
@@ -353,6 +354,10 @@ export class UserService {
         });
     }
 
+    cancelMailChange(user: User) {
+        return this.resetPreviousMailChanges(user);
+    }
+
     private async handleEmailChange(user: User, {mail, domain}) {
         console.log("handleMailChange");
         const _user = await this.findByEmail(user.mail);
@@ -369,10 +374,7 @@ export class UserService {
         }
 
         if (_user != null) {
-            await this.emailChangeRepository.query("UPDATE user_mail_change " +
-                "SET oldMail = 'invalid' " +
-                "WHERE used IS NULL " +
-                "AND userId = ?", [_user.id]);
+            await this.resetPreviousMailChanges(_user);
 
             let token = crypto.createHmac('sha256', mail + process.env.MAIL_TOKEN_SALT + Date.now()).digest('hex');
 
@@ -416,4 +418,10 @@ export class UserService {
         }
     }
 
+    private async resetPreviousMailChanges(user: User) {
+        await this.emailChangeRepository.query("UPDATE user_mail_change " +
+            "SET oldMail = 'invalid' " +
+            "WHERE used IS NULL " +
+            "AND userId = ?", [user.id]);
+    }
 }

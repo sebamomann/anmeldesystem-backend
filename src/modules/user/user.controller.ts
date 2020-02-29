@@ -199,6 +199,20 @@ export class UserController {
             });
     }
 
+    @Get('/mail/change/cancel')
+    @UseGuards(AuthGuard('jwt'))
+    cancelMailChange(@Usr() user: User,
+                     @Res() res: Response) {
+        this.userService
+            .cancelMailChange(user)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
     private defaultErrorResponseHandler(err, res: Response) {
         let error: any = {};
 
