@@ -53,6 +53,7 @@ export class AppointmentService {
             .leftJoinAndSelect("enrollments.creator", "enrollment_creator")
             .leftJoinAndSelect("appointment.files", "files")
             .leftJoinAndSelect("appointment.administrators", "administrators")
+            .leftJoinAndSelect("appointment.pinners", "pinners")
             .select(["appointment", "additions", "enrollments",
                 "enrollment_passenger", "enrollment_driver", "enrollment_creator",
                 "creator.username", "files", "administrators.mail", "administrators.username",
@@ -60,6 +61,7 @@ export class AppointmentService {
             .where("creator.id = :creatorId", {creatorId: user.id})
             .orWhere("administrators.id = :admin", {admin: user.id})
             .orWhere("enrollments.creatorId = :user", {user: user.id})
+            .orWhere("pinners.id = :user", {user: user.id})
             .orderBy("appointment.date", "DESC")
             .getMany();
 

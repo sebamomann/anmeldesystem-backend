@@ -39,17 +39,24 @@ export class AppointmentController {
     @Get()
     @UseGuards(AuthGuard('jwt'))
     @UseInterceptors(ClassSerializerInterceptor)
-    findAll(@Query('slim') slim: string, @Usr() user: User): Promise<Appointment[]> {
+    findAll(@Usr() user: User,
+            @Query('slim') slim: string,
+            @Res() res: Response
+    ) {
         let _slim = slim === "true";
         return this.appointmentService
-            .findAll(user, _slim);
+            .findAll(user, _slim)
+            .then(result => {
+                res.status(HttpStatus.OK).json(result);
+            });
     }
 
     @Get(":link/permission")
     @UseGuards(AuthGuard('jwt'))
     permission(@Param('link') link: string,
                @Usr() user: User,
-               @Res() res: Response) {
+               @Res() res: Response
+    ) {
         this.appointmentService
             .hasPermission(link, user)
             .then(result => {
