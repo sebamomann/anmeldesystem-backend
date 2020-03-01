@@ -28,6 +28,7 @@ import {User} from "../user/user.entity";
 import {UserUtil} from "../../util/userUtil.util";
 import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
 import {Etag} from "../../util/etag";
+import {UserController} from "../user/user.controller";
 
 @Controller('appointment')
 export class AppointmentController {
@@ -55,6 +56,26 @@ export class AppointmentController {
                 res.status(HttpStatus.OK).json(result);
             });
     }
+
+    @Get(':link/pin')
+    @UseGuards(AuthGuard('jwt'))
+    pinAppointment(@Usr() user: User,
+                   @Param('link') link: string,
+                   @Res() res: Response) {
+        this.appointmentService
+            .pinAppointment(user, link)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
+            })
+            .catch(err => {
+                if (err instanceof NotFoundException) {
+                    throw err;
+                }
+
+                return UserController.passwordresetErrorHandler(err, res);
+            });
+    }
+
 
     @Post()
     @UseGuards(AuthGuard('jwt'))

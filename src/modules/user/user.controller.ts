@@ -38,7 +38,11 @@ export class UserController {
             });
     }
 
-    private static passwordresetErrorHandler(err: any, res: Response) {
+    static passwordresetErrorHandler(err: any, res: Response) {
+        if (err instanceof NotFoundException) {
+            return err;
+        }
+
         let error: any = {};
         if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED' || err.code === 'OUTDATED') {
             error.code = err.code;
@@ -210,22 +214,6 @@ export class UserController {
             })
             .catch(err => {
                 console.log(err);
-            });
-    }
-
-    @Get('appointment/:link/pin')
-    @UseGuards(AuthGuard('jwt'))
-    pinAppointment(@Usr() user: User,
-                   @Param('link') link: string,
-                   @Res() res: Response) {
-        this.userService
-            .pinAppointment(user, link)
-            .then(result => {
-                return res.status(HttpStatus.OK).json();
-            })
-            .catch(err => {
-                console.log(err);
-                return UserController.passwordresetErrorHandler(err, res);
             });
     }
 

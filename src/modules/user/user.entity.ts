@@ -51,7 +51,7 @@ export class User {
     @ManyToMany(type => Appointment,
         appointment => appointment.pinners,
         {
-            eager: false
+            eager: true
         }
     )
     pinned: Appointment[];

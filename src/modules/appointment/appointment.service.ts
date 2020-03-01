@@ -118,6 +118,20 @@ export class AppointmentService {
         return appointment;
     }
 
+    async pinAppointment(user: User, link: string) {
+        const appointment = await this.find(link);
+        const _user = await this.userService.findById("" + user.id);
+
+        if (_user.pinned.some(sPinned => sPinned.id === appointment.id)) {
+            const removeIndex = _user.pinned.indexOf(appointment);
+            _user.pinned.splice(removeIndex, 1);
+        } else {
+            _user.pinned.push(appointment);
+        }
+
+        return this.userRepository.save(_user);
+    }
+
     async findBasic(link: string): Promise<Appointment> {
         return await getRepository(Appointment)
             .createQueryBuilder("appointment")
