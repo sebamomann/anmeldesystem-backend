@@ -8,6 +8,7 @@ import {PasswordReset} from "./password-reset/password-reset.entity";
 import {InvalidTokenException} from "../../exceptions/InvalidTokenException";
 import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
 import {EmailChange} from "./email-change/email-change.entity";
+import {AppointmentService} from "../appointment/appointment.service";
 
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
@@ -24,7 +25,8 @@ export class UserService {
         private readonly passwordResetRepository: Repository<PasswordReset>,
         @InjectRepository(EmailChange)
         private readonly emailChangeRepository: Repository<EmailChange>,
-        private readonly mailerService: MailerService,
+        private mailerService: MailerService,
+        private appointmentService: AppointmentService
     ) {
     }
 
@@ -423,5 +425,19 @@ export class UserService {
             "SET oldMail = 'invalid' " +
             "WHERE used IS NULL " +
             "AND userId = ?", [user.id]);
+    }
+
+    async pinAppointment(user: User, link: string) {
+        const appointment = await this.appointmentService.find(link);
+        const _user = await this.find(user.id);
+
+        if (_user.pinned.includes(appointment)) {
+            const removeIndex = _user.pinned.indexOf(appointment);
+            _user.pinned.splice(removeIndex, 1);
+        } else {
+            _user.pinned.push(appointment);
+        }
+
+        return this.userRepository.save(_user);
     }
 }

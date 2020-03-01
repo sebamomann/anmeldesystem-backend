@@ -213,6 +213,23 @@ export class UserController {
             });
     }
 
+    @Get('appointment/:link/pin')
+    @UseGuards(AuthGuard('jwt'))
+    pinAppointment(@Usr() user: User,
+                   @Param('link') link: string,
+                   @Res() res: Response) {
+        this.userService
+            .pinAppointment(user, link)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
+            })
+            .catch(err => {
+                console.log(err);
+                return UserController.passwordresetErrorHandler(err, res);
+            });
+    }
+
+
     private defaultErrorResponseHandler(err, res: Response) {
         let error: any = {};
 

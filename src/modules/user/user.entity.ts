@@ -39,12 +39,22 @@ export class User {
     )
     appointments: Appointment[];
 
+
     @ManyToMany(type => Appointment,
         appointment => appointment.administrators,
         {
             eager: false
         })
     administrations: Appointment[];
+
+
+    @ManyToMany(type => Appointment,
+        appointment => appointment.pinners,
+        {
+            eager: false
+        }
+    )
+    pinned: Appointment[];
 
     @OneToOne(type => TelegramUser,
         telegramUser => telegramUser.user)
