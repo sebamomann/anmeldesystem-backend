@@ -89,4 +89,6 @@ export class Appointment {
     @UpdateDateColumn({name: 'lud', nullable: true})
     @Exclude({toPlainOnly: true})
     lud: Date;
+
+    reference?: string[] = [];
 }

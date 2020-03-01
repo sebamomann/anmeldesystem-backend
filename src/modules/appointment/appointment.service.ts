@@ -56,8 +56,8 @@ export class AppointmentService {
             .leftJoinAndSelect("appointment.pinners", "pinners")
             .select(["appointment", "additions", "enrollments",
                 "enrollment_passenger", "enrollment_driver", "enrollment_creator",
-                "creator.username", "files", "administrators.mail", "administrators.username",
-                "enrollment_additions"])
+                "creator.username", "files", "administrators.username", "administrators.name",
+                "enrollment_additions", "pinners"])
             .where("creator.id = :creatorId", {creatorId: user.id})
             .orWhere("administrators.id = :admin", {admin: user.id})
             .orWhere("enrollments.creatorId = :user", {user: user.id})
@@ -65,12 +65,38 @@ export class AppointmentService {
             .orderBy("appointment.date", "DESC")
             .getMany();
 
+
         appointments.map(fAppointment => {
+            if (fAppointment.administrators !== undefined
+                && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username)) {
+                fAppointment.reference.push("ADMIN")
+            }
+
+            if (fAppointment.creator.username === user.username) {
+                fAppointment.reference.push("CREATOR")
+            }
+
+            if (fAppointment.enrollments !== undefined
+                && fAppointment.enrollments.some(sEnrollment => {
+                    return sEnrollment.creator != null
+                        && sEnrollment.creator.id === user.id
+                })) {
+                fAppointment.reference.push("ENROLLED")
+            }
+
+            if (fAppointment.pinners !== undefined
+                && fAppointment.pinners.some(sPinner => sPinner.id === user.id)) {
+                fAppointment.reference.push("PINNED")
+            }
+
             fAppointment.enrollments.map(mEnrollments => {
                 mEnrollments.createdByUser = mEnrollments.creator != null;
                 delete mEnrollments.creator;
-            })
+            });
+
+            delete fAppointment.pinners;
         });
+
 
         if (slim) {
             appointments = appointments.map(fAppointment => {
