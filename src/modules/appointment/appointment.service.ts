@@ -41,7 +41,14 @@ export class AppointmentService {
         }));
     }
 
-    async findAll(user: User, slim = false): Promise<Appointment[]> {
+    async findAll(user: User, params: any, slim = false): Promise<Appointment[]> {
+        let pins = [];
+        for (const queryKey of Object.keys(params)) {
+            if (queryKey.startsWith("pin")) {
+                pins.push(params[queryKey]);
+            }
+        }
+
         let appointments = await getRepository(Appointment)
             .createQueryBuilder("appointment")
             .leftJoinAndSelect("appointment.creator", "creator")
@@ -62,6 +69,7 @@ export class AppointmentService {
             .orWhere("administrators.id = :admin", {admin: user.id})
             .orWhere("enrollments.creatorId = :user", {user: user.id})
             .orWhere("pinners.id = :user", {user: user.id})
+            .orWhere("appointment.link IN (:...links)", {links: pins})
             .orderBy("appointment.date", "DESC")
             .getMany();
 
@@ -85,7 +93,8 @@ export class AppointmentService {
             }
 
             if (fAppointment.pinners !== undefined
-                && fAppointment.pinners.some(sPinner => sPinner.id === user.id)) {
+                && fAppointment.pinners.some(sPinner => sPinner.id === user.id)
+                || pins.includes(fAppointment.link)) {
                 fAppointment.reference.push("PINNED")
             }
 

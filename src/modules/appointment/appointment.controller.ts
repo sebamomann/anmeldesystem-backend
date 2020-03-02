@@ -41,12 +41,13 @@ export class AppointmentController {
     @UseGuards(AuthGuard('jwt'))
     @UseInterceptors(ClassSerializerInterceptor)
     findAll(@Usr() user: User,
+            @Query() params: any,
             @Query('slim') slim: string,
             @Res() res: Response
     ) {
         let _slim = slim === "true";
         return this.appointmentService
-            .findAll(user, _slim)
+            .findAll(user, params, _slim)
             .then(result => {
                 res.status(HttpStatus.OK).json(result);
             });
