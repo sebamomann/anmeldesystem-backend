@@ -38,7 +38,7 @@ export class AppointmentController {
     }
 
     @Get()
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(JwtOptStrategy)
     @UseInterceptors(ClassSerializerInterceptor)
     findAll(@Usr() user: User,
             @Query() params: any,

@@ -42,7 +42,7 @@ export class AppointmentService {
     }
 
     async findAll(user: User, params: any, slim = false): Promise<Appointment[]> {
-        let pins = [];
+        let pins = [''];
         for (const queryKey of Object.keys(params)) {
             if (queryKey.startsWith("pin")) {
                 pins.push(params[queryKey]);
@@ -72,30 +72,30 @@ export class AppointmentService {
             .orWhere("appointment.link IN (:...links)", {links: pins})
             .orderBy("appointment.date", "DESC")
             .getMany();
-
-
         appointments.map(fAppointment => {
-            if (fAppointment.administrators !== undefined
-                && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username)) {
-                fAppointment.reference.push("ADMIN")
-            }
+            if (user != null) {
+                if (fAppointment.administrators !== undefined
+                    && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username)) {
+                    fAppointment.reference.push("ADMIN")
+                }
 
-            if (fAppointment.creator.username === user.username) {
-                fAppointment.reference.push("CREATOR")
-            }
+                if (fAppointment.creator.username === user.username) {
+                    fAppointment.reference.push("CREATOR")
+                }
 
-            if (fAppointment.enrollments !== undefined
-                && fAppointment.enrollments.some(sEnrollment => {
-                    return sEnrollment.creator != null
-                        && sEnrollment.creator.id === user.id
-                })) {
-                fAppointment.reference.push("ENROLLED")
-            }
+                if (fAppointment.enrollments !== undefined
+                    && fAppointment.enrollments.some(sEnrollment => {
+                        return sEnrollment.creator != null
+                            && sEnrollment.creator.id === user.id
+                    })) {
+                    fAppointment.reference.push("ENROLLED")
+                }
 
-            if (fAppointment.pinners !== undefined
-                && fAppointment.pinners.some(sPinner => sPinner.id === user.id)
-                || pins.includes(fAppointment.link)) {
-                fAppointment.reference.push("PINNED")
+                if (fAppointment.pinners !== undefined
+                    && fAppointment.pinners.some(sPinner => sPinner.id === user.id)
+                    || pins.includes(fAppointment.link)) {
+                    fAppointment.reference.push("PINNED")
+                }
             }
 
             fAppointment.enrollments.map(mEnrollments => {
