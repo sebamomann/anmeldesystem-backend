@@ -122,10 +122,11 @@ export class AppointmentService {
             .leftJoinAndSelect("enrollments.additions", "enrollment_additions")
             .leftJoinAndSelect("appointment.files", "files")
             .leftJoinAndSelect("appointment.administrators", "administrators")
+            .leftJoinAndSelect("appointment.pinners", "pinners")
             .select(["appointment", "additions", "enrollments",
                 "enrollment_passenger", "enrollment_driver", "enrollment_creator", "enrollments.iat",
                 "creator.username", "creator.name", "files.name", "files.id", "administrators.name", "administrators.username",
-                "enrollment_additions"])
+                "enrollment_additions", "pinners"])
             .orderBy("enrollments.iat", "ASC")
             .getOne();
 
