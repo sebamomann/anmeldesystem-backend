@@ -56,7 +56,7 @@ export class AppointmentService {
             .leftJoinAndSelect("appointment.pinners", "pinners")
             .select(["appointment", "additions", "enrollments",
                 "enrollment_passenger", "enrollment_driver", "enrollment_creator",
-                "creator.username", "files", "administrators.username", "administrators.name",
+                "creator.username", "creator.name", "files", "administrators.username", "administrators.name",
                 "enrollment_additions", "pinners"])
             .where("creator.id = :creatorId", {creatorId: user.id})
             .orWhere("administrators.id = :admin", {admin: user.id})
