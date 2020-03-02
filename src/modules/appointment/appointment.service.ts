@@ -109,7 +109,7 @@ export class AppointmentService {
         return appointments;
     }
 
-    async find(link: string, slim: boolean = false): Promise<Appointment> {
+    async find(link: string, user: User, slim: boolean = false): Promise<Appointment> {
         let appointment = await getRepository(Appointment)
             .createQueryBuilder("appointment")
             .where("appointment.link = :link", {link: link})
@@ -124,13 +124,19 @@ export class AppointmentService {
             .leftJoinAndSelect("appointment.administrators", "administrators")
             .select(["appointment", "additions", "enrollments",
                 "enrollment_passenger", "enrollment_driver", "enrollment_creator", "enrollments.iat",
-                "creator.username", "files.name", "files.id", "administrators.mail", "administrators.username",
+                "creator.username", "creator.name", "files.name", "files.id", "administrators.name", "administrators.username",
                 "enrollment_additions"])
             .orderBy("enrollments.iat", "ASC")
             .getOne();
 
         if (appointment === undefined) {
             throw new NotFoundException();
+        }
+
+        if (appointment.pinners !== undefined
+            && user != null
+            && appointment.pinners.some(sPinner => sPinner.id === user.id)) {
+            appointment.reference.push("PINNED")
         }
 
         if (slim) {
@@ -147,7 +153,7 @@ export class AppointmentService {
     }
 
     async pinAppointment(user: User, link: string) {
-        const appointment = await this.find(link);
+        const appointment = await this.find(link, user);
         const _user = await this.userService.findById("" + user.id);
 
         if (_user.pinned.some(sPinned => sPinned.id === appointment.id)) {
@@ -274,7 +280,7 @@ export class AppointmentService {
 
         await this.appointmentRepository.save(appointment);
 
-        return await this.find(appointment.link);
+        return await this.find(appointment.link, user);
     }
 
 
@@ -318,7 +324,7 @@ export class AppointmentService {
     }
 
     public async addAdministrator(link: string, username: string) {
-        const appointment = await this.find(link);
+        const appointment = await this.find(link, null);
 
         const user = await this.userService.findByUsername(username);
         if (user === undefined) {
@@ -331,7 +337,7 @@ export class AppointmentService {
     }
 
     public async removeAdministrator(link: string, username: string) {
-        const appointment = await this.find(link);
+        const appointment = await this.find(link, null);
 
         appointment.administrators = appointment.administrators.filter(fAdministrator => {
             return fAdministrator.username != username;
@@ -341,7 +347,7 @@ export class AppointmentService {
     }
 
     public async addFile(link: string, data: any) {
-        const appointment = await this.find(link);
+        const appointment = await this.find(link, null);
         console.log("add file", data.name, data.data.length);
 
         const file = new File();

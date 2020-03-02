@@ -63,7 +63,7 @@ export class EnrollmentService {
     }
 
     async create(enrollment: Enrollment, link: string, user: User) {
-        const appointment: Appointment = await this.appointmentService.find(link);
+        const appointment: Appointment = await this.appointmentService.find(link, user);
 
         try {
             EnrollmentService.checkForEmptyValues(enrollment, user);

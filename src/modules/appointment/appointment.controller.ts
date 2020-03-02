@@ -29,6 +29,7 @@ import {UserUtil} from "../../util/userUtil.util";
 import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
 import {Etag} from "../../util/etag";
 import {UserController} from "../user/user.controller";
+import {JwtOptStrategy} from "../../auth/jwt-opt.strategy";
 
 @Controller('appointment')
 export class AppointmentController {
@@ -163,10 +164,15 @@ export class AppointmentController {
     }
 
     @Get(':link')
-    findByLink(@Query('slim') slim: string, @Param('link') link: string, @Request() req: Request, @Res() res: Response) {
+    @UseGuards(JwtOptStrategy)
+    findByLink(@Usr() user: User,
+               @Query('slim') slim: string,
+               @Param('link') link: string,
+               @Request() req: Request,
+               @Res() res: Response) {
         let _slim = slim === "true";
         return this.appointmentService
-            .find(link, _slim)
+            .find(link, user, _slim)
             .then(tAppointment => {
                 if (tAppointment != null) {
                     const etag = Etag.generate(JSON.stringify(tAppointment));
@@ -194,42 +200,42 @@ export class AppointmentController {
             });
     }
 
-    @Post('newcontent/:link')
-    updateAvailable(@Param('link') link: string, @Body("lastUpdated") lud: Date, @Request() req: Request, @Res() res: Response) {
-        const date = new Date(lud).getTime();
-        return this.appointmentService
-            .find(link)
-            .then(tAppointment => {
-                if (tAppointment != null) {
-                    const appointmentDate = tAppointment.lud.getTime();
-                    const enrollments = tAppointment.enrollments.filter(fEnrollment => {
-                        if (fEnrollment.lud.getTime() > date) {
-                            return fEnrollment;
-                        }
-                    });
-                    console.log(`${appointmentDate} ${date}`);
-
-                    if (enrollments.length > 0 || appointmentDate > date) {
-                        res.status(HttpStatus.OK).json(tAppointment);
-                    } else {
-                        res.status(HttpStatus.NOT_MODIFIED).json();
-                    }
-
-                } else {
-                    res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
-                }
-            }).catch((err) => {
-                if (err instanceof NotFoundException) {
-                    throw err;
-                }
-
-                console.log(err);
-                let error = {error: {}};
-                error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
-            });
-    }
+    // @Post('newcontent/:link')
+    // updateAvailable(@Param('link') link: string, @Body("lastUpdated") lud: Date, @Request() req: Request, @Res() res: Response) {
+    //     const date = new Date(lud).getTime();
+    //     return this.appointmentService
+    //         .find(link)
+    //         .then(tAppointment => {
+    //             if (tAppointment != null) {
+    //                 const appointmentDate = tAppointment.lud.getTime();
+    //                 const enrollments = tAppointment.enrollments.filter(fEnrollment => {
+    //                     if (fEnrollment.lud.getTime() > date) {
+    //                         return fEnrollment;
+    //                     }
+    //                 });
+    //                 console.log(`${appointmentDate} ${date}`);
+    //
+    //                 if (enrollments.length > 0 || appointmentDate > date) {
+    //                     res.status(HttpStatus.OK).json(tAppointment);
+    //                 } else {
+    //                     res.status(HttpStatus.NOT_MODIFIED).json();
+    //                 }
+    //
+    //             } else {
+    //                 res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
+    //             }
+    //         }).catch((err) => {
+    //             if (err instanceof NotFoundException) {
+    //                 throw err;
+    //             }
+    //
+    //             console.log(err);
+    //             let error = {error: {}};
+    //             error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
+    //
+    //             res.status(HttpStatus.BAD_REQUEST).json(error);
+    //         });
+    // }
 
     @Post(':link/administrator')
     addAdministrator(@Param('link') link: string, @Body("username") username: string,
