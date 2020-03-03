@@ -20,9 +20,10 @@ import {PassengerService} from "./passenger/passenger.service";
 import {UserService} from "../user/user.service";
 import {TelegramUser} from "../user/telegram/telegram-user.entity";
 import {PasswordReset} from "../user/password-reset/password-reset.entity";
+import {EmailChange} from "../user/email-change/email-change.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Enrollment, Appointment, Addition, File, Driver, Passenger, Comment, User, Key, TelegramUser, PasswordReset])],
+    imports: [TypeOrmModule.forFeature([Enrollment, Appointment, Addition, File, Driver, Passenger, Comment, User, Key, TelegramUser, PasswordReset, EmailChange])],
     providers: [EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService, PassengerService, UserService],
     exports: [EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService, PassengerService, UserService],
     controllers: [EnrollmentController],

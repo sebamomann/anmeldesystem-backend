@@ -3,6 +3,7 @@ import {
     CreateDateColumn,
     Entity,
     Index,
+    JoinColumn,
     JoinTable,
     ManyToMany,
     ManyToOne,
@@ -69,8 +70,9 @@ export class Enrollment {
     iat: Date;
 
     @ManyToOne(type => User,
+        user => user.enrollments,
         {onDelete: "CASCADE"})
-    @JoinTable({name: 'enrollment_creator'})
+    @JoinColumn()
     creator: User;
 
     @OneToOne(type => Key,

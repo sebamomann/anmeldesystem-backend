@@ -24,11 +24,19 @@ export class UserController {
     constructor(private readonly userService: UserService, private authService: AuthService) {
     }
 
-    // @Get()
-    // @UseInterceptors(ClassSerializerInterceptor)
-    // findAll(): Promise<User[]> {
-    //     return this.userService.findAll();
-    // }
+    @Get()
+    @UseGuards(AuthGuard('jwt'))
+    findAll(@Usr() user: User,
+            @Res() res: Response) {
+        return this.userService
+            .get(user)
+            .then(result => {
+                res.status(200).json(result);
+            })
+            .catch(err => {
+
+            });
+    }
 
     private static passwordresetErrorHandler(err: any, res: Response) {
         let error: any = {};
@@ -106,17 +114,6 @@ export class UserController {
             });
     }
 
-    @Post('/passwordreset')
-    resetPasswordInit(@Body('mail') mail: string,
-                      @Body('domain') domain: string,
-                      @Res() res: Response) {
-        this.userService
-            .resetPasswordInit(mail, domain)
-            .then(result => {
-                return res.status(HttpStatus.NO_CONTENT).json();
-            });
-    }
-
     @UseGuards(AuthGuard('jwt'))
     @Post('/telegram')
     addTelegramUser(@Body() telegramUser: TelegramUser,
@@ -129,6 +126,17 @@ export class UserController {
             })
             .catch((err) => {
                 return this.defaultErrorResponseHandler(err, res);
+            });
+    }
+
+    @Post('/passwordreset')
+    resetPasswordInit(@Body('mail') mail: string,
+                      @Body('domain') domain: string,
+                      @Res() res: Response) {
+        this.userService
+            .resetPasswordInit(mail, domain)
+            .then(result => {
+                return res.status(HttpStatus.NO_CONTENT).json();
             });
     }
 
@@ -159,6 +167,49 @@ export class UserController {
             .catch(err => {
                 console.log(err);
                 return UserController.passwordresetErrorHandler(err, res);
+            });
+    }
+
+    @Get('/mail/verify/:mail/:token')
+    verifyMailChange(@Param('mail') mail: string,
+                     @Param('token') token: string,
+                     @Res() res: Response) {
+        this.userService
+            .verifyMailChange(mail, token)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
+            })
+            .catch(err => {
+                return UserController.passwordresetErrorHandler(err, res);
+            });
+    }
+
+    @Post('/mail/change/resend')
+    @UseGuards(AuthGuard('jwt'))
+    resendMailChange(@Body('domain') domain: string,
+                     @Usr() user: User,
+                     @Res() res: Response) {
+        this.userService
+            .resendMailChange(user, domain)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    @Get('/mail/change/cancel')
+    @UseGuards(AuthGuard('jwt'))
+    cancelMailChange(@Usr() user: User,
+                     @Res() res: Response) {
+        this.userService
+            .cancelMailChange(user)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
+            })
+            .catch(err => {
+                console.log(err);
             });
     }
 

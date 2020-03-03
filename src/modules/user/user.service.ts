@@ -1,12 +1,13 @@
-import {Injectable} from '@nestjs/common';
+import {BadRequestException, Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {User} from "./user.entity";
-import {Repository} from 'typeorm';
+import {getRepository, Repository} from 'typeorm';
 import {TelegramUser} from "./telegram/telegram-user.entity";
 import {MailerService} from "@nest-modules/mailer";
 import {PasswordReset} from "./password-reset/password-reset.entity";
 import {InvalidTokenException} from "../../exceptions/InvalidTokenException";
 import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
+import {EmailChange} from "./email-change/email-change.entity";
 
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
@@ -21,12 +22,25 @@ export class UserService {
         private readonly telegramUserRepository: Repository<TelegramUser>,
         @InjectRepository(PasswordReset)
         private readonly passwordResetRepository: Repository<PasswordReset>,
+        @InjectRepository(EmailChange)
+        private readonly emailChangeRepository: Repository<EmailChange>,
         private readonly mailerService: MailerService,
     ) {
     }
 
-    findAll(): Promise<User[]> {
-        return this.userRepository.find();
+    async get(user) {
+        const _user = await this.userRepository.findByIds(user.id);
+        const __user = _user[0];
+        __user.emailChange = __user.emailChange.filter(fEmailChange =>
+            (fEmailChange.iat.getTime()) + (24 * 60 * 60 * 1000) > Date.now()
+            && fEmailChange.oldMail != 'invalid'
+            && fEmailChange.used === null);
+
+        if (JSON.stringify(__user.emailChange) === JSON.stringify([])) {
+            delete __user.emailChange;
+        }
+
+        return __user;
     }
 
     public async register(user: User, domain: string) {
@@ -100,9 +114,15 @@ export class UserService {
             .getOne();
     }
 
-    async resetPasswordInit(mail: string, domain: string) {
+    public async findById(id: string): Promise<User | undefined> {
+        return await this.userRepository
+            .createQueryBuilder("user")
+            .where("user.id = :id", {id: id})
+            .getOne();
+    }
+
+    public async resetPasswordInit(mail: string, domain: string) {
         const user = await this.findByEmail(mail);
-        console.log(user);
         if (user != null) {
             await this.passwordResetRepository.query("UPDATE user_password_reset " +
                 "SET oldPassword = 'invalid' " +
@@ -209,6 +229,29 @@ export class UserService {
         throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
     }
 
+    public async validateMailChangeToken(mail: string, token: string) {
+        let emailChange = await this.emailChangeRepository
+            .createQueryBuilder("emailChange")
+            .where("emailChange.token = :token", {token: token})
+            .andWhere("emailChange.newMail = :mail", {mail: mail})
+            .getOne();
+        if (emailChange != undefined) {
+            if ((emailChange.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
+                if (emailChange.oldMail === 'invalid') {
+                    throw new InvalidTokenException('OUTDATED', 'Provided token was already replaced by a new one', null);
+                } else if (emailChange.used === null) {
+                    return emailChange;
+                }
+
+                throw new InvalidTokenException('USED', 'Provided token was already used', {date: new Date(emailChange.used)});
+            }
+
+            throw new InvalidTokenException('EXPIRED', 'Provided token expired', null);
+        }
+
+        throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
+    }
+
     async updatePassword(mail: string, token: string, pass: string): Promise<boolean> {
         var self = this;
         return new Promise(function (resolve, reject) {
@@ -261,11 +304,20 @@ export class UserService {
             if (key in _user && _user[key] !== value) {
                 let _value = value;
                 if (key === "username") {
+                    _value = _user.username;
                 }
-                if (key === "email") {
+                if (key === "mail") {
+                    this.handleEmailChange(user, toChange)
+                        .catch(err => {
+                            console.log(err);
+                            throw err;
+                        });
+                    _value = _user.mail;
                 }
                 if (key === "password") {
+                    _value = bcrypt.hashSync(_value, 10);
                 }
+
                 console.log(`${key} changed from ${JSON.stringify(_user[key])} to ${JSON.stringify(_value)}`);
 
                 _user[key] = _value;
@@ -274,9 +326,102 @@ export class UserService {
 
         let ret_user = await this.userRepository.save(_user);
 
-        delete ret_user.activated;
-        delete ret_user.password;
+        return await this.get(ret_user);
+    }
 
-        return ret_user;
+    public verifyMailChange(mail: string, token: string) {
+        const self = this;
+        return new Promise(function (resolve, reject) {
+            self.validateMailChangeToken(mail, token)
+                .then(async res => {
+                    const user = await self.findByEmail(res.oldMail);
+                    let currentMail = user.mail;
+                    user.mail = mail;
+
+                    await self.userRepository.save(user);
+                    await self.passwordResetRepository
+                        .createQueryBuilder("emailChange")
+                        .update(EmailChange)
+                        .set({used: new Date(Date.now()), oldMail: currentMail})
+                        .where("token = :token", {token: token})
+                        .execute();
+
+                    return resolve(true);
+                })
+                .catch(err => {
+                    reject(err);
+                });
+        });
+    }
+
+    cancelMailChange(user: User) {
+        return this.resetPreviousMailChanges(user);
+    }
+
+    private async handleEmailChange(user: User, {mail, domain}) {
+        console.log("handleMailChange");
+        const _user = await this.findByEmail(user.mail);
+
+        if (await this.findByEmail(mail) !== undefined) {
+            throw new DuplicateValueException('DUPLICATE_ENTRY',
+                'Following values are already taken',
+                ['mail']);
+        }
+
+        if (domain === '') {
+            console.log("missing domain");
+            throw new BadRequestException("EMPTY_FIELDS", "Due to the mail change you need to provide the domain for the activation call");
+        }
+
+        if (_user != null) {
+            await this.resetPreviousMailChanges(_user);
+
+            let token = crypto.createHmac('sha256', mail + process.env.MAIL_TOKEN_SALT + Date.now()).digest('hex');
+
+            const emailChange = new EmailChange();
+            emailChange.user = user;
+            emailChange.token = token;
+            emailChange.newMail = mail;
+            emailChange.oldMail = user.mail;
+
+            await this.emailChangeRepository.save(emailChange);
+
+            this.mailerService
+                .sendMail({
+                    to: mail,
+                    from: 'no-reply@eca.cg-hh.de',
+                    subject: 'Bitte bestätige deine neue Email-Adresse',
+                    template: 'emailchange', // The `.pug` or `.hbs` extension is appended automatically.
+                    context: {  // Data to be sent to template engine.
+                        name: _user.username,
+                        url: `https://${domain}/${mail}/${token}`
+                    },
+                })
+                .then(() => {
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
+    }
+
+    async resendMailChange(user, domain: string) {
+        let emailChange = await getRepository(EmailChange)
+            .createQueryBuilder("emailChange")
+            .where("emailChange.oldMail NOT LIKE :oldMail", {oldMail: 'invalid'})
+            .andWhere("emailChange.used IS NULL")
+            .orderBy("emailChange.iat", "DESC")
+            .getOne();
+
+        if (emailChange !== undefined) {
+            this.handleEmailChange(user, {mail: emailChange.newMail, domain: domain});
+        }
+    }
+
+    private async resetPreviousMailChanges(user: User) {
+        await this.emailChangeRepository.query("UPDATE user_mail_change " +
+            "SET oldMail = 'invalid' " +
+            "WHERE used IS NULL " +
+            "AND userId = ?", [user.id]);
     }
 }

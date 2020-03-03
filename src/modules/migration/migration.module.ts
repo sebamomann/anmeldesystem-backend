@@ -21,9 +21,10 @@ import {AppointmentController} from "../appointment/appointment.controller";
 import {MigrationService} from "./migration.service";
 import {PasswordReset} from "../user/password-reset/password-reset.entity";
 import {FileService} from "../file/file.service";
+import {EmailChange} from "../user/email-change/email-change.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Appointment, Addition, File, Comment, Enrollment, Driver, Passenger, User, Key, TelegramUser, PasswordReset])],
+    imports: [TypeOrmModule.forFeature([Appointment, Addition, File, Comment, Enrollment, Driver, Passenger, User, Key, TelegramUser, PasswordReset, EmailChange])],
     providers: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService, FileService],
     exports: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService, FileService],
     controllers: [AppointmentController],
