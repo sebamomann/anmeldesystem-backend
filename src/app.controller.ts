@@ -7,8 +7,8 @@ export class AppController {
     constructor(private readonly authService: AuthService) {
     }
 
-    @UseGuards(AuthGuard('local'))
     @Post('auth/login')
+    @UseGuards(AuthGuard('local'))
     async login(@Request() req,
                 @Res() res) {
         if (req.user instanceof Date) {

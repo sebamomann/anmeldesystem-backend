@@ -284,7 +284,6 @@ export class UserService {
             "AND userId = ? " +
             "ORDER BY iat DESC " +
             "LIMIT 1", [user.id]);
-        console.log(res);
         if (res) {
             if (await bcrypt.compare(pass, res[0].oldPassword)) {
                 console.log("is old pass");
@@ -420,5 +419,9 @@ export class UserService {
             "SET oldMail = 'invalid' " +
             "WHERE used IS NULL " +
             "AND userId = ?", [user.id]);
+    }
+
+    async findByEmailOrUsername(value: string) {
+        return await this.userRepository.findOne({where: [{mail: value}, {username: value}]});
     }
 }
