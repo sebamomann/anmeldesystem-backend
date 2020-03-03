@@ -24,7 +24,7 @@ export class UserService {
         private readonly passwordResetRepository: Repository<PasswordReset>,
         @InjectRepository(EmailChange)
         private readonly emailChangeRepository: Repository<EmailChange>,
-        private readonly mailerService: MailerService,
+        private mailerService: MailerService,
     ) {
     }
 
@@ -115,10 +115,7 @@ export class UserService {
     }
 
     public async findById(id: string): Promise<User | undefined> {
-        return await this.userRepository
-            .createQueryBuilder("user")
-            .where("user.id = :id", {id: id})
-            .getOne();
+        return await this.userRepository.findOne({where: {id: id}});
     }
 
     public async resetPasswordInit(mail: string, domain: string) {

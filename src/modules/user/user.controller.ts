@@ -38,7 +38,11 @@ export class UserController {
             });
     }
 
-    private static passwordresetErrorHandler(err: any, res: Response) {
+    static passwordresetErrorHandler(err: any, res: Response) {
+        if (err instanceof NotFoundException) {
+            return err;
+        }
+
         let error: any = {};
         if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED' || err.code === 'OUTDATED') {
             error.code = err.code;
@@ -212,6 +216,7 @@ export class UserController {
                 console.log(err);
             });
     }
+
 
     private defaultErrorResponseHandler(err, res: Response) {
         let error: any = {};

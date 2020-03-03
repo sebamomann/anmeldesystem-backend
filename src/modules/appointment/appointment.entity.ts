@@ -64,6 +64,12 @@ export class Appointment {
     @JoinTable()
     administrators: User[];
 
+    @ManyToMany(type => User,
+        user => user.pinned,
+        {eager: false})
+    @JoinTable()
+    pinners: User[];
+
     @OneToMany(type => File,
         file => file.appointment,
         {
@@ -83,4 +89,6 @@ export class Appointment {
     @UpdateDateColumn({name: 'lud', nullable: true})
     @Exclude({toPlainOnly: true})
     lud: Date;
+
+    reference?: string[] = [];
 }

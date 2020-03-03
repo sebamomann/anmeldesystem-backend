@@ -41,7 +41,14 @@ export class AppointmentService {
         }));
     }
 
-    async findAll(user: User, slim = false): Promise<Appointment[]> {
+    async findAll(user: User, params: any, slim = false): Promise<Appointment[]> {
+        let pins = [''];
+        for (const queryKey of Object.keys(params)) {
+            if (queryKey.startsWith("pin")) {
+                pins.push(params[queryKey]);
+            }
+        }
+
         let appointments = await getRepository(Appointment)
             .createQueryBuilder("appointment")
             .leftJoinAndSelect("appointment.creator", "creator")
@@ -53,22 +60,52 @@ export class AppointmentService {
             .leftJoinAndSelect("enrollments.creator", "enrollment_creator")
             .leftJoinAndSelect("appointment.files", "files")
             .leftJoinAndSelect("appointment.administrators", "administrators")
+            .leftJoinAndSelect("appointment.pinners", "pinners")
             .select(["appointment", "additions", "enrollments",
                 "enrollment_passenger", "enrollment_driver", "enrollment_creator",
-                "creator.username", "files", "administrators.mail", "administrators.username",
-                "enrollment_additions"])
+                "creator.username", "creator.name", "files", "administrators.username", "administrators.name",
+                "enrollment_additions", "pinners"])
             .where("creator.id = :creatorId", {creatorId: user.id})
             .orWhere("administrators.id = :admin", {admin: user.id})
             .orWhere("enrollments.creatorId = :user", {user: user.id})
+            .orWhere("pinners.id = :user", {user: user.id})
+            .orWhere("appointment.link IN (:...links)", {links: pins})
             .orderBy("appointment.date", "DESC")
             .getMany();
-
         appointments.map(fAppointment => {
+            if (user != null) {
+                if (fAppointment.administrators !== undefined
+                    && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username)) {
+                    fAppointment.reference.push("ADMIN")
+                }
+
+                if (fAppointment.creator.username === user.username) {
+                    fAppointment.reference.push("CREATOR")
+                }
+
+                if (fAppointment.enrollments !== undefined
+                    && fAppointment.enrollments.some(sEnrollment => {
+                        return sEnrollment.creator != null
+                            && sEnrollment.creator.id === user.id
+                    })) {
+                    fAppointment.reference.push("ENROLLED")
+                }
+
+                if (fAppointment.pinners !== undefined
+                    && fAppointment.pinners.some(sPinner => sPinner.id === user.id)
+                    || pins.includes(fAppointment.link)) {
+                    fAppointment.reference.push("PINNED")
+                }
+            }
+
             fAppointment.enrollments.map(mEnrollments => {
                 mEnrollments.createdByUser = mEnrollments.creator != null;
                 delete mEnrollments.creator;
-            })
+            });
+
+            delete fAppointment.pinners;
         });
+
 
         if (slim) {
             appointments = appointments.map(fAppointment => {
@@ -81,7 +118,7 @@ export class AppointmentService {
         return appointments;
     }
 
-    async find(link: string, slim: boolean = false): Promise<Appointment> {
+    async find(link: string, user: User, slim: boolean = false): Promise<Appointment> {
         let appointment = await getRepository(Appointment)
             .createQueryBuilder("appointment")
             .where("appointment.link = :link", {link: link})
@@ -94,15 +131,22 @@ export class AppointmentService {
             .leftJoinAndSelect("enrollments.additions", "enrollment_additions")
             .leftJoinAndSelect("appointment.files", "files")
             .leftJoinAndSelect("appointment.administrators", "administrators")
+            .leftJoinAndSelect("appointment.pinners", "pinners")
             .select(["appointment", "additions", "enrollments",
                 "enrollment_passenger", "enrollment_driver", "enrollment_creator", "enrollments.iat",
-                "creator.username", "files.name", "files.id", "administrators.mail", "administrators.username",
-                "enrollment_additions"])
+                "creator.username", "creator.name", "files.name", "files.id", "administrators.name", "administrators.username",
+                "enrollment_additions", "pinners"])
             .orderBy("enrollments.iat", "ASC")
             .getOne();
 
         if (appointment === undefined) {
             throw new NotFoundException();
+        }
+
+        if (appointment.pinners !== undefined
+            && user != null
+            && appointment.pinners.some(sPinner => sPinner.id === user.id)) {
+            appointment.reference.push("PINNED")
         }
 
         if (slim) {
@@ -116,6 +160,20 @@ export class AppointmentService {
         });
 
         return appointment;
+    }
+
+    async pinAppointment(user: User, link: string) {
+        const appointment = await this.find(link, user);
+        const _user = await this.userService.findById("" + user.id);
+
+        if (_user.pinned.some(sPinned => sPinned.id === appointment.id)) {
+            const removeIndex = _user.pinned.indexOf(appointment);
+            _user.pinned.splice(removeIndex, 1);
+        } else {
+            _user.pinned.push(appointment);
+        }
+
+        return this.userRepository.save(_user);
     }
 
     async findBasic(link: string): Promise<Appointment> {
@@ -232,7 +290,7 @@ export class AppointmentService {
 
         await this.appointmentRepository.save(appointment);
 
-        return await this.find(appointment.link);
+        return await this.find(appointment.link, user);
     }
 
 
@@ -276,7 +334,7 @@ export class AppointmentService {
     }
 
     public async addAdministrator(link: string, username: string) {
-        const appointment = await this.find(link);
+        const appointment = await this.find(link, null);
 
         const user = await this.userService.findByUsername(username);
         if (user === undefined) {
@@ -289,7 +347,7 @@ export class AppointmentService {
     }
 
     public async removeAdministrator(link: string, username: string) {
-        const appointment = await this.find(link);
+        const appointment = await this.find(link, null);
 
         appointment.administrators = appointment.administrators.filter(fAdministrator => {
             return fAdministrator.username != username;
@@ -299,7 +357,7 @@ export class AppointmentService {
     }
 
     public async addFile(link: string, data: any) {
-        const appointment = await this.find(link);
+        const appointment = await this.find(link, null);
         console.log("add file", data.name, data.data.length);
 
         const file = new File();
