@@ -52,6 +52,7 @@ export class EnrollmentController {
         this.enrollmentService
             .create(enrollment, link, user)
             .then(tEntrollment => {
+                delete tEntrollment.appointment;
                 res.status(HttpStatus.CREATED).json(tEntrollment);
             })
             .catch((err) => {
