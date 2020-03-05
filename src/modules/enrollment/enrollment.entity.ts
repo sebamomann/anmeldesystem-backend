@@ -55,6 +55,7 @@ export class Enrollment {
     @JoinTable({name: 'enrollment_addition'})
     additions: Addition[];
 
+    @Exclude({toPlainOnly: true})
     @ManyToOne(type => Appointment,
         appointment => appointment.enrollments)
     appointment: Appointment;
@@ -84,6 +85,7 @@ export class Enrollment {
     @Exclude({toPlainOnly: true})
     lud: Date;
 
-    editKey: string;
+    mail?: string;
+    token?: string;
     createdByUser: boolean;
 }

@@ -15,6 +15,8 @@ import {Key} from "./key/key.entity";
 import {PassengerService} from "./passenger/passenger.service";
 import {DriverService} from "./driver/driver.service";
 
+const crypto = require("crypto");
+
 @Injectable()
 export class EnrollmentService {
     constructor(@InjectRepository(Enrollment)
@@ -37,8 +39,8 @@ export class EnrollmentService {
         if (enrollment.name === "" || enrollment.name === null) {
             emptyValues.push('name');
         }
-        if (!!user === false && (enrollment.editKey == "" || enrollment.editKey == null)) {
-            emptyValues.push('key');
+        if (!!user === false && (enrollment.mail == "" || enrollment.mail == null)) {
+            emptyValues.push('mail');
         }
         if (emptyValues.length > 0) {
             throw  new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', emptyValues);
@@ -79,9 +81,9 @@ export class EnrollmentService {
         let enrollmentToDb = await this.createEnrollmentObjectForDB(enrollment, appointment);
 
         // If user is not set
-        if (enrollment.editKey != null && enrollment.editKey != "") {
+        if (enrollment.mail != null && enrollment.mail != "") {
             const key = new Key();
-            key.key = enrollment.editKey;
+            key.key = enrollment.mail;
             enrollmentToDb.key = await this.keyRepository.save(key);
         } else {
             enrollmentToDb.creator = user;
@@ -89,7 +91,13 @@ export class EnrollmentService {
 
         enrollmentToDb.appointment = appointment;
 
-        return this.enrollmentRepository.save(await enrollmentToDb)
+        const savedEnrollment = await this.enrollmentRepository.save(await enrollmentToDb);
+        delete savedEnrollment.appointment;
+        if (savedEnrollment.creator === null) {
+            savedEnrollment.token = crypto.createHash('sha256').update(savedEnrollment.id + process.env.SALT_ENROLLMENT).digest('base64');
+        }
+
+        return savedEnrollment;
     }
 
     private async createEnrollmentObjectForDB(enrollment: Enrollment, appointment: Appointment) {
@@ -181,7 +189,7 @@ export class EnrollmentService {
         const enrollmentFromDb: Enrollment = await this.find(id);
         const appointment: Appointment = enrollmentFromDb.appointment;
 
-        if (!EnrollmentService.allowedToEdit(enrollmentFromDb, user, enrollment.editKey)) {
+        if (!EnrollmentService.allowedToEdit(enrollmentFromDb, user, enrollment.mail)) {
             console.log("No edit allowed");
             throw new Error();
         }
