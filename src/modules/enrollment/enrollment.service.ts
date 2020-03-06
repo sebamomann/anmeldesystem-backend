@@ -68,7 +68,7 @@ export class EnrollmentService {
     }
 
     async create(enrollment: Enrollment, link: string, user: User) {
-        const appointment: Appointment = await this.appointmentService.find(link, user);
+        const appointment: Appointment = await this.appointmentService.find(link, user, null);
 
         try {
             EnrollmentService.checkForEmptyValues(enrollment, user);
@@ -99,7 +99,9 @@ export class EnrollmentService {
 
         if (savedEnrollment.creator === null ||
             savedEnrollment.creator === undefined) {
-            savedEnrollment.token = crypto.createHash('sha256').update(savedEnrollment.id + process.env.SALT_ENROLLMENT).digest('base64');
+            savedEnrollment.token = crypto.createHash('sha256')
+                .update(savedEnrollment.id + process.env.SALT_ENROLLMENT)
+                .digest('base64');
         }
 
         return savedEnrollment;

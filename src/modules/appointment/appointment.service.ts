@@ -11,6 +11,8 @@ import {DuplicateValueException} from "../../exceptions/DuplicateValueException"
 import {UserService} from "../user/user.service";
 import {FileService} from "../file/file.service";
 
+const crypto = require('crypto');
+
 @Injectable()
 export class AppointmentService {
     constructor(
@@ -118,7 +120,7 @@ export class AppointmentService {
         return appointments;
     }
 
-    async find(link: string, user: User, slim: boolean = false): Promise<Appointment> {
+    async find(link: string, user: User, permissions: any, slim: boolean = false): Promise<Appointment> {
         let appointment = await getRepository(Appointment)
             .createQueryBuilder("appointment")
             .where("appointment.link = :link", {link: link})
@@ -153,6 +155,36 @@ export class AppointmentService {
             delete appointment.files;
         }
 
+        if (true) {
+            let ids = [];
+            let tokens = [];
+            for (const queryKey of Object.keys(permissions)) {
+                if (queryKey.startsWith("perm")) {
+                    ids.push(permissions[queryKey]);
+                }
+
+                if (queryKey.startsWith("token")) {
+                    tokens.push(permissions[queryKey]);
+                }
+            }
+
+            let finalIds = [];
+            ids.forEach((fId, i) => {
+                const token = crypto.createHash('sha256')
+                    .update(fId + process.env.SALT_ENROLLMENT)
+                    .digest('base64');
+                if (tokens[i] !== undefined && token === tokens[i]) {
+                    finalIds.push(fId);
+                }
+            });
+
+            appointment.enrollments = appointment.enrollments.filter(fEnrollment => {
+                if (finalIds.includes(fEnrollment.id)) {
+                    return fEnrollment;
+                }
+            })
+        }
+
         appointment.enrollments.map(mEnrollment => {
             mEnrollment.createdByUser = mEnrollment.creator != null;
             delete mEnrollment.creator;
@@ -163,7 +195,7 @@ export class AppointmentService {
     }
 
     async pinAppointment(user: User, link: string) {
-        const appointment = await this.find(link, user);
+        const appointment = await this.find(link, user, null);
         const _user = await this.userService.findById("" + user.id);
 
         if (_user.pinned.some(sPinned => sPinned.id === appointment.id)) {
@@ -290,7 +322,7 @@ export class AppointmentService {
 
         await this.appointmentRepository.save(appointment);
 
-        return await this.find(appointment.link, user);
+        return await this.find(appointment.link, user, null);
     }
 
 
@@ -334,7 +366,7 @@ export class AppointmentService {
     }
 
     public async addAdministrator(link: string, username: string) {
-        const appointment = await this.find(link, null);
+        const appointment = await this.find(link, null, null);
 
         const user = await this.userService.findByUsername(username);
         if (user === undefined) {
@@ -347,7 +379,7 @@ export class AppointmentService {
     }
 
     public async removeAdministrator(link: string, username: string) {
-        const appointment = await this.find(link, null);
+        const appointment = await this.find(link, null, null);
 
         appointment.administrators = appointment.administrators.filter(fAdministrator => {
             return fAdministrator.username != username;
@@ -357,7 +389,7 @@ export class AppointmentService {
     }
 
     public async addFile(link: string, data: any) {
-        const appointment = await this.find(link, null);
+        const appointment = await this.find(link, null, null);
         console.log("add file", data.name, data.data.length);
 
         const file = new File();
