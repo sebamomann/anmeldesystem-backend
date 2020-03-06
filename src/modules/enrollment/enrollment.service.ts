@@ -79,7 +79,6 @@ export class EnrollmentService {
         if (await this.existsByName(enrollment.name, appointment)) {
             throw new DuplicateValueException('DUPLICATE_ENTRY', 'Following values are already taken', ['name']);
         }
-
         enrollment.id = "";
         let enrollmentToDb = await this.createEnrollmentObjectForDB(enrollment, appointment);
 
@@ -94,7 +93,7 @@ export class EnrollmentService {
 
         enrollmentToDb.appointment = appointment;
 
-        const savedEnrollment = await this.enrollmentRepository.save(await enrollmentToDb);
+        const savedEnrollment = await this.enrollmentRepository.save(enrollmentToDb);
         delete savedEnrollment.appointment;
 
         if (savedEnrollment.creator === null ||
@@ -103,6 +102,7 @@ export class EnrollmentService {
                 .update(savedEnrollment.id + process.env.SALT_ENROLLMENT)
                 .digest('base64');
         }
+
 
         return savedEnrollment;
     }
