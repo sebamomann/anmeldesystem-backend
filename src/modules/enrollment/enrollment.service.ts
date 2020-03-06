@@ -16,6 +16,8 @@ import {PassengerService} from "./passenger/passenger.service";
 import {DriverService} from "./driver/driver.service";
 import {Mail} from "./mail/mail.entity";
 
+const crypto = require("crypto");
+
 @Injectable()
 export class EnrollmentService {
     constructor(@InjectRepository(Enrollment)
@@ -40,8 +42,8 @@ export class EnrollmentService {
         if (enrollment.name === "" || enrollment.name === null) {
             emptyValues.push('name');
         }
-        if (!!user === false && (enrollment.editKey == "" || enrollment.editKey == null)) {
-            emptyValues.push('key');
+        if (!!user === false && (enrollment.editMail == "" || enrollment.editMail == null)) {
+            emptyValues.push('mail');
         }
         if (emptyValues.length > 0) {
             throw  new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', emptyValues);
@@ -92,7 +94,15 @@ export class EnrollmentService {
 
         enrollmentToDb.appointment = appointment;
 
-        return this.enrollmentRepository.save(await enrollmentToDb)
+        const savedEnrollment = await this.enrollmentRepository.save(await enrollmentToDb);
+        delete savedEnrollment.appointment;
+
+        if (savedEnrollment.creator === null ||
+            savedEnrollment.creator === undefined) {
+            savedEnrollment.token = crypto.createHash('sha256').update(savedEnrollment.id + process.env.SALT_ENROLLMENT).digest('base64');
+        }
+
+        return savedEnrollment;
     }
 
     private async createEnrollmentObjectForDB(enrollment: Enrollment, appointment: Appointment) {

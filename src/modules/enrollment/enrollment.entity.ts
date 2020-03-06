@@ -92,5 +92,6 @@ export class Enrollment {
 
     editKey: string;
     editMail: string;
+    token?: string;
     createdByUser: boolean;
 }
