@@ -155,7 +155,7 @@ export class AppointmentService {
             delete appointment.files;
         }
 
-        if (true && permissions != null) {
+        if (appointment.hidden && permissions != null) {
             let ids = [];
             let tokens = [];
             for (const queryKey of Object.keys(permissions)) {
