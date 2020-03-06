@@ -181,6 +181,7 @@ export class AppointmentService {
             appointment.enrollments = appointment.enrollments.filter(fEnrollment => {
                 if (finalIds.includes(fEnrollment.id)
                     || (fEnrollment.creator != null &&
+                        user != null &&
                         fEnrollment.creator.id === user.id)) {
                     return fEnrollment;
                 }
