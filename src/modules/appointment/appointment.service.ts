@@ -179,7 +179,9 @@ export class AppointmentService {
             });
 
             appointment.enrollments = appointment.enrollments.filter(fEnrollment => {
-                if (finalIds.includes(fEnrollment.id)) {
+                if (finalIds.includes(fEnrollment.id)
+                    || (fEnrollment.creator != null &&
+                        fEnrollment.creator.id === user.id)) {
                     return fEnrollment;
                 }
             })
@@ -300,6 +302,7 @@ export class AppointmentService {
         }
 
         for (const [key, value] of Object.entries(toChange)) {
+            console.log(key, value);
             if (key in appointment && appointment[key] !== value) {
                 let _value = value;
                 if (key === "additions") {

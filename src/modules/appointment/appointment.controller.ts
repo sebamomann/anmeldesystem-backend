@@ -123,7 +123,8 @@ export class AppointmentController {
 
     @Put(':link')
     @UseGuards(AuthGuard('jwt'))
-    update(@Body() toChange: any, @Param('link') link: string, @Res() res: Response, @Usr() user: User) {
+    update(@Body() toChange: any,
+           @Param('link') link: string, @Res() res: Response, @Usr() user: User) {
         return this.appointmentService
             .update(toChange, link, user)
             .then(tAppointment => {
