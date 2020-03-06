@@ -20,6 +20,7 @@ import {Comment} from "./comment/comment.entity";
 import {User} from "../user/user.entity";
 import {Key} from "./key/key.entity";
 import {Exclude} from "class-transformer";
+import {Mail} from "./mail/mail.entity";
 
 @Entity()
 @Index("index_unique_name_appointment", ["name", "appointment"], {unique: true}) // first style
@@ -80,10 +81,16 @@ export class Enrollment {
         {onDelete: "CASCADE"})
     key: Key;
 
+    @OneToOne(type => Mail,
+        mail => mail.enrollment,
+        {onDelete: "CASCADE"})
+    mail: Mail;
+
     @UpdateDateColumn({name: 'lud', nullable: true})
     @Exclude({toPlainOnly: true})
     lud: Date;
 
     editKey: string;
+    editMail: string;
     createdByUser: boolean;
 }

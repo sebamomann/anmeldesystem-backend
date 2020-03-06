@@ -13,6 +13,44 @@ export class EnrollmentController {
     constructor(private enrollmentService: EnrollmentService) {
     }
 
+    @UseGuards(JwtOptStrategy)
+    @Post()
+    async create(@Usr() user: User,
+                 @Query('link') link: string,
+                 @Body() enrollment: Enrollment,
+                 @Res() res: Response) {
+        this.enrollmentService
+            .create(enrollment, link, user)
+            .then(tEnrollment => {
+                delete tEnrollment.appointment;
+                res.status(HttpStatus.CREATED).json(tEnrollment);
+            })
+            .catch((err) => {
+                if (err.code === 'EMPTY_FIELDS' && err.data.indexOf('key') === 0) {
+                    res.status(HttpStatus.UNAUTHORIZED).json();
+                    return;
+                }
+
+                let error: any = {};
+                if (err.code === 'DUPLICATE_ENTRY'
+                    || err.code === 'EMPTY_FIELDS') {
+                    error.code = err.code;
+                    error.error = err.data
+                } else {
+                    let id = this.makeid(10);
+                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
+
+                    error.code = "UNDEFINED";
+                    error.error = {
+                        message: "Some error occurred. Please try again later or contact the support",
+                        id: id
+                    };
+                }
+
+                res.status(HttpStatus.BAD_REQUEST).json(error);
+            });
+    }
+
     @UseGuards(AuthGuard('jwt'))
     @Get()
     async find(@Query() id: string) {
@@ -43,41 +81,6 @@ export class EnrollmentController {
             .catch((err) => {
                 console.log(JSON.stringify(err));
                 res.status(HttpStatus.FORBIDDEN).json();
-            });
-    }
-
-    @UseGuards(JwtOptStrategy)
-    @Post()
-    async create(@Query('link') link: string, @Body() enrollment: Enrollment, @Usr() user: User, @Res() res: Response) {
-        this.enrollmentService
-            .create(enrollment, link, user)
-            .then(tEntrollment => {
-                delete tEntrollment.appointment;
-                res.status(HttpStatus.CREATED).json(tEntrollment);
-            })
-            .catch((err) => {
-                if (err.code === 'EMPTY_FIELDS' && err.data.indexOf('key') === 0) {
-                    res.status(HttpStatus.UNAUTHORIZED).json();
-                    return;
-                }
-
-                let error: any = {};
-                if (err.code === 'DUPLICATE_ENTRY'
-                    || err.code === 'EMPTY_FIELDS') {
-                    error.code = err.code;
-                    error.error = err.data
-                } else {
-                    let id = this.makeid(10);
-                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
-                    error.code = "UNDEFINED";
-                    error.error = {
-                        message: "Some error occurred. Please try again later or contact the support",
-                        id: id
-                    };
-                }
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
             });
     }
 

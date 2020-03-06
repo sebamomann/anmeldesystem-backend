@@ -14,6 +14,7 @@ import {User} from "../user/user.entity";
 import {Key} from "./key/key.entity";
 import {PassengerService} from "./passenger/passenger.service";
 import {DriverService} from "./driver/driver.service";
+import {Mail} from "./mail/mail.entity";
 
 @Injectable()
 export class EnrollmentService {
@@ -28,7 +29,9 @@ export class EnrollmentService {
                 @InjectRepository(Passenger)
                 private readonly passengerRepository: Repository<Passenger>,
                 @InjectRepository(Key)
-                private readonly keyRepository: Repository<Key>) {
+                private readonly keyRepository: Repository<Key>,
+                @InjectRepository(Mail)
+                private readonly mailRepository: Repository<Mail>) {
 
     }
 
@@ -78,11 +81,11 @@ export class EnrollmentService {
         enrollment.id = "";
         let enrollmentToDb = await this.createEnrollmentObjectForDB(enrollment, appointment);
 
-        // If user is not set
-        if (enrollment.editKey != null && enrollment.editKey != "") {
-            const key = new Key();
-            key.key = enrollment.editKey;
-            enrollmentToDb.key = await this.keyRepository.save(key);
+        if (enrollment.editMail != null &&
+            enrollment.editMail != "") {
+            const mail = new Mail();
+            mail.mail = enrollment.editMail;
+            enrollmentToDb.mail = await this.mailRepository.save(mail);
         } else {
             enrollmentToDb.creator = user;
         }
