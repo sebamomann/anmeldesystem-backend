@@ -109,13 +109,15 @@ export class EnrollmentController {
             });
     }
 
-    @Post('/:id/validateKey')
-    async validateKey(@Param() params: string, @Body() body: { key: string }, @Res() res: Response) {
+    @Get('/:id/validateToken/:token')
+    async validateKey(@Param() id: string,
+                      @Param('token') token: string,
+                      @Res() res: Response) {
         this.enrollmentService
-            .find(params)
+            .find(id)
             .then(tEnrollment => {
                 if (tEnrollment != undefined) {
-                    if (EnrollmentService.allowEditByToken(tEnrollment, body.key)) {
+                    if (EnrollmentService.allowEditByToken(tEnrollment, token)) {
                         res.status(HttpStatus.OK).json();
                     }
                 } else {
