@@ -43,7 +43,6 @@ export class EnrollmentService {
         const check = crypto.createHash('sha256')
             .update(enrollment.id + process.env.SALT_ENROLLMENT)
             .digest('base64');
-        console.log(token.replace(" ", "+"), check);
 
         return enrollment.token !== null && (token.replace(" ", "+") === check);
     }
