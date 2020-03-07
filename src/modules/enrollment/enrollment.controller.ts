@@ -17,10 +17,12 @@ export class EnrollmentController {
     @Post()
     async create(@Usr() user: User,
                  @Query('link') link: string,
+                 @Query('asquery') asquery: string,
+                 @Body('domain') domain: string,
                  @Body() enrollment: Enrollment,
                  @Res() res: Response) {
         this.enrollmentService
-            .create(enrollment, link, user)
+            .create(enrollment, link, user, domain, asquery)
             .then(tEnrollment => {
                 res.status(HttpStatus.CREATED).json(tEnrollment);
             })
@@ -71,7 +73,10 @@ export class EnrollmentController {
 
     @Put(':id')
     @UseGuards(JwtOptStrategy)
-    async update(@Param() id: string, @Body() enrollment: Enrollment, @Usr() user: User, @Res() res: Response) {
+    async update(@Usr() user: User,
+                 @Param() id: string,
+                 @Body() enrollment: Enrollment,
+                 @Res() res: Response) {
         await this.enrollmentService
             .update(id, enrollment, user)
             .then((tEnrollment) => {
@@ -110,7 +115,7 @@ export class EnrollmentController {
             .find(params)
             .then(tEnrollment => {
                 if (tEnrollment != undefined) {
-                    if (EnrollmentService.allowEditByKey(tEnrollment, body.key)) {
+                    if (EnrollmentService.allowEditByToken(tEnrollment, body.key)) {
                         res.status(HttpStatus.OK).json();
                     }
                 } else {
