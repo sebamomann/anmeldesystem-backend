@@ -42,7 +42,7 @@ export class EnrollmentService {
     public static allowEditByToken(enrollment: Enrollment, token: string) {
         const check = crypto.createHash('sha256')
             .update(enrollment.id + process.env.SALT_ENROLLMENT)
-            .digest('base64');
+            .digest('hex');
 
         return enrollment.token !== null && (token.replace(" ", "+") === check);
     }
@@ -69,8 +69,8 @@ export class EnrollmentService {
         if (enrollment.name === "" || enrollment.name === null) {
             emptyValues.push('name');
         }
-        if (!!user === false && (enrollment.token == "" || enrollment.token == null)) {
-            emptyValues.push('token');
+        if (!!user === false && (enrollment.editMail == "" || enrollment.editMail == null)) {
+            emptyValues.push('mail');
         }
         if (emptyValues.length > 0) {
             throw  new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', emptyValues);
@@ -197,7 +197,7 @@ export class EnrollmentService {
             savedEnrollment.creator === undefined) {
             savedEnrollment.token = crypto.createHash('sha256')
                 .update(savedEnrollment.id + process.env.SALT_ENROLLMENT)
-                .digest('base64');
+                .digest('hex');
 
             let url = `https://${domain}`;
             if (asquery === "true") {
