@@ -173,7 +173,7 @@ export class AppointmentService {
                 const token = crypto.createHash('sha256')
                     .update(fId + process.env.SALT_ENROLLMENT)
                     .digest('base64');
-                if (tokens[i] !== undefined && token === tokens[i]) {
+                if (tokens[i] !== undefined && token === tokens[i].replace(" ", "+")) {
                     finalIds.push(fId);
                 }
             });
