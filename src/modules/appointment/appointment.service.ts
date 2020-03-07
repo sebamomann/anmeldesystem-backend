@@ -76,12 +76,11 @@ export class AppointmentService {
             .getMany();
         appointments.map(fAppointment => {
             if (user != null) {
-                if (fAppointment.administrators !== undefined
-                    && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username)) {
+                if (this.isAdministrator(fAppointment, user)) {
                     fAppointment.reference.push("ADMIN")
                 }
 
-                if (fAppointment.creator.username === user.username) {
+                if (this.isCreator(fAppointment, user)) {
                     fAppointment.reference.push("CREATOR")
                 }
 
@@ -155,7 +154,10 @@ export class AppointmentService {
             delete appointment.files;
         }
 
-        if (appointment.hidden && permissions != null) {
+        if (appointment.hidden &&
+            permissions != null &&
+            !this.isCreator(appointment, user) &&
+            !this.isAdministrator(appointment, user)) {
             let ids = [];
             let tokens = [];
             for (const queryKey of Object.keys(permissions)) {
@@ -195,6 +197,15 @@ export class AppointmentService {
         });
 
         return appointment;
+    }
+
+    private isCreator(fAppointment: Appointment, user: User) {
+        return fAppointment.creator.username === user.username;
+    }
+
+    private isAdministrator(fAppointment: Appointment, user: User) {
+        return fAppointment.administrators !== undefined
+            && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username);
     }
 
     async pinAppointment(user: User, link: string) {
