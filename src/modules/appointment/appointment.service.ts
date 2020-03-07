@@ -180,6 +180,7 @@ export class AppointmentService {
                 }
             });
 
+            appointment.numberOfEnrollments = appointment.enrollments.length;
             appointment.enrollments = appointment.enrollments.filter(fEnrollment => {
                 if (finalIds.includes(fEnrollment.id)
                     || (fEnrollment.creator != null &&

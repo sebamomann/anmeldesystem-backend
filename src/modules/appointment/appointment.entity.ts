@@ -94,4 +94,5 @@ export class Appointment {
     lud: Date;
 
     reference?: string[] = [];
+    numberOfEnrollments?: number;
 }
