@@ -58,11 +58,13 @@ export class EnrollmentController {
         return this.enrollmentService.find(id);
     }
 
-    @Delete(':id')
+    @Delete(':id/:token')
     @UseGuards(JwtOptStrategy)
-    async delete(@Param() id: string, @Body() body: any, @Usr() user: User, @Res() res: Response) {
+    async delete(@Param() id: string,
+                 @Param('token') token: string,
+                 @Usr() user: User, @Res() res: Response) {
         await this.enrollmentService
-            .delete(id, body.key, user)
+            .delete(id, token, user)
             .then(() => {
                 res.status(HttpStatus.OK).json();
             })
