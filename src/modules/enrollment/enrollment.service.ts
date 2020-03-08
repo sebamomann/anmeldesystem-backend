@@ -140,10 +140,10 @@ export class EnrollmentService {
         }) !== undefined;
     }
 
-    async delete(id: string, key: string, user: User) {
+    async delete(id: string, token: string, user: User) {
         const enrollment: Enrollment = await this.find(id);
 
-        if (!EnrollmentService.allowedToEdit(enrollment, user, key)) {
+        if (!EnrollmentService.allowedToEdit(enrollment, user, token)) {
             throw new Error();
         }
 
