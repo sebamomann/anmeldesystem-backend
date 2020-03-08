@@ -42,6 +42,9 @@ export class Appointment {
     @Column('int', {default: null})
     maxEnrollments: number;
 
+    @Column('boolean', {default: false})
+    hidden: boolean;
+
     @OneToMany(type => Enrollment,
         enrollment => enrollment.appointment, {
             eager: true
@@ -91,4 +94,5 @@ export class Appointment {
     lud: Date;
 
     reference?: string[] = [];
+    numberOfEnrollments?: number;
 }

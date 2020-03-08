@@ -123,7 +123,8 @@ export class AppointmentController {
 
     @Put(':link')
     @UseGuards(AuthGuard('jwt'))
-    update(@Body() toChange: any, @Param('link') link: string, @Res() res: Response, @Usr() user: User) {
+    update(@Body() toChange: any,
+           @Param('link') link: string, @Res() res: Response, @Usr() user: User) {
         return this.appointmentService
             .update(toChange, link, user)
             .then(tAppointment => {
@@ -168,12 +169,13 @@ export class AppointmentController {
     @UseGuards(JwtOptStrategy)
     findByLink(@Usr() user: User,
                @Query('slim') slim: string,
+               @Query() permissions: any,
                @Param('link') link: string,
                @Request() req: Request,
                @Res() res: Response) {
         let _slim = slim === "true";
         return this.appointmentService
-            .find(link, user, _slim)
+            .find(link, user, permissions, _slim)
             .then(tAppointment => {
                 if (tAppointment != null) {
                     const etag = Etag.generate(JSON.stringify(tAppointment));

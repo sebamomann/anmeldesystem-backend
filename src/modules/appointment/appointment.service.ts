@@ -11,6 +11,8 @@ import {DuplicateValueException} from "../../exceptions/DuplicateValueException"
 import {UserService} from "../user/user.service";
 import {FileService} from "../file/file.service";
 
+const crypto = require('crypto');
+
 @Injectable()
 export class AppointmentService {
     constructor(
@@ -74,12 +76,11 @@ export class AppointmentService {
             .getMany();
         appointments.map(fAppointment => {
             if (user != null) {
-                if (fAppointment.administrators !== undefined
-                    && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username)) {
+                if (this.isAdministrator(fAppointment, user)) {
                     fAppointment.reference.push("ADMIN")
                 }
 
-                if (fAppointment.creator.username === user.username) {
+                if (this.isCreator(fAppointment, user)) {
                     fAppointment.reference.push("CREATOR")
                 }
 
@@ -118,7 +119,7 @@ export class AppointmentService {
         return appointments;
     }
 
-    async find(link: string, user: User, slim: boolean = false): Promise<Appointment> {
+    async find(link: string, user: User, permissions: any, slim: boolean = false): Promise<Appointment> {
         let appointment = await getRepository(Appointment)
             .createQueryBuilder("appointment")
             .where("appointment.link = :link", {link: link})
@@ -153,6 +154,43 @@ export class AppointmentService {
             delete appointment.files;
         }
 
+        if (appointment.hidden &&
+            permissions != null &&
+            !this.isCreator(appointment, user) &&
+            !this.isAdministrator(appointment, user)) {
+            let ids = [];
+            let tokens = [];
+            for (const queryKey of Object.keys(permissions)) {
+                if (queryKey.startsWith("perm")) {
+                    ids.push(permissions[queryKey]);
+                }
+
+                if (queryKey.startsWith("token")) {
+                    tokens.push(permissions[queryKey]);
+                }
+            }
+
+            let finalIds = [];
+            ids.forEach((fId, i) => {
+                const token = crypto.createHash('sha256')
+                    .update(fId + process.env.SALT_ENROLLMENT)
+                    .digest('hex');
+                if (tokens[i] !== undefined && token === tokens[i].replace(" ", "+")) {
+                    finalIds.push(fId);
+                }
+            });
+
+            appointment.numberOfEnrollments = appointment.enrollments.length;
+            appointment.enrollments = appointment.enrollments.filter(fEnrollment => {
+                if (finalIds.includes(fEnrollment.id)
+                    || (fEnrollment.creator != null &&
+                        user != null &&
+                        fEnrollment.creator.id === user.id)) {
+                    return fEnrollment;
+                }
+            })
+        }
+
         appointment.enrollments.map(mEnrollment => {
             mEnrollment.createdByUser = mEnrollment.creator != null;
             delete mEnrollment.creator;
@@ -162,8 +200,17 @@ export class AppointmentService {
         return appointment;
     }
 
+    private isCreator(fAppointment: Appointment, user: User) {
+        return fAppointment.creator.username === user.username;
+    }
+
+    private isAdministrator(fAppointment: Appointment, user: User) {
+        return fAppointment.administrators !== undefined
+            && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username);
+    }
+
     async pinAppointment(user: User, link: string) {
-        const appointment = await this.find(link, user);
+        const appointment = await this.find(link, user, null);
         const _user = await this.userService.findById("" + user.id);
 
         if (_user.pinned.some(sPinned => sPinned.id === appointment.id)) {
@@ -268,6 +315,7 @@ export class AppointmentService {
         }
 
         for (const [key, value] of Object.entries(toChange)) {
+            console.log(key, value);
             if (key in appointment && appointment[key] !== value) {
                 let _value = value;
                 if (key === "additions") {
@@ -290,7 +338,7 @@ export class AppointmentService {
 
         await this.appointmentRepository.save(appointment);
 
-        return await this.find(appointment.link, user);
+        return await this.find(appointment.link, user, null);
     }
 
 
@@ -334,7 +382,7 @@ export class AppointmentService {
     }
 
     public async addAdministrator(link: string, username: string) {
-        const appointment = await this.find(link, null);
+        const appointment = await this.find(link, null, null);
 
         const user = await this.userService.findByUsername(username);
         if (user === undefined) {
@@ -347,7 +395,7 @@ export class AppointmentService {
     }
 
     public async removeAdministrator(link: string, username: string) {
-        const appointment = await this.find(link, null);
+        const appointment = await this.find(link, null, null);
 
         appointment.administrators = appointment.administrators.filter(fAdministrator => {
             return fAdministrator.username != username;
@@ -357,7 +405,7 @@ export class AppointmentService {
     }
 
     public async addFile(link: string, data: any) {
-        const appointment = await this.find(link, null);
+        const appointment = await this.find(link, null, null);
         console.log("add file", data.name, data.data.length);
 
         const file = new File();
