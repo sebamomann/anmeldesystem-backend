@@ -73,6 +73,22 @@ export class EnrollmentController {
             });
     }
 
+    @Delete(':id/')
+    @UseGuards(JwtOptStrategy)
+    async delete2(@Param() id: string,
+                  @Param('token') token: string,
+                  @Usr() user: User, @Res() res: Response) {
+        await this.enrollmentService
+            .delete(id, "", user)
+            .then(() => {
+                res.status(HttpStatus.OK).json();
+            })
+            .catch((err) => {
+                console.log(err);
+                res.status(HttpStatus.FORBIDDEN).json();
+            });
+    }
+
     @Put(':id')
     @UseGuards(JwtOptStrategy)
     async update(@Usr() user: User,
