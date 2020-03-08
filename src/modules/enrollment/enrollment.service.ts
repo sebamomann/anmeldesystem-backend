@@ -64,12 +64,12 @@ export class EnrollmentService {
             .getOne();
     }
 
-    private static checkForEmptyValues(enrollment: Enrollment, user: User) {
+    private static checkForEmptyValues(enrollment: Enrollment, user: User, isEdit = false) {
         let emptyValues = [];
         if (enrollment.name === "" || enrollment.name === null) {
             emptyValues.push('name');
         }
-        if (!!user === false && (enrollment.editMail == "" || enrollment.editMail == null)) {
+        if (!!user === false && ((enrollment.editMail == "" || enrollment.editMail == null) && !isEdit)) {
             emptyValues.push('mail');
         }
         if (emptyValues.length > 0) {
@@ -245,7 +245,7 @@ export class EnrollmentService {
 
     async update(id: string, enrollment: Enrollment, user: User) {
         try {
-            EnrollmentService.checkForEmptyValues(enrollment, user);
+            EnrollmentService.checkForEmptyValues(enrollment, user, true);
         } catch (e) {
             console.log("Empty Values");
             throw e;
