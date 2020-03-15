@@ -10,6 +10,7 @@ import {AdditionService} from "../addition/addition.service";
 import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
 import {UserService} from "../user/user.service";
 import {FileService} from "../file/file.service";
+import {InvalidValueException} from "../../exceptions/InvalidValueException";
 
 const crypto = require('crypto');
 
@@ -238,6 +239,11 @@ export class AppointmentService {
     async create(appointment: Appointment, user: User) {
         let appointmentToDb = new Appointment();
         appointmentToDb.title = appointment.title;
+
+        if (appointment.description.length < 10) {
+            throw new InvalidValueException("INVALID_VALUE", "Minimum length of 10 needed", ["description"]);
+        }
+
         appointmentToDb.description = appointment.description;
 
         if (appointment.link === null || appointment.link.length < 5) {
