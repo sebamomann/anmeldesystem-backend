@@ -96,9 +96,11 @@ export class EnrollmentService {
             if (enrollment.driver !== null && enrollment.driver !== undefined) {
                 enrollmentToDb.driver = await this.handleDriverRelation(enrollment);
                 enrollmentToDb.passenger = null;
-            } else {
+            } else if (enrollment.passenger !== null && enrollment.driver !== undefined) {
                 enrollmentToDb.passenger = await this.handlePassengerRelation(enrollment);
                 enrollmentToDb.driver = null;
+            } else {
+                throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify one of the following values', ["driver", "passenger"]);
             }
         }
 
@@ -112,6 +114,9 @@ export class EnrollmentService {
             passenger = _passenger;
         }
 
+        if (enrollment.passenger.requirement === undefined) {
+            throw new EmptyFieldsException("EMPTY_FIELDS", "Please specify following values", ["passenger_requirement"]);
+        }
         passenger.requirement = enrollment.passenger.requirement;
 
         return await this.passengerRepository.save(passenger);
@@ -122,6 +127,18 @@ export class EnrollmentService {
         const _driver = await this.driverService.findByEnrollment(enrollment);
         if (_driver !== undefined && _driver != null) {
             driver = _driver;
+        }
+
+        let emptyFields = [];
+        if (enrollment.driver.seats === undefined) {
+            emptyFields.push("driver_seats");
+        }
+        if (enrollment.driver.service === undefined) {
+            emptyFields.push("driver_service");
+        }
+
+        if (emptyFields.length > 0) {
+            throw new EmptyFieldsException("EMPTY_FIELDS", "Please specify following values", emptyFields);
         }
 
         driver.seats = enrollment.driver.seats;
