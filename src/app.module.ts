@@ -31,6 +31,7 @@ import {ReleasenoteModule} from './modules/releasenote/releasenote.module';
 import {Releasenote} from "./modules/releasenote/releasenote.entity";
 import {EmailChange} from "./modules/user/email-change/email-change.entity";
 import {Mail} from "./modules/enrollment/mail/mail.entity";
+import {PasswordChange} from "./modules/user/password-change/password-change.entity";
 
 require('dotenv').config();
 const password = process.env.MAIL_ECA_PASSWORD;
@@ -44,7 +45,7 @@ const password = process.env.MAIL_ECA_PASSWORD;
         password: process.env.API_PASSWORD != null ? process.env.API_PASSWORD : "",
         database: process.env.API_DATABASE != null ? process.env.API_DATABASE : "anmeldesystem-api",
         entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key,
-            TelegramUser, PasswordReset, Releasenote, EmailChange, Mail],
+            TelegramUser, PasswordReset, Releasenote, EmailChange, Mail, PasswordChange,],
         synchronize: true
     }),
         MailerModule.forRoot({
