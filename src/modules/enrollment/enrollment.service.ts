@@ -16,6 +16,7 @@ import {PassengerService} from "./passenger/passenger.service";
 import {DriverService} from "./driver/driver.service";
 import {Mail} from "./mail/mail.entity";
 import {MailerService} from "@nest-modules/mailer";
+import {InvalidValueException} from "../../exceptions/InvalidValueException";
 
 const crypto = require("crypto");
 
@@ -139,6 +140,10 @@ export class EnrollmentService {
 
         if (emptyFields.length > 0) {
             throw new EmptyFieldsException("EMPTY_FIELDS", "Please specify following values", emptyFields);
+        }
+
+        if (enrollment.driver.seats <= 0) {
+            throw new InvalidValueException("INVALID_VALUE", "Minimum of 1 needed", ["driver_seats"]);
         }
 
         driver.seats = enrollment.driver.seats;
