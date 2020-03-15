@@ -7,9 +7,10 @@ import {TelegramUser} from "./telegram/telegram-user.entity";
 import {PasswordReset} from "./password-reset/password-reset.entity";
 import {AuthModule} from "../../auth/auth.module";
 import {EmailChange} from "./email-change/email-change.entity";
+import {PasswordChange} from "./password-change/password-change.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([User, TelegramUser, PasswordReset, EmailChange]), AuthModule],
+    imports: [TypeOrmModule.forFeature([User, TelegramUser, PasswordReset, PasswordChange, EmailChange]), AuthModule],
     providers: [UserService],
     exports: [UserService],
     controllers: [UserController],

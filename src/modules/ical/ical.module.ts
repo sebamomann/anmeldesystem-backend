@@ -23,9 +23,10 @@ import {PasswordReset} from "../user/password-reset/password-reset.entity";
 import {IcalController} from "./ical.controller";
 import {EmailChange} from "../user/email-change/email-change.entity";
 import {Mail} from "../enrollment/mail/mail.entity";
+import {PasswordChange} from "../user/password-change/password-change.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Enrollment, Appointment, Addition, File, Driver, Passenger, Comment, User, Key, Mail, TelegramUser, PasswordReset, EmailChange])],
+    imports: [TypeOrmModule.forFeature([Enrollment, Appointment, Addition, File, Driver, Passenger, Comment, User, Key, Mail, TelegramUser, PasswordReset, PasswordChange, EmailChange])],
     providers: [UserService, EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService, PassengerService, IcalService],
     exports: [EnrollmentService, AppointmentService, AdditionService, FileService, CommentService, DriverService, PassengerService, IcalService],
     controllers: [IcalController],

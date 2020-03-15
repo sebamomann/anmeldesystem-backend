@@ -17,9 +17,10 @@ import {UserModule} from "../../user/user.module";
 import {TelegramUser} from "../../user/telegram/telegram-user.entity";
 import {PasswordReset} from "../../user/password-reset/password-reset.entity";
 import {EmailChange} from "../../user/email-change/email-change.entity";
+import {PasswordChange} from "../../user/password-change/password-change.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Driver, Addition, Enrollment, Appointment, File, User, Key, TelegramUser, PasswordReset, EmailChange]), UserModule],
+    imports: [TypeOrmModule.forFeature([Driver, Addition, Enrollment, Appointment, File, User, Key, TelegramUser, PasswordReset, PasswordChange, EmailChange]), UserModule],
     providers: [DriverService, AdditionService, AppointmentService, FileService, UserService],
     exports: [DriverService, AdditionService, AppointmentService, FileService, UserService],
     controllers: [DriverController],

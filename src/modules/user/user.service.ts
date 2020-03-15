@@ -8,6 +8,7 @@ import {PasswordReset} from "./password-reset/password-reset.entity";
 import {InvalidTokenException} from "../../exceptions/InvalidTokenException";
 import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
 import {EmailChange} from "./email-change/email-change.entity";
+import {PasswordChange} from "./password-change/password-change.entity";
 
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
@@ -22,6 +23,8 @@ export class UserService {
         private readonly telegramUserRepository: Repository<TelegramUser>,
         @InjectRepository(PasswordReset)
         private readonly passwordResetRepository: Repository<PasswordReset>,
+        @InjectRepository(PasswordChange)
+        private readonly passwordChangeRepository: Repository<PasswordChange>,
         @InjectRepository(EmailChange)
         private readonly emailChangeRepository: Repository<EmailChange>,
         private mailerService: MailerService,
@@ -278,19 +281,39 @@ export class UserService {
     }
 
     async getLastPasswordDate(user: User, pass: string) {
-        const res = await this.userRepository.query("SELECT * " +
+        let used = null;
+
+        const res = await this.userRepository.query("SELECT oldPassword, used " +
             "FROM user_password_reset " +
             "WHERE oldPassword IS NOT NULL " +
             "AND userId = ? " +
-            "ORDER BY iat DESC " +
-            "LIMIT 1", [user.id]);
+            "ORDER BY iat DESC ", [user.id]);
         if (res) {
-            if (await bcrypt.compare(pass, res[0].oldPassword)) {
-                console.log("is old pass");
-                console.log(res[0].used);
-                return res[0].used;
+            for (const _pass of res) {
+                if (await bcrypt.compare(pass, _pass.oldPassword)) {
+                    used = _pass.used;
+                    break;
+                }
             }
         }
+
+        const res2 = await this.userRepository.query("SELECT oldPassword, iat " +
+            "FROM user_password_change " +
+            "WHERE userId = ? " +
+            "ORDER BY iat DESC ", [user.id]);
+        if (res2) {
+            for (const _pass of res2) {
+                if (await bcrypt.compare(pass, _pass.oldPassword)) {
+                    if (used < _pass.iat) {
+                        used = _pass.iat;
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        return used;
     }
 
     async update(toChange: any, user: User) {
@@ -302,6 +325,7 @@ export class UserService {
                 if (key === "username") {
                     _value = _user.username;
                 }
+
                 if (key === "mail") {
                     this.handleEmailChange(user, toChange)
                         .catch(err => {
@@ -310,11 +334,16 @@ export class UserService {
                         });
                     _value = _user.mail;
                 }
+
                 if (key === "password") {
                     _value = bcrypt.hashSync(_value, 10);
-                }
 
-                console.log(`${key} changed from ${JSON.stringify(_user[key])} to ${JSON.stringify(_value)}`);
+                    const passwordChange = new PasswordChange();
+                    passwordChange.oldPassword = _user.password;
+                    passwordChange.user = _user;
+
+                    await this.passwordChangeRepository.save(passwordChange)
+                }
 
                 _user[key] = _value;
             }
