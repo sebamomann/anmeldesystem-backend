@@ -48,22 +48,24 @@ pipeline {
       }
       steps {
         echo 'preparing .env file'
-        def data = "
-        SALT_JWT=${SALT_JWT}
-        SALT_MAIL=${SALT_MAIL}
-        SALT_ENROLLMENT=${SALT_ENROLLMENT}
 
-        MAIL_ECA=${MAIL_ECA}
-        MAIL_ECA_PASSWORD=${MAIL_ECA_PASSWORD}
+        script {
+          def data = """
+            SALT_JWT=${SALT_JWT}
+            SALT_MAIL=${SALT_MAIL}
+            SALT_ENROLLMENT=${SALT_ENROLLMENT}
+            MAIL_ECA=${MAIL_ECA}
+            MAIL_ECA_PASSWORD=${MAIL_ECA_PASSWORD}
+            DOMAIN=${DOMAIN}
+            DB_HOST=${DB_HOST}
+            DB_PORT=${DB_PORT}
+            DB_USERNAME=${DB_USERNAME}
+            DB_PASSWORD=${DB_PASSWORD}
+            DB_DATABASE=${DB_DATABASE}
+          """
+        }
 
-        DOMAIN=${DOMAIN}
-
-        DB_HOST=${DB_HOST}
-        DB_PORT=${DB_PORT}
-        DB_USERNAME=${DB_USERNAME}
-        DB_PASSWORD=${DB_PASSWORD}
-        DB_DATABASE=${DB_DATABASE}"
-        writeFile file: ".env", text: data
+        writeFile(file: ".env", text: data)
 
         echo 'execute ...'
         sh 'docker-compose -f compose.yml up -d'
