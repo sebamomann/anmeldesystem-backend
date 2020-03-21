@@ -22,7 +22,7 @@ pipeline {
     stage('Build Docker image') {
       steps {  
         script {
-          image = docker.build("sebamomann/anmeldesystem-backend:${env.BUILD_ID}")
+          image = docker.build("sebamomann/anmeldesystem-backend:${env.BUILD_ID}", "--build-arg version=${VERSION}")
         }
       }
     }
@@ -52,6 +52,7 @@ pipeline {
       steps {
         echo 'preparing .env file'
         sh 'touch .env'
+
         echo 'execute ...'
         sh 'docker-compose -f compose.yml up -d'
       }
