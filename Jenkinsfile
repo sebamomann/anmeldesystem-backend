@@ -25,8 +25,8 @@ pipeline {
       steps {
         withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: ""]) {
           script {
-            image.push("sebamomann/anmeldesystem-backend:${env.BUILD_ID}")
-            image.push('sebamomann/anmeldesystem-backend:latest')
+            image.push(":${env.BUILD_ID}")
+            image.push(':latest')
           }
         }
       }
