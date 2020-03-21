@@ -7,11 +7,11 @@ pipeline {
         checkout scm
       }
     }
-    stage('Test App') {
-      steps {
+    //stage('Test App') {
+      // steps {
         // sh 'npm test'
-      }
-    }
+      // }
+    //}
     stage('Build Docker image') {
       steps {  
         script {
