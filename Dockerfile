@@ -10,7 +10,7 @@ RUN npm install
 RUN npm version ${version}
 RUN npm run-script build
 
-COPY . ./dist/*
+COPY ./dist . 
 
 RUN ls -la
 
