@@ -21,7 +21,7 @@ pipeline {
         }
       }
     }
-    stage('Deploy to HUB') {
+    stage('Deploy to HUB version') {
       steps {
         withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: ""]) {
           script {
@@ -34,6 +34,8 @@ pipeline {
           return ${LATEST} == true
         }
       }
+    }
+    stage('Deploy to HUB latest') {
       steps {
         withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: ""]) {
           script {
