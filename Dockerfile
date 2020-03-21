@@ -16,4 +16,4 @@ COPY . ./dist/
 
 RUN ls -la
 
-CMD [ "node", "dist/main" ]
+CMD [ "node", "dist/main.js" ]
