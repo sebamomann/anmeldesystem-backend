@@ -26,7 +26,7 @@ pipeline {
         withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: ""]) {
           script {
             image.push("${env.BUILD_ID}")
-            image.push(':latest')
+            image.push("latest")
           }
         }
       }
