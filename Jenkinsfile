@@ -31,6 +31,9 @@ pipeline {
         }
       }
     }
+    stage('Prepare execute (env)') {
+      sh 'touch .env'
+    }
     stage('Execute') {
       steps {
         sh 'docker-compose -f compose.yml up -d'
