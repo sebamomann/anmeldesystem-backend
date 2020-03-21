@@ -25,6 +25,7 @@ pipeline {
       steps {
         withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: ""]) {
           script {
+            echo LATEST
             image.push("${VERSION}")
           }
         }
