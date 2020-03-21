@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  anmeldeystem-backend:
+    build:
+      contexts: .
+      dockerfile: .
+      restart: always
+      container_name: anmeldesystem-backend
+      env_file:
+        - ./.env
+    ports:
+      - 3000:3000
