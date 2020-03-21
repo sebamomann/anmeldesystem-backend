@@ -1,3 +1,5 @@
+img = null
+
 pipeline {
   agent any
 
@@ -15,15 +17,17 @@ pipeline {
     stage('Build Docker image') {
       steps {  
         script {
-          def image = docker.build("anmeldesystem-backend:${env.BUILD_ID}")
+          image = docker.build("anmeldesystem-backend:${env.BUILD_ID}")
         }
       }
     }
     stage('Deploy to HUB') {
       steps {
-        script {
-          image.push()
-          image.push(':latest')
+        withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: url: ""]) {
+          script {
+            image.push()
+            image.push(':latest')
+          }
         }
       }
     }
