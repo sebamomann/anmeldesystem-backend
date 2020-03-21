@@ -2,8 +2,7 @@ version: '2'
 
 services:
   anmeldeystem-backend:
-    build: .
-    image: anmeldesystem-backend
+    image: sebamomann/anmeldesystem-backend:latest
     restart: always
     container_name: anmeldesystem-backend
     env_file:
