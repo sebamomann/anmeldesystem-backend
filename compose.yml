@@ -3,7 +3,9 @@ version: '2'
 services:
   anmeldeystem-backend:
     build: .
+    image: anmeldesystem-backend
     restart: always
+    container_name: anmeldesystem-backend
     env_file:
       - ./.env
     ports:
