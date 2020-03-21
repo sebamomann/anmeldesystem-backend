@@ -6,7 +6,7 @@ WORKDIR /usr/src
 
 COPY package*.json ./
 RUN npm install
-RUN npm version ${version}
+RUN "npm version ${version}"
 
 COPY . .
 
