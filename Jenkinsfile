@@ -27,11 +27,15 @@ pipeline {
           script {
             image.push("${env.BUILD_ID}")
           }
-          when {
-            expression {
-              return ${LATEST} == true
-            }
-          }
+        }
+      }
+      when {
+        expression {
+          return ${LATEST} == true
+        }
+      }
+      steps {
+        withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: ""]) {
           script {
             image.push("latest")
           }
