@@ -9,7 +9,7 @@ pipeline {
     }
     stage('Test App') {
       steps {
-        sh 'npm test'
+        // sh 'npm test'
       }
     }
     stage('Build Docker image') {
