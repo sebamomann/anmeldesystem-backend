@@ -33,7 +33,7 @@ pipeline {
     stage('Deploy to HUB latest') {
       when {
         expression {
-          return true == true
+          return "${LATEST}" == true
         }
       }
       steps {
@@ -47,7 +47,7 @@ pipeline {
     stage('Execute') {
       when {
         expression {
-          return true == true
+          return "${LATEST}" == true
         }
       }
       steps {
