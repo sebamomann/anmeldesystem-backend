@@ -32,7 +32,9 @@ pipeline {
       }
     }
     stage('Prepare execute (env)') {
-      sh 'touch .env'
+      steps {
+        sh 'touch .env'
+      }
     }
     stage('Execute') {
       steps {
