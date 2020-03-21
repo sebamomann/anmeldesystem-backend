@@ -25,7 +25,7 @@ pipeline {
       steps {
         withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: ""]) {
           script {
-            image.push("${env.BUILD_ID}")
+            image.push("${VERSION}")
           }
         }
       }
