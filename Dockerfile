@@ -12,8 +12,8 @@ RUN npm run-script build
 
 RUN ls -la
 
-COPY dist/ . 
+COPY ./dist/ . 
 
 RUN ls -la
 
-CMD [ "node", "main" ]
+CMD [ "node", "dist/main" ]
