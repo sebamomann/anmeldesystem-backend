@@ -231,7 +231,7 @@ export class EnrollmentService {
             this.mailerService
                 .sendMail({
                     to: enrollmentToDb.mail.mail,
-                    from: 'no-reply@eca.cg-hh.de',
+                    from: process.env.MAIL_ECA,
                     subject: 'Deine Anmeldung zu ' + appointment.title,
                     template: 'enroll', // The `.pug` or `.hbs` extension is appended automatically.
                     context: {  // Data to be sent to template engine.

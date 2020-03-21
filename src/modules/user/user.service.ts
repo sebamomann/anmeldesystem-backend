@@ -65,13 +65,13 @@ export class UserService {
         }
 
         let token = crypto.createHmac('sha256',
-            user.mail + process.env.MAIL_TOKEN_SALT + user.username + Date.now())
+            user.mail + process.env.SALT_MAIL + user.username + Date.now())
             .digest('hex');
 
         this.mailerService
             .sendMail({
                 to: user.mail,
-                from: 'no-reply@eca.cg-hh.de',
+                from: process.env.MAIL_ECA,
                 subject: 'Neuer Account',
                 template: 'register', // The `.pug` or `.hbs` extension is appended automatically.
                 context: {  // Data to be sent to template engine.
@@ -130,7 +130,7 @@ export class UserService {
                 "AND oldPassword IS NULL " +
                 "AND userId = ?", [user.id]);
 
-            let token = crypto.createHmac('sha256', mail + process.env.MAIL_TOKEN_SALT + Date.now()).digest('hex');
+            let token = crypto.createHmac('sha256', mail + process.env.SALT_MAIL + Date.now()).digest('hex');
             const passwordReset = new PasswordReset();
             passwordReset.user = user;
             passwordReset.token = token;
@@ -140,7 +140,7 @@ export class UserService {
             this.mailerService
                 .sendMail({
                     to: mail,
-                    from: 'no-reply@eca.cg-hh.de',
+                    from: process.env.MAIL_ECA,
                     subject: 'Jemand möchte dein Passwort zurücksetzen. Bist das du?',
                     template: 'passwordreset', // The `.pug` or `.hbs` extension is appended automatically.
                     context: {  // Data to be sent to template engine.
@@ -401,7 +401,7 @@ export class UserService {
         if (_user != null) {
             await this.resetPreviousMailChanges(_user);
 
-            let token = crypto.createHmac('sha256', mail + process.env.MAIL_TOKEN_SALT + Date.now()).digest('hex');
+            let token = crypto.createHmac('sha256', mail + process.env.SALT_MAIL + Date.now()).digest('hex');
 
             const emailChange = new EmailChange();
             emailChange.user = user;
@@ -414,7 +414,7 @@ export class UserService {
             this.mailerService
                 .sendMail({
                     to: mail,
-                    from: 'no-reply@eca.cg-hh.de',
+                    from: process.env.MAIL_ECA,
                     subject: 'Bitte bestätige deine neue Email-Adresse',
                     template: 'emailchange', // The `.pug` or `.hbs` extension is appended automatically.
                     context: {  // Data to be sent to template engine.
