@@ -23,7 +23,7 @@ pipeline {
     }
     stage('Deploy to HUB') {
       steps {
-        withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: ""]) {
+        withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: "/sebamomann/anmeldesystem-backend"]) {
           script {
             image.push()
             image.push(':latest')
