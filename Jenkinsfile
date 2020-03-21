@@ -3,7 +3,9 @@ pipeline {
 
   stages {
     stage('Checkout') {
-      checkout scm
+      steps {
+        checkout scm
+      }
     }
     stage('Test App') {
       steps {
@@ -18,11 +20,17 @@ pipeline {
       }
     }
     stage('Deploy to HUB') {
-      image.push()
-      image.push(':latest')
+      steps {
+        script {
+          image.push()
+          image.push(':latest')
+        }
+      }
     }
     stage('Execute') {
-      sh 'docker-compose -f compose.yml up -d'
+      steps {
+        sh 'docker-compose -f compose.yml up -d'
+      }
     }
   }
 }
