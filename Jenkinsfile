@@ -9,11 +9,6 @@ pipeline {
         checkout scm
       }
     }
-    stage('Versioning') {
-      steps {
-        sh "npm version ${VERSION}"
-      }
-    }
     //stage('Test App') {
       // steps {
         // sh 'npm test'
@@ -38,7 +33,7 @@ pipeline {
             }
           }
           script {
-            image.push("latest")image.push("latest")
+            image.push("latest")
           }
         }
       }
