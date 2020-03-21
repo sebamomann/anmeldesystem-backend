@@ -29,13 +29,13 @@ pipeline {
           }
         }
       }
+    }
+    stage('Deploy to HUB latest') {
       when {
         expression {
           return ${LATEST} == true
         }
       }
-    }
-    stage('Deploy to HUB latest') {
       steps {
         withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: ""]) {
           script {
