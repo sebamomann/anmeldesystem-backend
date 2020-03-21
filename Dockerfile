@@ -8,7 +8,8 @@ WORKDIR /usr/src
 COPY package*.json ./
 RUN npm install
 RUN npm version ${version}
+RUN nom build
 
-COPY . .
+COPY . ./dist/*
 
-CMD [ "node", "src/main.ts" ]
+CMD [ "node", "main.ts" ]
