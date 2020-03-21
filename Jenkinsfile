@@ -1,4 +1,5 @@
 img = null
+env_data = ""
 
 pipeline {
   agent any
@@ -50,7 +51,7 @@ pipeline {
         echo 'preparing .env file'
 
         script {
-          def data = """
+          env_data = """
             SALT_JWT=${SALT_JWT}
             SALT_MAIL=${SALT_MAIL}
             SALT_ENROLLMENT=${SALT_ENROLLMENT}
@@ -65,7 +66,7 @@ pipeline {
           """
         }
 
-        writeFile(file: ".env", text: data)
+        writeFile(file: ".env", text: env_data)
 
         echo 'execute ...'
         sh 'docker-compose -f compose.yml up -d'
