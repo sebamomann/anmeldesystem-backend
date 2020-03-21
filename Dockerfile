@@ -8,7 +8,7 @@ WORKDIR /usr/src
 COPY package*.json ./
 RUN npm install
 RUN npm version ${version}
-RUN nom build
+RUN npm build
 
 COPY . ./dist/*
 
