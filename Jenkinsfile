@@ -9,6 +9,11 @@ pipeline {
         checkout scm
       }
     }
+    stage('Versioning') {
+      steps {
+        sh "npm version ${VERSION}"
+      }
+    }
     //stage('Test App') {
       // steps {
         // sh 'npm test'
@@ -26,18 +31,28 @@ pipeline {
         withDockerRegistry([credentialsId: "docker-hub-sebamomann", url: ""]) {
           script {
             image.push("${env.BUILD_ID}")
-            image.push("latest")
+          }
+          when {
+            expression {
+              return ${LATEST} == true
+            }
+          }
+          script {
+            image.push("latest")image.push("latest")
           }
         }
       }
     }
-    stage('Prepare execute (env)') {
-      steps {
-        sh 'touch .env'
-      }
-    }
     stage('Execute') {
+      when {
+        expression {
+          return ${LATEST} == true
+        }
+      }
       steps {
+        echo 'preparing .env file'
+        sh 'touch .env'
+        echo 'execute ...'
         sh 'docker-compose -f compose.yml up -d'
       }
     }
