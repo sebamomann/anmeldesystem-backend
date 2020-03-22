@@ -19,6 +19,9 @@ async function bootstrap() {
         res.header('access-control-expose-headers', "etag");
         return next();
     });
+
+    console.log(process.env);
+
     await app.listen(3000);
 }
 

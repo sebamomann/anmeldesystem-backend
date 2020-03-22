@@ -1,8 +1,8 @@
-version: '3'
+version: '2'
 
 services:
   anmeldeystem-backend:
-    build: .
+    image: sebamomann/anmeldesystem-backend:latest
     restart: always
     container_name: anmeldesystem-backend
     env_file:

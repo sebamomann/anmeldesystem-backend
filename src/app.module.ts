@@ -35,23 +35,25 @@ import {PasswordChange} from "./modules/user/password-change/password-change.ent
 
 require('dotenv').config();
 const password = process.env.MAIL_ECA_PASSWORD;
+const _mail = process.env.MAIL_ECA;
+
 
 @Module({
     imports: [TypeOrmModule.forRoot({
         type: 'mysql',
-        host: process.env.API_HOST != null ? process.env.API_HOST : "localhost",
-        port: 3306,
-        username: process.env.API_USERNAME != null ? process.env.API_USERNAME : "root",
-        password: process.env.API_PASSWORD != null ? process.env.API_PASSWORD : "",
-        database: process.env.API_DATABASE != null ? process.env.API_DATABASE : "anmeldesystem-api",
+        host: process.env.DB_HOST,
+        port: +process.env.DB_PORT,
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_DATABASE,
         entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key,
             TelegramUser, PasswordReset, Releasenote, EmailChange, Mail, PasswordChange,],
         synchronize: true
     }),
         MailerModule.forRoot({
-            transport: 'smtps://no-reply@eca.cg-hh.de:' + password + '@cp.dankoe.de',
+            transport: 'smtps://' + _mail + ':' + password + '@cp.dankoe.de',
             defaults: {
-                from: '"ECA-Bot" <no-reply@eca.cg-hh.de>',
+                from: '"ECA-Bot" <' + _mail + '>',
             },
             template: {
                 dir: path.resolve(__dirname, 'templates'),
