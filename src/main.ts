@@ -20,8 +20,6 @@ async function bootstrap() {
         return next();
     });
 
-    console.log(process.env);
-
     await app.listen(3000);
 }
 
