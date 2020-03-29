@@ -1,4 +1,4 @@
-import {BadRequestException, Injectable} from '@nestjs/common';
+import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {User} from "./user.entity";
 import {getRepository, Repository} from 'typeorm';
@@ -32,18 +32,22 @@ export class UserService {
     }
 
     async get(user) {
-        const _user = await this.userRepository.findByIds(user.id);
-        const __user = _user[0];
-        __user.emailChange = __user.emailChange.filter(fEmailChange =>
+        const _user = await this.userRepository.findOne(user.id);
+
+        if (_user === undefined) {
+            throw new NotFoundException();
+        }
+
+        _user.emailChange = _user.emailChange.filter(fEmailChange =>
             (fEmailChange.iat.getTime()) + (24 * 60 * 60 * 1000) > Date.now()
             && fEmailChange.oldMail != 'invalid'
             && fEmailChange.used === null);
 
-        if (JSON.stringify(__user.emailChange) === JSON.stringify([])) {
-            delete __user.emailChange;
+        if (JSON.stringify(_user.emailChange) === JSON.stringify([])) {
+            delete _user.emailChange;
         }
 
-        return __user;
+        return _user;
     }
 
     public async register(user: User, domain: string) {

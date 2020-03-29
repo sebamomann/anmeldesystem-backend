@@ -16,8 +16,8 @@ import {User} from "./user.entity";
 import {TelegramUser} from "./telegram/telegram-user.entity";
 import {Usr} from "./user.decorator";
 import {AuthGuard} from "@nestjs/passport";
-import {Response} from "express";
 import {AuthService} from "../../auth/auth.service";
+import {Response} from 'express';
 
 @Controller('user')
 export class UserController {
@@ -26,15 +26,15 @@ export class UserController {
 
     @Get()
     @UseGuards(AuthGuard('jwt'))
-    findAll(@Usr() user: User,
-            @Res() res: Response) {
+    get(@Usr() user: User,
+        @Res() res: Response) {
         return this.userService
             .get(user)
             .then(result => {
-                res.status(200).json(result);
+                return res.status(200).json(result);
             })
-            .catch(err => {
-
+            .catch((err) => {
+                return res.status(410).json();
             });
     }
 
