@@ -7,7 +7,7 @@ export class EmptyFieldsException implements Error {
     data: string[];
     code: string;
 
-    constructor(code: string, message: string, data: string[]) {
+    constructor(code: string, message: string, data: string[] = null) {
         this.code = code;
         this.message = message;
         this.data = data;

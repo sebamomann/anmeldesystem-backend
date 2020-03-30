@@ -1,6 +1,6 @@
 import {Controller, HttpStatus, Post, Request, Res, UseGuards} from '@nestjs/common';
-import {AuthGuard} from "@nestjs/passport";
-import {AuthService} from "./auth/auth.service";
+import {AuthGuard} from '@nestjs/passport';
+import {AuthService} from './auth/auth.service';
 
 @Controller()
 export class AppController {
@@ -19,6 +19,6 @@ export class AppController {
             return res.status(HttpStatus.UNAUTHORIZED).json(error);
         }
 
-        return res.status(200).json(await this.authService.login(req.user));
+        return res.status(200).json(await this.authService.addJwtToObject(req.user));
     }
 }

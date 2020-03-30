@@ -1,41 +1,15 @@
-import {
-    Body,
-    Controller,
-    ForbiddenException,
-    Get,
-    HttpStatus,
-    NotFoundException,
-    Param,
-    Post,
-    Put,
-    Res,
-    UseGuards
-} from '@nestjs/common';
-import {UserService} from "./user.service";
-import {User} from "./user.entity";
-import {TelegramUser} from "./telegram/telegram-user.entity";
-import {Usr} from "./user.decorator";
-import {AuthGuard} from "@nestjs/passport";
-import {AuthService} from "../../auth/auth.service";
+import {Body, Controller, Get, HttpStatus, NotFoundException, Param, Post, Put, Res, UseGuards} from '@nestjs/common';
+import {UserService} from './user.service';
+import {User} from './user.entity';
+import {TelegramUser} from './telegram/telegram-user.entity';
+import {Usr} from './user.decorator';
+import {AuthGuard} from '@nestjs/passport';
+import {AuthService} from '../../auth/auth.service';
 import {Response} from 'express';
 
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService, private authService: AuthService) {
-    }
-
-    @Get()
-    @UseGuards(AuthGuard('jwt'))
-    get(@Usr() user: User,
-        @Res() res: Response) {
-        return this.userService
-            .get(user)
-            .then(result => {
-                return res.status(200).json(result);
-            })
-            .catch((err) => {
-                return res.status(410).json();
-            });
     }
 
     static passwordresetErrorHandler(err: any, res: Response) {
@@ -53,53 +27,31 @@ export class UserController {
         return res.status(HttpStatus.BAD_REQUEST).json(error);
     }
 
-    @Post()
-    register(@Body('user') user: User,
-             @Body('domain') domain: string,
-             @Res() res: Response) {
+    @Get()
+    @UseGuards(AuthGuard('jwt'))
+    get(@Usr() user: User,
+        @Res() res: Response,) {
         return this.userService
-            .register(user, domain)
+            .get(user)
             .then(result => {
-                return res.status(HttpStatus.CREATED).json(result);
+                res.status(HttpStatus.OK).json(result);
             })
-            .catch(err => {
-                return this.defaultErrorResponseHandler(err, res);
+            .catch(() => {
+                res.status(HttpStatus.GONE).json();
             });
     }
 
-    @Put()
-    @UseGuards(AuthGuard('jwt'))
-    update(@Body() toChange: any,
-           @Res() res: Response,
-           @Usr() user: User) {
+    @Post()
+    register(@Body('user') user: User,
+             @Body('domain') domain: string,
+             @Res() res: Response,) {
         return this.userService
-            .update(toChange, user)
-            .then(async tUser => {
-                tUser = await this.authService.login(tUser);
-                res.status(HttpStatus.OK).json(tUser);
+            .register(user, domain)
+            .then(result => {
+                res.status(HttpStatus.CREATED).json(result);
             })
-            .catch((err) => {
-                console.log(err);
-
-                let error = {code: '', error: {}};
-                if (err.code === 'DUPLICATE_ENTRY') {
-                    error.code = 'ER_DUP_ENTRY';
-                    error.error = {
-                        columns: err.data
-                    };
-                } else if (err instanceof NotFoundException
-                    || err instanceof ForbiddenException) {
-                    throw err
-                } else {
-                    error.error = {
-                        undefined: {
-                            message: "Some error occurred. Please try again later or contact the support",
-                            error: err
-                        }
-                    };
-                }
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
+            .catch(err => {
+                this.defaultErrorResponseHandler(err, res);
             });
     }
 
@@ -217,29 +169,70 @@ export class UserController {
             });
     }
 
+    @Put()
+    @UseGuards(AuthGuard('jwt'))
+    update(@Usr() user: User,
+           @Body() toChange: any,
+           @Res() res: Response,) {
+        return this.userService
+            .update(toChange, user)
+            .then(async tUser => {
+                tUser = this.authService.addJwtToObject(tUser);
+                res.status(HttpStatus.OK).json(tUser);
+            })
+            .catch(err => {
+                let error: any = {};
+
+                if (err.code === 'EMPTY_FIELDS') {
+                    error.code = err.code;
+                    error.message = 'Due to the mail change you need to provide a domain for the activation call';
+                    error.data = err.data;
+                } else if (err.code === 'DUPLICATE_ENTRY') {
+                    error.code = err.code;
+                    error.message = 'Following values are already in use';
+                    error.data = err.data;
+                } else {
+                    let id = this.makeid(10);
+                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
+
+                    error.code = 'UNDEFINED';
+                    error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
+                    error.data = id;
+                }
+
+                if (error.code !== 'UNDEFINED') {
+                    res.status(HttpStatus.BAD_REQUEST).json(error);
+                }
+
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+            });
+    }
 
     private defaultErrorResponseHandler(err, res: Response) {
         let error: any = {};
 
         if (err.code === 'EMPTY_FIELDS') {
             error.code = err.code;
-            error.error = err.data
+            error.message = 'Following values need to be provided';
+            error.data = err.data;
         } else if (err.code === 'DUPLICATE_ENTRY') {
-            error.code = 'ER_DUP_ENTRY';
-            error.error = {
-                columns: err.data
-            };
+            error.code = err.code;
+            error.message = 'Following values are already in use';
+            error.data = err.data;
         } else {
             let id = this.makeid(10);
             console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
 
-            error.code = "UNDEFINED";
-            error.error = {
-                message: "Some error occurred. Please try again later or contact the support",
-                id: id
-            };
+            error.code = 'UNDEFINED';
+            error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
+            error.data = id;
         }
-        return res.status(HttpStatus.BAD_REQUEST).json(error);
+
+        if (error.code !== 'UNDEFINED') {
+            return res.status(HttpStatus.BAD_REQUEST).json(error);
+        }
+
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
     }
 
     makeid(length) {
