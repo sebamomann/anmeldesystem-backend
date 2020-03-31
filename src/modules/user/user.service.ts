@@ -10,6 +10,8 @@ import {DuplicateValueException} from '../../exceptions/DuplicateValueException'
 import {EmailChange} from './email-change/email-change.entity';
 import {PasswordChange} from './password-change/password-change.entity';
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
+import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
+import {UnknownUserException} from '../../exceptions/UnknownUserException';
 
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
@@ -69,8 +71,10 @@ export class UserService {
             console.log(e);
         }
 
+        const savedUser = await this.userRepository.save(userToDb);
+
         let token = crypto.createHmac('sha256',
-            user.mail + process.env.SALT_MAIL + user.username + Date.now())
+            user.mail + process.env.SALT_MAIL + savedUser.username + savedUser.iat)
             .digest('hex');
 
         this.mailerService
@@ -90,22 +94,33 @@ export class UserService {
                 console.log(err);
             });
 
-        return await this.userRepository.save(userToDb);
+        return savedUser;
     }
 
-    async verifyAccountByEmail(mail: string, token: string) {
+    async activate(mail: string, token: string) {
         let user = await this.findByEmail(mail);
+
         if (user != undefined) {
-            if (!!user.activated === false) {
-                user.activated = true;
-                await this.userRepository.save(user);
-                return true;
+            const verifyingToken = crypto.createHmac('sha256',
+                user.mail + process.env.SALT_MAIL + user.username + user.iat)
+                .digest('hex');
+            const tokenIsValid = verifyingToken === token;
+
+            if (tokenIsValid) {
+                if (!!user.activated === false) {
+                    user.activated = true;
+                    await this.userRepository.save(user);
+
+                    return true;
+                }
+
+                throw new AlreadyUsedException('USED', 'User is already verified');
             }
 
-            throw new InvalidTokenException('USED', 'User is already verified', null);
+            throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
         }
 
-        throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
+        throw new UnknownUserException('GONE', 'User is not present anymore', null);
     }
 
     public async findByEmail(mail: string): Promise<User | undefined> {

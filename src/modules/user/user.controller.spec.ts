@@ -8,6 +8,8 @@ import {UserController} from './user.controller';
 import {HttpStatus, NotFoundException} from '@nestjs/common';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
+import {UnknownUsersException} from '../../exceptions/UnknownUsersException';
+import {InvalidTokenException} from '../../exceptions/InvalidTokenException';
 
 jest.mock('./user.service');
 jest.mock('../../auth/auth.service');
@@ -241,7 +243,7 @@ describe('User Controller', () => {
             });
         });
 
-        describe('* failure should return error with 500 status code ', () => {
+        describe('* failure should return error with 500 status code', () => {
             it('undefined error has occurred', async () => {
                 const result = new Error();
 
@@ -253,6 +255,106 @@ describe('User Controller', () => {
                 const res = mockResponse();
 
                 await userController.update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res);
+                expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                expect(res.json).toHaveBeenCalledWith({
+                    code: 'UNDEFINED',
+                    message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
+                    data: expect.stringMatching(/^.{10}$/)
+                });
+            });
+        });
+    });
+
+    describe('* verify account (by link from mail)', () => {
+        describe('* successful should return nothing with 200 status code', () => {
+            it('successful request', async () => {
+                jest.spyOn(userService, 'activate')
+                    .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
+
+                const mockMailToSatisfyParameters = 'mocked@mail.de';
+                const mockTokenToSatisfyParameters = 'mockedToken';
+                const res = mockResponse();
+
+                await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+            });
+        });
+
+        describe('* failure should return error with 400 status code', () => {
+            describe('* invalid token', () => {
+                it('token mismatch', async () => {
+                    const result = new InvalidTokenException('INVALID',
+                        'Provided token is not valid');
+
+                    jest.spyOn(userService, 'activate')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockTokenToSatisfyParameters = 'mockedToken';
+                    const res = mockResponse();
+
+                    await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                    expect(res.json).toHaveBeenCalledWith({
+                        code: 'INVALID',
+                        message: 'Provided token is not valid',
+                        data: null,
+                    });
+                });
+
+                it('token used', async () => {
+                    const result = new InvalidTokenException('USED',
+                        'User is already verified');
+
+                    jest.spyOn(userService, 'activate')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockTokenToSatisfyParameters = 'mockedToken';
+                    const res = mockResponse();
+
+                    await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                    expect(res.json).toHaveBeenCalledWith({
+                        code: 'USED',
+                        message: 'User is already verified',
+                        data: null,
+                    });
+                });
+            });
+        });
+
+        describe('* failure should return error with 410 status code', () => {
+            describe('* user not found', () => {
+                it('user gone', async () => {
+                    const result = new UnknownUsersException('GONE',
+                        'User is not present anymore');
+
+                    jest.spyOn(userService, 'activate')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockTokenToSatisfyParameters = 'mockedToken';
+                    const res = mockResponse();
+
+                    await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.GONE);
+                });
+            });
+        });
+
+        describe('* failure should return error with 500 status code', () => {
+            it('undefined error has occurred', async () => {
+                const result = new Error();
+
+                jest.spyOn(userService, 'activate')
+                    .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                const mockMailToSatisfyParameters = 'mocked@mail.de';
+                const mockTokenToSatisfyParameters = 'mockedToken';
+                const res = mockResponse();
+
+                await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                 expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
                 expect(res.json).toHaveBeenCalledWith({
                     code: 'UNDEFINED',

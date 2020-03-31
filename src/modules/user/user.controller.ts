@@ -12,21 +12,6 @@ export class UserController {
     constructor(private readonly userService: UserService, private authService: AuthService) {
     }
 
-    static passwordresetErrorHandler(err: any, res: Response) {
-        if (err instanceof NotFoundException) {
-            return err;
-        }
-
-        let error: any = {};
-        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED' || err.code === 'OUTDATED') {
-            error.code = err.code;
-            error.message = err.message;
-            error.error = err.data;
-        }
-
-        return res.status(HttpStatus.BAD_REQUEST).json(error);
-    }
-
     @Get()
     @UseGuards(AuthGuard('jwt'))
     get(@Usr() user: User,
@@ -55,18 +40,58 @@ export class UserController {
             });
     }
 
-    @Get('/verify/:mail/:token')
-    verifyAccountByEmail(@Param('mail') mail: string,
-                         @Param('token') token: string,
-                         @Res() res: Response) {
-        this.userService
-            .verifyAccountByEmail(mail, token)
-            .then(result => {
-                return res.status(HttpStatus.OK).json();
+    static passwordresetErrorHandler(err: any, res: Response) {
+        if (err instanceof NotFoundException) {
+            return err;
+        }
+
+        let error: any = {};
+        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED' || err.code === 'OUTDATED') {
+            error.code = err.code;
+            error.message = err.message;
+            error.error = err.data;
+        }
+
+        return res.status(HttpStatus.BAD_REQUEST).json(error);
+    }
+
+    @Put()
+    @UseGuards(AuthGuard('jwt'))
+    update(@Usr() user: User,
+           @Body() toChange: any,
+           @Res() res: Response,) {
+        return this.userService
+            .update(toChange, user)
+            .then(async tUser => {
+                tUser = this.authService.addJwtToObject(tUser);
+                res.status(HttpStatus.OK).json(tUser);
             })
             .catch(err => {
-                console.log(err);
-                return UserController.passwordresetErrorHandler(err, res);
+                let error: any = {};
+
+                if (err.code === 'EMPTY_FIELDS') {
+                    error.code = err.code;
+                    error.message = 'Due to the mail change you need to provide a domain for the activation call';
+                    error.data = err.data;
+                } else if (err.code === 'DUPLICATE_ENTRY') {
+                    error.code = err.code;
+                    error.message = 'Following values are already in use';
+                    error.data = err.data;
+                } else {
+                    let id = this.makeid(10);
+                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
+
+                    error.code = 'UNDEFINED';
+                    error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
+                    error.data = id;
+                }
+
+                if (error.code !== 'UNDEFINED') {
+                    res.status(HttpStatus.BAD_REQUEST).json(error);
+                    return;
+                }
+
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
             });
     }
 
@@ -169,27 +194,29 @@ export class UserController {
             });
     }
 
-    @Put()
-    @UseGuards(AuthGuard('jwt'))
-    update(@Usr() user: User,
-           @Body() toChange: any,
-           @Res() res: Response,) {
+    @Get('/verify/:mail/:token')
+    activate(@Param('mail') mail: string,
+             @Param('token') token: string,
+             @Res() res: Response) {
         return this.userService
-            .update(toChange, user)
-            .then(async tUser => {
-                tUser = this.authService.addJwtToObject(tUser);
-                res.status(HttpStatus.OK).json(tUser);
+            .activate(mail, token)
+            .then(() => {
+                res.status(HttpStatus.OK).json();
             })
             .catch(err => {
                 let error: any = {};
 
-                if (err.code === 'EMPTY_FIELDS') {
+                if (err.code === 'GONE') {
+                    res.status(HttpStatus.GONE).json();
+                    return;
+                } else if (err.code === 'INVALID') {
                     error.code = err.code;
-                    error.message = 'Due to the mail change you need to provide a domain for the activation call';
+                    error.message = 'Provided token is not valid';
                     error.data = err.data;
-                } else if (err.code === 'DUPLICATE_ENTRY') {
+
+                } else if (err.code === 'USED') {
                     error.code = err.code;
-                    error.message = 'Following values are already in use';
+                    error.message = 'User is already verified';
                     error.data = err.data;
                 } else {
                     let id = this.makeid(10);
@@ -198,13 +225,12 @@ export class UserController {
                     error.code = 'UNDEFINED';
                     error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
                     error.data = id;
+
+                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+                    return;
                 }
 
-                if (error.code !== 'UNDEFINED') {
-                    res.status(HttpStatus.BAD_REQUEST).json(error);
-                }
-
-                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+                res.status(HttpStatus.BAD_REQUEST).json(error);
             });
     }
 

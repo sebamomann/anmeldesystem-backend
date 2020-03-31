@@ -1,4 +1,4 @@
-export class InvalidTokenException implements Error {
+export class AlreadyUsedException implements Error {
     readonly columnNumber: number;
     readonly fileName: string;
     readonly lineNumber: number;
