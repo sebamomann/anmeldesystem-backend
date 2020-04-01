@@ -50,6 +50,7 @@ describe('User Controller', () => {
 
                 await userController.get(new User(), res);
                 expect(res.status).toHaveBeenCalledWith(200);
+                expect(res.status).toBeCalledTimes(1);
                 expect(res.json).toHaveBeenCalledWith(result);
             });
         });
@@ -66,6 +67,7 @@ describe('User Controller', () => {
 
                 await userController.get(mockUserToSatisfyParameters, res);
                 expect(res.status).toHaveBeenCalledWith(HttpStatus.GONE);
+                expect(res.status).toBeCalledTimes(1);
             });
         });
     });
@@ -84,6 +86,7 @@ describe('User Controller', () => {
 
                 await userController.register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res);
                 expect(res.status).toHaveBeenCalledWith(201);
+                expect(res.status).toBeCalledTimes(1);
                 expect(res.json).toHaveBeenCalledWith(result);
             });
         });
@@ -102,6 +105,7 @@ describe('User Controller', () => {
 
                     await userController.register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'DUPLICATE_ENTRY',
                         message: 'Following values are already in use',
@@ -123,6 +127,7 @@ describe('User Controller', () => {
 
                     await userController.register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'DUPLICATE_ENTRY',
                         message: 'Following values are already in use',
@@ -144,6 +149,7 @@ describe('User Controller', () => {
 
                     await userController.register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'DUPLICATE_ENTRY',
                         message: 'Following values are already in use',
@@ -166,6 +172,7 @@ describe('User Controller', () => {
 
                 await userController.register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res);
                 expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                expect(res.status).toBeCalledTimes(1);
                 expect(res.json).toHaveBeenCalledWith({
                     code: 'UNDEFINED',
                     message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
@@ -194,6 +201,7 @@ describe('User Controller', () => {
 
                 await userController.update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res);
                 expect(res.status).toHaveBeenCalledWith(200);
+                expect(res.status).toBeCalledTimes(1);
                 expect(res.json).toHaveBeenCalledWith(resultWithToken);
             });
         });
@@ -214,6 +222,7 @@ describe('User Controller', () => {
 
                     await userController.update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'DUPLICATE_ENTRY',
                         message: 'Following values are already in use',
@@ -236,6 +245,7 @@ describe('User Controller', () => {
 
                     await userController.update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'EMPTY_FIELDS',
                         message: 'Due to the mail change you need to provide a domain for the activation call',
@@ -258,6 +268,7 @@ describe('User Controller', () => {
 
                 await userController.update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res);
                 expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                expect(res.status).toBeCalledTimes(1);
                 expect(res.json).toHaveBeenCalledWith({
                     code: 'UNDEFINED',
                     message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
@@ -279,6 +290,7 @@ describe('User Controller', () => {
 
                 await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                 expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+                expect(res.status).toBeCalledTimes(1);
             });
         });
 
@@ -297,6 +309,7 @@ describe('User Controller', () => {
 
                     await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'INVALID',
                         message: 'Provided token is not valid',
@@ -317,6 +330,7 @@ describe('User Controller', () => {
 
                     await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'USED',
                         message: 'User is already verified',
@@ -341,6 +355,7 @@ describe('User Controller', () => {
 
                     await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.GONE);
+                    expect(res.status).toBeCalledTimes(1);
                 });
             });
         });
@@ -358,6 +373,7 @@ describe('User Controller', () => {
 
                 await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                 expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                expect(res.status).toBeCalledTimes(1);
                 expect(res.json).toHaveBeenCalledWith({
                     code: 'UNDEFINED',
                     message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
@@ -380,6 +396,7 @@ describe('User Controller', () => {
 
                     await userController.resetPasswordInitialization(mockMailToSatisfyParameters, mockDomainToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                    expect(res.status).toBeCalledTimes(1);
                 });
             });
 
@@ -396,6 +413,7 @@ describe('User Controller', () => {
 
                     await userController.resetPasswordInitialization(mockMailToSatisfyParameters, mockDomainToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'UNDEFINED',
                         message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
@@ -417,6 +435,7 @@ describe('User Controller', () => {
 
                     await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                    expect(res.status).toBeCalledTimes(1);
                 });
             });
 
@@ -435,6 +454,7 @@ describe('User Controller', () => {
 
                         await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                         expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                        expect(res.status).toBeCalledTimes(1);
                         expect(res.json).toHaveBeenCalledWith({
                             code: 'INVALID',
                             message: 'Provided token is not valid',
@@ -455,6 +475,7 @@ describe('User Controller', () => {
 
                         await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                         expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                        expect(res.status).toBeCalledTimes(1);
                         expect(res.json).toHaveBeenCalledWith({
                             code: 'EXPIRED',
                             message: 'Provided token expired',
@@ -475,6 +496,7 @@ describe('User Controller', () => {
 
                         await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                         expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                        expect(res.status).toBeCalledTimes(1);
                         expect(res.json).toHaveBeenCalledWith({
                             code: 'USED',
                             message: 'User is already verified',
@@ -495,6 +517,7 @@ describe('User Controller', () => {
 
                         await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                         expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                        expect(res.status).toBeCalledTimes(1);
                         expect(res.json).toHaveBeenCalledWith({
                             code: 'OUTDATED',
                             message: 'Provided token was already replaced by a new one',
@@ -517,6 +540,7 @@ describe('User Controller', () => {
 
                     await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'UNDEFINED',
                         message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
@@ -539,6 +563,7 @@ describe('User Controller', () => {
                     await userController.resetPassword(mockMailToSatisfyParameters,
                         mockTokenToSatisfyParameters, mockPasswordToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                    expect(res.status).toBeCalledTimes(1);
                 });
             });
 
@@ -578,6 +603,7 @@ describe('User Controller', () => {
                     await userController.resetPassword(mockMailToSatisfyParameters,
                         mockTokenToSatisfyParameters, mockPasswordToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'UNDEFINED',
                         message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
@@ -601,6 +627,7 @@ describe('User Controller', () => {
 
                     await userController.mailChangeVerifyTokenAndExecuteChange(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                    expect(res.status).toBeCalledTimes(1);
                 });
             });
 
@@ -637,6 +664,7 @@ describe('User Controller', () => {
 
                     await userController.mailChangeVerifyTokenAndExecuteChange(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'UNDEFINED',
                         message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
@@ -658,6 +686,7 @@ describe('User Controller', () => {
 
                     await userController.mailChangeResendMail(mockUserToSatisfyParameter, mockDomainToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                    expect(res.status).toBeCalledTimes(1);
                 });
             });
 
@@ -676,6 +705,7 @@ describe('User Controller', () => {
                     await userController.mailChangeResendMail(mockUserToSatisfyParameter, mockDomainToSatisfyParameters, res);
 
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'INVALID',
                         message: 'There is no active mail change going on. Email resend is not possible',
@@ -697,6 +727,7 @@ describe('User Controller', () => {
 
                     await userController.mailChangeResendMail(mockUserToSatisfyParameter, mockDomainToSatisfyParameters, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'UNDEFINED',
                         message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
@@ -717,6 +748,7 @@ describe('User Controller', () => {
 
                     await userController.mailChangeDeactivateToken(mockUserToSatisfyParameter, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                    expect(res.status).toBeCalledTimes(1);
                 });
             });
 
@@ -732,6 +764,7 @@ describe('User Controller', () => {
 
                     await userController.mailChangeDeactivateToken(mockUserToSatisfyParameter, res);
                     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.status).toBeCalledTimes(1);
                     expect(res.json).toHaveBeenCalledWith({
                         code: 'UNDEFINED',
                         message: 'Some error occurred. Please try again later or contact the support with the appended error Code',

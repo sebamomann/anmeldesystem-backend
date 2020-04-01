@@ -1,10 +1,11 @@
-import {Body, Controller, Get, HttpStatus, NotFoundException, Param, Post, Put, Res, UnauthorizedException, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, HttpStatus, Param, Post, Put, Res, UnauthorizedException, UseGuards} from '@nestjs/common';
 import {UserService} from './user.service';
 import {User} from './user.entity';
 import {Usr} from './user.decorator';
 import {AuthGuard} from '@nestjs/passport';
 import {AuthService} from '../../auth/auth.service';
 import {Response} from 'express';
+import {Responses} from '../../util/responses.util';
 
 @Controller('user')
 export class UserController {
@@ -42,34 +43,12 @@ export class UserController {
                     error.message = 'Following values are already in use';
                     error.data = err.data;
                 } else {
-                    let id = this.makeid(10);
-                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
-                    error.code = 'UNDEFINED';
-                    error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
-                    error.data = id;
-
-                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+                    Responses.undefinedErrorResponse(err, error, res);
                     return;
                 }
 
                 res.status(HttpStatus.BAD_REQUEST).json(error);
             });
-    }
-
-    static passwordresetErrorHandler(err: any, res: Response) {
-        if (err instanceof NotFoundException) {
-            return err;
-        }
-
-        let error: any = {};
-        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED' || err.code === 'OUTDATED') {
-            error.code = err.code;
-            error.message = err.message;
-            error.error = err.data;
-        }
-
-        return res.status(HttpStatus.BAD_REQUEST).json(error);
     }
 
     @Put()
@@ -95,20 +74,11 @@ export class UserController {
                     error.message = 'Following values are already in use';
                     error.data = err.data;
                 } else {
-                    let id = this.makeid(10);
-                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
-                    error.code = 'UNDEFINED';
-                    error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
-                    error.data = id;
-                }
-
-                if (error.code !== 'UNDEFINED') {
-                    res.status(HttpStatus.BAD_REQUEST).json(error);
+                    Responses.undefinedErrorResponse(err, error, res);
                     return;
                 }
 
-                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+                res.status(HttpStatus.BAD_REQUEST).json(error);
             });
     }
 
@@ -131,20 +101,12 @@ export class UserController {
                     error.code = err.code;
                     error.message = 'Provided token is not valid';
                     error.data = err.data;
-
                 } else if (err.code === 'USED') {
                     error.code = err.code;
                     error.message = 'User is already verified';
                     error.data = err.data;
                 } else {
-                    let id = this.makeid(10);
-                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
-                    error.code = 'UNDEFINED';
-                    error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
-                    error.data = id;
-
-                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+                    Responses.undefinedErrorResponse(err, error, res);
                     return;
                 }
 
@@ -164,14 +126,7 @@ export class UserController {
             .catch((err) => {
                 let error: any = {};
 
-                let id = this.makeid(10);
-                console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
-                error.code = 'UNDEFINED';
-                error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
-                error.data = id;
-
-                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+                Responses.undefinedErrorResponse(err, error, res);
                 return;
             });
     }
@@ -205,14 +160,7 @@ export class UserController {
                     error.message = 'Provided token was already replaced by a new one';
                     error.data = err.data;
                 } else {
-                    let id = this.makeid(10);
-                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
-                    error.code = 'UNDEFINED';
-                    error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
-                    error.data = id;
-
-                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+                    Responses.undefinedErrorResponse(err, error, res);
                     return;
                 }
 
@@ -236,14 +184,7 @@ export class UserController {
                 if (err instanceof UnauthorizedException) {
                     throw new UnauthorizedException();
                 } else {
-                    let id = this.makeid(10);
-                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
-                    error.code = 'UNDEFINED';
-                    error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
-                    error.data = id;
-
-                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+                    Responses.undefinedErrorResponse(err, error, res);
                     return;
                 }
             });
@@ -264,14 +205,7 @@ export class UserController {
                 if (err instanceof UnauthorizedException) {
                     throw new UnauthorizedException();
                 } else {
-                    let id = this.makeid(10);
-                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
-                    error.code = 'UNDEFINED';
-                    error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
-                    error.data = id;
-
-                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+                    Responses.undefinedErrorResponse(err, error, res);
                     return;
                 }
             });
@@ -295,14 +229,7 @@ export class UserController {
                     error.message = 'There is no active mail change going on. Email resend is not possible';
                     error.data = err.data;
                 } else {
-                    let id = this.makeid(10);
-                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
-                    error.code = 'UNDEFINED';
-                    error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
-                    error.data = id;
-
-                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+                    Responses.undefinedErrorResponse(err, error, res);
                     return;
                 }
 
@@ -322,14 +249,8 @@ export class UserController {
             .catch(err => {
                 let error: any = {};
 
-                let id = this.makeid(10);
-                console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
-
-                error.code = 'UNDEFINED';
-                error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
-                error.data = id;
-
-                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+                Responses.undefinedErrorResponse(err, error, res);
+                return;
             });
     }
 
@@ -348,15 +269,4 @@ export class UserController {
     //         });
     // }
 
-    makeid(length) {
-        let result = '';
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        const charactersLength = characters.length;
-
-        for (var i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-
-        return result;
-    }
 }

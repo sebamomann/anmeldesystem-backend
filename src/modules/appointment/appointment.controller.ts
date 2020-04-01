@@ -18,18 +18,17 @@ import {
     UseGuards,
     UseInterceptors
 } from '@nestjs/common';
-import {Appointment} from "./appointment.entity";
-import {AppointmentService} from "./appointment.service";
-import {Response} from "express";
-import {AuthGuard} from "@nestjs/passport";
-import {REQUEST} from "@nestjs/core";
-import {Usr} from "../user/user.decorator";
-import {User} from "../user/user.entity";
-import {UserUtil} from "../../util/userUtil.util";
-import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
-import {Etag} from "../../util/etag";
-import {UserController} from "../user/user.controller";
-import {JwtOptStrategy} from "../../auth/jwt-opt.strategy";
+import {Appointment} from './appointment.entity';
+import {AppointmentService} from './appointment.service';
+import {Response} from 'express';
+import {AuthGuard} from '@nestjs/passport';
+import {REQUEST} from '@nestjs/core';
+import {Usr} from '../user/user.decorator';
+import {User} from '../user/user.entity';
+import {UserUtil} from '../../util/userUtil.util';
+import {UnknownUsersException} from '../../exceptions/UnknownUsersException';
+import {Etag} from '../../util/etag';
+import {JwtOptStrategy} from '../../auth/jwt-opt.strategy';
 
 @Controller('appointment')
 export class AppointmentController {
@@ -66,25 +65,20 @@ export class AppointmentController {
             });
     }
 
-    @Get(':link/pin')
-    @UseGuards(AuthGuard('jwt'))
-    pinAppointment(@Usr() user: User,
-                   @Param('link') link: string,
-                   @Res() res: Response) {
-        this.appointmentService
-            .pinAppointment(user, link)
-            .then(result => {
-                return res.status(HttpStatus.OK).json();
-            })
-            .catch(err => {
-                if (err instanceof NotFoundException) {
-                    throw err;
-                }
+    static passwordresetErrorHandler(err: any, res: Response) {
+        if (err instanceof NotFoundException) {
+            return err;
+        }
 
-                return UserController.passwordresetErrorHandler(err, res);
-            });
+        let error: any = {};
+        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED' || err.code === 'OUTDATED') {
+            error.code = err.code;
+            error.message = err.message;
+            error.error = err.data;
+        }
+
+        return res.status(HttpStatus.BAD_REQUEST).json(error);
     }
-
 
     @Post()
     @UseGuards(AuthGuard('jwt'))
@@ -303,6 +297,25 @@ export class AppointmentController {
             .removeFile(link, id)
             .then(result => {
                 res.status(HttpStatus.OK).json();
+            });
+    }
+
+    @Get(':link/pin')
+    @UseGuards(AuthGuard('jwt'))
+    pinAppointment(@Usr() user: User,
+                   @Param('link') link: string,
+                   @Res() res: Response) {
+        this.appointmentService
+            .pinAppointment(user, link)
+            .then(result => {
+                return res.status(HttpStatus.OK).json();
             })
+            .catch(err => {
+                if (err instanceof NotFoundException) {
+                    throw err;
+                }
+
+                return AppointmentController.passwordresetErrorHandler(err, res);
+            });
     }
 }
