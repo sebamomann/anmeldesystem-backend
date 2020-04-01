@@ -1,4 +1,4 @@
-import {Injectable, NotFoundException} from '@nestjs/common';
+import {Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {User} from './user.entity';
 import {getRepository, Repository} from 'typeorm';
@@ -12,6 +12,7 @@ import {PasswordChange} from './password-change/password-change.entity';
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
+import {InvalidRequestException} from '../../exceptions/InvalidRequestException';
 
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
@@ -141,16 +142,21 @@ export class UserService {
         return await this.userRepository.findOne({where: {id: id}});
     }
 
-    public async resetPasswordInit(mail: string, domain: string) {
+    public async resetPasswordInitialization(mail: string, domain: string) {
         const user = await this.findByEmail(mail);
-        if (user != null) {
+
+        if (user != undefined) {
             await this.passwordResetRepository.query('UPDATE user_password_reset ' +
                 'SET oldPassword = \'invalid\' ' +
                 'WHERE used IS NULL ' +
                 'AND oldPassword IS NULL ' +
                 'AND userId = ?', [user.id]);
 
-            let token = crypto.createHmac('sha256', mail + process.env.SALT_MAIL + Date.now()).digest('hex');
+            let token = crypto
+                .createHmac('sha256',
+                    mail + process.env.SALT_MAIL + Date.now())
+                .digest('hex');
+
             const passwordReset = new PasswordReset();
             passwordReset.user = user;
             passwordReset.token = token;
@@ -170,33 +176,33 @@ export class UserService {
                 })
                 .then(() => {
                 })
-                .catch((err) => {
-                    console.log(err);
+                .catch(() => {
                 });
         }
     }
 
-    async validatePasswordresetToken(mail: string, token: string) {
+    async resetPasswordTokenVerification(mail: string, token: string) {
         let passwordReset = await this.passwordResetRepository
             .createQueryBuilder('passwordReset')
             .where('passwordReset.token = :token', {token: token})
             .innerJoin('passwordReset.user', 'user', 'user.mail = :mail', {mail})
             .getOne();
+
         if (passwordReset != undefined) {
             if ((passwordReset.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
                 if (passwordReset.oldPassword === 'invalid') {
-                    throw new InvalidTokenException('OUTDATED', 'Provided token was already replaced by a new one', null);
+                    throw new InvalidTokenException('OUTDATED', 'Provided token was already replaced by a new one');
                 } else if (passwordReset.used === null) {
                     return true;
                 }
 
-                throw new InvalidTokenException('USED', 'Provided token was already used', {date: new Date(passwordReset.used)});
+                throw new AlreadyUsedException('USED', 'Provided token was already used', {date: new Date(passwordReset.used)});
             }
 
-            throw new InvalidTokenException('EXPIRED', 'Provided token expired', null);
+            throw new InvalidTokenException('EXPIRED', 'Provided token expired');
         }
 
-        throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
+        throw new InvalidTokenException('INVALID', 'Provided token is not valid');
     }
 
     private async existsByUsername(username: string) {
@@ -255,32 +261,27 @@ export class UserService {
         throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
     }
 
-    async updatePassword(mail: string, token: string, pass: string): Promise<boolean> {
-        var self = this;
-        return new Promise(function(resolve, reject) {
-            self.validatePasswordresetToken(mail, token)
-                .then(async res => {
-                    console.log(res);
-                    const user = await self.findByEmail(mail);
-                    let currentPassword = user.password;
-                    let newPassword;
-                    newPassword = bcrypt.hashSync(pass, 10);
+    async updatePassword(mail: string, token: string, pass: string) {
+        return this.resetPasswordTokenVerification(mail, token)
+            .then(async () => {
+                const user = await this.findByEmail(mail);
 
-                    user.password = newPassword;
-                    await self.userRepository.save(user);
-                    await self.passwordResetRepository
-                        .createQueryBuilder('pwr')
-                        .update(PasswordReset)
-                        .set({used: new Date(Date.now()), oldPassword: currentPassword})
-                        .where('token = :token', {token: token})
-                        .execute();
+                let currentPassword = user.password;
+                user.password = bcrypt.hashSync(pass, 10);
 
-                    return resolve(true);
-                })
-                .catch(err => {
-                    reject(err);
-                });
-        });
+                await this.userRepository.save(user);
+                await this.passwordResetRepository
+                    .createQueryBuilder('pwr')
+                    .update(PasswordReset)
+                    .set({used: new Date(Date.now()), oldPassword: currentPassword})
+                    .where('token = :token', {token: token})
+                    .execute();
+
+                return true;
+            })
+            .catch(() => {
+                throw new UnauthorizedException();
+            });
     }
 
     async getLastPasswordDate(user: User, pass: string) {
@@ -356,32 +357,30 @@ export class UserService {
         return await this.get(ret_user);
     }
 
-    public verifyMailChange(mail: string, token: string) {
-        const self = this;
-        return new Promise(function(resolve, reject) {
-            self.validateMailChangeToken(mail, token)
-                .then(async res => {
-                    const user = await self.findByEmail(res.oldMail);
-                    let currentMail = user.mail;
-                    user.mail = mail;
+    public mailChangeVerifyTokenAndExecuteChange(mail: string, token: string) {
+        return this.validateMailChangeToken(mail, token)
+            .then(async res => {
+                const user = await this.findByEmail(res.oldMail);
 
-                    await self.userRepository.save(user);
-                    await self.passwordResetRepository
-                        .createQueryBuilder('emailChange')
-                        .update(EmailChange)
-                        .set({used: new Date(Date.now()), oldMail: currentMail})
-                        .where('token = :token', {token: token})
-                        .execute();
+                let currentMail = user.mail;
+                user.mail = mail;
 
-                    return resolve(true);
-                })
-                .catch(err => {
-                    reject(err);
-                });
-        });
+                await this.userRepository.save(user);
+                await this.passwordResetRepository
+                    .createQueryBuilder('emailChange')
+                    .update(EmailChange)
+                    .set({used: new Date(Date.now()), oldMail: currentMail})
+                    .where('token = :token', {token: token})
+                    .execute();
+
+                return true;
+            })
+            .catch(() => {
+                throw new UnauthorizedException();
+            });
     }
 
-    async resendMailChange(user, domain: string) {
+    async mailChangeResendMail(user: User, domain: string) {
         let emailChange = await getRepository(EmailChange)
             .createQueryBuilder('emailChange')
             .where('emailChange.oldMail NOT LIKE :oldMail', {oldMail: 'invalid'})
@@ -391,10 +390,13 @@ export class UserService {
 
         if (emailChange !== undefined) {
             this.handleEmailChange(user, {mail: emailChange.newMail, domain: domain});
+            return true;
         }
+
+        throw new InvalidRequestException('INVALID', 'There is no active mail change going on. Email resend is not possible');
     }
 
-    cancelMailChange(user: User) {
+    public async mailChangeDeactivateToken(user: User) {
         return this.resetPreviousMailChanges(user);
     }
 
@@ -462,10 +464,11 @@ export class UserService {
     }
 
     private async resetPreviousMailChanges(user: User) {
-        await this.emailChangeRepository.query('UPDATE user_mail_change ' +
-            'SET oldMail = \'invalid\' ' +
-            'WHERE used IS NULL ' +
-            'AND userId = ?', [user.id]);
+        return await this.emailChangeRepository
+            .query('UPDATE user_mail_change ' +
+                'SET oldMail = \'invalid\' ' +
+                'WHERE used IS NULL ' +
+                'AND userId = ?', [user.id]);
     }
 
     async findByEmailOrUsername(value: string) {

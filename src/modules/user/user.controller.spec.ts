@@ -5,11 +5,13 @@ import {UserService} from './user.service';
 import {AuthService} from '../../auth/auth.service';
 import {UserController} from './user.controller';
 
-import {HttpStatus, NotFoundException} from '@nestjs/common';
+import {HttpStatus, NotFoundException, UnauthorizedException} from '@nestjs/common';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {UnknownUsersException} from '../../exceptions/UnknownUsersException';
 import {InvalidTokenException} from '../../exceptions/InvalidTokenException';
+import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
+import {InvalidRequestException} from '../../exceptions/InvalidRequestException';
 
 jest.mock('./user.service');
 jest.mock('../../auth/auth.service');
@@ -365,6 +367,381 @@ describe('User Controller', () => {
         });
     });
 
+    describe('* passwordreset', () => {
+        describe('* initialization', () => {
+            describe('* successful should return 204 status code', () => {
+                it('successful request', async () => {
+                    jest.spyOn(userService, 'resetPasswordInitialization')
+                        .mockImplementation(async (): Promise<void> => Promise.resolve());
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockDomainToSatisfyParameters = 'my.domain.tld';
+                    const res = mockResponse();
+
+                    await userController.resetPasswordInitialization(mockMailToSatisfyParameters, mockDomainToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                });
+            });
+
+            describe('* failure should return error with 500 status code', () => {
+                it('undefined error has occurred', async () => {
+                    const result = new Error();
+
+                    jest.spyOn(userService, 'resetPasswordInitialization')
+                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockDomainToSatisfyParameters = 'my.domain.tld';
+                    const res = mockResponse();
+
+                    await userController.resetPasswordInitialization(mockMailToSatisfyParameters, mockDomainToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.json).toHaveBeenCalledWith({
+                        code: 'UNDEFINED',
+                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
+                        data: expect.stringMatching(/^.{10}$/)
+                    });
+                });
+            });
+        });
+
+        describe('* link verification', () => {
+            describe('* successful should return 204 status code', () => {
+                it('successful request', async () => {
+                    jest.spyOn(userService, 'resetPasswordTokenVerification')
+                        .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockTokenToSatisfyParameters = 'token';
+                    const res = mockResponse();
+
+                    await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                });
+            });
+
+            describe('* failure should return error with 400 status code', () => {
+                describe('* invalid token', () => {
+                    it('token mismatch', async () => {
+                        const result = new InvalidTokenException('INVALID',
+                            'Provided token is not valid');
+
+                        jest.spyOn(userService, 'resetPasswordTokenVerification')
+                            .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                        const mockMailToSatisfyParameters = 'mocked@mail.de';
+                        const mockTokenToSatisfyParameters = 'token';
+                        const res = mockResponse();
+
+                        await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                        expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                        expect(res.json).toHaveBeenCalledWith({
+                            code: 'INVALID',
+                            message: 'Provided token is not valid',
+                            data: null,
+                        });
+                    });
+
+                    it('token expired', async () => {
+                        const result = new InvalidTokenException('EXPIRED',
+                            'Provided token expired');
+
+                        jest.spyOn(userService, 'resetPasswordTokenVerification')
+                            .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                        const mockMailToSatisfyParameters = 'mocked@mail.de';
+                        const mockTokenToSatisfyParameters = 'token';
+                        const res = mockResponse();
+
+                        await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                        expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                        expect(res.json).toHaveBeenCalledWith({
+                            code: 'EXPIRED',
+                            message: 'Provided token expired',
+                            data: null,
+                        });
+                    });
+
+                    it('token used', async () => {
+                        const result = new AlreadyUsedException('USED',
+                            'Provided token was already used');
+
+                        jest.spyOn(userService, 'resetPasswordTokenVerification')
+                            .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                        const mockMailToSatisfyParameters = 'mocked@mail.de';
+                        const mockTokenToSatisfyParameters = 'token';
+                        const res = mockResponse();
+
+                        await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                        expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                        expect(res.json).toHaveBeenCalledWith({
+                            code: 'USED',
+                            message: 'User is already verified',
+                            data: null,
+                        });
+                    });
+
+                    it('token outdated', async () => {
+                        const result = new AlreadyUsedException('OUTDATED',
+                            'Provided token was already replaced by a new one');
+
+                        jest.spyOn(userService, 'resetPasswordTokenVerification')
+                            .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                        const mockMailToSatisfyParameters = 'mocked@mail.de';
+                        const mockTokenToSatisfyParameters = 'token';
+                        const res = mockResponse();
+
+                        await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                        expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                        expect(res.json).toHaveBeenCalledWith({
+                            code: 'OUTDATED',
+                            message: 'Provided token was already replaced by a new one',
+                            data: null,
+                        });
+                    });
+                });
+            });
+
+            describe('* failure should return error with 500 status code', () => {
+                it('undefined error has occurred', async () => {
+                    const result = new Error();
+
+                    jest.spyOn(userService, 'resetPasswordTokenVerification')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockTokenToSatisfyParameters = 'token';
+                    const res = mockResponse();
+
+                    await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.json).toHaveBeenCalledWith({
+                        code: 'UNDEFINED',
+                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
+                        data: expect.stringMatching(/^.{10}$/)
+                    });
+                });
+            });
+        });
+        describe('* set new password', () => {
+            describe('* successful should return 204 status code', () => {
+                it('successful request', async () => {
+                    jest.spyOn(userService, 'updatePassword')
+                        .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockTokenToSatisfyParameters = 'token';
+                    const mockPasswordToSatisfyParameters = 'password';
+                    const res = mockResponse();
+
+                    await userController.resetPassword(mockMailToSatisfyParameters,
+                        mockTokenToSatisfyParameters, mockPasswordToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                });
+            });
+
+            describe('* unauthorized return error with 401 status code', () => {
+                it('token invalid', async () => {
+                    const result = new UnauthorizedException();
+
+                    jest.spyOn(userService, 'updatePassword')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockTokenToSatisfyParameters = 'token';
+                    const mockPasswordToSatisfyParameters = 'password';
+                    const res = mockResponse();
+
+                    await userController.resetPassword(mockMailToSatisfyParameters,
+                        mockTokenToSatisfyParameters, mockPasswordToSatisfyParameters, res).then(() => {
+                        throw new Error('I have failed you, Anakin. Expected resetPassword to throw error');
+                    }).catch(err => {
+                        expect(err).toBeInstanceOf(UnauthorizedException);
+                    });
+                });
+            });
+
+            describe('* failure should return error with 500 status code', () => {
+                it('undefined error has occurred', async () => {
+                    const result = new Error();
+
+                    jest.spyOn(userService, 'updatePassword')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockTokenToSatisfyParameters = 'token';
+                    const mockPasswordToSatisfyParameters = 'password';
+                    const res = mockResponse();
+
+                    await userController.resetPassword(mockMailToSatisfyParameters,
+                        mockTokenToSatisfyParameters, mockPasswordToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.json).toHaveBeenCalledWith({
+                        code: 'UNDEFINED',
+                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
+                        data: expect.stringMatching(/^.{10}$/)
+                    });
+                });
+            });
+        });
+    });
+
+    describe('* mail change', () => {
+        describe('* verify and execute', () => {
+            describe('* successful should return 204 status code', () => {
+                it('successful request', async () => {
+                    jest.spyOn(userService, 'mailChangeVerifyTokenAndExecuteChange')
+                        .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockTokenToSatisfyParameters = 'token';
+                    const res = mockResponse();
+
+                    await userController.mailChangeVerifyTokenAndExecuteChange(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                });
+            });
+
+            describe('* unauthorized return error with 401 status code', () => {
+                it('token invalid', async () => {
+                    const result = new UnauthorizedException();
+
+                    jest.spyOn(userService, 'mailChangeVerifyTokenAndExecuteChange')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockTokenToSatisfyParameters = 'token';
+                    const res = mockResponse();
+
+                    await userController.mailChangeVerifyTokenAndExecuteChange(mockMailToSatisfyParameters,
+                        mockTokenToSatisfyParameters, res).then(() => {
+                        throw new Error('I have failed you, Anakin. Expected resetPassword to throw error');
+                    }).catch(err => {
+                        expect(err).toBeInstanceOf(UnauthorizedException);
+                    });
+                });
+            });
+
+            describe('* failure should return error with 500 status code', () => {
+                it('undefined error has occurred', async () => {
+                    const result = new Error();
+
+                    jest.spyOn(userService, 'mailChangeVerifyTokenAndExecuteChange')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                    const mockMailToSatisfyParameters = 'mocked@mail.de';
+                    const mockTokenToSatisfyParameters = 'token';
+                    const res = mockResponse();
+
+                    await userController.mailChangeVerifyTokenAndExecuteChange(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.json).toHaveBeenCalledWith({
+                        code: 'UNDEFINED',
+                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
+                        data: expect.stringMatching(/^.{10}$/)
+                    });
+                });
+            });
+        });
+
+        describe('* resend verification mail', () => {
+            describe('* successful should return 204 status code', () => {
+                it('successful request', async () => {
+                    jest.spyOn(userService, 'mailChangeResendMail')
+                        .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
+
+                    const mockUserToSatisfyParameter = new User();
+                    const mockDomainToSatisfyParameters = 'my.domain.tld';
+                    const res = mockResponse();
+
+                    await userController.mailChangeResendMail(mockUserToSatisfyParameter, mockDomainToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                });
+            });
+
+            describe('* failure should return error with 400 status code', () => {
+                it('no active mail change - can\'t resend', async () => {
+                    const result = new InvalidRequestException('INVALID',
+                        'There is no active mail change going on. Email resend is not possible');
+
+                    jest.spyOn(userService, 'mailChangeResendMail')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                    const mockUserToSatisfyParameter = new User();
+                    const mockDomainToSatisfyParameters = 'my.domain.tld';
+                    const res = mockResponse();
+
+                    await userController.mailChangeResendMail(mockUserToSatisfyParameter, mockDomainToSatisfyParameters, res);
+
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+                    expect(res.json).toHaveBeenCalledWith({
+                        code: 'INVALID',
+                        message: 'There is no active mail change going on. Email resend is not possible',
+                        data: null,
+                    });
+                });
+            });
+
+            describe('* failure should return error with 500 status code', () => {
+                it('undefined error has occurred', async () => {
+                    const result = new Error();
+
+                    jest.spyOn(userService, 'mailChangeResendMail')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+
+                    const mockUserToSatisfyParameter = new User();
+                    const mockDomainToSatisfyParameters = 'my.domain.tld';
+                    const res = mockResponse();
+
+                    await userController.mailChangeResendMail(mockUserToSatisfyParameter, mockDomainToSatisfyParameters, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.json).toHaveBeenCalledWith({
+                        code: 'UNDEFINED',
+                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
+                        data: expect.stringMatching(/^.{10}$/)
+                    });
+                });
+            });
+        });
+
+        describe('* deactivate existing token', () => {
+            describe('* successful should return 204 status code', () => {
+                it('successful request', async () => {
+                    jest.spyOn(userService, 'mailChangeDeactivateToken')
+                        .mockImplementation(async (): Promise<void> => Promise.resolve());
+
+                    const mockUserToSatisfyParameter = new User();
+                    const res = mockResponse();
+
+                    await userController.mailChangeDeactivateToken(mockUserToSatisfyParameter, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                });
+            });
+
+            describe('* failure should return error with 500 status code', () => {
+                it('undefined error has occurred', async () => {
+                    const result = new Error();
+
+                    jest.spyOn(userService, 'mailChangeDeactivateToken')
+                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
+
+                    const mockUserToSatisfyParameter = new User();
+                    const res = mockResponse();
+
+                    await userController.mailChangeDeactivateToken(mockUserToSatisfyParameter, res);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+                    expect(res.json).toHaveBeenCalledWith({
+                        code: 'UNDEFINED',
+                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
+                        data: expect.stringMatching(/^.{10}$/)
+                    });
+                });
+            });
+        });
+    });
+
     afterEach(() => {
         jest.resetAllMocks();
     });
@@ -376,4 +753,3 @@ const mockResponse = () => {
     res.json = jest.fn().mockReturnValue(res);
     return res;
 };
-
