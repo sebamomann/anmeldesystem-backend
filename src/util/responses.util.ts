@@ -3,7 +3,9 @@ import {HttpStatus} from '@nestjs/common';
 import {GeneratorUtil} from './generator.util';
 
 export class Responses {
-    public static undefinedErrorResponse = function(err, error: any, res: Response) {
+    public static undefinedErrorResponse = function(err, res: Response) {
+        let error: any = {};
+
         let id = GeneratorUtil.makeid(10);
         console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(err)}`);
 

@@ -8,10 +8,10 @@ import {UserController} from './user.controller';
 import {HttpStatus, NotFoundException, UnauthorizedException} from '@nestjs/common';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
-import {UnknownUsersException} from '../../exceptions/UnknownUsersException';
 import {InvalidTokenException} from '../../exceptions/InvalidTokenException';
 import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
 import {InvalidRequestException} from '../../exceptions/InvalidRequestException';
+import {UnknownUserException} from '../../exceptions/UnknownUserException';
 
 jest.mock('./user.service');
 jest.mock('../../auth/auth.service');
@@ -343,8 +343,7 @@ describe('User Controller', () => {
         describe('* failure should return error with 410 status code', () => {
             describe('* user not found', () => {
                 it('user gone', async () => {
-                    const result = new UnknownUsersException('GONE',
-                        'User is not present anymore');
+                    const result = new UnknownUserException();
 
                     jest.spyOn(userService, 'activate')
                         .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
@@ -484,8 +483,11 @@ describe('User Controller', () => {
                     });
 
                     it('token used', async () => {
+                        const date = new Date();
+
                         const result = new AlreadyUsedException('USED',
-                            'Provided token was already used');
+                            'Provided token was already used at the following date',
+                            date);
 
                         jest.spyOn(userService, 'resetPasswordTokenVerification')
                             .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
@@ -499,8 +501,8 @@ describe('User Controller', () => {
                         expect(res.status).toBeCalledTimes(1);
                         expect(res.json).toHaveBeenCalledWith({
                             code: 'USED',
-                            message: 'User is already verified',
-                            data: null,
+                            message: 'Provided token was already used at the following date',
+                            data: date,
                         });
                     });
 

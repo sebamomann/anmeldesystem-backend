@@ -6,6 +6,13 @@ import {AuthGuard} from '@nestjs/passport';
 import {AuthService} from '../../auth/auth.service';
 import {Response} from 'express';
 import {Responses} from '../../util/responses.util';
+import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
+import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
+import {InvalidTokenException} from '../../exceptions/InvalidTokenException';
+import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
+import {UnknownUserException} from '../../exceptions/UnknownUserException';
+import {ExpiredTokenException} from '../../exceptions/ExpiredTokenException';
+import {InvalidRequestException} from '../../exceptions/InvalidRequestException';
 
 @Controller('user')
 export class UserController {
@@ -38,16 +45,15 @@ export class UserController {
             .catch(err => {
                 let error: any = {};
 
-                if (err.code === 'DUPLICATE_ENTRY') {
+                if (err instanceof DuplicateValueException) {
                     error.code = err.code;
-                    error.message = 'Following values are already in use';
+                    error.message = err.message;
                     error.data = err.data;
-                } else {
-                    Responses.undefinedErrorResponse(err, error, res);
-                    return;
-                }
 
-                res.status(HttpStatus.BAD_REQUEST).json(error);
+                    res.status(HttpStatus.BAD_REQUEST).json(error);
+                } else {
+                    Responses.undefinedErrorResponse(err, res);
+                }
             });
     }
 
@@ -63,22 +69,8 @@ export class UserController {
                 res.status(HttpStatus.OK).json(tUser);
             })
             .catch(err => {
-                let error: any = {};
-
-                if (err.code === 'EMPTY_FIELDS') {
-                    error.code = err.code;
-                    error.message = 'Due to the mail change you need to provide a domain for the activation call';
-                    error.data = err.data;
-                } else if (err.code === 'DUPLICATE_ENTRY') {
-                    error.code = err.code;
-                    error.message = 'Following values are already in use';
-                    error.data = err.data;
-                } else {
-                    Responses.undefinedErrorResponse(err, error, res);
-                    return;
-                }
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
+                const allowedExceptions: any = [EmptyFieldsException, DuplicateValueException];
+                handleExceptions(allowedExceptions, err, res);
             });
     }
 
@@ -92,25 +84,13 @@ export class UserController {
                 res.status(HttpStatus.OK).json();
             })
             .catch(err => {
-                let error: any = {};
-
-                if (err.code === 'GONE') {
+                if (err instanceof UnknownUserException) {
                     res.status(HttpStatus.GONE).json();
                     return;
-                } else if (err.code === 'INVALID') {
-                    error.code = err.code;
-                    error.message = 'Provided token is not valid';
-                    error.data = err.data;
-                } else if (err.code === 'USED') {
-                    error.code = err.code;
-                    error.message = 'User is already verified';
-                    error.data = err.data;
                 } else {
-                    Responses.undefinedErrorResponse(err, error, res);
-                    return;
+                    const allowedExceptions: any = [InvalidTokenException, AlreadyUsedException];
+                    handleExceptions(allowedExceptions, err, res);
                 }
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
             });
     }
 
@@ -124,10 +104,7 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch((err) => {
-                let error: any = {};
-
-                Responses.undefinedErrorResponse(err, error, res);
-                return;
+                Responses.undefinedErrorResponse(err, res);
             });
     }
 
@@ -141,30 +118,8 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                let error: any = {};
-
-                if (err.code === 'INVALID') {
-                    error.code = err.code;
-                    error.message = 'Provided token is not valid';
-                    error.data = err.data;
-                } else if (err.code === 'EXPIRED') {
-                    error.code = err.code;
-                    error.message = 'Provided token expired';
-                    error.data = err.data;
-                } else if (err.code === 'USED') {
-                    error.code = err.code;
-                    error.message = 'User is already verified';
-                    error.data = err.data;
-                } else if (err.code === 'OUTDATED') {
-                    error.code = err.code;
-                    error.message = 'Provided token was already replaced by a new one';
-                    error.data = err.data;
-                } else {
-                    Responses.undefinedErrorResponse(err, error, res);
-                    return;
-                }
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
+                const allowedExceptions: any = [InvalidTokenException, ExpiredTokenException, AlreadyUsedException];
+                handleExceptions(allowedExceptions, err, res);
             });
     }
 
@@ -179,13 +134,10 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                let error: any = {};
-
                 if (err instanceof UnauthorizedException) {
-                    throw new UnauthorizedException();
+                    throw err;
                 } else {
-                    Responses.undefinedErrorResponse(err, error, res);
-                    return;
+                    Responses.undefinedErrorResponse(err, res);
                 }
             });
     }
@@ -200,13 +152,10 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                let error: any = {};
-
                 if (err instanceof UnauthorizedException) {
                     throw new UnauthorizedException();
                 } else {
-                    Responses.undefinedErrorResponse(err, error, res);
-                    return;
+                    Responses.undefinedErrorResponse(err, res);
                 }
             });
     }
@@ -222,18 +171,8 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                let error: any = {};
-
-                if (err.code === 'INVALID') {
-                    error.code = err.code;
-                    error.message = 'There is no active mail change going on. Email resend is not possible';
-                    error.data = err.data;
-                } else {
-                    Responses.undefinedErrorResponse(err, error, res);
-                    return;
-                }
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
+                const allowedExceptions: any = [InvalidRequestException];
+                handleExceptions(allowedExceptions, err, res);
             });
     }
 
@@ -247,10 +186,7 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                let error: any = {};
-
-                Responses.undefinedErrorResponse(err, error, res);
-                return;
+                Responses.undefinedErrorResponse(err, res);
             });
     }
 
@@ -269,4 +205,26 @@ export class UserController {
     //         });
     // }
 
+}
+
+function handleExceptions(allowedExceptions: any[], err: any, res: Response) {
+    let valid = false;
+    let error: any = {};
+
+    allowedExceptions.forEach(FAllowedException => {
+        if (err instanceof FAllowedException) {
+            error.code = err.code;
+            error.message = err.message;
+            error.data = err.data;
+
+            res.status(HttpStatus.BAD_REQUEST).json(error);
+
+            valid = true;
+            return;
+        }
+    });
+
+    if (!valid) {
+        Responses.undefinedErrorResponse(err, res);
+    }
 }

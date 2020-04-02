@@ -9,7 +9,13 @@ export class InvalidRequestException implements Error {
 
     constructor(code: string, message: string, data: string = null) {
         this.code = code;
-        this.message = message;
+        if (message === null
+            || message === '') {
+            this.message = 'Request could not be processed';
+        } else {
+            this.message = message;
+        }
+
         this.data = data;
     }
 

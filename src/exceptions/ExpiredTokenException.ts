@@ -1,4 +1,4 @@
-export class EmptyFieldsException implements Error {
+export class ExpiredTokenException implements Error {
     readonly columnNumber: number;
     readonly fileName: string;
     readonly lineNumber: number;
@@ -7,17 +7,17 @@ export class EmptyFieldsException implements Error {
     data: string[];
     code: string;
 
-    constructor(code: string = null, message: string = null, data: string[] = null) {
+    constructor(code: string = null, message: string = null, data: any = null) {
         if (code === null
             || code === '') {
-            this.code = 'EMPTY_FIELDS';
+            this.code = 'EXPIRED';
         } else {
             this.code = code;
         }
 
         if (message === null
             || message === '') {
-            this.message = 'Following values need to be specified';
+            this.message = 'Provided token expired';
         } else {
             this.message = message;
         }

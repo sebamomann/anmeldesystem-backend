@@ -1,4 +1,4 @@
-export class EmptyFieldsException implements Error {
+export class AlreadyUsedException implements Error {
     readonly columnNumber: number;
     readonly fileName: string;
     readonly lineNumber: number;
@@ -7,21 +7,20 @@ export class EmptyFieldsException implements Error {
     data: string[];
     code: string;
 
-    constructor(code: string = null, message: string = null, data: string[] = null) {
+    constructor(code: string = null, message: string = null, data: any = null) {
         if (code === null
             || code === '') {
-            this.code = 'EMPTY_FIELDS';
+            this.code = 'GONE';
         } else {
             this.code = code;
         }
 
         if (message === null
             || message === '') {
-            this.message = 'Following values need to be specified';
+            this.message = 'Requested resource is already gone';
         } else {
             this.message = message;
         }
-
         this.data = data;
     }
 

@@ -7,9 +7,21 @@ export class DuplicateValueException implements Error {
     data: string[];
     code: string;
 
-    constructor(code: string, message: string, data: string[]) {
-        this.code = code;
-        this.message = message;
+    constructor(code: string = null, message: string = null, data: string[] = null) {
+        if (code === null
+            || code === '') {
+            this.code = 'DUPLICATE_ENTRY';
+        } else {
+            this.code = code;
+        }
+
+        if (message === null
+            || message === '') {
+            this.message = 'Following values are already in use';
+        } else {
+            this.message = message;
+        }
+
         this.data = data;
     }
 

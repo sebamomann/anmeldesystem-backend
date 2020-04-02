@@ -13,6 +13,7 @@ import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {InvalidRequestException} from '../../exceptions/InvalidRequestException';
+import {ExpiredTokenException} from '../../exceptions/ExpiredTokenException';
 
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
@@ -115,13 +116,13 @@ export class UserService {
                     return true;
                 }
 
-                throw new AlreadyUsedException('USED', 'User is already verified');
+                throw new AlreadyUsedException(null, 'User is already verified');
             }
 
-            throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
+            throw new InvalidTokenException();
         }
 
-        throw new UnknownUserException('GONE', 'User is not present anymore', null);
+        throw new UnknownUserException();
     }
 
     public async findByEmail(mail: string): Promise<User | undefined> {
@@ -191,18 +192,18 @@ export class UserService {
         if (passwordReset != undefined) {
             if ((passwordReset.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
                 if (passwordReset.oldPassword === 'invalid') {
-                    throw new InvalidTokenException('OUTDATED', 'Provided token was already replaced by a new one');
+                    throw new ExpiredTokenException('OUTDATED', 'Provided token was already replaced by a new one');
                 } else if (passwordReset.used === null) {
                     return true;
                 }
 
-                throw new AlreadyUsedException('USED', 'Provided token was already used', {date: new Date(passwordReset.used)});
+                throw new AlreadyUsedException(null, 'Provided token was already used at the following date', {date: new Date(passwordReset.used)});
             }
 
-            throw new InvalidTokenException('EXPIRED', 'Provided token expired');
+            throw new ExpiredTokenException();
         }
 
-        throw new InvalidTokenException('INVALID', 'Provided token is not valid');
+        throw new InvalidTokenException();
     }
 
     private async existsByUsername(username: string) {
@@ -411,7 +412,7 @@ export class UserService {
         }
 
         if (duplicateValues.length > 0) {
-            throw new DuplicateValueException('DUPLICATE_ENTRY', '', duplicateValues);
+            throw new DuplicateValueException(null, null, duplicateValues);
         }
     }
 
@@ -419,16 +420,13 @@ export class UserService {
         const _user = await this.findByEmail(user.mail);
 
         if (await this.findByEmail(mail) !== undefined) {
-            throw new DuplicateValueException('DUPLICATE_ENTRY',
-                'Following values are already taken',
-                ['email']);
+            throw new DuplicateValueException(null, null, ['email']);
         }
 
         if (domain === undefined
             || domain === null
             || domain === '') {
-            throw new EmptyFieldsException('EMPTY_FIELDS',
-                'Due to the mail change you need to provide the domain for the activation call');
+            throw new EmptyFieldsException(null, 'Due to the mail change you need to provide the domain for the activation call');
         }
 
         if (_user != null) {
