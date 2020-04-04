@@ -1,4 +1,4 @@
-import {Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
+import {Injectable, UnauthorizedException} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {User} from './user.entity';
 import {getRepository, Repository} from 'typeorm';
@@ -11,9 +11,11 @@ import {EmailChange} from './email-change/email-change.entity';
 import {PasswordChange} from './password-change/password-change.entity';
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
-import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {InvalidRequestException} from '../../exceptions/InvalidRequestException';
 import {ExpiredTokenException} from '../../exceptions/ExpiredTokenException';
+import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
+import {EntityGoneException} from '../../exceptions/EntityGoneException';
+import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
@@ -36,27 +38,53 @@ export class UserService {
     ) {
     }
 
-    public async findById(id: number): Promise<User | undefined> {
-        return await this.userRepository.findOne({where: {id: id}});
+    public async findById(id: number): Promise<User> {
+        const user = await this.userRepository.findOne({where: {id: id}});
+
+        if (user === undefined) {
+            throw new EntityNotFoundException(null, null, 'user');
+        }
+
+        return user;
     }
 
-    public async findByEmail(mail: string): Promise<User | undefined> {
-        return await this.userRepository.findOne({where: [{mail: mail}]});
+    public async findByEmail(mail: string): Promise<User> {
+        const user = await this.userRepository.findOne({where: [{mail: mail}]});
+
+        if (user === undefined) {
+            throw new EntityNotFoundException(null, null, 'user');
+        }
+
+        return user;
     }
 
-    public async findByUsername(username: string): Promise<User | undefined> {
-        return await this.userRepository.findOne({where: [{username: username}]});
+    public async findByUsername(username: string): Promise<User> {
+        const user = await this.userRepository.findOne({where: [{username: username}]});
+
+        if (user === undefined) {
+            throw new EntityNotFoundException(null, null, 'user');
+        }
+
+        return user;
     }
 
     async findByEmailOrUsername(value: string) {
-        return await this.userRepository.findOne({where: [{mail: value}, {username: value}]});
+        const user = await this.userRepository.findOne({where: [{mail: value}, {username: value}]});
+
+        if (user === undefined) {
+            throw new EntityNotFoundException(null, null, 'user');
+        }
+
+        return user;
     }
 
     public async get(user: User) {
-        const _user = await this.findById(user.id);
+        let _user;
 
-        if (_user === undefined) {
-            throw new NotFoundException();
+        try {
+            _user = this.findById(user.id);
+        } catch (e) {
+            throw e;
         }
 
         _user.emailChange = _user.emailChange.filter(fEmailChange =>
@@ -176,7 +204,7 @@ export class UserService {
             throw new InvalidTokenException();
         }
 
-        throw new UnknownUserException();
+        throw new EntityGoneException();
     }
 
     public async resetPasswordInitialization(mail: string, domain: string) {
@@ -237,7 +265,7 @@ export class UserService {
                 return true;
             })
             .catch(() => {
-                throw new UnauthorizedException();
+                throw new InsufficientPermissionsException();
             });
     }
 

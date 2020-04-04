@@ -1,4 +1,4 @@
-import {Body, Controller, Get, HttpStatus, Param, Post, Put, Res, UnauthorizedException, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, GoneException, HttpStatus, Param, Post, Put, Res, UseGuards} from '@nestjs/common';
 
 import {User} from './user.entity';
 import {Usr} from './user.decorator';
@@ -9,15 +9,6 @@ import {AuthService} from '../../auth/auth.service';
 import {AuthGuard} from '@nestjs/passport';
 
 import {Response} from 'express';
-import {Responses} from '../../util/responses.util';
-
-import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
-import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
-import {InvalidTokenException} from '../../exceptions/InvalidTokenException';
-import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
-import {UnknownUserException} from '../../exceptions/UnknownUserException';
-import {ExpiredTokenException} from '../../exceptions/ExpiredTokenException';
-import {InvalidRequestException} from '../../exceptions/InvalidRequestException';
 
 @Controller('user')
 export class UserController {
@@ -35,7 +26,7 @@ export class UserController {
                 res.status(HttpStatus.OK).json(result);
             })
             .catch(() => {
-                res.status(HttpStatus.GONE).json();
+                throw new GoneException();
             });
     }
 
@@ -49,8 +40,7 @@ export class UserController {
                 res.status(HttpStatus.CREATED).json(result);
             })
             .catch(err => {
-                const allowedExceptions: any = [DuplicateValueException];
-                handleExceptions(allowedExceptions, err, res);
+                throw err;
             });
     }
 
@@ -66,8 +56,7 @@ export class UserController {
                 res.status(HttpStatus.OK).json(tUser);
             })
             .catch(err => {
-                const allowedExceptions: any = [EmptyFieldsException, DuplicateValueException];
-                handleExceptions(allowedExceptions, err, res);
+                throw err;
             });
     }
 
@@ -81,13 +70,7 @@ export class UserController {
                 res.status(HttpStatus.OK).json();
             })
             .catch(err => {
-                if (err instanceof UnknownUserException) {
-                    res.status(HttpStatus.GONE).json();
-                    return;
-                } else {
-                    const allowedExceptions: any = [InvalidTokenException, AlreadyUsedException];
-                    handleExceptions(allowedExceptions, err, res);
-                }
+                throw err;
             });
     }
 
@@ -101,7 +84,7 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch((err) => {
-                Responses.undefinedErrorResponse(err, res);
+                throw err;
             });
     }
 
@@ -115,8 +98,7 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                const allowedExceptions: any = [InvalidTokenException, ExpiredTokenException, AlreadyUsedException];
-                handleExceptions(allowedExceptions, err, res);
+                throw err;
             });
     }
 
@@ -131,11 +113,7 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                if (err instanceof UnauthorizedException) {
-                    throw err;
-                } else {
-                    Responses.undefinedErrorResponse(err, res);
-                }
+                throw err;
             });
     }
 
@@ -149,11 +127,7 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                if (err instanceof UnauthorizedException) {
-                    throw new UnauthorizedException();
-                } else {
-                    Responses.undefinedErrorResponse(err, res);
-                }
+                throw err;
             });
     }
 
@@ -168,8 +142,7 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                const allowedExceptions: any = [InvalidRequestException];
-                handleExceptions(allowedExceptions, err, res);
+                throw err;
             });
     }
 
@@ -183,7 +156,7 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                Responses.undefinedErrorResponse(err, res);
+                throw err;
             });
     }
 
@@ -202,26 +175,4 @@ export class UserController {
     //         });
     // }
 
-}
-
-function handleExceptions(allowedExceptions: any[], err: any, res: Response) {
-    let valid = false;
-    let error: any = {};
-
-    allowedExceptions.forEach(FAllowedException => {
-        if (err instanceof FAllowedException) {
-            error.code = err.code;
-            error.message = err.message;
-            error.data = err.data;
-
-            res.status(HttpStatus.BAD_REQUEST).json(error);
-
-            valid = true;
-            return;
-        }
-    });
-
-    if (!valid) {
-        Responses.undefinedErrorResponse(err, res);
-    }
 }

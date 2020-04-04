@@ -3,6 +3,7 @@ import {
     CallHandler,
     ExecutionContext,
     ForbiddenException,
+    GoneException,
     Injectable,
     InternalServerErrorException,
     NestInterceptor,
@@ -15,20 +16,30 @@ import {DuplicateValueException} from '../exceptions/DuplicateValueException';
 import {GeneratorUtil} from '../util/generator.util';
 import {InsufficientPermissionsException} from '../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../exceptions/EntityNotFoundException';
+import {EmptyFieldsException} from '../exceptions/EmptyFieldsException';
+import {EntityGoneException} from '../exceptions/EntityGoneException';
+import {InvalidTokenException} from '../exceptions/InvalidTokenException';
+import {ExpiredTokenException} from '../exceptions/ExpiredTokenException';
+import {AlreadyUsedException} from '../exceptions/AlreadyUsedException';
 
 @Injectable()
 export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-        // next.handle() is an Observable of the controller's result value
         return next.handle()
             .pipe(catchError(error => {
                 if (error instanceof EntityNotFoundException) {
                     throw new NotFoundException();
                 } else if (error instanceof InvalidValuesException
-                    || error instanceof DuplicateValueException) {
+                    || error instanceof InvalidTokenException
+                    || error instanceof ExpiredTokenException
+                    || error instanceof AlreadyUsedException
+                    || error instanceof DuplicateValueException
+                    || error instanceof EmptyFieldsException) {
                     throw new BadRequestException(error.parse());
                 } else if (error instanceof InsufficientPermissionsException) {
                     throw new ForbiddenException(error.parse());
+                } else if (error instanceof EntityGoneException) {
+                    throw new GoneException(error.parse());
                 } else {
                     let error: any = {};
 

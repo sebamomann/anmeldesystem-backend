@@ -68,10 +68,11 @@ describe('Appointment Controller', () => {
                 const mockQueryParameterToSatisfyParameter = {};
                 const mockIsSlimToSatisfyParameter = 'true';
 
-                await appointmentController.getAll(mockUserToSatisfyParameter,
-                    mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, res)
+                await appointmentController
+                    .getAll(mockUserToSatisfyParameter,
+                        mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, res)
                     .then(() => {
-                        throw new Error('I have failed you, Anakin. Expected update appointment to throw error');
+                        throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
                         expect(err).toBe(result);
                     });
@@ -117,7 +118,7 @@ describe('Appointment Controller', () => {
                 await appointmentController
                     .create(mockUserToSatisfyParameter, mockAppointmentToSatisfyParameter, res)
                     .then(() => {
-                        throw new Error('I have failed you, Anakin. Expected create appointment to throw error');
+                        throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
                         expect(err).toBe(result);
                     });
@@ -136,7 +137,7 @@ describe('Appointment Controller', () => {
                 await appointmentController
                     .create(mockUserToSatisfyParameter, mockAppointmentToSatisfyParameter, res)
                     .then(() => {
-                        throw new Error('I have failed you, Anakin. Expected update appointment to throw error');
+                        throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
                         expect(err).toBe(result);
                     });
@@ -155,7 +156,7 @@ describe('Appointment Controller', () => {
                 await appointmentController
                     .create(mockUserToSatisfyParameter, mockAppointmentToSatisfyParameter, res)
                     .then(() => {
-                        throw new Error('I have failed you, Anakin. Expected update appointment to throw error');
+                        throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
                         expect(err).toBe(result);
                     });
@@ -200,7 +201,7 @@ describe('Appointment Controller', () => {
                 await appointmentController.update(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockAppointmentToSatisfyParameter, res)
                     .then(() => {
-                        throw new Error('I have failed you, Anakin. Expected update appointment to throw error');
+                        throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
                         expect(err).toBe(result);
                     });
@@ -220,7 +221,7 @@ describe('Appointment Controller', () => {
                 await appointmentController.update(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockAppointmentToSatisfyParameter, res)
                     .then(() => {
-                        throw new Error('I have failed you, Anakin. Expected update appointment to throw error');
+                        throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
                         expect(err).toBe(result);
                     });
@@ -240,7 +241,7 @@ describe('Appointment Controller', () => {
                 await appointmentController.update(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockAppointmentToSatisfyParameter, res)
                     .then(() => {
-                        throw new Error('I have failed you, Anakin. Expected update appointment to throw error');
+                        throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
                         expect(err).toBe(result);
                     });
@@ -281,7 +282,7 @@ describe('Appointment Controller', () => {
                 await appointmentController.addAdministrator(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockUsernameToSatisfyParameter, res)
                     .then(() => {
-                        throw new Error('I have failed you, Anakin. Expected addAdministrator to throw error');
+                        throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
                         expect(err).toBe(result);
                     });
@@ -300,7 +301,7 @@ describe('Appointment Controller', () => {
 
                 await appointmentController.addAdministrator(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockUsernameToSatisfyParameter, res).then(() => {
-                    throw new Error('I have failed you, Anakin. Expected addAdministrator to throw error');
+                    throw new Error('I have failed you, Anakin.');
                 }).catch(err => {
                     expect(err).toBe(result);
                 });
@@ -320,7 +321,7 @@ describe('Appointment Controller', () => {
                 await appointmentController.addAdministrator(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockUsernameToSatisfyParameter, res)
                     .then(() => {
-                        throw new Error('I have failed you, Anakin. Expected update appointment to throw error');
+                        throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
                         expect(err).toBe(result);
                     });
@@ -360,7 +361,7 @@ describe('Appointment Controller', () => {
 
                 await appointmentController.removeAdministrator(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockUsernameToSatisfyParameter, res).then(() => {
-                    throw new Error('I have failed you, Anakin. Expected removeAdministrator to throw error');
+                    throw new Error('I have failed you, Anakin.');
                 }).catch(err => {
                     expect(err).toBe(result);
                 });
@@ -379,7 +380,7 @@ describe('Appointment Controller', () => {
 
                 await appointmentController.removeAdministrator(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockUsernameToSatisfyParameter, res).then(() => {
-                    throw new Error('I have failed you, Anakin. Expected addAdministrator to throw error');
+                    throw new Error('I have failed you, Anakin.');
                 }).catch(err => {
                     expect(err).toBe(result);
                 });
@@ -399,7 +400,7 @@ describe('Appointment Controller', () => {
                 await appointmentController.removeAdministrator(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockUsernameToSatisfyParameter, res)
                     .then(() => {
-                        throw new Error('I have failed you, Anakin. Expected update appointment to throw error');
+                        throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
                         expect(err).toBe(result);
                     });
@@ -437,7 +438,7 @@ describe('Appointment Controller', () => {
                     await appointmentController.hasPermission(mockUserToSatisfyParameter,
                         mockLinkToSatisfyParameter, res)
                         .then(() => {
-                            throw new Error('I have failed you, Anakin. Expected removeAdministrator to throw error');
+                            throw new Error('I have failed you, Anakin.');
                         }).catch(err => {
                             expect(err).toBe(result);
                         });
@@ -456,7 +457,7 @@ describe('Appointment Controller', () => {
                     await appointmentController.hasPermission(mockUserToSatisfyParameter,
                         mockLinkToSatisfyParameter, res)
                         .then(() => {
-                            throw new Error('I have failed you, Anakin. Expected update appointment to throw error');
+                            throw new Error('I have failed you, Anakin.');
                         }).catch(err => {
                             expect(err).toBe(result);
                         });

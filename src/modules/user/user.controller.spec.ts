@@ -5,13 +5,15 @@ import {UserService} from './user.service';
 import {AuthService} from '../../auth/auth.service';
 import {UserController} from './user.controller';
 
-import {HttpStatus, NotFoundException, UnauthorizedException} from '@nestjs/common';
+import {GoneException, HttpStatus, UnauthorizedException} from '@nestjs/common';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {InvalidTokenException} from '../../exceptions/InvalidTokenException';
 import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
 import {InvalidRequestException} from '../../exceptions/InvalidRequestException';
-import {UnknownUserException} from '../../exceptions/UnknownUserException';
+import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
+import {EntityGoneException} from '../../exceptions/EntityGoneException';
+import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 
 jest.mock('./user.service');
 jest.mock('../../auth/auth.service');
@@ -56,9 +58,9 @@ describe('User Controller', () => {
             });
         });
 
-        describe('* failure should return error with 410 status code', () => {
+        describe('* failure should return error', () => {
             it('user gone', async () => {
-                const result = new NotFoundException();
+                const result = new EntityNotFoundException(null, null, 'user');
 
                 jest.spyOn(userService, 'get')
                     .mockImplementation(async (): Promise<User> => Promise.reject(result));
@@ -66,9 +68,13 @@ describe('User Controller', () => {
                 const mockUserToSatisfyParameters = new User();
                 const res = mockResponse();
 
-                await userController.get(mockUserToSatisfyParameters, res);
-                expect(res.status).toHaveBeenCalledWith(HttpStatus.GONE);
-                expect(res.status).toBeCalledTimes(1);
+                await userController
+                    .get(mockUserToSatisfyParameters, res)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin.');
+                    }).catch(err => {
+                        expect(err).toBeInstanceOf(GoneException);
+                    });
             });
         });
     });
@@ -92,7 +98,7 @@ describe('User Controller', () => {
             });
         });
 
-        describe('* failure should return error with 400 status code ', () => {
+        describe('* failure should return error', () => {
             describe('* duplicate values (values already in use)', () => {
                 it('username in use', async () => {
                     const result = new DuplicateValueException('DUPLICATE_ENTRY',
@@ -105,14 +111,13 @@ describe('User Controller', () => {
                     const mockDomainToSatisfyParameters = 'https://example.com';
                     const res = mockResponse();
 
-                    await userController.register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'DUPLICATE_ENTRY',
-                        message: 'Following values are already in use',
-                        data: ['username']
-                    });
+                    await userController
+                        .register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
 
                 it('email in use', async () => {
@@ -127,14 +132,13 @@ describe('User Controller', () => {
                     const mockDomainToSatisfyParameters = 'https://example.com';
                     const res = mockResponse();
 
-                    await userController.register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'DUPLICATE_ENTRY',
-                        message: 'Following values are already in use',
-                        data: ['email']
-                    });
+                    await userController
+                        .register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
 
                 it('username and email in use', async () => {
@@ -149,19 +153,16 @@ describe('User Controller', () => {
                     const mockDomainToSatisfyParameters = 'https://example.com';
                     const res = mockResponse();
 
-                    await userController.register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'DUPLICATE_ENTRY',
-                        message: 'Following values are already in use',
-                        data: ['username', 'email']
-                    });
+                    await userController
+                        .register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
-        });
 
-        describe('* failure should return error with 500 status code ', () => {
             it('undefined error has occurred', async () => {
                 const result = new Error();
 
@@ -172,14 +173,13 @@ describe('User Controller', () => {
                 const mockDomainToSatisfyParameters = 'https://example.com';
                 const res = mockResponse();
 
-                await userController.register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res);
-                expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-                expect(res.status).toBeCalledTimes(1);
-                expect(res.json).toHaveBeenCalledWith({
-                    code: 'UNDEFINED',
-                    message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
-                    data: expect.stringMatching(/^.{10}$/)
-                });
+                await userController
+                    .register(mockUserToSatisfyParameters, mockDomainToSatisfyParameters, res)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin.');
+                    }).catch(err => {
+                        expect(err).toBe(result);
+                    });
             });
         });
     });
@@ -208,7 +208,7 @@ describe('User Controller', () => {
             });
         });
 
-        describe('* failure should return error with 400 status code ', () => {
+        describe('* failure should return error', () => {
             describe('* duplicate values (values already in use)', () => {
                 it('email in use', async () => {
                     const result = new DuplicateValueException('DUPLICATE_ENTRY',
@@ -222,14 +222,13 @@ describe('User Controller', () => {
                     const mockUserToSatisfyParameters = new User();
                     const res = mockResponse();
 
-                    await userController.update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'DUPLICATE_ENTRY',
-                        message: 'Following values are already in use',
-                        data: ['email']
-                    });
+                    await userController
+                        .update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
 
@@ -245,19 +244,16 @@ describe('User Controller', () => {
                     const mockUserToSatisfyParameters = new User();
                     const res = mockResponse();
 
-                    await userController.update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'EMPTY_FIELDS',
-                        message: 'Due to the mail change you need to provide a domain for the activation call',
-                        data: null
-                    });
+                    await userController
+                        .update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
-        });
 
-        describe('* failure should return error with 500 status code', () => {
             it('undefined error has occurred', async () => {
                 const result = new Error();
 
@@ -268,14 +264,13 @@ describe('User Controller', () => {
                 const mockUserToSatisfyParameters = new User();
                 const res = mockResponse();
 
-                await userController.update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res);
-                expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-                expect(res.status).toBeCalledTimes(1);
-                expect(res.json).toHaveBeenCalledWith({
-                    code: 'UNDEFINED',
-                    message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
-                    data: expect.stringMatching(/^.{10}$/)
-                });
+                await userController
+                    .update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin.');
+                    }).catch(err => {
+                        expect(err).toBe(result);
+                    });
             });
         });
     });
@@ -296,7 +291,7 @@ describe('User Controller', () => {
             });
         });
 
-        describe('* failure should return error with 400 status code', () => {
+        describe('* failure should return error', () => {
             describe('* invalid token', () => {
                 it('token mismatch', async () => {
                     const result = new InvalidTokenException('INVALID',
@@ -309,14 +304,13 @@ describe('User Controller', () => {
                     const mockTokenToSatisfyParameters = 'mockedToken';
                     const res = mockResponse();
 
-                    await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'INVALID',
-                        message: 'Provided token is not valid',
-                        data: null,
-                    });
+                    await userController
+                        .activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
 
                 it('token used', async () => {
@@ -330,22 +324,19 @@ describe('User Controller', () => {
                     const mockTokenToSatisfyParameters = 'mockedToken';
                     const res = mockResponse();
 
-                    await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'USED',
-                        message: 'User is already verified',
-                        data: null,
-                    });
+                    await userController
+                        .activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
-        });
 
-        describe('* failure should return error with 410 status code', () => {
             describe('* user not found', () => {
                 it('user gone', async () => {
-                    const result = new UnknownUserException();
+                    const result = new EntityGoneException();
 
                     jest.spyOn(userService, 'activate')
                         .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
@@ -354,14 +345,16 @@ describe('User Controller', () => {
                     const mockTokenToSatisfyParameters = 'mockedToken';
                     const res = mockResponse();
 
-                    await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.GONE);
-                    expect(res.status).toBeCalledTimes(1);
+                    await userController
+                        .activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
-        });
 
-        describe('* failure should return error with 500 status code', () => {
             it('undefined error has occurred', async () => {
                 const result = new Error();
 
@@ -372,14 +365,13 @@ describe('User Controller', () => {
                 const mockTokenToSatisfyParameters = 'mockedToken';
                 const res = mockResponse();
 
-                await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
-                expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-                expect(res.status).toBeCalledTimes(1);
-                expect(res.json).toHaveBeenCalledWith({
-                    code: 'UNDEFINED',
-                    message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
-                    data: expect.stringMatching(/^.{10}$/)
-                });
+                await userController
+                    .activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin.');
+                    }).catch(err => {
+                        expect(err).toBe(result);
+                    });
             });
         });
     });
@@ -401,7 +393,7 @@ describe('User Controller', () => {
                 });
             });
 
-            describe('* failure should return error with 500 status code', () => {
+            describe('* failure should return error', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
@@ -412,14 +404,13 @@ describe('User Controller', () => {
                     const mockDomainToSatisfyParameters = 'my.domain.tld';
                     const res = mockResponse();
 
-                    await userController.resetPasswordInitialization(mockMailToSatisfyParameters, mockDomainToSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'UNDEFINED',
-                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
-                        data: expect.stringMatching(/^.{10}$/)
-                    });
+                    await userController
+                        .resetPasswordInitialization(mockMailToSatisfyParameters, mockDomainToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
         });
@@ -440,7 +431,7 @@ describe('User Controller', () => {
                 });
             });
 
-            describe('* failure should return error with 400 status code', () => {
+            describe('* failure should return error', () => {
                 describe('* invalid token', () => {
                     it('token mismatch', async () => {
                         const result = new InvalidTokenException('INVALID',
@@ -453,14 +444,13 @@ describe('User Controller', () => {
                         const mockTokenToSatisfyParameters = 'token';
                         const res = mockResponse();
 
-                        await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
-                        expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                        expect(res.status).toBeCalledTimes(1);
-                        expect(res.json).toHaveBeenCalledWith({
-                            code: 'INVALID',
-                            message: 'Provided token is not valid',
-                            data: null,
-                        });
+                        await userController
+                            .resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res)
+                            .then(() => {
+                                throw new Error('I have failed you, Anakin.');
+                            }).catch(err => {
+                                expect(err).toBe(result);
+                            });
                     });
 
                     it('token expired', async () => {
@@ -474,14 +464,13 @@ describe('User Controller', () => {
                         const mockTokenToSatisfyParameters = 'token';
                         const res = mockResponse();
 
-                        await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
-                        expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                        expect(res.status).toBeCalledTimes(1);
-                        expect(res.json).toHaveBeenCalledWith({
-                            code: 'EXPIRED',
-                            message: 'Provided token expired',
-                            data: null,
-                        });
+                        await userController
+                            .resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res)
+                            .then(() => {
+                                throw new Error('I have failed you, Anakin.');
+                            }).catch(err => {
+                                expect(err).toBe(result);
+                            });
                     });
 
                     it('token used', async () => {
@@ -498,14 +487,13 @@ describe('User Controller', () => {
                         const mockTokenToSatisfyParameters = 'token';
                         const res = mockResponse();
 
-                        await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
-                        expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                        expect(res.status).toBeCalledTimes(1);
-                        expect(res.json).toHaveBeenCalledWith({
-                            code: 'USED',
-                            message: 'Provided token was already used at the following date',
-                            data: date,
-                        });
+                        await userController
+                            .resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res)
+                            .then(() => {
+                                throw new Error('I have failed you, Anakin.');
+                            }).catch(err => {
+                                expect(err).toBe(result);
+                            });
                     });
 
                     it('token outdated', async () => {
@@ -519,19 +507,16 @@ describe('User Controller', () => {
                         const mockTokenToSatisfyParameters = 'token';
                         const res = mockResponse();
 
-                        await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
-                        expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                        expect(res.status).toBeCalledTimes(1);
-                        expect(res.json).toHaveBeenCalledWith({
-                            code: 'OUTDATED',
-                            message: 'Provided token was already replaced by a new one',
-                            data: null,
-                        });
+                        await userController
+                            .resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res)
+                            .then(() => {
+                                throw new Error('I have failed you, Anakin.');
+                            }).catch(err => {
+                                expect(err).toBe(result);
+                            });
                     });
                 });
-            });
 
-            describe('* failure should return error with 500 status code', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
@@ -542,17 +527,17 @@ describe('User Controller', () => {
                     const mockTokenToSatisfyParameters = 'token';
                     const res = mockResponse();
 
-                    await userController.resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'UNDEFINED',
-                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
-                        data: expect.stringMatching(/^.{10}$/)
-                    });
+                    await userController
+                        .resetPasswordTokenVerification(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
         });
+
         describe('* set new password', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
@@ -571,9 +556,9 @@ describe('User Controller', () => {
                 });
             });
 
-            describe('* unauthorized should return error with 401 status code', () => {
+            describe('* failure should return error', () => {
                 it('token invalid', async () => {
-                    const result = new UnauthorizedException();
+                    const result = new InsufficientPermissionsException();
 
                     jest.spyOn(userService, 'updatePassword')
                         .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
@@ -586,14 +571,12 @@ describe('User Controller', () => {
                     await userController.resetPassword(mockMailToSatisfyParameters,
                         mockTokenToSatisfyParameters, mockPasswordToSatisfyParameters, res)
                         .then(() => {
-                            throw new Error('I have failed you, Anakin. Expected resetPassword to throw error');
+                            throw new Error('I have failed you, Anakin.');
                         }).catch(err => {
-                            expect(err).toBeInstanceOf(UnauthorizedException);
+                            expect(err).toBe(result);
                         });
                 });
-            });
 
-            describe('* failure should return error with 500 status code', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
@@ -606,14 +589,12 @@ describe('User Controller', () => {
                     const res = mockResponse();
 
                     await userController.resetPassword(mockMailToSatisfyParameters,
-                        mockTokenToSatisfyParameters, mockPasswordToSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'UNDEFINED',
-                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
-                        data: expect.stringMatching(/^.{10}$/)
-                    });
+                        mockTokenToSatisfyParameters, mockPasswordToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
         });
@@ -636,7 +617,7 @@ describe('User Controller', () => {
                 });
             });
 
-            describe('* unauthorized return error with 401 status code', () => {
+            describe('* failure should return error', () => {
                 it('token invalid', async () => {
                     const result = new UnauthorizedException();
 
@@ -647,12 +628,14 @@ describe('User Controller', () => {
                     const mockTokenToSatisfyParameters = 'token';
                     const res = mockResponse();
 
-                    await userController.mailChangeVerifyTokenAndExecuteChange(mockMailToSatisfyParameters,
-                        mockTokenToSatisfyParameters, res).then(() => {
-                        throw new Error('I have failed you, Anakin. Expected resetPassword to throw error');
-                    }).catch(err => {
-                        expect(err).toBeInstanceOf(UnauthorizedException);
-                    });
+                    await userController
+                        .mailChangeVerifyTokenAndExecuteChange(mockMailToSatisfyParameters,
+                            mockTokenToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
 
@@ -667,14 +650,13 @@ describe('User Controller', () => {
                     const mockTokenToSatisfyParameters = 'token';
                     const res = mockResponse();
 
-                    await userController.mailChangeVerifyTokenAndExecuteChange(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'UNDEFINED',
-                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
-                        data: expect.stringMatching(/^.{10}$/)
-                    });
+                    await userController
+                        .mailChangeVerifyTokenAndExecuteChange(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
         });
@@ -695,7 +677,7 @@ describe('User Controller', () => {
                 });
             });
 
-            describe('* failure should return error with 400 status code', () => {
+            describe('* failure should return error', () => {
                 it('no active mail change - can\'t resend', async () => {
                     const result = new InvalidRequestException('INVALID',
                         'There is no active mail change going on. Email resend is not possible');
@@ -707,19 +689,15 @@ describe('User Controller', () => {
                     const mockDomainToSatisfyParameters = 'my.domain.tld';
                     const res = mockResponse();
 
-                    await userController.mailChangeResendMail(mockUserToSatisfyParameter, mockDomainToSatisfyParameters, res);
-
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'INVALID',
-                        message: 'There is no active mail change going on. Email resend is not possible',
-                        data: null,
-                    });
+                    await userController
+                        .mailChangeResendMail(mockUserToSatisfyParameter, mockDomainToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
-            });
 
-            describe('* failure should return error with 500 status code', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
@@ -730,14 +708,13 @@ describe('User Controller', () => {
                     const mockDomainToSatisfyParameters = 'my.domain.tld';
                     const res = mockResponse();
 
-                    await userController.mailChangeResendMail(mockUserToSatisfyParameter, mockDomainToSatisfyParameters, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'UNDEFINED',
-                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
-                        data: expect.stringMatching(/^.{10}$/)
-                    });
+                    await userController
+                        .mailChangeResendMail(mockUserToSatisfyParameter, mockDomainToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
         });
@@ -767,14 +744,13 @@ describe('User Controller', () => {
                     const mockUserToSatisfyParameter = new User();
                     const res = mockResponse();
 
-                    await userController.mailChangeDeactivateToken(mockUserToSatisfyParameter, res);
-                    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-                    expect(res.status).toBeCalledTimes(1);
-                    expect(res.json).toHaveBeenCalledWith({
-                        code: 'UNDEFINED',
-                        message: 'Some error occurred. Please try again later or contact the support with the appended error Code',
-                        data: expect.stringMatching(/^.{10}$/)
-                    });
+                    await userController
+                        .mailChangeDeactivateToken(mockUserToSatisfyParameter, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
                 });
             });
         });
