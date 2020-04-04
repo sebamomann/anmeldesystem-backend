@@ -1,15 +1,17 @@
 import {Test, TestingModule} from '@nestjs/testing';
 
 import {Appointment} from './appointment.entity';
-import {AppointmentController} from './appointment.controller';
 import {AppointmentService} from './appointment.service';
+import {AppointmentController} from './appointment.controller';
+
 import {User} from '../user/user.entity';
-import {NotFoundException} from '@nestjs/common';
 import {UserUtil} from '../../util/userUtil.util';
+
+import {HttpStatus, NotFoundException} from '@nestjs/common';
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
-import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
+import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 
 jest.mock('./appointment.service');
 
@@ -49,7 +51,7 @@ describe('Appointment Controller', () => {
                 await appointmentController.getAll(mockUserToSatisfyParameter,
                     mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, res);
 
-                expect(res.status).toHaveBeenCalledWith(200);
+                expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
                 expect(res.status).toBeCalledTimes(1);
                 expect(res.json).toHaveBeenCalledWith(result);
             });
@@ -96,7 +98,7 @@ describe('Appointment Controller', () => {
 
                 await appointmentController.create(mockUserToSatisfyParameter, mockAppointmentToSatisfyParameter, res);
 
-                expect(res.status).toHaveBeenCalledWith(201);
+                expect(res.status).toHaveBeenCalledWith(HttpStatus.CREATED);
                 expect(res.status).toBeCalledTimes(1);
                 expect(res.json).toHaveBeenCalledWith(result);
             });
@@ -180,7 +182,7 @@ describe('Appointment Controller', () => {
                 await appointmentController.update(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockAppointmentToSatisfyParameter, res);
 
-                expect(res.status).toHaveBeenCalledWith(200);
+                expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
                 expect(res.status).toBeCalledTimes(1);
                 expect(res.json).toHaveBeenCalledWith(result);
             });
@@ -262,7 +264,7 @@ describe('Appointment Controller', () => {
 
                 await appointmentController.addAdministrator(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockUsernameToSatisfyParameter, res);
-                expect(res.status).toHaveBeenCalledWith(204);
+                expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
                 expect(res.status).toBeCalledTimes(1);
             });
         });
@@ -342,7 +344,7 @@ describe('Appointment Controller', () => {
 
                 await appointmentController.removeAdministrator(mockUserToSatisfyParameter,
                     mockLinkToSatisfyParameter, mockUsernameToSatisfyParameter, res);
-                expect(res.status).toHaveBeenCalledWith(204);
+                expect(res.status).toHaveBeenCalledWith(HttpStatus.GONE);
                 expect(res.status).toBeCalledTimes(1);
             });
         });

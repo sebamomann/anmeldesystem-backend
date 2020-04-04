@@ -6,6 +6,7 @@ import {AuthService} from '../../auth/auth.service';
 import {UserController} from './user.controller';
 
 import {GoneException, HttpStatus, UnauthorizedException} from '@nestjs/common';
+
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {InvalidTokenException} from '../../exceptions/InvalidTokenException';
