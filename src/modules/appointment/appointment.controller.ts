@@ -133,8 +133,6 @@ export class AppointmentController {
             });
     }
 
-    // stopped here
-
     @Get(':link/permission')
     @UseGuards(AuthGuard('jwt'))
     hasPermission(@Usr() user: User,
@@ -154,6 +152,38 @@ export class AppointmentController {
                 throw err;
             });
     }
+
+    @Post(':link/file')
+    addFile(@Usr() user: User,
+            @Param('link') link: string,
+            @Body() data: { name: string, data: string },
+            @Res() res: Response) {
+        return this.appointmentService
+            .addFile(user, link, data)
+            .then(() => {
+                res.status(HttpStatus.NO_CONTENT).json();
+            })
+            .catch((err) => {
+                throw err;
+            });
+    }
+
+    @Delete(':link/file/:id')
+    removeFile(@Usr() user: User,
+               @Param('link') link: string,
+               @Param('id') id: string,
+               @Res() res: Response) {
+        return this.appointmentService
+            .removeFile(user, link, id)
+            .then(() => {
+                res.status(HttpStatus.NO_CONTENT).json();
+            })
+            .catch((err) => {
+                throw err;
+            });
+    }
+
+    // stopped here
 
     @Get(':link')
     @UseGuards(JwtOptStrategy)
@@ -229,40 +259,6 @@ export class AppointmentController {
     //             res.status(HttpStatus.BAD_REQUEST).json(error);
     //         });
     // }
-
-    @Post(':link/file')
-    addFile(@Param('link') link: string,
-            @Body() data: { name: string, data: string },
-            @Request() req: Request,
-            @Res() res: Response) {
-        return this.appointmentService
-            .addFile(link, data)
-            .then(result => {
-                res.status(HttpStatus.OK).json();
-            }).catch((err) => {
-                if (err instanceof NotFoundException) {
-                    throw err;
-                }
-
-                console.log(err);
-                let error = {error: {}};
-                error.error = {undefined: {message: 'Some error occurred. Please try again later or contact the support'}};
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
-            });
-    }
-
-    @Delete(':link/file/:id')
-    deleteFile(@Param('link') link: string,
-               @Param('id') id: string,
-               @Request() req: Request,
-               @Res() res: Response) {
-        return this.appointmentService
-            .removeFile(link, id)
-            .then(result => {
-                res.status(HttpStatus.OK).json();
-            });
-    }
 
     @Get(':link/pin')
     @UseGuards(AuthGuard('jwt'))

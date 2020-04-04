@@ -13,6 +13,7 @@ import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {UnknownUsersException} from '../../exceptions/UnknownUsersException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
+import {EntityGoneException} from '../../exceptions/EntityGoneException';
 
 const crypto = require('crypto');
 
@@ -279,6 +280,53 @@ export class AppointmentService {
             || this.isAdministrator(appointment, user);
     }
 
+    public async addFile(_user: User, link: string, data: any) {
+        let appointment;
+
+        try {
+            appointment = await this.find(link, null, null);
+        } catch (e) {
+            throw e;
+        }
+
+        if (!this.isCreator(appointment, _user)) {
+            throw new InsufficientPermissionsException();
+        }
+
+        const file = new File();
+        file.name = data.name;
+        file.data = data.data;
+
+        const savedFile = await this.fileRepository.save(file);
+        appointment.files.push(savedFile);
+
+        await this.appointmentRepository.save(appointment);
+    }
+
+    public async removeFile(_user: User, link: string, id: string) {
+        let appointment;
+
+        try {
+            appointment = await this.find(link, null, null);
+        } catch (e) {
+            throw e;
+        }
+
+        if (!this.isCreator(appointment, _user)) {
+            throw new InsufficientPermissionsException();
+        }
+
+        let file;
+
+        try {
+            file = await this.fileService.findById(id);
+        } catch (e) {
+            throw new EntityGoneException(null, null, 'file');
+        }
+
+        await this.fileRepository.remove(file);
+    }
+
     async find(link: string, user: User, permissions: any, slim: boolean = false): Promise<Appointment> {
         let appointment = await getRepository(Appointment)
             .createQueryBuilder('appointment')
@@ -432,23 +480,5 @@ export class AppointmentService {
             result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
         return result;
-    }
-
-    public async addFile(link: string, data: any) {
-        const appointment = await this.find(link, null, null);
-        console.log('add file', data.name, data.data.length);
-
-        const file = new File();
-        file.name = data.name;
-        file.data = data.data;
-        const _file = await this.fileRepository.save(file);
-        appointment.files.push(_file);
-
-        return this.appointmentRepository.save(appointment);
-    }
-
-    async removeFile(link: string, id: string) {
-        const file = await this.fileService.findById(id);
-        return this.fileRepository.remove(file);
     }
 }
