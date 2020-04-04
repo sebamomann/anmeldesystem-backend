@@ -1,16 +1,18 @@
-import {BadRequestException, ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
-import {Appointment} from "./appointment.entity";
+import {Injectable} from '@nestjs/common';
+import {Appointment} from './appointment.entity';
 import {getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
-import {Addition} from "../addition/addition.entity";
-import {File} from "../file/file.entity";
-import {User} from "../user/user.entity";
-import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
-import {AdditionService} from "../addition/addition.service";
-import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
-import {UserService} from "../user/user.service";
-import {FileService} from "../file/file.service";
-import {InvalidValueException} from "../../exceptions/InvalidValueException";
+import {Addition} from '../addition/addition.entity';
+import {File} from '../file/file.entity';
+import {User} from '../user/user.entity';
+import {AdditionService} from '../addition/addition.service';
+import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
+import {UserService} from '../user/user.service';
+import {FileService} from '../file/file.service';
+import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
+import {UnknownUsersException} from '../../exceptions/UnknownUsersException';
+import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
+import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 
 const crypto = require('crypto');
 
@@ -31,72 +33,60 @@ export class AppointmentService {
     ) {
     }
 
-    async hasPermission(link: string, user: User): Promise<boolean> {
-        let appointment;
-        try {
-            appointment = await this.findBasic(link);
-        } catch (e) {
-            return false;
-        }
-
-        return appointment !== undefined && (appointment.creator.id === user.id || appointment.administrators.some(sAdministrator => {
-            return sAdministrator.id === user.id;
-        }));
-    }
-
-    async findAll(user: User, params: any, slim = false): Promise<Appointment[]> {
+    public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
         let pins = [''];
         for (const queryKey of Object.keys(params)) {
-            if (queryKey.startsWith("pin")) {
+            if (queryKey.startsWith('pin')) {
                 pins.push(params[queryKey]);
             }
         }
 
         let appointments = await getRepository(Appointment)
-            .createQueryBuilder("appointment")
-            .leftJoinAndSelect("appointment.creator", "creator")
-            .leftJoinAndSelect("appointment.additions", "additions")
-            .leftJoinAndSelect("appointment.enrollments", "enrollments")
-            .leftJoinAndSelect("enrollments.passenger", "enrollment_passenger")
-            .leftJoinAndSelect("enrollments.driver", "enrollment_driver")
-            .leftJoinAndSelect("enrollments.additions", "enrollment_additions")
-            .leftJoinAndSelect("enrollments.creator", "enrollment_creator")
-            .leftJoinAndSelect("appointment.files", "files")
-            .leftJoinAndSelect("appointment.administrators", "administrators")
-            .leftJoinAndSelect("appointment.pinners", "pinners")
-            .select(["appointment", "additions", "enrollments",
-                "enrollment_passenger", "enrollment_driver", "enrollment_creator",
-                "creator.username", "creator.name", "files", "administrators.username", "administrators.name",
-                "enrollment_additions", "pinners"])
-            .where("creator.id = :creatorId", {creatorId: user.id})
-            .orWhere("administrators.id = :admin", {admin: user.id})
-            .orWhere("enrollments.creatorId = :user", {user: user.id})
-            .orWhere("pinners.id = :user", {user: user.id})
-            .orWhere("appointment.link IN (:...links)", {links: pins})
-            .orderBy("appointment.date", "DESC")
+            .createQueryBuilder('appointment')
+            .leftJoinAndSelect('appointment.creator', 'creator')
+            .leftJoinAndSelect('appointment.additions', 'additions')
+            .leftJoinAndSelect('appointment.enrollments', 'enrollments')
+            .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
+            .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
+            .leftJoinAndSelect('enrollments.additions', 'enrollment_additions')
+            .leftJoinAndSelect('enrollments.creator', 'enrollment_creator')
+            .leftJoinAndSelect('appointment.files', 'files')
+            .leftJoinAndSelect('appointment.administrators', 'administrators')
+            .leftJoinAndSelect('appointment.pinners', 'pinners')
+            .select(['appointment', 'additions', 'enrollments',
+                'enrollment_passenger', 'enrollment_driver', 'enrollment_creator',
+                'creator.username', 'creator.name', 'files', 'administrators.username', 'administrators.name',
+                'enrollment_additions', 'pinners'])
+            .where('creator.id = :creatorId', {creatorId: user.id})
+            .orWhere('administrators.id = :admin', {admin: user.id})
+            .orWhere('enrollments.creatorId = :user', {user: user.id})
+            .orWhere('pinners.id = :user', {user: user.id})
+            .orWhere('appointment.link IN (:...links)', {links: pins})
+            .orderBy('appointment.date', 'DESC')
             .getMany();
+
         appointments.map(fAppointment => {
             if (user != null) {
                 if (this.isAdministrator(fAppointment, user)) {
-                    fAppointment.reference.push("ADMIN")
+                    fAppointment.reference.push('ADMIN');
                 }
 
                 if (this.isCreator(fAppointment, user)) {
-                    fAppointment.reference.push("CREATOR")
+                    fAppointment.reference.push('CREATOR');
                 }
 
                 if (fAppointment.enrollments !== undefined
                     && fAppointment.enrollments.some(sEnrollment => {
                         return sEnrollment.creator != null
-                            && sEnrollment.creator.id === user.id
+                            && sEnrollment.creator.id === user.id;
                     })) {
-                    fAppointment.reference.push("ENROLLED")
+                    fAppointment.reference.push('ENROLLED');
                 }
 
                 if (fAppointment.pinners !== undefined
                     && fAppointment.pinners.some(sPinner => sPinner.id === user.id)
                     || pins.includes(fAppointment.link)) {
-                    fAppointment.reference.push("PINNED")
+                    fAppointment.reference.push('PINNED');
                 }
             }
 
@@ -107,7 +97,6 @@ export class AppointmentService {
 
             delete fAppointment.pinners;
         });
-
 
         if (slim) {
             appointments = appointments.map(fAppointment => {
@@ -120,130 +109,14 @@ export class AppointmentService {
         return appointments;
     }
 
-    async find(link: string, user: User, permissions: any, slim: boolean = false): Promise<Appointment> {
-        let appointment = await getRepository(Appointment)
-            .createQueryBuilder("appointment")
-            .where("appointment.link = :link", {link: link})
-            .leftJoinAndSelect("appointment.creator", "creator")
-            .leftJoinAndSelect("appointment.additions", "additions")
-            .leftJoinAndSelect("appointment.enrollments", "enrollments")
-            .leftJoinAndSelect("enrollments.creator", "enrollment_creator")
-            .leftJoinAndSelect("enrollments.passenger", "enrollment_passenger")
-            .leftJoinAndSelect("enrollments.driver", "enrollment_driver")
-            .leftJoinAndSelect("enrollments.additions", "enrollment_additions")
-            .leftJoinAndSelect("appointment.files", "files")
-            .leftJoinAndSelect("appointment.administrators", "administrators")
-            .leftJoinAndSelect("appointment.pinners", "pinners")
-            .select(["appointment", "additions", "enrollments",
-                "enrollment_passenger", "enrollment_driver", "enrollment_creator", "enrollments.iat",
-                "creator.username", "creator.name", "files.name", "files.id", "administrators.name", "administrators.username",
-                "enrollment_additions", "pinners"])
-            .orderBy("enrollments.iat", "ASC")
-            .getOne();
-
-        if (appointment === undefined) {
-            throw new NotFoundException();
-        }
-
-        if (appointment.pinners !== undefined
-            && user != null
-            && appointment.pinners.some(sPinner => sPinner.id === user.id)) {
-            appointment.reference.push("PINNED")
-        }
-
-        if (slim) {
-            delete appointment.files;
-        }
-
-        if (appointment.hidden &&
-            permissions != null &&
-            !this.isCreator(appointment, user) &&
-            !this.isAdministrator(appointment, user)) {
-            let ids = [];
-            let tokens = [];
-            for (const queryKey of Object.keys(permissions)) {
-                if (queryKey.startsWith("perm")) {
-                    ids.push(permissions[queryKey]);
-                }
-
-                if (queryKey.startsWith("token")) {
-                    tokens.push(permissions[queryKey]);
-                }
-            }
-
-            let finalIds = [];
-            ids.forEach((fId, i) => {
-                const token = crypto.createHash('sha256')
-                    .update(fId + process.env.SALT_ENROLLMENT)
-                    .digest('hex');
-                if (tokens[i] !== undefined && token === tokens[i].replace(" ", "+")) {
-                    finalIds.push(fId);
-                }
-            });
-
-            appointment.numberOfEnrollments = appointment.enrollments.length;
-            appointment.enrollments = appointment.enrollments.filter(fEnrollment => {
-                if (finalIds.includes(fEnrollment.id)
-                    || (fEnrollment.creator != null &&
-                        user != null &&
-                        fEnrollment.creator.id === user.id)) {
-                    return fEnrollment;
-                }
-            })
-        }
-
-        appointment.enrollments.map(mEnrollment => {
-            mEnrollment.createdByUser = mEnrollment.creator != null;
-            delete mEnrollment.creator;
-            return mEnrollment;
-        });
-
-        return appointment;
-    }
-
-    private isCreator(fAppointment: Appointment, user: User) {
-        return fAppointment.creator.username === user.username;
-    }
-
-    private isAdministrator(fAppointment: Appointment, user: User) {
-        return fAppointment.administrators !== undefined
-            && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username);
-    }
-
-    async pinAppointment(user: User, link: string) {
-        const appointment = await this.find(link, user, null);
-        const _user = await this.userService.findById("" + user.id);
-
-        if (_user.pinned.some(sPinned => sPinned.id === appointment.id)) {
-            const removeIndex = _user.pinned.indexOf(appointment);
-            _user.pinned.splice(removeIndex, 1);
-        } else {
-            _user.pinned.push(appointment);
-        }
-
-        return this.userRepository.save(_user);
-    }
-
-    async findBasic(link: string): Promise<Appointment> {
-        return await getRepository(Appointment)
-            .createQueryBuilder("appointment")
-            .where("appointment.link = :link", {link: link})
-            .leftJoinAndSelect("appointment.additions", "additions")
-            .leftJoinAndSelect("appointment.files", "files")
-            .leftJoinAndSelect("appointment.administrators", "administrators")
-            .leftJoinAndSelect("appointment.creator", "creator")
-            .select(["appointment", "additions", "files.name", "files.id", "administrators", "creator"])
-            .getOne();
-    }
-
     async create(appointment: Appointment, user: User) {
         let appointmentToDb = new Appointment();
-        appointmentToDb.title = appointment.title;
 
         if (appointment.description.length < 10) {
-            throw new InvalidValueException("INVALID_VALUE", "Minimum length of 10 needed", ["description"]);
+            throw new InvalidValuesException(null, 'Minimum length of 10 needed', ['description']);
         }
 
+        appointmentToDb.title = appointment.title;
         appointmentToDb.description = appointment.description;
 
         if (appointment.link === null || appointment.link.length < 5) {
@@ -255,6 +128,10 @@ export class AppointmentService {
 
             appointmentToDb.link = link;
         } else {
+            if (await this.linkInUse(appointment.link)) {
+                throw new DuplicateValueException(null, null, ['link']);
+            }
+
             appointmentToDb.link = appointment.link;
         }
 
@@ -280,33 +157,34 @@ export class AppointmentService {
         }
 
         // Administrators
-        let faultyAdministratorMails = [];
+        //let faultyAdministratorMails = [];
         let administratorsToDb = [];
-        for (const fAdmin of appointment.administrators) {
-            const _user: User = await this.userRepository.findOne({where: {mail: fAdmin}});
-            if (_user !== null && _user !== undefined) {
-                administratorsToDb.push(_user);
-            } else {
-                faultyAdministratorMails.push(fAdmin);
-            }
-        }
-        if (faultyAdministratorMails.length > 0) {
-            throw new UnknownUsersException('NOT_FOUND', `Users not found by mail`, faultyAdministratorMails);
-        }
+        // for (const fAdmin of appointment.administrators) {
+        //     const _user: User = await this.userRepository.findOne({where: {mail: fAdmin}});
+        //     if (_user !== null && _user !== undefined) {
+        //         administratorsToDb.push(_user);
+        //     } else {
+        //         faultyAdministratorMails.push(fAdmin);
+        //     }
+        // }
+        //
+        // if (faultyAdministratorMails.length > 0) {
+        //     throw new UnknownUsersException('NOT_FOUND', `Users not found by mail`, faultyAdministratorMails);
+        // }
         appointmentToDb.administrators = administratorsToDb;
 
         appointmentToDb.additions = additionsToDb;
 
         // Files
         let filesToDb = [];
-        for (const fFile of appointment.files) {
-            let _file: File = new File();
-            _file.name = fFile.name;
-            _file.data = fFile.data;
-
-            const createdFile = await this.fileRepository.save(_file);
-            filesToDb.push(createdFile);
-        }
+        // for (const fFile of appointment.files) {
+        //     let _file: File = new File();
+        //     _file.name = fFile.name;
+        //     _file.data = fFile.data;
+        //
+        //     const createdFile = await this.fileRepository.save(_file);
+        //     filesToDb.push(createdFile);
+        // }
 
         appointmentToDb.files = filesToDb;
 
@@ -316,23 +194,21 @@ export class AppointmentService {
     async update(toChange: any, link: string, user: User) {
         let appointment = await this.findBasic(link);
 
-        if (!this.hasPermission(link, user)) {
-            throw new ForbiddenException("FORBIDDEN");
+        if (!this.hasPermission(user, link)) {
+            throw new InsufficientPermissionsException();
         }
 
         for (const [key, value] of Object.entries(toChange)) {
             console.log(key, value);
             if (key in appointment && appointment[key] !== value) {
                 let _value = value;
-                if (key === "additions") {
+                if (key === 'additions') {
                     _value = await this.handleAdditions(value, appointment);
                 }
-                if (key === "link") {
+                if (key === 'link') {
                     if (await this.linkInUse(value)) {
-                        console.log("Link in use " + value);
-                        throw new DuplicateValueException('DUPLICATE_ENTRY',
-                            'Following values are already taken',
-                            ['link']);
+                        console.log('Link in use ' + value);
+                        throw new DuplicateValueException(null, null, ['link']);
                     }
                     _value = value;
                 }
@@ -347,6 +223,177 @@ export class AppointmentService {
         return await this.find(appointment.link, user, null);
     }
 
+    public async addAdministrator(_user: User, link: string, username: string) {
+        let appointment;
+
+        try {
+            appointment = await this.find(link, null, null);
+        } catch (e) {
+            throw e;
+        }
+
+        if (!this.isCreator(appointment, _user)) {
+            throw new InsufficientPermissionsException();
+        }
+
+        const user = await this.userService.findByUsername(username);
+        if (user === undefined) {
+            throw new UnknownUsersException('NOT_FOUND', `User not found by username`);
+        }
+
+        appointment.administrators.push(user);
+
+        await this.appointmentRepository.save(appointment);
+    }
+
+    public async removeAdministrator(_user: User, link: string, username: string) {
+        let appointment;
+
+        try {
+            appointment = await this.find(link, null, null);
+        } catch (e) {
+            throw e;
+        }
+
+        if (!this.isCreator(appointment, _user)) {
+            throw new InsufficientPermissionsException();
+        }
+
+        appointment.administrators = appointment.administrators.filter(fAdministrator => {
+            return fAdministrator.username !== username;
+        });
+
+        return this.appointmentRepository.save(appointment);
+    }
+
+    async hasPermission(user: User, link: string,): Promise<boolean> {
+        let appointment;
+
+        try {
+            appointment = await this.find(link, null, null);
+        } catch (e) {
+            throw new InsufficientPermissionsException();
+        }
+
+        return this.isCreator(appointment, user)
+            || this.isAdministrator(appointment, user);
+    }
+
+    async find(link: string, user: User, permissions: any, slim: boolean = false): Promise<Appointment> {
+        let appointment = await getRepository(Appointment)
+            .createQueryBuilder('appointment')
+            .where('appointment.link = :link', {link: link})
+            .leftJoinAndSelect('appointment.creator', 'creator')
+            .leftJoinAndSelect('appointment.additions', 'additions')
+            .leftJoinAndSelect('appointment.enrollments', 'enrollments')
+            .leftJoinAndSelect('enrollments.creator', 'enrollment_creator')
+            .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
+            .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
+            .leftJoinAndSelect('enrollments.additions', 'enrollment_additions')
+            .leftJoinAndSelect('appointment.files', 'files')
+            .leftJoinAndSelect('appointment.administrators', 'administrators')
+            .leftJoinAndSelect('appointment.pinners', 'pinners')
+            .select(['appointment', 'additions', 'enrollments',
+                'enrollment_passenger', 'enrollment_driver', 'enrollment_creator', 'enrollments.iat',
+                'creator.username', 'creator.name', 'files.name', 'files.id', 'administrators.name', 'administrators.username',
+                'enrollment_additions', 'pinners'])
+            .orderBy('enrollments.iat', 'ASC')
+            .getOne();
+
+        if (appointment === undefined) {
+            throw new EntityNotFoundException(null, null, 'appointment');
+        }
+
+        if (appointment.pinners !== undefined
+            && user != null
+            && appointment.pinners.some(sPinner => sPinner.id === user.id)) {
+            appointment.reference.push('PINNED');
+        }
+
+        if (slim) {
+            delete appointment.files;
+        }
+
+        if (appointment.hidden &&
+            permissions != null &&
+            !this.isCreator(appointment, user) &&
+            !this.isAdministrator(appointment, user)) {
+            let ids = [];
+            let tokens = [];
+            for (const queryKey of Object.keys(permissions)) {
+                if (queryKey.startsWith('perm')) {
+                    ids.push(permissions[queryKey]);
+                }
+
+                if (queryKey.startsWith('token')) {
+                    tokens.push(permissions[queryKey]);
+                }
+            }
+
+            let finalIds = [];
+            ids.forEach((fId, i) => {
+                const token = crypto.createHash('sha256')
+                    .update(fId + process.env.SALT_ENROLLMENT)
+                    .digest('hex');
+                if (tokens[i] !== undefined && token === tokens[i].replace(' ', '+')) {
+                    finalIds.push(fId);
+                }
+            });
+
+            appointment.numberOfEnrollments = appointment.enrollments.length;
+            appointment.enrollments = appointment.enrollments.filter(fEnrollment => {
+                if (finalIds.includes(fEnrollment.id)
+                    || (fEnrollment.creator != null &&
+                        user != null &&
+                        fEnrollment.creator.id === user.id)) {
+                    return fEnrollment;
+                }
+            });
+        }
+
+        appointment.enrollments.map(mEnrollment => {
+            mEnrollment.createdByUser = mEnrollment.creator != null;
+            delete mEnrollment.creator;
+            return mEnrollment;
+        });
+
+        return appointment;
+    }
+
+    private isCreator(fAppointment: Appointment, user: User) {
+        return fAppointment.creator.username === user.username;
+    }
+
+    private isAdministrator(fAppointment: Appointment, user: User) {
+        return fAppointment.administrators !== undefined
+            && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username);
+    }
+
+    async pinAppointment(user: User, link: string) {
+        const appointment = await this.find(link, user, null);
+        const _user = await this.userService.findById(user.id);
+
+        if (_user.pinned.some(sPinned => sPinned.id === appointment.id)) {
+            const removeIndex = _user.pinned.indexOf(appointment);
+            _user.pinned.splice(removeIndex, 1);
+        } else {
+            _user.pinned.push(appointment);
+        }
+
+        return this.userRepository.save(_user);
+    }
+
+    async findBasic(link: string): Promise<Appointment> {
+        return await getRepository(Appointment)
+            .createQueryBuilder('appointment')
+            .where('appointment.link = :link', {link: link})
+            .leftJoinAndSelect('appointment.additions', 'additions')
+            .leftJoinAndSelect('appointment.files', 'files')
+            .leftJoinAndSelect('appointment.administrators', 'administrators')
+            .leftJoinAndSelect('appointment.creator', 'creator')
+            .select(['appointment', 'additions', 'files.name', 'files.id', 'administrators', 'creator'])
+            .getOne();
+    }
 
     private async handleAdditions(value, appointment: Appointment) {
         let additions = [];
@@ -387,32 +434,9 @@ export class AppointmentService {
         return result;
     }
 
-    public async addAdministrator(link: string, username: string) {
-        const appointment = await this.find(link, null, null);
-
-        const user = await this.userService.findByUsername(username);
-        if (user === undefined) {
-            throw new BadRequestException('Username not found');
-        }
-
-        appointment.administrators.push(user);
-
-        return this.appointmentRepository.save(appointment);
-    }
-
-    public async removeAdministrator(link: string, username: string) {
-        const appointment = await this.find(link, null, null);
-
-        appointment.administrators = appointment.administrators.filter(fAdministrator => {
-            return fAdministrator.username != username;
-        });
-
-        return this.appointmentRepository.save(appointment);
-    }
-
     public async addFile(link: string, data: any) {
         const appointment = await this.find(link, null, null);
-        console.log("add file", data.name, data.data.length);
+        console.log('add file', data.name, data.data.length);
 
         const file = new File();
         file.name = data.name;

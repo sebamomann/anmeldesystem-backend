@@ -1,23 +1,23 @@
-export class DuplicateValueException implements Error {
+export class InsufficientPermissionsException implements Error {
     readonly columnNumber: number;
     readonly fileName: string;
     readonly lineNumber: number;
     message: string;
     name: string;
-    data: string[];
+    data: string;
     code: string;
 
-    constructor(code: string = null, message: string = null, data: string[] = null) {
+    constructor(code: string = null, message: string = null, data: string = null) {
         if (code === null
             || code === '') {
-            this.code = 'DUPLICATE_ENTRY';
+            this.code = 'FORBIDDEN';
         } else {
             this.code = code;
         }
 
         if (message === null
             || message === '') {
-            this.message = 'Following values are already in use';
+            this.message = 'Missing permissions to execute request';
         } else {
             this.message = message;
         }

@@ -1,11 +1,16 @@
 import {Body, Controller, Get, HttpStatus, Param, Post, Put, Res, UnauthorizedException, UseGuards} from '@nestjs/common';
-import {UserService} from './user.service';
+
 import {User} from './user.entity';
 import {Usr} from './user.decorator';
-import {AuthGuard} from '@nestjs/passport';
+
+import {UserService} from './user.service';
 import {AuthService} from '../../auth/auth.service';
+
+import {AuthGuard} from '@nestjs/passport';
+
 import {Response} from 'express';
 import {Responses} from '../../util/responses.util';
+
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {InvalidTokenException} from '../../exceptions/InvalidTokenException';
@@ -16,7 +21,8 @@ import {InvalidRequestException} from '../../exceptions/InvalidRequestException'
 
 @Controller('user')
 export class UserController {
-    constructor(private readonly userService: UserService, private authService: AuthService) {
+    constructor(private readonly userService: UserService,
+                private authService: AuthService) {
     }
 
     @Get()
@@ -43,17 +49,8 @@ export class UserController {
                 res.status(HttpStatus.CREATED).json(result);
             })
             .catch(err => {
-                let error: any = {};
-
-                if (err instanceof DuplicateValueException) {
-                    error.code = err.code;
-                    error.message = err.message;
-                    error.data = err.data;
-
-                    res.status(HttpStatus.BAD_REQUEST).json(error);
-                } else {
-                    Responses.undefinedErrorResponse(err, res);
-                }
+                const allowedExceptions: any = [DuplicateValueException];
+                handleExceptions(allowedExceptions, err, res);
             });
     }
 

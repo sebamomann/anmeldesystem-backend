@@ -1,24 +1,24 @@
 import {Injectable} from '@nestjs/common';
-import {Enrollment} from "./enrollment.entity";
+import {Enrollment} from './enrollment.entity';
 import {getConnection, getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
-import {Appointment} from "../appointment/appointment.entity";
-import {AppointmentService} from "../appointment/appointment.service";
-import {AdditionService} from "../addition/addition.service";
-import {Addition} from "../addition/addition.entity";
-import {Driver} from "./driver/driver.entity";
-import {Passenger} from "./passenger/passenger.entity";
-import {EmptyFieldsException} from "../../exceptions/EmptyFieldsException";
-import {DuplicateValueException} from "../../exceptions/DuplicateValueException";
-import {User} from "../user/user.entity";
-import {Key} from "./key/key.entity";
-import {PassengerService} from "./passenger/passenger.service";
-import {DriverService} from "./driver/driver.service";
-import {Mail} from "./mail/mail.entity";
-import {MailerService} from "@nest-modules/mailer";
-import {InvalidValueException} from "../../exceptions/InvalidValueException";
+import {Appointment} from '../appointment/appointment.entity';
+import {AppointmentService} from '../appointment/appointment.service';
+import {AdditionService} from '../addition/addition.service';
+import {Addition} from '../addition/addition.entity';
+import {Driver} from './driver/driver.entity';
+import {Passenger} from './passenger/passenger.entity';
+import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
+import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
+import {User} from '../user/user.entity';
+import {Key} from './key/key.entity';
+import {PassengerService} from './passenger/passenger.service';
+import {DriverService} from './driver/driver.service';
+import {Mail} from './mail/mail.entity';
+import {MailerService} from '@nest-modules/mailer';
+import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 
-const crypto = require("crypto");
+const crypto = require('crypto');
 
 @Injectable()
 export class EnrollmentService {
@@ -143,7 +143,7 @@ export class EnrollmentService {
         }
 
         if (enrollment.driver.seats <= 0) {
-            throw new InvalidValueException("INVALID_VALUE", "Minimum of 1 needed", ["driver_seats"]);
+            throw new InvalidValuesException('INVALID_VALUE', 'Minimum of 1 needed', ['driver_seats']);
         }
 
         driver.seats = enrollment.driver.seats;

@@ -381,13 +381,13 @@ export class UserService {
                     return emailChange;
                 }
 
-                throw new InvalidTokenException('USED', 'Provided token was already used', {date: new Date(emailChange.used)});
+                throw new AlreadyUsedException(null, 'Provided token was already used');
             }
 
-            throw new InvalidTokenException('EXPIRED', 'Provided token expired', null);
+            throw new ExpiredTokenException();
         }
 
-        throw new InvalidTokenException('INVALID', 'Provided token is not valid', null);
+        throw new InvalidTokenException();
     }
 
     private async handleEmailChange(user: User, {mail, domain}) {

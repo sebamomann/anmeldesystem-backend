@@ -1,4 +1,4 @@
-export class UnknownUsersException implements Error {
+export class InvalidValuesException implements Error {
     readonly columnNumber: number;
     readonly fileName: string;
     readonly lineNumber: number;
@@ -8,7 +8,13 @@ export class UnknownUsersException implements Error {
     code: string;
 
     constructor(code: string = null, message: string = null, data: string[] = null) {
-        this.code = code;
+        if (code === null
+            || code === '') {
+            this.code = 'INVALID_VALUES';
+        } else {
+            this.code = code;
+        }
+
         this.message = message;
         this.data = data;
     }
@@ -21,5 +27,13 @@ export class UnknownUsersException implements Error {
     }
 
     printStackTrace() {
+    }
+
+    parse() {
+        return {
+            code: this.code,
+            message: this.message,
+            data: this.data
+        };
     }
 }

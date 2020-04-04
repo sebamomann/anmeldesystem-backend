@@ -46,9 +46,10 @@ describe('User Controller', () => {
                 jest.spyOn(userService, 'get')
                     .mockImplementation(async (): Promise<User> => Promise.resolve(result));
 
+                const mockUserToSatisfyParameter = new User();
                 const res = mockResponse();
 
-                await userController.get(new User(), res);
+                await userController.get(mockUserToSatisfyParameter, res);
                 expect(res.status).toHaveBeenCalledWith(200);
                 expect(res.status).toBeCalledTimes(1);
                 expect(res.json).toHaveBeenCalledWith(result);
@@ -94,7 +95,8 @@ describe('User Controller', () => {
         describe('* failure should return error with 400 status code ', () => {
             describe('* duplicate values (values already in use)', () => {
                 it('username in use', async () => {
-                    const result = new DuplicateValueException('DUPLICATE_ENTRY', '', ['username']);
+                    const result = new DuplicateValueException('DUPLICATE_ENTRY',
+                        null, ['username']);
 
                     jest.spyOn(userService, 'register')
                         .mockImplementation(async (): Promise<User> => Promise.reject(result));
@@ -569,7 +571,7 @@ describe('User Controller', () => {
                 });
             });
 
-            describe('* unauthorized return error with 401 status code', () => {
+            describe('* unauthorized should return error with 401 status code', () => {
                 it('token invalid', async () => {
                     const result = new UnauthorizedException();
 
@@ -582,11 +584,12 @@ describe('User Controller', () => {
                     const res = mockResponse();
 
                     await userController.resetPassword(mockMailToSatisfyParameters,
-                        mockTokenToSatisfyParameters, mockPasswordToSatisfyParameters, res).then(() => {
-                        throw new Error('I have failed you, Anakin. Expected resetPassword to throw error');
-                    }).catch(err => {
-                        expect(err).toBeInstanceOf(UnauthorizedException);
-                    });
+                        mockTokenToSatisfyParameters, mockPasswordToSatisfyParameters, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Expected resetPassword to throw error');
+                        }).catch(err => {
+                            expect(err).toBeInstanceOf(UnauthorizedException);
+                        });
                 });
             });
 
