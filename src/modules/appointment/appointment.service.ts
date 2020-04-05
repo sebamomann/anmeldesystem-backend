@@ -14,6 +14,7 @@ import {UnknownUsersException} from '../../exceptions/UnknownUsersException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
+import {Etag} from '../../util/etag';
 
 const crypto = require('crypto');
 
@@ -34,80 +35,27 @@ export class AppointmentService {
     ) {
     }
 
-    public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
-        let pins = [''];
-        for (const queryKey of Object.keys(params)) {
-            if (queryKey.startsWith('pin')) {
-                pins.push(params[queryKey]);
-            }
+    private static isCreator(fAppointment: Appointment, user: User) {
+        return fAppointment.creator.username === user.username;
+    }
+
+    public async findByLink(user: User, link: string, permissions: any, slim: boolean, req) {
+        let appointment;
+
+        try {
+            appointment = await this.find(link, user, permissions);
+        } catch (e) {
+            throw e;
         }
 
-        let appointments = await getRepository(Appointment)
-            .createQueryBuilder('appointment')
-            .leftJoinAndSelect('appointment.creator', 'creator')
-            .leftJoinAndSelect('appointment.additions', 'additions')
-            .leftJoinAndSelect('appointment.enrollments', 'enrollments')
-            .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
-            .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
-            .leftJoinAndSelect('enrollments.additions', 'enrollment_additions')
-            .leftJoinAndSelect('enrollments.creator', 'enrollment_creator')
-            .leftJoinAndSelect('appointment.files', 'files')
-            .leftJoinAndSelect('appointment.administrators', 'administrators')
-            .leftJoinAndSelect('appointment.pinners', 'pinners')
-            .select(['appointment', 'additions', 'enrollments',
-                'enrollment_passenger', 'enrollment_driver', 'enrollment_creator',
-                'creator.username', 'creator.name', 'files', 'administrators.username', 'administrators.name',
-                'enrollment_additions', 'pinners'])
-            .where('creator.id = :creatorId', {creatorId: user.id})
-            .orWhere('administrators.id = :admin', {admin: user.id})
-            .orWhere('enrollments.creatorId = :user', {user: user.id})
-            .orWhere('pinners.id = :user', {user: user.id})
-            .orWhere('appointment.link IN (:...links)', {links: pins})
-            .orderBy('appointment.date', 'DESC')
-            .getMany();
+        const etag = Etag.generate(JSON.stringify(appointment));
 
-        appointments.map(fAppointment => {
-            if (user != null) {
-                if (this.isAdministrator(fAppointment, user)) {
-                    fAppointment.reference.push('ADMIN');
-                }
-
-                if (this.isCreator(fAppointment, user)) {
-                    fAppointment.reference.push('CREATOR');
-                }
-
-                if (fAppointment.enrollments !== undefined
-                    && fAppointment.enrollments.some(sEnrollment => {
-                        return sEnrollment.creator != null
-                            && sEnrollment.creator.id === user.id;
-                    })) {
-                    fAppointment.reference.push('ENROLLED');
-                }
-
-                if (fAppointment.pinners !== undefined
-                    && fAppointment.pinners.some(sPinner => sPinner.id === user.id)
-                    || pins.includes(fAppointment.link)) {
-                    fAppointment.reference.push('PINNED');
-                }
-            }
-
-            fAppointment.enrollments.map(mEnrollments => {
-                mEnrollments.createdByUser = mEnrollments.creator != null;
-                delete mEnrollments.creator;
-            });
-
-            delete fAppointment.pinners;
-        });
-
-        if (slim) {
-            appointments = appointments.map(fAppointment => {
-                delete fAppointment.enrollments;
-                delete fAppointment.files;
-                return fAppointment;
-            });
+        if (req.headers['if-none-match']
+            && req.headers['if-none-match'] == 'W/' + '"' + etag + '"') {
+            return null;
+        } else {
+            return appointment;
         }
-
-        return appointments;
     }
 
     async create(appointment: Appointment, user: User) {
@@ -224,6 +172,82 @@ export class AppointmentService {
         return await this.find(appointment.link, user, null);
     }
 
+    public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
+        let pins = [''];
+        for (const queryKey of Object.keys(params)) {
+            if (queryKey.startsWith('pin')) {
+                pins.push(params[queryKey]);
+            }
+        }
+
+        let appointments = await getRepository(Appointment)
+            .createQueryBuilder('appointment')
+            .leftJoinAndSelect('appointment.creator', 'creator')
+            .leftJoinAndSelect('appointment.additions', 'additions')
+            .leftJoinAndSelect('appointment.enrollments', 'enrollments')
+            .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
+            .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
+            .leftJoinAndSelect('enrollments.additions', 'enrollment_additions')
+            .leftJoinAndSelect('enrollments.creator', 'enrollment_creator')
+            .leftJoinAndSelect('appointment.files', 'files')
+            .leftJoinAndSelect('appointment.administrators', 'administrators')
+            .leftJoinAndSelect('appointment.pinners', 'pinners')
+            .select(['appointment', 'additions', 'enrollments',
+                'enrollment_passenger', 'enrollment_driver', 'enrollment_creator',
+                'creator.username', 'creator.name', 'files', 'administrators.username', 'administrators.name',
+                'enrollment_additions', 'pinners'])
+            .where('creator.id = :creatorId', {creatorId: user.id})
+            .orWhere('administrators.id = :admin', {admin: user.id})
+            .orWhere('enrollments.creatorId = :user', {user: user.id})
+            .orWhere('pinners.id = :user', {user: user.id})
+            .orWhere('appointment.link IN (:...links)', {links: pins})
+            .orderBy('appointment.date', 'DESC')
+            .getMany();
+
+        appointments.map(fAppointment => {
+            if (user != null) {
+                if (this.isAdministrator(fAppointment, user)) {
+                    fAppointment.reference.push('ADMIN');
+                }
+
+                if (AppointmentService.isCreator(fAppointment, user)) {
+                    fAppointment.reference.push('CREATOR');
+                }
+
+                if (fAppointment.enrollments !== undefined
+                    && fAppointment.enrollments.some(sEnrollment => {
+                        return sEnrollment.creator != null
+                            && sEnrollment.creator.id === user.id;
+                    })) {
+                    fAppointment.reference.push('ENROLLED');
+                }
+
+                if (fAppointment.pinners !== undefined
+                    && fAppointment.pinners.some(sPinner => sPinner.id === user.id)
+                    || pins.includes(fAppointment.link)) {
+                    fAppointment.reference.push('PINNED');
+                }
+            }
+
+            fAppointment.enrollments.map(mEnrollments => {
+                mEnrollments.createdByUser = mEnrollments.creator != null;
+                delete mEnrollments.creator;
+            });
+
+            delete fAppointment.pinners;
+        });
+
+        if (slim) {
+            appointments = appointments.map(fAppointment => {
+                delete fAppointment.enrollments;
+                delete fAppointment.files;
+                return fAppointment;
+            });
+        }
+
+        return appointments;
+    }
+
     public async addAdministrator(_user: User, link: string, username: string) {
         let appointment;
 
@@ -233,7 +257,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!this.isCreator(appointment, _user)) {
+        if (!AppointmentService.isCreator(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -256,7 +280,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!this.isCreator(appointment, _user)) {
+        if (!AppointmentService.isCreator(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -276,7 +300,7 @@ export class AppointmentService {
             throw new InsufficientPermissionsException();
         }
 
-        return this.isCreator(appointment, user)
+        return AppointmentService.isCreator(appointment, user)
             || this.isAdministrator(appointment, user);
     }
 
@@ -289,7 +313,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!this.isCreator(appointment, _user)) {
+        if (!AppointmentService.isCreator(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -312,7 +336,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!this.isCreator(appointment, _user)) {
+        if (!AppointmentService.isCreator(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -325,6 +349,31 @@ export class AppointmentService {
         }
 
         await this.fileRepository.remove(file);
+    }
+
+    public async pinAppointment(user: User, link: string) {
+        let appointment;
+
+        try {
+            appointment = await this.find(link, user, null);
+        } catch (e) {
+            throw e;
+        }
+
+        if (!AppointmentService.isCreator(appointment, user)) {
+            throw new InsufficientPermissionsException();
+        }
+
+        const _user = await this.userService.findById(user.id);
+
+        if (_user.pinned.some(sPinned => sPinned.id === appointment.id)) {
+            const removeIndex = _user.pinned.indexOf(appointment);
+            _user.pinned.splice(removeIndex, 1);
+        } else {
+            _user.pinned.push(appointment);
+        }
+
+        await this.userRepository.save(_user);
     }
 
     async find(link: string, user: User, permissions: any, slim: boolean = false): Promise<Appointment> {
@@ -364,7 +413,7 @@ export class AppointmentService {
 
         if (appointment.hidden &&
             permissions != null &&
-            !this.isCreator(appointment, user) &&
+            !AppointmentService.isCreator(appointment, user) &&
             !this.isAdministrator(appointment, user)) {
             let ids = [];
             let tokens = [];
@@ -408,27 +457,9 @@ export class AppointmentService {
         return appointment;
     }
 
-    private isCreator(fAppointment: Appointment, user: User) {
-        return fAppointment.creator.username === user.username;
-    }
-
     private isAdministrator(fAppointment: Appointment, user: User) {
         return fAppointment.administrators !== undefined
             && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username);
-    }
-
-    async pinAppointment(user: User, link: string) {
-        const appointment = await this.find(link, user, null);
-        const _user = await this.userService.findById(user.id);
-
-        if (_user.pinned.some(sPinned => sPinned.id === appointment.id)) {
-            const removeIndex = _user.pinned.indexOf(appointment);
-            _user.pinned.splice(removeIndex, 1);
-        } else {
-            _user.pinned.push(appointment);
-        }
-
-        return this.userRepository.save(_user);
     }
 
     async findBasic(link: string): Promise<Appointment> {

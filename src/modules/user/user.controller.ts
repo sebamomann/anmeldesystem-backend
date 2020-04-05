@@ -1,4 +1,4 @@
-import {Body, Controller, Get, GoneException, HttpStatus, Param, Post, Put, Res, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, GoneException, HttpStatus, Param, Post, Put, Res, UseGuards, UseInterceptors} from '@nestjs/common';
 
 import {User} from './user.entity';
 import {Usr} from './user.decorator';
@@ -9,8 +9,10 @@ import {AuthService} from '../../auth/auth.service';
 import {AuthGuard} from '@nestjs/passport';
 
 import {Response} from 'express';
+import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 
 @Controller('user')
+@UseInterceptors(BusinessToHttpExceptionInterceptor)
 export class UserController {
     constructor(private readonly userService: UserService,
                 private authService: AuthService) {

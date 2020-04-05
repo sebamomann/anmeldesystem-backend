@@ -35,6 +35,121 @@ describe('Appointment Controller', () => {
         appointmentController = module.get<AppointmentController>(AppointmentController);
     });
 
+    describe('* find appointments by link', () => {
+        describe('* successful should return entity of appointment with 200 status code', () => {
+            it('successful request', async () => {
+                const result = new Appointment();
+
+                jest.spyOn(appointmentService, 'findByLink')
+                    .mockImplementation(async (): Promise<Appointment> => Promise.resolve(result));
+
+                const mockUserToSatisfyParameter = new User();
+                const mockIsSlimToSatisfyParameter = 'true';
+                const mockPermissionsToSatisfyParameter = 'ObjectOfAllQueryParameters';
+                const mockLinkToSatisfyParameter = 'mylink';
+                const req: any = {
+                    headers: {
+                        'if-none-match': 'W/"etag"'
+                    }
+                };
+                const res = mockResponse();
+
+                await appointmentController
+                    .findByLink(mockUserToSatisfyParameter,
+                        mockIsSlimToSatisfyParameter, mockPermissionsToSatisfyParameter,
+                        mockLinkToSatisfyParameter, req, res);
+
+                expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+                expect(res.status).toBeCalledTimes(1);
+                expect(res.json).toHaveBeenCalledWith(result);
+            });
+
+            it('successful request (nothing changed)', async () => {
+                const result = null;
+
+                jest.spyOn(appointmentService, 'findByLink')
+                    .mockImplementation(async (): Promise<Appointment> => Promise.resolve(result));
+
+                const mockUserToSatisfyParameter = new User();
+                const mockIsSlimToSatisfyParameter = 'true';
+                const mockPermissionsToSatisfyParameter = 'ObjectOfAllQueryParameters';
+                const mockLinkToSatisfyParameter = 'mylink';
+                const req: any = {
+                    headers: {
+                        'if-none-match': 'W/"etag"'
+                    }
+                };
+                const res = mockResponse();
+
+                await appointmentController
+                    .findByLink(mockUserToSatisfyParameter,
+                        mockIsSlimToSatisfyParameter, mockPermissionsToSatisfyParameter,
+                        mockLinkToSatisfyParameter, req, res);
+
+                expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                expect(res.status).toBeCalledTimes(1);
+            });
+        });
+
+        describe('* failure should return error', () => {
+            it('appointment not found', async () => {
+                const result = new EntityNotFoundException(null, null, 'appointment');
+
+                jest.spyOn(appointmentService, 'findByLink')
+                    .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
+
+                const mockUserToSatisfyParameter = new User();
+                const mockIsSlimToSatisfyParameter = 'true';
+                const mockPermissionsToSatisfyParameter = 'ObjectOfAllQueryParameters';
+                const mockLinkToSatisfyParameter = 'mylink';
+                const req: any = {
+                    headers: {
+                        'if-none-match': 'W/"etag"'
+                    }
+                };
+                const res = mockResponse();
+
+                await appointmentController
+                    .findByLink(mockUserToSatisfyParameter,
+                        mockIsSlimToSatisfyParameter, mockPermissionsToSatisfyParameter,
+                        mockLinkToSatisfyParameter, req, res)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin.');
+                    }).catch(err => {
+                        expect(err).toBe(result);
+                    });
+            });
+
+            it('undefined error occurred', async () => {
+                const result = new Error();
+
+                jest.spyOn(appointmentService, 'findByLink')
+                    .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
+
+                const mockUserToSatisfyParameter = new User();
+                const mockIsSlimToSatisfyParameter = 'true';
+                const mockPermissionsToSatisfyParameter = 'ObjectOfAllQueryParameters';
+                const mockLinkToSatisfyParameter = 'mylink';
+                const req: any = {
+                    headers: {
+                        'if-none-match': 'W/"etag"'
+                    }
+                };
+                const res = mockResponse();
+
+                await appointmentController
+                    .findByLink(mockUserToSatisfyParameter,
+                        mockIsSlimToSatisfyParameter, mockPermissionsToSatisfyParameter,
+                        mockLinkToSatisfyParameter, req, res)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin.');
+                    }).catch(err => {
+                        expect(err).toBe(result);
+                    });
+            });
+        });
+    });
+
     describe('* find appointments in relation to user', () => {
         describe('* successful should return array of appointment entities with 200 status code', () => {
             it('successful request', async () => {
@@ -745,6 +860,83 @@ describe('Appointment Controller', () => {
         });
     });
 
+    describe('* pin appointment', () => {
+        describe('* successful should return nothing 204 status code', () => {
+            it('successful request', async () => {
+                jest.spyOn(appointmentService, 'pinAppointment')
+                    .mockImplementation(async (): Promise<void> => Promise.resolve());
+
+                const mockUserToSatisfyParameter = new User();
+                const mockLinkToSatisfyParameter = 'linkOfAppointment';
+                const res = mockResponse();
+
+                await appointmentController
+                    .pinAppointment(mockUserToSatisfyParameter, mockLinkToSatisfyParameter, res);
+                expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+                expect(res.status).toBeCalledTimes(1);
+            });
+        });
+
+        describe('* failure should return error', () => {
+            it('not permitted for appointment', async () => {
+                const result = new InsufficientPermissionsException();
+
+                jest.spyOn(appointmentService, 'pinAppointment')
+                    .mockImplementation(async (): Promise<void> => Promise.reject(result));
+
+                const mockUserToSatisfyParameter = new User();
+                const mockLinkToSatisfyParameter = 'linkOfAppointment';
+                const res = mockResponse();
+
+                await appointmentController
+                    .pinAppointment(mockUserToSatisfyParameter, mockLinkToSatisfyParameter, res)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin.');
+                    }).catch(err => {
+                        expect(err).toBe(result);
+                    });
+            });
+
+            it('appointment not found', async () => {
+                const result = new EntityNotFoundException(null, null, 'appointment');
+
+                jest.spyOn(appointmentService, 'pinAppointment')
+                    .mockImplementation(async (): Promise<void> => Promise.reject(result));
+
+                const mockUserToSatisfyParameter = new User();
+                const mockLinkToSatisfyParameter = 'linkOfAppointment';
+                const res = mockResponse();
+
+                await appointmentController
+                    .pinAppointment(mockUserToSatisfyParameter, mockLinkToSatisfyParameter, res)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin.');
+                    }).catch(err => {
+                        expect(err).toBe(result);
+                    });
+            });
+
+            it('undefined error has occurred', async () => {
+                const result = new Error();
+
+                jest.spyOn(appointmentService, 'pinAppointment')
+                    .mockImplementation(async (): Promise<void> => Promise.reject(result));
+
+                const mockUserToSatisfyParameter = new User();
+                const mockLinkToSatisfyParameter = 'linkOfAppointment';
+                const res = mockResponse();
+
+                await appointmentController
+                    .pinAppointment(mockUserToSatisfyParameter, mockLinkToSatisfyParameter, res)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin.');
+                    }).catch(err => {
+                        expect(err).toBe(result);
+                    });
+            });
+        });
+    });
+
     afterEach(() => {
         jest.resetAllMocks();
     });
@@ -756,3 +948,4 @@ const mockResponse = () => {
     res.json = jest.fn().mockReturnValue(res);
     return res;
 };
+

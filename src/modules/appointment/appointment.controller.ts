@@ -6,7 +6,6 @@ import {
     ForbiddenException,
     Get,
     HttpStatus,
-    NotFoundException,
     Param,
     Post,
     Put,
@@ -16,38 +15,48 @@ import {
     UseGuards,
     UseInterceptors
 } from '@nestjs/common';
-import {Appointment} from './appointment.entity';
 
-import {AppointmentService} from './appointment.service';
-
-import {Response} from 'express';
-import {AuthGuard} from '@nestjs/passport';
 import {Usr} from '../user/user.decorator';
 import {User} from '../user/user.entity';
 import {UserUtil} from '../../util/userUtil.util';
-import {Etag} from '../../util/etag';
+
+import {Appointment} from './appointment.entity';
+import {AppointmentService} from './appointment.service';
+
+import {AuthGuard} from '@nestjs/passport';
+
 import {JwtOptStrategy} from '../../auth/jwt-opt.strategy';
-import {Responses} from '../../util/responses.util';
+import {Response} from 'express';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 
 @Controller('appointment')
+@UseInterceptors(BusinessToHttpExceptionInterceptor)
 export class AppointmentController {
     constructor(private appointmentService: AppointmentService) {
     }
 
-    static passwordresetErrorHandler(err: any, res: Response) {
-        if (err instanceof NotFoundException) {
-            return err;
-        }
+    @Get(':link')
+    @UseGuards(JwtOptStrategy)
+    findByLink(@Usr() user: User,
+               @Query('slim') slim: string,
+               @Query() permissions: any,
+               @Param('link') link: string,
+               @Request() req: Request,
+               @Res() res: Response) {
+        let _slim = slim === 'true';
 
-        let error: any = {};
-        if (err.code === 'INVALID' || err.code === 'EXPIRED' || err.code === 'USED' || err.code === 'OUTDATED') {
-            error.code = err.code;
-            error.message = err.message;
-            error.error = err.data;
-        }
+        return this.appointmentService
+            .findByLink(user, link, permissions, _slim, req)
+            .then(tAppointment => {
+                if (tAppointment === null) {
+                    res.status(HttpStatus.NO_CONTENT).json();
+                    return;
+                }
 
-        return res.status(HttpStatus.BAD_REQUEST).json(error);
+                res.status(HttpStatus.OK).json(tAppointment);
+            }).catch((err) => {
+                throw err;
+            });
     }
 
     @Get()
@@ -71,7 +80,6 @@ export class AppointmentController {
 
     @Post()
     @UseGuards(AuthGuard('jwt'))
-    @UseInterceptors(BusinessToHttpExceptionInterceptor)
     create(@Usr() user: User,
            @Body() appointment: Appointment,
            @Res() res: Response,) {
@@ -183,43 +191,18 @@ export class AppointmentController {
             });
     }
 
-    // stopped here
-
-    @Get(':link')
-    @UseGuards(JwtOptStrategy)
-    findByLink(@Usr() user: User,
-               @Query('slim') slim: string,
-               @Query() permissions: any,
-               @Param('link') link: string,
-               @Request() req: Request,
-               @Res() res: Response) {
-        let _slim = slim === 'true';
+    @Get(':link/pin')
+    @UseGuards(AuthGuard('jwt'))
+    pinAppointment(@Usr() user: User,
+                   @Param('link') link: string,
+                   @Res() res: Response) {
         return this.appointmentService
-            .find(link, user, permissions, _slim)
-            .then(tAppointment => {
-                if (tAppointment != null) {
-                    const etag = Etag.generate(JSON.stringify(tAppointment));
-                    if (req.headers['if-none-match'] && req.headers['if-none-match'] == 'W/' + '"' + etag + '"') {
-                        console.log(`appointment ${link} not modified`);
-                        res.status(HttpStatus.NOT_MODIFIED).json();
-                    } else {
-                        console.log(`appointment ${link} modified`);
-                        res.header('etag', 'W/' + '"' + etag + '"');
-                        res.status(HttpStatus.OK).json(tAppointment);
-                    }
-                } else {
-                    res.status(HttpStatus.NOT_FOUND).json({error: {not_found: 'Appointment not found'}});
-                }
-            }).catch((err) => {
-                if (err instanceof NotFoundException) {
-                    throw err;
-                }
-
-                console.log(err);
-                let error = {error: {}};
-                error.error = {undefined: {message: 'Some error occurred. Please try again later or contact the support'}};
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
+            .pinAppointment(user, link)
+            .then(() => {
+                res.status(HttpStatus.NO_CONTENT).json();
+            })
+            .catch(err => {
+                throw err;
             });
     }
 
@@ -259,45 +242,4 @@ export class AppointmentController {
     //             res.status(HttpStatus.BAD_REQUEST).json(error);
     //         });
     // }
-
-    @Get(':link/pin')
-    @UseGuards(AuthGuard('jwt'))
-    pinAppointment(@Usr() user: User,
-                   @Param('link') link: string,
-                   @Res() res: Response) {
-        this.appointmentService
-            .pinAppointment(user, link)
-            .then(result => {
-                return res.status(HttpStatus.OK).json();
-            })
-            .catch(err => {
-                if (err instanceof NotFoundException) {
-                    throw err;
-                }
-
-                return AppointmentController.passwordresetErrorHandler(err, res);
-            });
-    }
-}
-
-function handleExceptions(allowedExceptions: any[], err: any, res: Response) {
-    let valid = false;
-    let error: any = {};
-
-    allowedExceptions.forEach(FAllowedException => {
-        if (err instanceof FAllowedException) {
-            error.code = err.code;
-            error.message = err.message;
-            error.data = err.data;
-
-            res.status(HttpStatus.BAD_REQUEST).json(error);
-
-            valid = true;
-            return;
-        }
-    });
-
-    if (!valid) {
-        Responses.undefinedErrorResponse(err, res);
-    }
 }
