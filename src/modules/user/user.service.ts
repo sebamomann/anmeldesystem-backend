@@ -82,21 +82,29 @@ export class UserService {
         let _user;
 
         try {
-            _user = this.findById(user.id);
+            _user = await this.findById(user.id);
         } catch (e) {
             throw e;
         }
 
-        _user.emailChange = _user.emailChange.filter(fEmailChange =>
-            (fEmailChange.iat.getTime()) + (24 * 60 * 60 * 1000) > Date.now()
-            && fEmailChange.oldMail != 'invalid'
-            && fEmailChange.used === null);
+        _user.emailChange = this.retrieveActiveMailChanges(_user.emailChange);
 
-        if (JSON.stringify(_user.emailChange) === JSON.stringify([])) {
+        if (_user.emailChange
+            .every(function(u, i) {
+                return u === [][i];
+            })
+        ) {
             delete _user.emailChange;
         }
 
         return _user;
+    }
+
+    private retrieveActiveMailChanges(emailChange: EmailChange[]) {
+        return emailChange.filter(fEmailChange =>
+            (fEmailChange.iat.getTime()) + (24 * 60 * 60 * 1000) > Date.now()
+            && fEmailChange.oldMail != 'invalid'
+            && fEmailChange.used === null);
     }
 
     public async register(user: User, domain: string) {
