@@ -69,7 +69,7 @@ export class UserController {
         return this.userService
             .activate(mail, token)
             .then(() => {
-                res.status(HttpStatus.OK).json();
+                res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
                 throw err;

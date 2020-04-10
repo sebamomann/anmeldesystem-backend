@@ -280,14 +280,14 @@ describe('User Controller', () => {
         describe('* successful should return nothing with 200 status code', () => {
             it('successful request', async () => {
                 jest.spyOn(userService, 'activate')
-                    .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
+                    .mockImplementation(async (): Promise<void> => Promise.resolve());
 
                 const mockMailToSatisfyParameters = 'mocked@mail.de';
                 const mockTokenToSatisfyParameters = 'mockedToken';
                 const res = mockResponse();
 
                 await userController.activate(mockMailToSatisfyParameters, mockTokenToSatisfyParameters, res);
-                expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+                expect(res.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
                 expect(res.status).toBeCalledTimes(1);
             });
         });
@@ -299,7 +299,7 @@ describe('User Controller', () => {
                         'Provided token is not valid');
 
                     jest.spyOn(userService, 'activate')
-                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'mockedToken';
@@ -319,7 +319,7 @@ describe('User Controller', () => {
                         'User is already verified');
 
                     jest.spyOn(userService, 'activate')
-                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'mockedToken';
@@ -340,7 +340,7 @@ describe('User Controller', () => {
                     const result = new EntityGoneException();
 
                     jest.spyOn(userService, 'activate')
-                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'mockedToken';
@@ -360,7 +360,7 @@ describe('User Controller', () => {
                 const result = new Error();
 
                 jest.spyOn(userService, 'activate')
-                    .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+                    .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                 const mockMailToSatisfyParameters = 'mocked@mail.de';
                 const mockTokenToSatisfyParameters = 'mockedToken';
