@@ -403,9 +403,10 @@ describe('UserService', () => {
                 currentUser.password = 'currentPassword';
                 userRepositoryMock.findOne.mockReturnValueOnce(currentUser);
                 passwordChangeRepositoryMock.save.mockImplementation((val) => val);
+                userRepositoryMock.save.mockImplementation((val) => val);
 
                 const actual = await userService.update(valuesToUpdate, userFromJwt);
-                expect(actual).toEqual(currentUser);
+                expect(actual).toBe(currentUser);
             });
         });
 
