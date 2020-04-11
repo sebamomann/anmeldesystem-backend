@@ -1,7 +1,7 @@
-import {Injectable, UnauthorizedException} from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {User} from './user.entity';
-import {getRepository, Repository} from 'typeorm';
+import {IsNull, Not, Repository} from 'typeorm';
 import {TelegramUser} from './telegram/telegram-user.entity';
 import {MailerService} from '@nest-modules/mailer';
 import {PasswordReset} from './password-reset/password-reset.entity';
@@ -15,8 +15,9 @@ import {InvalidRequestException} from '../../exceptions/InvalidRequestException'
 import {ExpiredTokenException} from '../../exceptions/ExpiredTokenException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
+import {InternalErrorException} from '../../exceptions/InternalErrorException';
 
-var winston = require('winston');
+var logger = require('../../logger');
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
 
@@ -115,7 +116,7 @@ export class UserService {
         try {
             userToDb.password = bcrypt.hashSync(user.password, 10);
         } catch (e) {
-            winston.log('error', 'Could not hash passsword');
+            logger.log('error', 'Could not hash passsword');
         }
 
         const savedUser = await this.userRepository.save(userToDb);
@@ -139,7 +140,7 @@ export class UserService {
             })
             .catch((err) => {
                 // maybe cleanup registered user ?
-                winston.log('error', 'Could not send register mail to %s', user.mail);
+                logger.log('error', 'Could not send register mail to %s', user.mail);
             });
 
         return savedUser;
@@ -233,13 +234,26 @@ export class UserService {
             && fEmailChange.used === null);
     }
 
+    /**
+     * Initialize password forgotten sequence.<br />
+     * Consisting of invalidate all previous password forgotten instances
+     * and sending mail to set new password.
+     *
+     * @param mail Mail address of user who wants to reset his password
+     * @param domain Domain to send url for password update to
+     *
+     * @returns url Url where to change password
+     *
+     * @throws See {@link findByEmail} for reference
+     * @throws EmptyFieldsException if domain was not provided
+     */
     public async resetPasswordInitialization(mail: string, domain: string) {
         let user;
 
         try {
             user = await this.findByEmail(mail);
         } catch (e) {
-            throw new EntityGoneException();
+            throw e;
         }
 
         if (domain === undefined
@@ -250,12 +264,15 @@ export class UserService {
                 ['domain']);
         }
 
-        await this.passwordResetRepository
-            .query('UPDATE user_password_reset ' +
-                'SET oldPassword = \'invalid\' ' +
-                'WHERE used IS NULL ' +
-                'AND oldPassword IS NULL ' +
-                'AND userId = ?', [user.id]);
+        await this.passwordResetRepository.update({
+            used: IsNull(),
+            oldPassword: IsNull(),
+            user: {
+                id: user.id
+            }
+        }, {
+            oldPassword: 'invalid'
+        });
 
         let token = crypto
             .createHmac('sha256', mail + process.env.SALT_MAIL + Date.now())
@@ -283,7 +300,7 @@ export class UserService {
             .then(() => {
             })
             .catch(() => {
-                winston.log('error', 'Could not send register mail to %s', user.mail);
+                logger.log('error', 'Could not send register mail to %s', user.mail);
             });
 
         return url;
@@ -318,8 +335,6 @@ export class UserService {
 
                 await this.userRepository.save(user);
                 await this.updatePasswordReset(token, currentPassword);
-
-                return true;
             })
             .catch((err) => {
                 throw err;
@@ -354,59 +369,150 @@ export class UserService {
 
         if ((passwordReset.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
             if (passwordReset.oldPassword === 'invalid') {
-                throw new ExpiredTokenException('OUTDATED', 'Provided token was already replaced by a new one');
+                throw new ExpiredTokenException('OUTDATED',
+                    'Provided token was already replaced by a new one');
             } else if (passwordReset.used === null) {
                 return true;
             }
 
-            throw new AlreadyUsedException(null, 'Provided token was already used at the following date', {date: new Date(passwordReset.used)});
+            throw new AlreadyUsedException(null,
+                'Provided token was already used at the following date',
+                {date: new Date(passwordReset.used)});
         }
 
         throw new ExpiredTokenException();
     }
 
-    public mailChangeVerifyTokenAndExecuteChange(mail: string, token: string) {
-        return this.validateMailChangeToken(mail, token)
-            .then(async res => {
-                const user = await this.findByEmail(res.oldMail);
+    /**
+     * Updates the mail address of a user. <br />
+     * Check for token validity and update {@link EmailChange} object. <br />
+     *
+     * @param mail mail address of user (from link)
+     * @param token verification token (from link)
+     *
+     * @return true if everything went accordingly
+     *
+     * @throws EntityNotFoundException when user with given mail does not exist anymore
+     * @throws See {@link mailChangeTokenVerification} for reference
+     */
+    public mailChange(mail: string, token: string) {
+        return this.mailChangeTokenVerification(mail, token)
+            .then(async () => {
+                let user;
+
+                try {
+                    user = await this.findByEmail(mail);
+                } catch (e) {
+                    throw e;
+                }
 
                 let currentMail = user.mail;
                 user.mail = mail;
 
                 await this.userRepository.save(user);
-                await this.passwordResetRepository
-                    .createQueryBuilder('emailChange')
-                    .update(EmailChange)
-                    .set({used: new Date(Date.now()), oldMail: currentMail})
-                    .where('token = :token', {token: token})
-                    .execute();
-
-                return true;
+                await this.updateMailChange(token, currentMail);
             })
-            .catch(() => {
-                throw new UnauthorizedException();
+            .catch((err) => {
+                throw err;
             });
     }
 
-    public async mailChangeResendMail(user: User, domain: string) {
-        let emailChange = await getRepository(EmailChange)
-            .createQueryBuilder('emailChange')
-            .where('emailChange.oldMail NOT LIKE :oldMail', {oldMail: 'invalid'})
-            .andWhere('emailChange.used IS NULL')
-            .orderBy('emailChange.iat', 'DESC')
-            .getOne();
+    /**
+     * Check corresponding {@link EmailChange} entity for being<br />
+     * <ol>
+     *     <li>Less than 24 hours in age</li>
+     *     <li>Already being used</li>
+     *     <li>Replaced by a new one</li>
+     * </ol>
+     * Note that the token does not need to be validated by recreation, due to database save.
+     * The possibility of guessing a correct token is already low enough.
+     *
+     * @param mail mail address of user check for
+     * @param token token created with mail address and
+     *
+     * @returns boolean (true) if token is valid
+     *
+     * @throws ExpiredTokenException if token is already replaced
+     * @throws AlreadyUsedException if password reset is already done, so the token is used (1 time usage token)
+     * @throws ExpiredTokenException if token is not used or replaced, but older than 24 hours
+     */
+    public async mailChangeTokenVerification(mail: string, token: string) {
+        let emailChange = await this.emailChangeRepository.findOne({where: {token: token, newMail: mail}});
 
-        if (emailChange !== undefined) {
-            this.handleEmailChange(user, {mail: emailChange.newMail, domain: domain});
-            return true;
+        if (emailChange === undefined) {
+            throw new InvalidTokenException();
         }
 
-        throw new InvalidRequestException(null, 'There is no active mail change going on. Email resend is not possible');
+        if ((emailChange.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
+            if (emailChange.oldMail === 'invalid') {
+                throw new ExpiredTokenException('OUTDATED',
+                    'Provided token was already replaced by a new one');
+            } else if (emailChange.used === null) {
+                return emailChange;
+            }
+
+            throw new AlreadyUsedException(null,
+                'Provided token was already used',
+                {date: new Date(emailChange.used)});
+        }
+
+        throw new ExpiredTokenException();
     }
 
-    public async mailChangeDeactivateToken(user: User) {
-        return this.resetPreviousMailChanges(user);
+    /**
+     * Re-Execute initial mail change.<br />
+     * Includes checking for mail to be already used by different user and resending mail with token.
+     *
+     * @param user
+     * @param domain
+     *
+     * @returns url url to execute email change
+     *
+     * @throws InvalidTokenException if the email cant be resend due to no active email change
+     * @throws See {@link handleEmailChange} for reference
+     */
+    public async mailChangeResendMail(user: User, domain: string) {
+        let emailChange = await this.emailChangeRepository.findOne({
+            where: {
+                oldMail: Not('invalid'),
+                used: IsNull()
+            },
+            order: {
+                iat: 'DESC'
+            }
+        });
+
+        if (emailChange === undefined) {
+            throw new InvalidRequestException(null,
+                'There is no active mail change going on. Email resend is not possible');
+        }
+
+        try {
+            return await this.handleEmailChange(user, {mail: emailChange.newMail, domain: domain});
+        } catch (e) {
+            throw e;
+        }
     }
+
+    /**
+     * Reset all pending mail changes for given user. This invalidates all active tokens. <br />
+     * Normally there is just one token for a email change active at any given time (per user)
+     *
+     * @param user User to cancel mail changes for
+     *
+     * @returns void
+     *
+     * @throws See {@link resetPreviousMailChanges} for reference
+     */
+    public async mailChangeDeactivateToken(user: User) {
+        try {
+            await this.resetPreviousMailChanges(user);
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    // TODO
 
     public async getLastPasswordDate(user: User, pass: string) {
         let used = null;
@@ -479,30 +585,7 @@ export class UserService {
     // -------------------- UTIL -------------------- //
     // -------------------- UTIL -------------------- //
 
-    private async validateMailChangeToken(mail: string, token: string) {
-        let emailChange = await this.emailChangeRepository
-            .createQueryBuilder('emailChange')
-            .where('emailChange.token = :token', {token: token})
-            .andWhere('emailChange.newMail = :mail', {mail: mail})
-            .getOne();
-        if (emailChange != undefined) {
-            if ((emailChange.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
-                if (emailChange.oldMail === 'invalid') {
-                    throw new InvalidTokenException('OUTDATED', 'Provided token was already replaced by a new one', null);
-                } else if (emailChange.used === null) {
-                    return emailChange;
-                }
-
-                throw new AlreadyUsedException(null, 'Provided token was already used');
-            }
-
-            throw new ExpiredTokenException();
-        }
-
-        throw new InvalidTokenException();
-    }
-
-    private async handleEmailChange(user: User, {mail, domain}) {
+    public async handleEmailChange(user: User, {mail, domain}) {
         let _user;
 
         try {
@@ -536,6 +619,8 @@ export class UserService {
 
             await this.emailChangeRepository.save(emailChange);
 
+            const url = `https://${domain}/${mail}/${token}`;
+
             this.mailerService
                 .sendMail({
                     to: mail,
@@ -544,23 +629,26 @@ export class UserService {
                     template: 'emailchange',
                     context: {
                         name: _user.username,
-                        url: `https://${domain}/${mail}/${token}`
+                        url: url
                     },
                 })
                 .then(() => {
                 })
-                .catch((err) => {
-                    winston.log('error', 'Could not send mail change mail to %s', mail);
+                .catch(() => {
+                    logger.log('error', 'Could not send mail change mail to %s', mail);
                 });
+
+            return url;
         }
     }
 
-    private async resetPreviousMailChanges(user: User) {
-        return await this.emailChangeRepository
-            .query('UPDATE user_mail_change ' +
-                'SET oldMail = \'invalid\' ' +
-                'WHERE used IS NULL ' +
-                'AND userId = ?', [user.id]);
+    public async updateMailChange(token: string, currentMail: string) {
+        await this.passwordResetRepository
+            .createQueryBuilder('emailChange')
+            .update(EmailChange)
+            .set({used: new Date(Date.now()), oldMail: currentMail})
+            .where('token = :token', {token: token})
+            .execute();
     }
 
     private async checkForDuplicateValues(user: User) {
@@ -585,5 +673,14 @@ export class UserService {
             .set({used: new Date(Date.now()), oldPassword: currentPassword})
             .where('token = :token', {token: token})
             .execute();
+    }
+
+    private async resetPreviousMailChanges(user: User) {
+        try {
+            await this.emailChangeRepository.update({used: IsNull(), user: {id: user.id}}, {oldMail: 'invalid'});
+        } catch (e) {
+            logger.log('error', `Can't execute query to cancel mail change of user ${user.id}`);
+            throw new InternalErrorException(null, 'Cannot cancel mail change due to a database error');
+        }
     }
 }

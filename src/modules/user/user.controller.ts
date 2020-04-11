@@ -124,7 +124,7 @@ export class UserController {
                                           @Param('token') token: string,
                                           @Res() res: Response) {
         return this.userService
-            .mailChangeVerifyTokenAndExecuteChange(mail, token)
+            .mailChange(mail, token)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })

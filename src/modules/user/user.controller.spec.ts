@@ -605,7 +605,7 @@ describe('User Controller', () => {
         describe('* verify and execute', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
-                    jest.spyOn(userService, 'mailChangeVerifyTokenAndExecuteChange')
+                    jest.spyOn(userService, 'mailChange')
                         .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -622,7 +622,7 @@ describe('User Controller', () => {
                 it('token invalid', async () => {
                     const result = new UnauthorizedException();
 
-                    jest.spyOn(userService, 'mailChangeVerifyTokenAndExecuteChange')
+                    jest.spyOn(userService, 'mailChange')
                         .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -644,7 +644,7 @@ describe('User Controller', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
-                    jest.spyOn(userService, 'mailChangeVerifyTokenAndExecuteChange')
+                    jest.spyOn(userService, 'mailChange')
                         .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
