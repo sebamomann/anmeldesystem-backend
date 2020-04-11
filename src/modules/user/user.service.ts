@@ -113,11 +113,7 @@ export class UserService {
             throw e;
         }
 
-        try {
-            userToDb.password = bcrypt.hashSync(user.password, 10);
-        } catch (e) {
-            logger.log('error', 'Could not hash passsword');
-        }
+        userToDb.password = bcrypt.hashSync(user.password, 10);
 
         const savedUser = await this.userRepository.save(userToDb);
 
@@ -138,7 +134,7 @@ export class UserService {
             })
             .then(() => {
             })
-            .catch((err) => {
+            .catch(() => {
                 // maybe cleanup registered user ?
                 logger.log('error', 'Could not send register mail to %s', user.mail);
             });
@@ -146,7 +142,7 @@ export class UserService {
         return savedUser;
     }
 
-    async update(valuesToUpdate: any, userFromJwt: User) {
+    public async update(valuesToUpdate: any, userFromJwt: User) {
         let user;
 
         try {
@@ -164,10 +160,12 @@ export class UserService {
                 let finalValue = value;
 
                 if (key === 'mail') {
-                    await this.handleEmailChange(userFromJwt, valuesToUpdate)
-                        .catch(err => {
-                            throw err;
-                        });
+                    try {
+                        await this.handleEmailChange(userFromJwt, valuesToUpdate);
+                    } catch (e) {
+                        throw e;
+                    }
+
                     finalValue = user.mail;
                 }
 
@@ -334,7 +332,12 @@ export class UserService {
                 user.password = bcrypt.hashSync(pass, 10);
 
                 await this.userRepository.save(user);
-                await this.updatePasswordReset(token, currentPassword);
+
+                try {
+                    await this.updatePasswordResetEntity(token, currentPassword);
+                } catch (e) {
+                    //
+                }
             })
             .catch((err) => {
                 throw err;
@@ -410,7 +413,12 @@ export class UserService {
                 user.mail = mail;
 
                 await this.userRepository.save(user);
-                await this.updateMailChange(token, currentMail);
+
+                try {
+                    await this.updateEmailChangeEntity(token, currentMail);
+                } catch (e) {
+                    //
+                }
             })
             .catch((err) => {
                 throw err;
@@ -512,36 +520,55 @@ export class UserService {
         }
     }
 
-    // TODO
-
-    public async getLastPasswordDate(user: User, pass: string) {
+    /**
+     * Gives user more information about his password.<br />
+     * Function is used to get the date, when the user changes the provided password to a new one.<br />
+     * Function used upon login to provide information, when the user changes his password.
+     *
+     * @param user User to retrieve information for
+     * @param password Password to check when it was changed
+     *
+     * @returns date at which provided password was lastly changed | null if this password was never used
+     */
+    public async getLastPasswordDate(user: User, password: string) {
         let used = null;
 
-        const passwordChangeListByReset = await this.userRepository
-            .query('SELECT oldPassword, used ' +
-                'FROM user_password_reset ' +
-                'WHERE oldPassword IS NOT NULL ' +
-                'AND userId = ? ' +
-                'ORDER BY iat DESC ', [user.id]);
+        const passwordChangeListByReset = await this.passwordResetRepository.find({
+            where: {
+                oldPassword: IsNull(),
+                user: {
+                    id: user.id
+                }
+            },
+            order: {
+                iat: 'DESC'
+            }
+        });
 
         if (passwordChangeListByReset) {
             for (const _pass of passwordChangeListByReset) {
-                if (await bcrypt.compare(pass, _pass.oldPassword)) {
+                if (await bcrypt.compare(password, _pass.oldPassword)) {
                     used = _pass.used;
                     break;
                 }
             }
         }
 
-        const passwordChangeListByChange = await this.userRepository
-            .query('SELECT oldPassword, iat ' +
-                'FROM user_password_change ' +
-                'WHERE userId = ? ' +
-                'ORDER BY iat DESC ', [user.id]);
+        const passwordChangeListByChange = await this.passwordChangeRepository.find({
+            where: {
+                oldPassword: IsNull(),
+                user: {
+                    id: user.id
+                }
+            },
+            order: {
+                iat: 'DESC'
+            }
+        });
 
         if (passwordChangeListByChange) {
             for (const _pass of passwordChangeListByChange) {
-                if (await bcrypt.compare(pass, _pass.oldPassword)) {
+                if (await bcrypt.compare(password, _pass.oldPassword)) {
                     if (used < _pass.iat) {
                         used = _pass.iat;
                     }
@@ -552,6 +579,106 @@ export class UserService {
         }
 
         return used;
+    }
+
+    /**
+     * Initializes mail change event. This includes invalidating previous change attempts (pending verification) and
+     * sending a verification mail to the new mail address.
+     *
+     * @param user The user whose mail is going to change
+     * @param mail New mail address
+     * @param domain Domain to build verification link with
+     *
+     * @returns url Email verification link to verify new mail address and execute mail change
+     *
+     * @throws See {@link findByEmail} for reference
+     * @throws DuplicateValueException if new mail is already in use
+     * @throws EmptyFieldsException if domain is missing
+     */
+    public async handleEmailChange(user: User, {mail, domain}) {
+        let _user;
+
+        try {
+            _user = await this.findByEmail(user.mail);
+        } catch (e) {
+            throw e;
+        }
+
+        if (await this.existsByMail(mail)) {
+            throw new DuplicateValueException(null, null, ['email']);
+        }
+
+        if (domain === undefined
+            || domain === null
+            || domain === '') {
+            throw new EmptyFieldsException(null,
+                'Due to the mail change you need to provide the domain for the activation call');
+        }
+
+        try {
+            await this.resetPreviousMailChanges(_user);
+        } catch (e) {
+            throw e;
+        }
+
+        let token = crypto
+            .createHmac('sha256', mail + process.env.SALT_MAIL + Date.now())
+            .digest('hex');
+
+        const emailChange = new EmailChange();
+        emailChange.user = user;
+        emailChange.token = token;
+        emailChange.newMail = mail;
+        emailChange.oldMail = user.mail;
+
+        await this.emailChangeRepository.save(emailChange);
+
+        const url = `https://${domain}/${mail}/${token}`;
+
+        this.mailerService
+            .sendMail({
+                to: mail,
+                from: process.env.MAIL_ECA,
+                subject: 'Bitte bestätige deine neue Email-Adresse',
+                template: 'emailchange',
+                context: {
+                    name: _user.username,
+                    url: url
+                },
+            })
+            .then(() => {
+            })
+            .catch(() => {
+                logger.log('error', 'Could not send mail change mail to %s', mail);
+            });
+
+        return url;
+    }
+
+    // async addTelegramUser(telegramUser: TelegramUser, user: User) {
+    //     let savedTelegramUser = await this.telegramUserRepository.save(telegramUser);
+    //     let userFromDb = await this.find(user.id);
+    //     userFromDb.telegramUser = savedTelegramUser;
+    //     return this.userRepository.save(userFromDb);
+    // }
+
+    // -------------------- UTIL -------------------- //
+    // -------------------- UTIL -------------------- //
+    // -------------------- UTIL -------------------- //
+
+    private async checkForDuplicateValues(user: User) {
+        let duplicateValues = [];
+        if (await this.existsByUsername(user.username)) {
+            duplicateValues.push('username');
+        }
+
+        if (await this.existsByMail(user.mail)) {
+            duplicateValues.push('email');
+        }
+
+        if (duplicateValues.length > 0) {
+            throw new DuplicateValueException(null, null, duplicateValues);
+        }
     }
 
     private async existsByUsername(username: string) {
@@ -574,110 +701,47 @@ export class UserService {
             });
     }
 
-    // async addTelegramUser(telegramUser: TelegramUser, user: User) {
-    //     let savedTelegramUser = await this.telegramUserRepository.save(telegramUser);
-    //     let userFromDb = await this.find(user.id);
-    //     userFromDb.telegramUser = savedTelegramUser;
-    //     return this.userRepository.save(userFromDb);
-    // }
-
-    // -------------------- UTIL -------------------- //
-    // -------------------- UTIL -------------------- //
-    // -------------------- UTIL -------------------- //
-
-    public async handleEmailChange(user: User, {mail, domain}) {
-        let _user;
-
+    private async updatePasswordResetEntity(token: string, currentPassword: string) {
         try {
-            _user = await this.findByEmail(user.mail);
-        } catch (e) {
-            throw e;
-        }
-
-        if (await this.existsByMail(mail)) {
-            throw new DuplicateValueException(null, null, ['email']);
-        }
-
-        if (domain === undefined
-            || domain === null
-            || domain === '') {
-            throw new EmptyFieldsException(null, 'Due to the mail change you need to provide the domain for the activation call');
-        }
-
-        if (_user != null) {
-            await this.resetPreviousMailChanges(_user);
-
-            let token = crypto
-                .createHmac('sha256', mail + process.env.SALT_MAIL + Date.now())
-                .digest('hex');
-
-            const emailChange = new EmailChange();
-            emailChange.user = user;
-            emailChange.token = token;
-            emailChange.newMail = mail;
-            emailChange.oldMail = user.mail;
-
-            await this.emailChangeRepository.save(emailChange);
-
-            const url = `https://${domain}/${mail}/${token}`;
-
-            this.mailerService
-                .sendMail({
-                    to: mail,
-                    from: process.env.MAIL_ECA,
-                    subject: 'Bitte bestätige deine neue Email-Adresse',
-                    template: 'emailchange',
-                    context: {
-                        name: _user.username,
-                        url: url
-                    },
-                })
-                .then(() => {
-                })
-                .catch(() => {
-                    logger.log('error', 'Could not send mail change mail to %s', mail);
+            await this.passwordResetRepository
+                .update({
+                    token: token
+                }, {
+                    used: new Date(Date.now()),
+                    oldPassword: currentPassword
                 });
-
-            return url;
+        } catch (e) {
+            logger.log('error', `Can't execute query to update password reset entity with token ${token}`);
+            throw new InternalErrorException();
         }
     }
 
-    public async updateMailChange(token: string, currentMail: string) {
-        await this.passwordResetRepository
-            .createQueryBuilder('emailChange')
-            .update(EmailChange)
-            .set({used: new Date(Date.now()), oldMail: currentMail})
-            .where('token = :token', {token: token})
-            .execute();
-    }
-
-    private async checkForDuplicateValues(user: User) {
-        let duplicateValues = [];
-        if (await this.existsByUsername(user.username)) {
-            duplicateValues.push('username');
+    private async updateEmailChangeEntity(token: string, currentMail: string) {
+        try {
+            await this.emailChangeRepository
+                .update({
+                    token: token
+                }, {
+                    used: new Date(Date.now()),
+                    oldMail: currentMail
+                });
+        } catch (e) {
+            logger.log('error', `Can't execute query to update email change entity with token ${token}`);
+            throw new InternalErrorException();
         }
-
-        if (await this.existsByMail(user.mail)) {
-            duplicateValues.push('email');
-        }
-
-        if (duplicateValues.length > 0) {
-            throw new DuplicateValueException(null, null, duplicateValues);
-        }
-    }
-
-    public async updatePasswordReset(token: string, currentPassword: string) {
-        await this.passwordResetRepository
-            .createQueryBuilder('pwr')
-            .update(PasswordReset)
-            .set({used: new Date(Date.now()), oldPassword: currentPassword})
-            .where('token = :token', {token: token})
-            .execute();
     }
 
     private async resetPreviousMailChanges(user: User) {
         try {
-            await this.emailChangeRepository.update({used: IsNull(), user: {id: user.id}}, {oldMail: 'invalid'});
+            await this.emailChangeRepository
+                .update({
+                    used: IsNull(),
+                    user: {
+                        id: user.id
+                    }
+                }, {
+                    oldMail: 'invalid'
+                });
         } catch (e) {
             logger.log('error', `Can't execute query to cancel mail change of user ${user.id}`);
             throw new InternalErrorException(null, 'Cannot cancel mail change due to a database error');

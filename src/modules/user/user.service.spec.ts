@@ -20,6 +20,7 @@ import {InvalidRequestException} from '../../exceptions/InvalidRequestException'
 import {InternalErrorException} from '../../exceptions/InternalErrorException';
 
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 describe('UserService', () => {
     let userService: UserService;
@@ -284,6 +285,22 @@ describe('UserService', () => {
             expect(actual).toEqual(user);
         });
 
+        it('should return registered user if successful, even if send mail failed', async () => {
+            const user = new User();
+            user.username = 'username';
+            user.mail = 'mail@example.com';
+            user.password = 'password';
+            const domainToSatisfyParameter = 'example.de';
+
+            userRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            userRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            userRepositoryMock.save.mockReturnValueOnce(user);
+            jest.spyOn(mailerService, 'sendMail').mockReturnValueOnce(Promise.reject());
+
+            const actual = await userService.register(user, domainToSatisfyParameter);
+            expect(actual).toEqual(user);
+        });
+
         describe('* should return error if user already exists with given values', () => {
             it('username', async () => {
                 const user = new User();
@@ -415,8 +432,8 @@ describe('UserService', () => {
             });
         });
 
-        describe('* should return error if request was invalid', () => {
-            it('email already in use', async () => {
+        describe('* should return error if failed', () => {
+            it('user not found', async () => {
                 const valuesToUpdate = {
                     mail: 'changed@example.com',
                     domain: 'domain'
@@ -425,43 +442,67 @@ describe('UserService', () => {
                 userFromJwt.id = 1;
 
                 const currentUser = new User();
-                currentUser.mail = 'current@example.com';
-                userRepositoryMock.findOne.mockReturnValueOnce(currentUser);
-                jest.spyOn(userService, 'findByEmail').mockImplementationOnce(() => Promise.resolve(new User()));
-                jest.spyOn(userService, 'findByEmail').mockImplementationOnce(() => Promise.resolve(new User()));
+                currentUser.name = 'currentName';
+                userRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
                 userService
                     .update(valuesToUpdate, userFromJwt)
                     .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten a DuplicateValuesException (email)');
+                        throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
                     })
                     .catch((err) => {
-                        expect(err).toBeInstanceOf(DuplicateValueException);
-                        expect(err.data).toEqual(['email']);
+                        expect(err).toBeInstanceOf(EntityNotFoundException);
                     });
             });
 
-            it('domain not provided', async () => {
-                const valuesToUpdate = {
-                    mail: 'changed@example.com'
-                };
-                const userFromJwt = new User();
-                userFromJwt.id = 1;
+            describe('handleEmailChange error (just forward error)', () => {
+                it('Error', async () => {
+                    const valuesToUpdate = {
+                        mail: 'changed@example.com',
+                        domain: 'domain'
+                    };
+                    const userFromJwt = new User();
+                    userFromJwt.id = 1;
 
-                const currentUser = new User();
-                currentUser.mail = 'current@example.com';
-                userRepositoryMock.findOne.mockReturnValueOnce(currentUser);
-                jest.spyOn(userService, 'findByEmail').mockImplementationOnce(() => Promise.resolve(new User()));
-                jest.spyOn(userService, 'findByEmail').mockImplementationOnce(() => Promise.reject(new EntityNotFoundException()));
+                    const currentUser = new User();
+                    currentUser.name = 'currentName';
+                    userRepositoryMock.findOne.mockReturnValueOnce(currentUser);
 
-                userService
-                    .update(valuesToUpdate, userFromJwt)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten a DuplicateValuesException (email)');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(EmptyFieldsException);
-                    });
+                    jest.spyOn(userService, 'handleEmailChange').mockReturnValueOnce(Promise.reject(new Error()));
+
+                    userService
+                        .update(valuesToUpdate, userFromJwt)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned Error');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(Error);
+                        });
+                });
+
+                it('DuplicateValueException', async () => {
+                    const valuesToUpdate = {
+                        mail: 'changed@example.com',
+                        domain: 'domain'
+                    };
+                    const userFromJwt = new User();
+                    userFromJwt.id = 1;
+
+                    const currentUser = new User();
+                    currentUser.mail = 'current@example.com';
+                    userRepositoryMock.findOne.mockReturnValueOnce(currentUser);
+
+                    jest.spyOn(userService, 'handleEmailChange').mockReturnValueOnce(Promise.reject(new DuplicateValueException()));
+
+                    userService
+                        .update(valuesToUpdate, userFromJwt)
+                        .then((res) => {
+                            throw new Error('I have failed you, Anakin. Should have returned DuplicateValueException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(DuplicateValueException);
+                        });
+                });
             });
         });
     });
@@ -578,6 +619,29 @@ describe('UserService', () => {
                     });
             });
 
+            it('should return correct URL if successful, even if mail send failed', async (done) => {
+                const mail = 'mail@example.de';
+                const domain = 'domain';
+
+                const user = new User();
+
+                jest.spyOn(userService, 'findByEmail').mockImplementationOnce(() => Promise.resolve(user));
+                passwordResetRepositoryMock.update.mockReturnValueOnce(undefined);
+                passwordResetRepositoryMock.save.mockReturnValueOnce(undefined);
+                jest.spyOn(mailerService, 'sendMail').mockReturnValueOnce(Promise.reject());
+
+                userService
+                    .resetPasswordInitialization(mail, domain)
+                    .then((res) => {
+                        const regex = new RegExp('https:\/\/' + domain + '\/' + mail + '\/.{64}', 'g');
+                        expect(res).toMatch(regex);
+                        done();
+                    })
+                    .catch(() => {
+                        throw new Error('I have failed you, Anakin. Should have returned correct url');
+                    });
+            });
+
             describe('should return error if failed', () => {
                 it('entity not found', async () => {
                     const mail = 'mail@example.de';
@@ -611,6 +675,7 @@ describe('UserService', () => {
                             expect(err.data).toEqual(['domain']);
                         });
                 });
+
             });
         });
 
@@ -623,7 +688,7 @@ describe('UserService', () => {
                 jest.spyOn(userService, 'resetPasswordTokenVerification').mockReturnValueOnce(Promise.resolve(true));
                 jest.spyOn(userService, 'findByEmail').mockReturnValueOnce(Promise.resolve(new User()));
                 userRepositoryMock.save.mockReturnValueOnce(undefined);
-                jest.spyOn(userService, 'updatePasswordReset').mockReturnValueOnce(undefined);
+                passwordResetRepositoryMock.save.mockReturnValueOnce(undefined);
 
                 userService
                     .updatePassword(mail, token, password)
@@ -631,6 +696,26 @@ describe('UserService', () => {
                         done();
                     })
                     .catch(() => {
+                        throw new Error('I have failed you, Anakin. Should have returned void');
+                    });
+            });
+
+            it('should return nothing if successful, even if update of PasswordReset entity failed', async (done) => {
+                const mail = 'mail@example.com';
+                const token = 'token';
+                const password = 'password';
+
+                jest.spyOn(userService, 'resetPasswordTokenVerification').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(userService, 'findByEmail').mockReturnValueOnce(Promise.resolve(new User()));
+                userRepositoryMock.save.mockReturnValueOnce(new User());
+                passwordResetRepositoryMock.update.mockReturnValueOnce(Promise.reject());
+
+                userService
+                    .updatePassword(mail, token, password)
+                    .then(() => {
+                        done();
+                    })
+                    .catch((err) => {
                         throw new Error('I have failed you, Anakin. Should have returned void');
                     });
             });
@@ -802,7 +887,26 @@ describe('UserService', () => {
                 jest.spyOn(userService, 'mailChangeTokenVerification').mockReturnValueOnce(Promise.resolve(new EmailChange()));
                 jest.spyOn(userService, 'findByEmail').mockReturnValueOnce(Promise.resolve(new User()));
                 userRepositoryMock.save.mockReturnValueOnce(undefined);
-                jest.spyOn(userService, 'updateMailChange').mockReturnValueOnce(undefined);
+                emailChangeRepositoryMock.update.mockReturnValueOnce(undefined);
+
+                await userService
+                    .mailChange(mail, token)
+                    .then(() => {
+                        done();
+                    })
+                    .catch(() => {
+                        throw new Error('I have failed you, Anakin. Should have returned nothing ');
+                    });
+            });
+
+            it('returns void if successful, even if updateEmailChangeEntity fails', async (done) => {
+                const mail = 'mail@example.com';
+                const token = 'validToken';
+
+                jest.spyOn(userService, 'mailChangeTokenVerification').mockReturnValueOnce(Promise.resolve(new EmailChange()));
+                jest.spyOn(userService, 'findByEmail').mockReturnValueOnce(Promise.resolve(new User()));
+                userRepositoryMock.save.mockReturnValueOnce(new User());
+                emailChangeRepositoryMock.update.mockReturnValueOnce(Promise.reject());
 
                 await userService
                     .mailChange(mail, token)
@@ -874,21 +978,23 @@ describe('UserService', () => {
             it('should return true if successful', async (done) => {
                 const mail = 'mail@example.com';
                 const token = 'token';
-                1;
-                const passwordReset = new PasswordReset();
-                passwordReset.used = null;
-                passwordReset.oldPassword = null;
-                passwordReset.iat = new Date();
-                passwordResetRepositoryMock.findOne.mockReturnValueOnce(passwordReset);
+
+                const emailChange = new EmailChange();
+                emailChange.used = null;
+                emailChange.oldMail = null;
+                emailChange.iat = new Date();
+                emailChangeRepositoryMock.findOne.mockReturnValueOnce(emailChange);
 
                 userService
-                    .resetPasswordTokenVerification(mail, token)
+                    .mailChangeTokenVerification(mail, token)
                     .then((res) => {
-                        expect(res).toBe(true);
+                        expect(res).toBe(emailChange);
                         done();
                     })
-                    .catch(() => {
-                        throw new Error('I have failed you, Anakin. Should have returned true');
+                    .catch((err) => {
+
+                        console.log(err);
+                        throw new Error('I have failed you, Anakin. Should have returned passwordReset enti');
                     });
             });
 
@@ -1037,7 +1143,7 @@ describe('UserService', () => {
                         await userService
                             .mailChangeResendMail(user, domain)
                             .then(() => {
-                                throw new Error('I have failed you, Anakin. Should have returned InvalidRequestException');
+                                throw new Error('I have failed you, Anakin. Should have returned DuplicateValueException');
                             })
                             .catch((err) => {
                                 expect(err).toBeInstanceOf(DuplicateValueException);
@@ -1080,6 +1186,270 @@ describe('UserService', () => {
                             });
                     });
                 });
+            });
+        });
+
+        describe('* handle mail change', () => {
+            it('should return url if successful', async (done) => {
+                const userFromJwt = new User();
+                userFromJwt.id = 1;
+                const valuesToUpdate = {
+                    mail: 'changed@example.com',
+                    domain: 'domain'
+                };
+
+                userRepositoryMock.findOne.mockReturnValueOnce(new User());
+                userRepositoryMock.findOne.mockReturnValueOnce(undefined);
+                emailChangeRepositoryMock.update.mockReturnThis();
+                jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.resolve({}));
+
+                userService
+                    .handleEmailChange(userFromJwt, valuesToUpdate)
+                    .then((res) => {
+                        const regex = new RegExp('https:\/\/' + valuesToUpdate.domain + '\/' + valuesToUpdate.mail + '\/.{64}', 'g');
+                        expect(res).toMatch(regex);
+                        done();
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        throw new Error('I have failed you, Anakin. Should have returned url');
+                    });
+            });
+
+            it('should return url if successful, even if mail send failed', async (done) => {
+                const userFromJwt = new User();
+                userFromJwt.id = 1;
+                const valuesToUpdate = {
+                    mail: 'changed@example.com',
+                    domain: 'domain'
+                };
+
+                userRepositoryMock.findOne.mockReturnValueOnce(new User());
+                userRepositoryMock.findOne.mockReturnValueOnce(undefined);
+                emailChangeRepositoryMock.update.mockReturnThis();
+                jest.spyOn(mailerService, 'sendMail').mockReturnValueOnce(Promise.reject());
+
+                userService
+                    .handleEmailChange(userFromJwt, valuesToUpdate)
+                    .then((res) => {
+                        const regex = new RegExp('https:\/\/' + valuesToUpdate.domain + '\/' + valuesToUpdate.mail + '\/.{64}', 'g');
+                        expect(res).toMatch(regex);
+                        done();
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        throw new Error('I have failed you, Anakin. Should have returned url');
+                    });
+            });
+
+            describe('* should return error if request was invalid', () => {
+                it('user not found', async () => {
+                    const userFromJwt = new User();
+                    userFromJwt.id = 1;
+                    const valuesToUpdate = {
+                        mail: 'changed@example.com',
+                        domain: 'domain'
+                    };
+
+                    userRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    userService
+                        .handleEmailChange(userFromJwt, valuesToUpdate)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have gotten a DuplicateValuesException (email)');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityNotFoundException);
+                            expect(err.data).toEqual('user');
+                        });
+                });
+
+                it('email already in use', async () => {
+                    const userFromJwt = new User();
+                    userFromJwt.id = 1;
+                    const valuesToUpdate = {
+                        mail: 'changed@example.com',
+                        domain: 'domain'
+                    };
+
+                    userRepositoryMock.findOne.mockReturnValueOnce(new User());
+                    userRepositoryMock.findOne.mockReturnValueOnce(new User());
+
+                    userService
+                        .handleEmailChange(userFromJwt, valuesToUpdate)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have gotten a DuplicateValuesException (email)');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(DuplicateValueException);
+                            expect(err.data).toEqual(['email']);
+                        });
+                });
+
+                it('domain not provided', async () => {
+                    const valuesToUpdate = {
+                        mail: 'changed@example.com',
+                        domain: undefined
+                    };
+                    const userFromJwt = new User();
+                    userFromJwt.id = 1;
+
+                    userRepositoryMock.findOne.mockReturnValueOnce(new User());
+                    userRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    userService
+                        .handleEmailChange(userFromJwt, valuesToUpdate)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have gotten a EmptyFieldsException (email)');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EmptyFieldsException);
+                        });
+                });
+
+                it('reset previous mail changes error', async () => {
+                    const valuesToUpdate = {
+                        mail: 'changed@example.com',
+                        domain: 'domain'
+                    };
+                    const userFromJwt = new User();
+                    userFromJwt.id = 1;
+
+                    userRepositoryMock.findOne.mockReturnValueOnce(new User());
+                    userRepositoryMock.findOne.mockReturnValueOnce(undefined);
+                    emailChangeRepositoryMock.update.mockReturnValueOnce(Promise.reject());
+
+                    userService
+                        .handleEmailChange(userFromJwt, valuesToUpdate)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have gotten a EmptyFieldsException (email)');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(InternalErrorException);
+                        });
+                });
+            });
+        });
+    });
+
+    describe('* password change date', () => {
+        describe('* should return date if successful', () => {
+            it('only password reset', async () => {
+                const user = new User();
+                const password = 'password';
+
+                const passwordReset = new PasswordReset();
+                passwordReset.oldPassword = 'oldPassword (actually a hash)';
+                passwordReset.used = new Date();
+                passwordResetRepositoryMock.find.mockReturnValueOnce([passwordReset]);
+
+                passwordChangeRepositoryMock.find.mockReturnValueOnce(undefined);
+
+                jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(Promise.resolve(true));
+
+                const actual = await userService.getLastPasswordDate(user, password);
+                expect(actual).toEqual(passwordReset.used);
+            });
+
+            it('only password change', async () => {
+                const user = new User();
+                const password = 'password';
+
+                passwordResetRepositoryMock.find.mockReturnValueOnce(undefined);
+
+                const passwordChange = new PasswordChange();
+                passwordChange.oldPassword = 'oldPassword (actually a hash)';
+                passwordChange.iat = new Date();
+                passwordChangeRepositoryMock.find.mockReturnValueOnce([passwordChange]);
+
+                jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(Promise.resolve(true));
+
+                const actual = await userService.getLastPasswordDate(user, password);
+                expect(actual).toEqual(passwordChange.iat);
+            });
+
+            it('both (1 item each, reset more recent)', async () => {
+                const user = new User();
+                const password = 'password';
+
+                const passwordReset = new PasswordReset();
+                passwordReset.oldPassword = 'oldPassword (actually a hash)';
+                passwordReset.used = new Date();
+                passwordResetRepositoryMock.find.mockReturnValueOnce([passwordReset]);
+
+                const passwordChange = new PasswordChange();
+                passwordChange.oldPassword = 'oldPassword (actually a hash)';
+                passwordChange.iat = new Date(Date.now() - (2 * 60 * 60 * 1000));
+                passwordChangeRepositoryMock.find.mockReturnValueOnce([passwordChange]);
+
+                jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(Promise.resolve(true));
+
+                const actual = await userService.getLastPasswordDate(user, password);
+                expect(actual).toEqual(passwordReset.used);
+            });
+
+            it('both (1 item each, change more recent)', async () => {
+                const user = new User();
+                const password = 'password';
+
+                const passwordReset = new PasswordReset();
+                passwordReset.oldPassword = 'oldPassword (actually a hash)';
+                passwordReset.used = new Date(Date.now() - (2 * 60 * 60 * 1000));
+                passwordResetRepositoryMock.find.mockReturnValueOnce([passwordReset]);
+
+                const passwordChange = new PasswordChange();
+                passwordChange.oldPassword = 'oldPassword (actually a hash)';
+                passwordChange.iat = new Date();
+                passwordChangeRepositoryMock.find.mockReturnValueOnce([passwordChange]);
+
+                jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(Promise.resolve(true));
+
+                const actual = await userService.getLastPasswordDate(user, password);
+                expect(actual).toEqual(passwordChange.iat);
+            });
+
+            it('both (1 item each, reset password not matching)', async () => {
+                const user = new User();
+                const password = 'password';
+
+                const passwordReset = new PasswordReset();
+                passwordReset.oldPassword = 'oldPassword (actually a hash)';
+                passwordReset.used = new Date();
+                passwordResetRepositoryMock.find.mockReturnValueOnce([passwordReset]);
+
+                const passwordChange = new PasswordChange();
+                passwordChange.oldPassword = 'oldPassword (actually a hash)';
+                passwordChange.iat = new Date(Date.now() - (2 * 60 * 60 * 1000));
+                passwordChangeRepositoryMock.find.mockReturnValueOnce([passwordChange]);
+
+                jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(Promise.resolve(false));
+                jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(Promise.resolve(true));
+
+                const actual = await userService.getLastPasswordDate(user, password);
+                expect(actual).toEqual(passwordChange.iat);
+            });
+
+            it('both (1 item each, change password not matching)', async () => {
+                const user = new User();
+                const password = 'password';
+
+                const passwordReset = new PasswordReset();
+                passwordReset.oldPassword = 'oldPassword (actually a hash)';
+                passwordReset.used = new Date(Date.now() - (2 * 60 * 60 * 1000));
+                passwordResetRepositoryMock.find.mockReturnValueOnce([passwordReset]);
+
+                const passwordChange = new PasswordChange();
+                passwordChange.oldPassword = 'oldPassword (actually a hash)';
+                passwordChange.iat = new Date();
+                passwordChangeRepositoryMock.find.mockReturnValueOnce([passwordChange]);
+
+                jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(Promise.resolve(false));
+
+                const actual = await userService.getLastPasswordDate(user, password);
+                expect(actual).toEqual(passwordReset.used);
             });
         });
     });

@@ -382,7 +382,7 @@ describe('User Controller', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
                     jest.spyOn(userService, 'resetPasswordInitialization')
-                        .mockImplementation(async (): Promise<void> => Promise.resolve());
+                        .mockImplementation(async (): Promise<string> => Promise.resolve(''));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockDomainToSatisfyParameters = 'my.domain.tld';
@@ -399,7 +399,7 @@ describe('User Controller', () => {
                     const result = new Error();
 
                     jest.spyOn(userService, 'resetPasswordInitialization')
-                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<string> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockDomainToSatisfyParameters = 'my.domain.tld';
@@ -543,7 +543,7 @@ describe('User Controller', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
                     jest.spyOn(userService, 'updatePassword')
-                        .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
+                        .mockImplementation(async (): Promise<void> => Promise.resolve());
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -562,7 +562,7 @@ describe('User Controller', () => {
                     const result = new InsufficientPermissionsException();
 
                     jest.spyOn(userService, 'updatePassword')
-                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -582,7 +582,7 @@ describe('User Controller', () => {
                     const result = new Error();
 
                     jest.spyOn(userService, 'updatePassword')
-                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -606,7 +606,7 @@ describe('User Controller', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
                     jest.spyOn(userService, 'mailChange')
-                        .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
+                        .mockImplementation(async (): Promise<void> => Promise.resolve());
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -623,7 +623,7 @@ describe('User Controller', () => {
                     const result = new UnauthorizedException();
 
                     jest.spyOn(userService, 'mailChange')
-                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -645,7 +645,7 @@ describe('User Controller', () => {
                     const result = new Error();
 
                     jest.spyOn(userService, 'mailChange')
-                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -666,7 +666,7 @@ describe('User Controller', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
                     jest.spyOn(userService, 'mailChangeResendMail')
-                        .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
+                        .mockImplementation(async (): Promise<string> => Promise.resolve(''));
 
                     const mockUserToSatisfyParameter = new User();
                     const mockDomainToSatisfyParameters = 'my.domain.tld';
@@ -684,7 +684,7 @@ describe('User Controller', () => {
                         'There is no active mail change going on. Email resend is not possible');
 
                     jest.spyOn(userService, 'mailChangeResendMail')
-                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<string> => Promise.reject(result));
 
                     const mockUserToSatisfyParameter = new User();
                     const mockDomainToSatisfyParameters = 'my.domain.tld';
@@ -703,7 +703,7 @@ describe('User Controller', () => {
                     const result = new Error();
 
                     jest.spyOn(userService, 'mailChangeResendMail')
-                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<string> => Promise.reject(result));
 
                     const mockUserToSatisfyParameter = new User();
                     const mockDomainToSatisfyParameters = 'my.domain.tld';
