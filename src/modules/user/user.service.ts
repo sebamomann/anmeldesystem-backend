@@ -15,7 +15,6 @@ import {InvalidRequestException} from '../../exceptions/InvalidRequestException'
 import {ExpiredTokenException} from '../../exceptions/ExpiredTokenException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
-import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 
 var winston = require('winston');
 var crypto = require('crypto');
@@ -235,65 +234,135 @@ export class UserService {
     }
 
     public async resetPasswordInitialization(mail: string, domain: string) {
-        const user = await this.findByEmail(mail);
+        let user;
 
-        if (user != undefined) {
-            await this.passwordResetRepository
-                .query('UPDATE user_password_reset ' +
-                    'SET oldPassword = \'invalid\' ' +
-                    'WHERE used IS NULL ' +
-                    'AND oldPassword IS NULL ' +
-                    'AND userId = ?', [user.id]);
-
-            let token = crypto
-                .createHmac('sha256', mail + process.env.SALT_MAIL + Date.now())
-                .digest('hex');
-
-            const passwordReset = new PasswordReset();
-            passwordReset.user = user;
-            passwordReset.token = token;
-
-            await this.passwordResetRepository.save(passwordReset);
-
-            this.mailerService
-                .sendMail({
-                    to: mail,
-                    from: process.env.MAIL_ECA,
-                    subject: 'Jemand möchte dein Passwort zurücksetzen. Bist das du?',
-                    template: 'passwordreset',
-                    context: {
-                        name: user.username,
-                        url: `https://${domain}/${mail}/${token}`
-                    },
-                })
-                .then(() => {
-                })
-                .catch(() => {
-                });
+        try {
+            user = await this.findByEmail(mail);
+        } catch (e) {
+            throw new EntityGoneException();
         }
+
+        if (domain === undefined
+            || domain === null
+            || domain === '') {
+            throw new EmptyFieldsException(null,
+                'In order to send the password verification link you need to provide a domain',
+                ['domain']);
+        }
+
+        await this.passwordResetRepository
+            .query('UPDATE user_password_reset ' +
+                'SET oldPassword = \'invalid\' ' +
+                'WHERE used IS NULL ' +
+                'AND oldPassword IS NULL ' +
+                'AND userId = ?', [user.id]);
+
+        let token = crypto
+            .createHmac('sha256', mail + process.env.SALT_MAIL + Date.now())
+            .digest('hex');
+
+        const passwordReset = new PasswordReset();
+        passwordReset.user = user;
+        passwordReset.token = token;
+
+        await this.passwordResetRepository.save(passwordReset);
+
+        let url = `https://${domain}/${mail}/${token}`;
+
+        this.mailerService
+            .sendMail({
+                to: mail,
+                from: process.env.MAIL_ECA,
+                subject: 'Jemand möchte dein Passwort zurücksetzen. Bist das du?',
+                template: 'passwordreset',
+                context: {
+                    name: user.username,
+                    url: url
+                },
+            })
+            .then(() => {
+            })
+            .catch(() => {
+                winston.log('error', 'Could not send register mail to %s', user.mail);
+            });
+
+        return url;
     }
 
-    async updatePassword(mail: string, token: string, pass: string) {
+    /**
+     * Updates the password of a user. <br />
+     * Check for token validity and update passwordReset object. <br />
+     *
+     * @param mail mail address of user (from link)
+     * @param token verification token (from link)
+     * @param pass new password (from body)
+     *
+     * @return true if everything went accordingly
+     *
+     * @throws EntityNotFoundException when user with given mail does not exist anymore
+     * @throws See {@link resetPasswordTokenVerification} for reference
+     */
+    public async updatePassword(mail: string, token: string, pass: string) {
         return this.resetPasswordTokenVerification(mail, token)
             .then(async () => {
-                const user = await this.findByEmail(mail);
+                let user;
+
+                try {
+                    user = await this.findByEmail(mail);
+                } catch (e) {
+                    throw e;
+                }
 
                 let currentPassword = user.password;
                 user.password = bcrypt.hashSync(pass, 10);
 
                 await this.userRepository.save(user);
-                await this.passwordResetRepository
-                    .createQueryBuilder('pwr')
-                    .update(PasswordReset)
-                    .set({used: new Date(Date.now()), oldPassword: currentPassword})
-                    .where('token = :token', {token: token})
-                    .execute();
+                await this.updatePasswordReset(token, currentPassword);
 
                 return true;
             })
-            .catch(() => {
-                throw new InsufficientPermissionsException();
+            .catch((err) => {
+                throw err;
             });
+    }
+
+    /**
+     * Check corresponding {@link PasswordReset} entity for being<br />
+     * <ol>
+     *     <li>Less than 24 hours in age</li>
+     *     <li>Already being used</li>
+     *     <li>Replaced by a new one</li>
+     * </ol>
+     * Note that the token does not need to be validated by recreation, due to database save.
+     * The possibility of guessing a correct token is already low enough.
+     *
+     * @param mail mail address of user check for
+     * @param token token created with mail address and
+     *
+     * @returns boolean (true) if token is valid
+     *
+     * @throws ExpiredTokenException if token is already replaced
+     * @throws AlreadyUsedException if password reset is already done, so the token is used (1 time usage token)
+     * @throws ExpiredTokenException if token is not used or replaced, but older than 24 hours
+     */
+    public async resetPasswordTokenVerification(mail: string, token: string) {
+        const passwordReset = await this.passwordResetRepository.findOne({where: {token: token}});
+
+        if (passwordReset === undefined) {
+            throw new InvalidTokenException();
+        }
+
+        if ((passwordReset.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
+            if (passwordReset.oldPassword === 'invalid') {
+                throw new ExpiredTokenException('OUTDATED', 'Provided token was already replaced by a new one');
+            } else if (passwordReset.used === null) {
+                return true;
+            }
+
+            throw new AlreadyUsedException(null, 'Provided token was already used at the following date', {date: new Date(passwordReset.used)});
+        }
+
+        throw new ExpiredTokenException();
     }
 
     public mailChangeVerifyTokenAndExecuteChange(mail: string, token: string) {
@@ -317,30 +386,6 @@ export class UserService {
             .catch(() => {
                 throw new UnauthorizedException();
             });
-    }
-
-    async resetPasswordTokenVerification(mail: string, token: string) {
-        let passwordReset = await this.passwordResetRepository
-            .createQueryBuilder('passwordReset')
-            .where('passwordReset.token = :token', {token: token})
-            .innerJoin('passwordReset.user', 'user', 'user.mail = :mail', {mail})
-            .getOne();
-
-        if (passwordReset != undefined) {
-            if ((passwordReset.iat.getTime() + (24 * 60 * 60 * 1000)) > Date.now()) {
-                if (passwordReset.oldPassword === 'invalid') {
-                    throw new ExpiredTokenException('OUTDATED', 'Provided token was already replaced by a new one');
-                } else if (passwordReset.used === null) {
-                    return true;
-                }
-
-                throw new AlreadyUsedException(null, 'Provided token was already used at the following date', {date: new Date(passwordReset.used)});
-            }
-
-            throw new ExpiredTokenException();
-        }
-
-        throw new InvalidTokenException();
     }
 
     public async mailChangeResendMail(user: User, domain: string) {
@@ -531,5 +576,14 @@ export class UserService {
         if (duplicateValues.length > 0) {
             throw new DuplicateValueException(null, null, duplicateValues);
         }
+    }
+
+    public async updatePasswordReset(token: string, currentPassword: string) {
+        await this.passwordResetRepository
+            .createQueryBuilder('pwr')
+            .update(PasswordReset)
+            .set({used: new Date(Date.now()), oldPassword: currentPassword})
+            .where('token = :token', {token: token})
+            .execute();
     }
 }
