@@ -53,9 +53,9 @@ export class UserController {
            @Res() res: Response,) {
         return this.userService
             .update(toChange, user)
-            .then(async tUser => {
-                tUser = this.authService.addJwtToObject(tUser);
-                res.status(HttpStatus.OK).json(tUser);
+            .then(async result => {
+                result = this.authService.addJwtToObject(result);
+                res.status(HttpStatus.OK).json(result);
             })
             .catch(err => {
                 throw err;

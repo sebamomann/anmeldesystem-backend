@@ -39,7 +39,6 @@ export class User {
     )
     appointments: Appointment[];
 
-
     @ManyToMany(type => Appointment,
         appointment => appointment.administrators,
         {

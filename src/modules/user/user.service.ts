@@ -20,6 +20,7 @@ import {InternalErrorException} from '../../exceptions/InternalErrorException';
 var logger = require('../../logger');
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
+var userMapper = require('./user.mapper');
 
 @Injectable()
 export class UserService {
@@ -88,17 +89,7 @@ export class UserService {
             throw e;
         }
 
-        _user.emailChange = this.retrieveActiveMailChanges(_user.emailChange);
-
-        if (_user.emailChange
-            .every(function(u, i) {
-                return u === [][i];
-            })
-        ) {
-            delete _user.emailChange;
-        }
-
-        return _user;
+        return userMapper.basic(this, _user);
     }
 
     public async register(user: User, domain: string) {
@@ -108,7 +99,7 @@ export class UserService {
         userToDb.mail = user.mail;
 
         try {
-            await this.checkForDuplicateValues(user);
+            await this._checkForDuplicateValues(user);
         } catch (e) {
             throw e;
         }
@@ -139,7 +130,7 @@ export class UserService {
                 logger.log('error', 'Could not send register mail to %s', user.mail);
             });
 
-        return savedUser;
+        return userMapper.basic(this, savedUser);
     }
 
     public async update(valuesToUpdate: any, userFromJwt: User) {
@@ -161,7 +152,8 @@ export class UserService {
 
                 if (key === 'mail') {
                     try {
-                        await this.handleEmailChange(userFromJwt, valuesToUpdate);
+                        const emailChange = await this.handleEmailChange(userFromJwt, valuesToUpdate);
+                        user.emailChange = [emailChange];
                     } catch (e) {
                         throw e;
                     }
@@ -184,8 +176,7 @@ export class UserService {
         }
 
         let savedUser = await this.userRepository.save(user);
-        return savedUser;
-        //return await this.get(savedUser);
+        return userMapper.basic(this, savedUser);
     }
 
     public async activate(mail: string, token: string) {
@@ -215,21 +206,6 @@ export class UserService {
         }
 
         throw new InvalidTokenException();
-    }
-
-    /**
-     * Fetch the current active mail change from the mailChange list. <br />
-     * Active state is determined by checking the time interval (max 24h old),
-     * plus the used state.
-     *
-     * @param emailChange List of all email changes to filter in
-     * @return EmailChange[] List of all active email  (should just be one item)
-     */
-    private retrieveActiveMailChanges(emailChange: EmailChange[]) {
-        return emailChange.filter(fEmailChange =>
-            (fEmailChange.iat.getTime()) + (24 * 60 * 60 * 1000) > Date.now()
-            && fEmailChange.oldMail != 'invalid'
-            && fEmailChange.used === null);
     }
 
     /**
@@ -334,7 +310,7 @@ export class UserService {
                 await this.userRepository.save(user);
 
                 try {
-                    await this.updatePasswordResetEntity(token, currentPassword);
+                    await this._updatePasswordResetEntity(token, currentPassword);
                 } catch (e) {
                     //
                 }
@@ -415,7 +391,7 @@ export class UserService {
                 await this.userRepository.save(user);
 
                 try {
-                    await this.updateEmailChangeEntity(token, currentMail);
+                    await this._updateEmailChangeEntity(token, currentMail);
                 } catch (e) {
                     //
                 }
@@ -510,11 +486,11 @@ export class UserService {
      *
      * @returns void
      *
-     * @throws See {@link resetPreviousMailChanges} for reference
+     * @throws See {@link _resetPreviousMailChanges} for reference
      */
     public async mailChangeDeactivateToken(user: User) {
         try {
-            await this.resetPreviousMailChanges(user);
+            await this._resetPreviousMailChanges(user);
         } catch (e) {
             throw e;
         }
@@ -604,7 +580,7 @@ export class UserService {
             throw e;
         }
 
-        if (await this.existsByMail(mail)) {
+        if (await this._existsByMail(mail)) {
             throw new DuplicateValueException(null, null, ['email']);
         }
 
@@ -616,7 +592,7 @@ export class UserService {
         }
 
         try {
-            await this.resetPreviousMailChanges(_user);
+            await this._resetPreviousMailChanges(_user);
         } catch (e) {
             throw e;
         }
@@ -625,13 +601,13 @@ export class UserService {
             .createHmac('sha256', mail + process.env.SALT_MAIL + Date.now())
             .digest('hex');
 
-        const emailChange = new EmailChange();
-        emailChange.user = user;
+        let emailChange = new EmailChange();
+        emailChange.user = _user;
         emailChange.token = token;
         emailChange.newMail = mail;
-        emailChange.oldMail = user.mail;
+        emailChange.oldMail = _user.mail;
 
-        await this.emailChangeRepository.save(emailChange);
+        emailChange = await this.emailChangeRepository.save(emailChange);
 
         const url = `https://${domain}/${mail}/${token}`;
 
@@ -652,7 +628,7 @@ export class UserService {
                 logger.log('error', 'Could not send mail change mail to %s', mail);
             });
 
-        return url;
+        return emailChange;
     }
 
     // async addTelegramUser(telegramUser: TelegramUser, user: User) {
@@ -662,17 +638,32 @@ export class UserService {
     //     return this.userRepository.save(userFromDb);
     // }
 
-    // -------------------- UTIL -------------------- //
-    // -------------------- UTIL -------------------- //
-    // -------------------- UTIL -------------------- //
+    /**
+     * Fetch the current active mail change from the mailChange list. <br />
+     * Active state is determined by checking the time interval (max 24h old),
+     * plus the used state.
+     *
+     * @param emailChange List of all email changes to filter in
+     * @return EmailChange[] List of all active email  (should just be one item)
+     */
+    public retrieveActiveMailChanges(emailChange: EmailChange[]) {
+        if (emailChange === undefined) {
+            return [];
+        }
 
-    private async checkForDuplicateValues(user: User) {
+        return emailChange.filter(fEmailChange =>
+            (fEmailChange.iat.getTime()) + (24 * 60 * 60 * 1000) > Date.now()
+            && fEmailChange.oldMail != 'invalid'
+            && fEmailChange.used === null);
+    }
+
+    private async _checkForDuplicateValues(user: User) {
         let duplicateValues = [];
-        if (await this.existsByUsername(user.username)) {
+        if (await this._existsByUsername(user.username)) {
             duplicateValues.push('username');
         }
 
-        if (await this.existsByMail(user.mail)) {
+        if (await this._existsByMail(user.mail)) {
             duplicateValues.push('email');
         }
 
@@ -681,7 +672,7 @@ export class UserService {
         }
     }
 
-    private async existsByUsername(username: string) {
+    private async _existsByUsername(username: string) {
         return this.findByUsername(username)
             .then(() => {
                 return true;
@@ -691,7 +682,7 @@ export class UserService {
             });
     }
 
-    private async existsByMail(mail: string) {
+    private async _existsByMail(mail: string) {
         return this.findByEmail(mail)
             .then(() => {
                 return true;
@@ -701,7 +692,7 @@ export class UserService {
             });
     }
 
-    private async updatePasswordResetEntity(token: string, currentPassword: string) {
+    private async _updatePasswordResetEntity(token: string, currentPassword: string) {
         try {
             await this.passwordResetRepository
                 .update({
@@ -716,7 +707,7 @@ export class UserService {
         }
     }
 
-    private async updateEmailChangeEntity(token: string, currentMail: string) {
+    private async _updateEmailChangeEntity(token: string, currentMail: string) {
         try {
             await this.emailChangeRepository
                 .update({
@@ -731,7 +722,7 @@ export class UserService {
         }
     }
 
-    private async resetPreviousMailChanges(user: User) {
+    private async _resetPreviousMailChanges(user: User) {
         try {
             await this.emailChangeRepository
                 .update({
