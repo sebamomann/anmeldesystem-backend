@@ -76,7 +76,7 @@ describe('UserService', () => {
     describe('* UTIL - find user', () => {
         describe('* by id', () => {
             it('should return entity if found', async () => {
-                const idToSatisfyParameter = 1;
+                const idToSatisfyParameter = '1';
                 const user = new User();
 
                 userRepositoryMock.findOne.mockReturnValue(user);
@@ -84,7 +84,7 @@ describe('UserService', () => {
             });
 
             it('should return error if not found', async () => {
-                const idToSatisfyParameter = 1;
+                const idToSatisfyParameter = '1';
                 const user = undefined;
 
                 userRepositoryMock.findOne.mockReturnValue(user);
@@ -323,7 +323,7 @@ describe('UserService', () => {
             it('update name', async () => {
                 const valuesToUpdate = {name: 'updatedName'};
                 const userFromJwt = new User();
-                userFromJwt.id = 1;
+                userFromJwt.id = '1';
 
                 const currentUser = new User();
                 currentUser.name = 'currentName';
@@ -341,7 +341,7 @@ describe('UserService', () => {
                     domain: 'domain'
                 };
                 const userFromJwt = new User();
-                userFromJwt.id = 1;
+                userFromJwt.id = '1';
 
                 const currentUser = new User();
                 currentUser.mail = 'current@example.com';
@@ -370,7 +370,7 @@ describe('UserService', () => {
                 const valuesToUpdate = {password: 'newPassword'};
 
                 const userFromJwt = new User();
-                userFromJwt.id = 1;
+                userFromJwt.id = '1';
 
                 let currentUser = new User();
                 currentUser.password = 'currentPassword';
@@ -393,7 +393,7 @@ describe('UserService', () => {
                     domain: 'domain'
                 };
                 const userFromJwt = new User();
-                userFromJwt.id = 1;
+                userFromJwt.id = '1';
 
                 const currentUser = new User();
                 currentUser.name = 'currentName';
@@ -416,7 +416,7 @@ describe('UserService', () => {
                         domain: 'domain'
                     };
                     const userFromJwt = new User();
-                    userFromJwt.id = 1;
+                    userFromJwt.id = '1';
 
                     const currentUser = new User();
                     currentUser.name = 'currentName';
@@ -440,7 +440,7 @@ describe('UserService', () => {
                         domain: 'domain'
                     };
                     const userFromJwt = new User();
-                    userFromJwt.id = 1;
+                    userFromJwt.id = '1';
 
                     const currentUser = new User();
                     currentUser.mail = 'current@example.com';
@@ -1145,7 +1145,7 @@ describe('UserService', () => {
             describe('* should return EmailChange entity', () => {
                 it('if successful', async (done) => {
                     const userFromJwt = new User();
-                    userFromJwt.id = 1;
+                    userFromJwt.id = '1';
 
                     const valuesToUpdate = {
                         mail: 'changed@example.com',
@@ -1153,7 +1153,7 @@ describe('UserService', () => {
                     };
 
                     const currentUser = new User();
-                    currentUser.id = 1;
+                    currentUser.id = '1';
                     currentUser.mail = 'current@example.com';
                     userRepositoryMock.findOne.mockReturnValueOnce(currentUser);
 
@@ -1179,7 +1179,7 @@ describe('UserService', () => {
 
                 it('if successful - but mail send failed', async (done) => {
                     const userFromJwt = new User();
-                    userFromJwt.id = 1;
+                    userFromJwt.id = '1';
 
                     const valuesToUpdate = {
                         mail: 'changed@example.com',
@@ -1187,7 +1187,7 @@ describe('UserService', () => {
                     };
 
                     const currentUser = new User();
-                    currentUser.id = 1;
+                    currentUser.id = '1';
                     currentUser.mail = 'current@example.com';
                     userRepositoryMock.findOne.mockReturnValueOnce(currentUser);
 
@@ -1215,7 +1215,7 @@ describe('UserService', () => {
             describe('* should return error if request was invalid', () => {
                 it('user not found', async () => {
                     const userFromJwt = new User();
-                    userFromJwt.id = 1;
+                    userFromJwt.id = '1';
                     const valuesToUpdate = {
                         mail: 'changed@example.com',
                         domain: 'domain'
@@ -1236,7 +1236,7 @@ describe('UserService', () => {
 
                 it('email already in use', async () => {
                     const userFromJwt = new User();
-                    userFromJwt.id = 1;
+                    userFromJwt.id = '1';
                     const valuesToUpdate = {
                         mail: 'changed@example.com',
                         domain: 'domain'
@@ -1262,7 +1262,7 @@ describe('UserService', () => {
                         domain: undefined
                     };
                     const userFromJwt = new User();
-                    userFromJwt.id = 1;
+                    userFromJwt.id = '1';
 
                     userRepositoryMock.findOne.mockReturnValueOnce(new User());
                     userRepositoryMock.findOne.mockReturnValueOnce(undefined);
@@ -1283,7 +1283,7 @@ describe('UserService', () => {
                         domain: 'domain'
                     };
                     const userFromJwt = new User();
-                    userFromJwt.id = 1;
+                    userFromJwt.id = '1';
 
                     userRepositoryMock.findOne.mockReturnValueOnce(new User());
                     userRepositoryMock.findOne.mockReturnValueOnce(undefined);

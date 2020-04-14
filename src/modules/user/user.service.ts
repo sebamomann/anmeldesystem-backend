@@ -40,7 +40,7 @@ export class UserService {
     ) {
     }
 
-    public async findById(id: number): Promise<User> {
+    public async findById(id: string): Promise<User> {
         const user = await this.userRepository.findOne({where: {id: id}});
 
         if (user === undefined) {

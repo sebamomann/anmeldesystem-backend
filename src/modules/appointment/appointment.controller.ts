@@ -46,7 +46,7 @@ export class AppointmentController {
         let _slim = slim === 'true';
 
         return this.appointmentService
-            .findByLink(user, link, permissions, _slim, req)
+            .get(user, link, permissions, _slim)
             .then(tAppointment => {
                 if (tAppointment === null) {
                     res.status(HttpStatus.NO_CONTENT).json();
@@ -55,6 +55,7 @@ export class AppointmentController {
 
                 res.status(HttpStatus.OK).json(tAppointment);
             }).catch((err) => {
+                console.log(err);
                 throw err;
             });
     }

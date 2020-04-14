@@ -40,7 +40,7 @@ describe('Appointment Controller', () => {
             it('successful request', async () => {
                 const result = new Appointment();
 
-                jest.spyOn(appointmentService, 'findByLink')
+                jest.spyOn(appointmentService, 'get')
                     .mockImplementation(async (): Promise<Appointment> => Promise.resolve(result));
 
                 const mockUserToSatisfyParameter = new User();
@@ -67,7 +67,7 @@ describe('Appointment Controller', () => {
             it('successful request (nothing changed)', async () => {
                 const result = null;
 
-                jest.spyOn(appointmentService, 'findByLink')
+                jest.spyOn(appointmentService, 'get')
                     .mockImplementation(async (): Promise<Appointment> => Promise.resolve(result));
 
                 const mockUserToSatisfyParameter = new User();
@@ -95,7 +95,7 @@ describe('Appointment Controller', () => {
             it('appointment not found', async () => {
                 const result = new EntityNotFoundException(null, null, 'appointment');
 
-                jest.spyOn(appointmentService, 'findByLink')
+                jest.spyOn(appointmentService, 'get')
                     .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
 
                 const mockUserToSatisfyParameter = new User();
@@ -123,7 +123,7 @@ describe('Appointment Controller', () => {
             it('undefined error occurred', async () => {
                 const result = new Error();
 
-                jest.spyOn(appointmentService, 'findByLink')
+                jest.spyOn(appointmentService, 'get')
                     .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
 
                 const mockUserToSatisfyParameter = new User();

@@ -1,8 +1,8 @@
 import {Injectable} from '@nestjs/common';
-import {Addition} from "./addition.entity";
+import {Addition} from './addition.entity';
 import {InjectRepository} from '@nestjs/typeorm';
-import {getRepository, Repository} from 'typeorm';
-import {Appointment} from "../appointment/appointment.entity";
+import {Repository} from 'typeorm';
+import {Appointment} from '../appointment/appointment.entity';
 
 @Injectable()
 export class AdditionService {
@@ -17,12 +17,13 @@ export class AdditionService {
     }
 
     public async findByNameAndAppointment(name: string, appointment: Appointment) {
-        console.log("where " + name);
-        return getRepository(Addition)
-            .createQueryBuilder("addition")
-            .where("addition.name = :name", {name: name})
-            .andWhere("addition.appointmentId = :appointmentId", {appointmentId: appointment.id})
-            .select(["addition"])
-            .getOne();
+        return await this.additionRepository.findOne({
+            where: {
+                name: name,
+                appointment: {
+                    id: appointment.id
+                }
+            }
+        });
     }
 }

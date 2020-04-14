@@ -9,14 +9,16 @@ import {AdditionService} from '../addition/addition.service';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {UserService} from '../user/user.service';
 import {FileService} from '../file/file.service';
-import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {UnknownUsersException} from '../../exceptions/UnknownUsersException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
-import {Etag} from '../../util/etag';
+import {Enrollment} from '../enrollment/enrollment.entity';
+import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 
 const crypto = require('crypto');
+var logger = require('../../logger');
+const appointmentMapper = require('./appointment.mapper');
 
 @Injectable()
 export class AppointmentService {
@@ -35,141 +37,214 @@ export class AppointmentService {
     ) {
     }
 
-    private static isCreator(fAppointment: Appointment, user: User) {
-        return fAppointment.creator.username === user.username;
+    public static isCreatorOfAppointment(_appointment: Appointment, _user: User) {
+        if (_user === undefined || _user === null || !_user) {
+            return false;
+        }
+
+        return _appointment.creator.username === _user.username;
     }
 
-    public async findByLink(user: User, link: string, permissions: any, slim: boolean, req) {
+    public static isAdministratorOfAppointment(_appointment: Appointment, _user: User) {
+        if (_user === undefined || _user === null || !_user) {
+            return false;
+        }
+
+        return _appointment.administrators !== undefined
+            && _appointment.administrators.some(sAdministrator => sAdministrator.username === _user.username);
+    }
+
+    private static async _handleDateValidation(date, deadline) {
+        if (date < deadline) {
+            throw new InvalidValuesException(null, 'The date can not be before the deadline', ['date']);
+        }
+
+        return date;
+    }
+
+    private static async _handleDeadlineValidation(date, deadline) {
+        if (deadline > date) {
+            throw new InvalidValuesException(null, 'The deadline can not be after the date', ['deadline']);
+        }
+
+        return deadline;
+    }
+
+    public async findByLink(link: string): Promise<Appointment> {
+        let appointment = this.appointmentRepository.findOne({
+            where: {
+                link: link
+            },
+            relations: ['administrators']
+        });
+
+        if (appointment === undefined) {
+            throw new EntityNotFoundException(null, null, 'appointment');
+        }
+
+        return appointment;
+    }
+
+    /**
+     * Get a appointment by its link. Checking for permissions by query parameter,
+     * being creator or being administrator.
+     *
+     * @param user Requester
+     * @param link Link of appointment to fetch for
+     * @param permissions Needed if appointment is hidden. Gives permission for enrollment
+     * @param slim Exclude enrollments and files to save bandwidth
+     *
+     * @returns Appointment after applying filters
+     *
+     * @throws EntityNotFoundException if appointment not found
+     */
+    public async get(user: User, link: string, permissions: any, slim: boolean) {
         let appointment;
 
         try {
-            appointment = await this.find(link, user, permissions);
+            appointment = await this.findByLink(link);
         } catch (e) {
             throw e;
         }
 
-        const etag = Etag.generate(JSON.stringify(appointment));
+        appointment = appointmentMapper.permission(this, appointment, user, permissions);
+        appointment = appointmentMapper.slim(this, appointment, slim);
+        appointment = appointmentMapper.basic(this, appointment);
 
-        if (req.headers['if-none-match']
-            && req.headers['if-none-match'] == 'W/' + '"' + etag + '"') {
-            return null;
-        } else {
-            return appointment;
-        }
+        return appointment;
     }
 
-    async create(appointment: Appointment, user: User) {
-        let appointmentToDb = new Appointment();
+    /**
+     * Create appointment. <br/>
+     * Not all options are passed here. Only the core information gets processed.
+     * All other information are getting set via the specific options
+     *
+     * @param rawData Appointment data to create appointment with
+     * @param user Requester
+     *
+     * @returns Created appointment after applying filters
+     *
+     * @throws DuplicateValueException if link is already in use
+     */
+    public async create(rawData: Appointment, user: User) {
+        let appointment = new Appointment();
 
-        if (appointment.description.length < 10) {
-            throw new InvalidValuesException(null, 'Minimum length of 10 needed', ['description']);
+        appointment.title = rawData.title;
+        appointment.description = rawData.description;
+
+        try {
+            appointment.link = await this.handleAppointmentLink(rawData.link);
+        } catch (e) {
+            throw e;
         }
 
-        appointmentToDb.title = appointment.title;
-        appointmentToDb.description = appointment.description;
+        appointment.location = rawData.location;
 
-        if (appointment.link === null || appointment.link.length < 5) {
-            let link;
+        // Only date validation needed
+        // date < deadline === deadline > date
+        try {
+            appointment.date = await AppointmentService._handleDateValidation(rawData.date, rawData.deadline);
+        } catch (e) {
+            throw e;
+        }
 
-            do {
-                link = this.makeid(5);
-            } while (await this.linkInUse(link));
+        appointment.deadline = rawData.deadline;
 
-            appointmentToDb.link = link;
+        if (rawData.maxEnrollments > 0) {
+            appointment.maxEnrollments = rawData.maxEnrollments;
         } else {
-            if (await this.linkInUse(appointment.link)) {
-                throw new DuplicateValueException(null, null, ['link']);
+            appointment.maxEnrollments = null;
+        }
+
+        appointment.driverAddition = rawData.driverAddition;
+        appointment.creator = user;
+        appointment.additions = await this._createAdditionEntitiesAndFilterDuplicates(rawData.additions);
+
+        appointment = await this.appointmentRepository.save(appointment);
+        appointment = appointmentMapper.permission(this, appointment, user, {});
+        appointment = appointmentMapper.slim(this, appointment, false);
+        appointment = appointmentMapper.basic(this, appointment);
+
+        return appointment;
+    }
+
+    /**
+     *
+     * Updated values passed by any object. Only overall data allowed to update like this.<br/>
+     * additions, link, date deadline need special validation.
+     *
+     * @param toChange any {} with the values to change given Appointment with
+     * @param link Current link of Appointment
+     * @param user Requester
+     */
+    public async update(toChange: any, link: string, user: User) {
+        let appointment;
+
+        try {
+            appointment = await this.findByLink(link);
+        } catch (e) {
+            throw e;
+        }
+
+        try {
+            if (!(await this.hasPermission(user, link))) {
+                throw new InsufficientPermissionsException();
             }
-
-            appointmentToDb.link = appointment.link;
-        }
-
-        appointmentToDb.location = appointment.location;
-        appointmentToDb.date = appointment.date;
-        appointmentToDb.deadline = appointment.deadline;
-
-        if (appointment.maxEnrollments > 0) {
-            appointmentToDb.maxEnrollments = appointment.maxEnrollments;
-        } else {
-            appointmentToDb.maxEnrollments = null;
-        }
-
-        appointmentToDb.driverAddition = appointment.driverAddition;
-        appointmentToDb.creator = user;
-
-        let additionsToDb = [];
-        for (const fAddition of appointment.additions) {
-            let _addition: Addition = new Addition();
-            _addition.name = fAddition.name;
-            await this.additionRepository.save(_addition);
-            additionsToDb.push(_addition);
-        }
-
-        // Administrators
-        //let faultyAdministratorMails = [];
-        let administratorsToDb = [];
-        // for (const fAdmin of appointment.administrators) {
-        //     const _user: User = await this.userRepository.findOne({where: {mail: fAdmin}});
-        //     if (_user !== null && _user !== undefined) {
-        //         administratorsToDb.push(_user);
-        //     } else {
-        //         faultyAdministratorMails.push(fAdmin);
-        //     }
-        // }
-        //
-        // if (faultyAdministratorMails.length > 0) {
-        //     throw new UnknownUsersException('NOT_FOUND', `Users not found by mail`, faultyAdministratorMails);
-        // }
-        appointmentToDb.administrators = administratorsToDb;
-
-        appointmentToDb.additions = additionsToDb;
-
-        // Files
-        let filesToDb = [];
-        // for (const fFile of appointment.files) {
-        //     let _file: File = new File();
-        //     _file.name = fFile.name;
-        //     _file.data = fFile.data;
-        //
-        //     const createdFile = await this.fileRepository.save(_file);
-        //     filesToDb.push(createdFile);
-        // }
-
-        appointmentToDb.files = filesToDb;
-
-        return await this.appointmentRepository.save(appointmentToDb);
-    }
-
-    async update(toChange: any, link: string, user: User) {
-        let appointment = await this.findBasic(link);
-
-        if (!this.hasPermission(user, link)) {
+        } catch (e) {
             throw new InsufficientPermissionsException();
         }
 
+        const allowedValuesToChange = ['title', 'description', 'link',
+            'location', 'date', 'deadline', 'maxEnrollments', 'hidden', 'additions',
+            'driverAddition'];
+
         for (const [key, value] of Object.entries(toChange)) {
-            console.log(key, value);
-            if (key in appointment && appointment[key] !== value) {
-                let _value = value;
+            if (key in appointment
+                && appointment[key] !== value
+                && allowedValuesToChange.indexOf(key) > -1) {
+                let changedValue = value;
+
                 if (key === 'additions') {
-                    _value = await this.handleAdditions(value, appointment);
+                    changedValue = await this._handleAdditionsUpdate(value, appointment);
                 }
+
                 if (key === 'link') {
                     if (await this.linkInUse(value)) {
-                        console.log('Link in use ' + value);
                         throw new DuplicateValueException(null, null, ['link']);
                     }
-                    _value = value;
-                }
-                console.log(`${key} changed from ${JSON.stringify(appointment[key])} to ${JSON.stringify(_value)}`);
 
-                appointment[key] = _value;
+                    changedValue = value;
+                }
+
+                if (key === 'date') {
+                    try {
+                        changedValue = await AppointmentService._handleDateValidation(value, appointment.deadline);
+                    } catch (e) {
+                        throw e;
+                    }
+                }
+
+                if (key === 'deadline') {
+                    try {
+                        changedValue = await AppointmentService._handleDeadlineValidation(appointment.date, value);
+                    } catch (e) {
+                        throw e;
+                    }
+                }
+
+                logger.log('debug', `[${appointment.id}] ${key} changed from ${JSON.stringify(appointment[key])} to ${JSON.stringify(changedValue)}`);
+
+                appointment[key] = changedValue;
             }
         }
 
-        await this.appointmentRepository.save(appointment);
+        appointment = await this.appointmentRepository.save(appointment);
 
-        return await this.find(appointment.link, user, null);
+        appointment = appointmentMapper.permission(this, appointment, user, {});
+        appointment = appointmentMapper.slim(this, appointment, false);
+        appointment = appointmentMapper.basic(this, appointment);
+
+        return appointment;
     }
 
     public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
@@ -206,11 +281,11 @@ export class AppointmentService {
 
         appointments.map(fAppointment => {
             if (user != null) {
-                if (this.isAdministrator(fAppointment, user)) {
+                if (AppointmentService.isAdministratorOfAppointment(fAppointment, user)) {
                     fAppointment.reference.push('ADMIN');
                 }
 
-                if (AppointmentService.isCreator(fAppointment, user)) {
+                if (AppointmentService.isCreatorOfAppointment(fAppointment, user)) {
                     fAppointment.reference.push('CREATOR');
                 }
 
@@ -257,7 +332,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreator(appointment, _user)) {
+        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -280,7 +355,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreator(appointment, _user)) {
+        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -291,17 +366,26 @@ export class AppointmentService {
         return this.appointmentRepository.save(appointment);
     }
 
-    async hasPermission(user: User, link: string,): Promise<boolean> {
-        let appointment;
+    async findBasic(link: string): Promise<Appointment> {
+        return await getRepository(Appointment)
+            .createQueryBuilder('appointment')
+            .where('appointment.link = :link', {link: link})
+            .leftJoinAndSelect('appointment.additions', 'additions')
+            .leftJoinAndSelect('appointment.files', 'files')
+            .leftJoinAndSelect('appointment.administrators', 'administrators')
+            .leftJoinAndSelect('appointment.creator', 'creator')
+            .select(['appointment', 'additions', 'files.name', 'files.id', 'administrators', 'creator'])
+            .getOne();
+    }
 
-        try {
-            appointment = await this.find(link, null, null);
-        } catch (e) {
-            throw new InsufficientPermissionsException();
+    makeid(length) {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
-
-        return AppointmentService.isCreator(appointment, user)
-            || this.isAdministrator(appointment, user);
+        return result;
     }
 
     public async addFile(_user: User, link: string, data: any) {
@@ -313,7 +397,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreator(appointment, _user)) {
+        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -336,7 +420,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreator(appointment, _user)) {
+        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -360,7 +444,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreator(appointment, user)) {
+        if (!AppointmentService.isCreatorOfAppointment(appointment, user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -413,8 +497,8 @@ export class AppointmentService {
 
         if (appointment.hidden &&
             permissions != null &&
-            !AppointmentService.isCreator(appointment, user) &&
-            !this.isAdministrator(appointment, user)) {
+            !AppointmentService.isCreatorOfAppointment(appointment, user) &&
+            !AppointmentService.isAdministratorOfAppointment(appointment, user)) {
             let ids = [];
             let tokens = [];
             for (const queryKey of Object.keys(permissions)) {
@@ -457,59 +541,133 @@ export class AppointmentService {
         return appointment;
     }
 
-    private isAdministrator(fAppointment: Appointment, user: User) {
-        return fAppointment.administrators !== undefined
-            && fAppointment.administrators.some(sAdministrator => sAdministrator.username === user.username);
-    }
-
-    async findBasic(link: string): Promise<Appointment> {
-        return await getRepository(Appointment)
-            .createQueryBuilder('appointment')
-            .where('appointment.link = :link', {link: link})
-            .leftJoinAndSelect('appointment.additions', 'additions')
-            .leftJoinAndSelect('appointment.files', 'files')
-            .leftJoinAndSelect('appointment.administrators', 'administrators')
-            .leftJoinAndSelect('appointment.creator', 'creator')
-            .select(['appointment', 'additions', 'files.name', 'files.id', 'administrators', 'creator'])
-            .getOne();
-    }
-
-    private async handleAdditions(value, appointment: Appointment) {
-        let additions = [];
-        let _additions: { name: string }[];
-        _additions = value;
-
-        for (let fAddition of _additions) {
-            let _addition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
-            if (_addition !== undefined) {
-                additions.push(_addition);
-            } else {
-                _addition = new Addition();
-                _addition.name = fAddition.name;
-                await this.additionRepository.save(_addition);
-                additions.push(_addition);
-            }
-        }
-
-        return additions;
-    }
-
-    private async linkInUse(link) {
-        return await this.findBasic(link) !== undefined;
-    }
-
     arrayBufferToBase64(buffer) {
         console.log(String.fromCharCode.apply(null, new Uint16Array(buffer)));
         return String.fromCharCode.apply(null, new Uint16Array(buffer));
     }
 
-    makeid(length) {
-        var result = '';
-        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var charactersLength = characters.length;
-        for (var i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    public async hasPermission(user: User, link: string,): Promise<boolean> {
+        let appointment;
+
+        try {
+            appointment = await this.findByLink(link);
+        } catch (e) {
+            throw new InsufficientPermissionsException();
         }
-        return result;
+
+        return AppointmentService.isCreatorOfAppointment(appointment, user)
+            || AppointmentService.isAdministratorOfAppointment(appointment, user);
+    }
+
+    /**
+     * Filters out all enrollments, the requester is not allowed to see.<br />
+     * Done by validation the query parameters (id and token) passed with te request.
+     * If the token is valid and the enrollment id exists in the enrollments array, then return it.<br/>
+     * <br />
+     * The query parameters are determined by the starting sequence
+     * <br />
+     * "perm" for the id (e.g. perm1, perm2, perm3) <br />
+     * "token" for the validation token of the id (e.g. token1, token2, token3) <br/>
+     * <br />
+     *
+     * IMPORTANT - The order of the ids with their corresponding token is important!.
+     * The second id passed, will be verified with the second passed token!
+     *
+     * @param permissions All raw query parameters
+     * @param enrollments Enrollments to filter
+     *
+     * @returns Enrollment[] ALl filtered enrollments
+     */
+    public permissionHandling(permissions: any, enrollments: Enrollment[]) {
+        let extractedIds = [];
+        let extractedTokens = [];
+        for (const queryKey of Object.keys(permissions)) {
+            if (queryKey.startsWith('perm')) {
+                extractedIds.push(permissions[queryKey]);
+            } else if (queryKey.startsWith('token')) {
+                extractedTokens.push(permissions[queryKey]);
+            }
+        }
+
+        let validIds = [];
+        extractedIds.forEach((fId, i) => {
+            const token = crypto.createHash('sha256')
+                .update(fId + process.env.SALT_ENROLLMENT)
+                .digest('hex');
+            if (extractedTokens[i] !== undefined
+                && token === extractedTokens[i].replace(' ', '+')) {
+                validIds.push(fId);
+            }
+        });
+
+        return enrollments.filter(fEnrollment => {
+            if (validIds.includes(fEnrollment.id)) {
+                return fEnrollment;
+            }
+        });
+    }
+
+    private async handleAppointmentLink(_link: string) {
+        let link = '';
+
+        if (_link === null || _link === undefined || _link === '') {
+            do {
+                link = this.makeid(5);
+            } while (await this.linkInUse(link));
+        } else {
+            if (await this.linkInUse(_link)) {
+                throw new DuplicateValueException(null, null, ['link']);
+            }
+
+            link = _link;
+        }
+
+        return link;
+    }
+
+    private async linkInUse(link) {
+        try {
+            await this.findByLink(link);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    private async _createAdditionEntitiesAndFilterDuplicates(_additions) {
+        let output = [];
+
+        if (_additions !== undefined) {
+            for (const fAddition of _additions) {
+                if (!output.some(sAddition => sAddition.name === fAddition.name)) {
+                    let _addition: Addition = new Addition();
+                    _addition.name = fAddition.name;
+                    await this.additionRepository.save(_addition);
+                    output.push(_addition);
+                }
+            }
+        }
+
+        return output;
+    }
+
+    private async _handleAdditionsUpdate(mixedAdditions, appointment: Appointment) {
+        let output = [];
+
+        for (let fAddition of mixedAdditions) {
+            let potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
+            if (potExistingAddition !== undefined) {
+                if (!output.some(sAddition => sAddition === potExistingAddition)) {
+                    output.push(potExistingAddition);
+                }
+            } else {
+                potExistingAddition = new Addition();
+                potExistingAddition.name = fAddition.name;
+                potExistingAddition = await this.additionRepository.save(potExistingAddition);
+                output.push(potExistingAddition);
+            }
+        }
+
+        return output;
     }
 }

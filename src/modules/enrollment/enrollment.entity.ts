@@ -12,18 +12,18 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from 'typeorm';
-import {Appointment} from "../appointment/appointment.entity";
-import {Addition} from "../addition/addition.entity";
-import {Driver} from "./driver/driver.entity";
-import {Passenger} from "./passenger/passenger.entity";
-import {Comment} from "./comment/comment.entity";
-import {User} from "../user/user.entity";
-import {Key} from "./key/key.entity";
-import {Exclude} from "class-transformer";
-import {Mail} from "./mail/mail.entity";
+import {Appointment} from '../appointment/appointment.entity';
+import {Addition} from '../addition/addition.entity';
+import {Driver} from './driver/driver.entity';
+import {Passenger} from './passenger/passenger.entity';
+import {Comment} from './comment/comment.entity';
+import {User} from '../user/user.entity';
+import {Key} from './key/key.entity';
+import {Exclude} from 'class-transformer';
+import {Mail} from './mail/mail.entity';
 
 @Entity()
-@Index("index_unique_name_appointment", ["name", "appointment"], {unique: true}) // first style
+@Index('index_unique_name_appointment', ['name', 'appointment'], {unique: true}) // first style
 export class Enrollment {
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -37,7 +37,7 @@ export class Enrollment {
     @OneToOne(type => Driver, driver => driver.enrollment,
         {
             eager: true,
-            onUpdate: "CASCADE",
+            onUpdate: 'CASCADE',
         })
     driver: Driver;
 
@@ -45,7 +45,7 @@ export class Enrollment {
         passenger => passenger.enrollment,
         {
             eager: true,
-            onUpdate: "CASCADE",
+            onUpdate: 'CASCADE',
         })
     passenger: Passenger;
 
@@ -72,18 +72,18 @@ export class Enrollment {
 
     @ManyToOne(type => User,
         user => user.enrollments,
-        {onDelete: "CASCADE"})
+        {onDelete: 'CASCADE'})
     @JoinColumn()
     creator: User;
 
     @OneToOne(type => Key,
         key => key.enrollment,
-        {onDelete: "CASCADE"})
+        {onDelete: 'CASCADE'})
     key: Key;
 
     @OneToOne(type => Mail,
         mail => mail.enrollment,
-        {onDelete: "CASCADE"})
+        {onDelete: 'CASCADE'})
     mail: Mail;
 
     @UpdateDateColumn({name: 'lud', nullable: true})
