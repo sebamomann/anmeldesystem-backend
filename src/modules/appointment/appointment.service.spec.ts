@@ -20,6 +20,8 @@ import {DuplicateValueException} from '../../exceptions/DuplicateValueException'
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
+import {UnknownUserException} from '../../exceptions/UnknownUserException';
+import {EntityGoneException} from '../../exceptions/EntityGoneException';
 
 const crypto = require('crypto');
 
@@ -114,7 +116,7 @@ describe('AppointmentService', () => {
                 jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(actual).toEqual(result);
+                expect(typeof actual).toBe('object');
             });
 
             it('successful - as creator should include "iat" and "lud"', async () => {
@@ -465,6 +467,7 @@ describe('AppointmentService', () => {
             });
         });
     });
+
     describe('* update appointment', () => {
         describe('* should return updated entity if successful', () => {
             describe('* update additions', () => {
@@ -825,208 +828,522 @@ describe('AppointmentService', () => {
                 const actual = await appointmentService.getAll(user, permissions, slim);
                 expect(actual).toHaveLength(1);
             });
+        });
+    });
 
-            it('successful - as creator (2)', async () => {
-                const user = new User();
-                user.username = 'username';
-                const permissions = {};
-                const slim = false;
+    describe('* parse references', () => {
+        it('successful - as creator', async () => {
+            const user = new User();
+            user.username = 'username';
+            const pins = [];
 
-                const owned1 = new Appointment();
-                owned1.id = '1';
-                owned1.creator = user;
-                owned1.enrollments = [];
+            const appointment = new Appointment();
+            appointment.id = '1';
+            appointment.creator = user;
+            appointment.enrollments = [];
 
-                const owned2 = new Appointment();
-                owned2.id = '2';
-                owned2.creator = user;
-                owned2.enrollments = [];
+            const actual = await appointmentService.parseReferences(user, appointment, pins);
+            expect(actual).toEqual(['CREATOR']);
+        });
 
-                jest.spyOn(appointmentService, 'getAppointments')
-                    .mockReturnValueOnce(Promise.resolve([owned1, owned2]));
+        it('successful - as administrator', async () => {
+            const user = new User();
+            user.username = 'username';
+            const pins = [];
 
-                const actual = await appointmentService.getAll(user, permissions, slim);
-                expect(actual).toHaveLength(2);
-                expect(actual).toEqual(
-                    expect.arrayContaining([
-                        expect.objectContaining({
-                            id: owned1.id,
-                            reference: expect.arrayContaining(['CREATOR'])
-                        }),
-                        expect.objectContaining({
-                            id: owned2.id,
-                            reference: expect.arrayContaining(['CREATOR'])
-                        }),
-                    ])
-                );
-            });
+            const creator = new User();
+            creator.username = 'creator';
 
-            it('successful - as administrator (2)', async () => {
-                const user = new User();
-                user.username = 'username';
-                const permissions = {};
-                const slim = false;
+            const appointment = new Appointment();
+            appointment.id = '1';
+            appointment.creator = creator;
+            appointment.administrators = [user];
+            appointment.enrollments = [];
 
-                const creator = new User();
-                creator.username = 'creator';
+            const actual = await appointmentService.parseReferences(user, appointment, pins);
+            expect(actual).toEqual(['ADMIN']);
+        });
 
-                const owned1 = new Appointment();
-                owned1.id = '1';
-                owned1.creator = creator;
-                owned1.administrators = [user];
-                owned1.enrollments = [];
+        it('successful - pinned', async () => {
+            const user = new User();
+            user.username = 'username';
+            const pins = [];
 
-                const owned2 = new Appointment();
-                owned2.id = '2';
-                owned2.creator = creator;
-                owned2.administrators = [user];
-                owned2.enrollments = [];
+            const creator = new User();
+            creator.username = 'creator';
 
-                jest.spyOn(appointmentService, 'getAppointments')
-                    .mockReturnValueOnce(Promise.resolve([owned1, owned2]));
+            const appointment = new Appointment();
+            appointment.id = '1';
+            appointment.creator = creator;
+            appointment.pinners = [user];
+            appointment.enrollments = [];
 
-                const actual = await appointmentService.getAll(user, permissions, slim);
-                expect(actual).toHaveLength(2);
-                expect(actual).toEqual(
-                    expect.arrayContaining([
-                        expect.objectContaining({
-                            id: owned1.id,
-                            reference: expect.arrayContaining(['ADMIN'])
-                        }),
-                        expect.objectContaining({
-                            id: owned2.id,
-                            reference: expect.arrayContaining(['ADMIN'])
-                        }),
-                    ])
-                );
-            });
+            const actual = await appointmentService.parseReferences(user, appointment, pins);
+            expect(actual).toEqual(['PINNED']);
+        });
 
-            it('successful - pinned (2) - parameter', async () => {
-                const user = new User();
-                const permissions = {'pin1': 'link1', 'pin2': 'link2'};
-                const slim = false;
+        it('successful - pinned - parameter', async () => {
+            const user = new User();
+            user.username = 'username';
+            const pins = ['link'];
 
-                const creator = new User();
-                creator.username = 'creator';
+            const creator = new User();
+            creator.username = 'creator';
 
-                const notOwned1 = new Appointment();
-                notOwned1.id = '1';
-                notOwned1.creator = creator;
-                notOwned1.enrollments = [];
-                notOwned1.link = 'link1';
+            const appointment = new Appointment();
+            appointment.id = '1';
+            appointment.link = 'link';
+            appointment.creator = creator;
+            appointment.enrollments = [];
 
-                const notOwned2 = new Appointment();
-                notOwned2.id = '2';
-                notOwned2.creator = creator;
-                notOwned2.enrollments = [];
-                notOwned2.link = 'link2';
+            const actual = await appointmentService.parseReferences(user, appointment, pins);
+            expect(actual).toEqual(['PINNED']);
+        });
 
-                jest.spyOn(appointmentService, 'getAppointments')
-                    .mockReturnValueOnce(Promise.resolve([notOwned1, notOwned2]));
+        it('successful - enrolled', async () => {
+            const user = new User();
+            user.username = 'username';
+            const pins = [];
 
-                const actual = await appointmentService.getAll(user, permissions, slim);
-                expect(actual).toHaveLength(2);
-                expect(actual).toEqual(
-                    expect.arrayContaining([
-                        expect.objectContaining({
-                            id: notOwned1.id,
-                            reference: expect.arrayContaining(['PINNED'])
-                        }),
-                        expect.objectContaining({
-                            id: notOwned2.id,
-                            reference: expect.arrayContaining(['PINNED'])
-                        }),
-                    ])
-                );
-            });
+            const creator = new User();
+            creator.username = 'creator';
 
-            it('successful - pinned (2) - pinner', async () => {
+            const enrollment = new Enrollment();
+            enrollment.creator = user;
+
+            const appointment = new Appointment();
+            appointment.id = '1';
+            appointment.creator = creator;
+            appointment.enrollments = [enrollment];
+
+            const actual = await appointmentService.parseReferences(user, appointment, pins);
+            expect(actual).toEqual(['ENROLLED']);
+        });
+    });
+
+    describe('* administrator', () => {
+        describe('* add', () => {
+            it('should return nothing if successful', async (done) => {
                 const user = new User();
                 user.id = '1';
-                const permissions = {};
-                const slim = false;
+                user.username = 'username';
 
-                const creator = new User();
-                creator.username = 'creator';
+                const administratorToAdd = new User();
+                administratorToAdd.username = 'admin';
 
-                const notOwned1 = new Appointment();
-                notOwned1.id = '1';
-                notOwned1.creator = creator;
-                notOwned1.enrollments = [];
-                notOwned1.pinners = [user];
-                notOwned1.link = 'link1';
+                const appointment = new Appointment();
+                appointment.creator = user;
+                appointment.administrators = [];
 
-                const notOwned2 = new Appointment();
-                notOwned2.id = '2';
-                notOwned2.creator = creator;
-                notOwned2.enrollments = [];
-                notOwned2.pinners = [user];
-                notOwned2.link = 'link2';
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                userRepositoryMock.findOne.mockReturnValueOnce(administratorToAdd);
+                appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
-                jest.spyOn(appointmentService, 'getAppointments')
-                    .mockReturnValueOnce(Promise.resolve([notOwned1, notOwned2]));
-
-                const actual = await appointmentService.getAll(user, permissions, slim);
-                expect(actual).toHaveLength(2);
-                expect(actual).toEqual(
-                    expect.arrayContaining([
-                        expect.objectContaining({
-                            id: notOwned1.id,
-                            reference: expect.arrayContaining(['PINNED'])
-                        }),
-                        expect.objectContaining({
-                            id: notOwned2.id,
-                            reference: expect.arrayContaining(['PINNED'])
-                        }),
-                    ])
-                );
+                appointmentService
+                    .addAdministrator(user, appointment.link, administratorToAdd.username)
+                    .then(() => {
+                        done();
+                    })
+                    .catch(() => {
+                        throw new Error('I have failed you, Anakin. Should have returned nothing');
+                    });
             });
 
-            it('successful - enrolled (2)', async () => {
+            describe('* should return error if failed', () => {
+                it('appointment not found', async () => {
+                    const user = new User();
+                    const administratorToAdd = new User();
+                    const appointment = new Appointment();
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    appointmentService
+                        .addAdministrator(user, appointment.link, administratorToAdd.username)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityNotFoundException);
+                            expect(err.data).toEqual('appointment');
+                        });
+                });
+
+                it('insufficient permissions', async () => {
+                    const user = new User();
+                    user.username = 'username';
+
+                    const administratorToAdd = new User();
+
+                    const creator = new User();
+                    creator.username = 'creator';
+
+                    const appointment = new Appointment();
+                    appointment.creator = creator;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+
+                    appointmentService
+                        .addAdministrator(user, appointment.link, administratorToAdd.username)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned InsufficientPermissionsException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                        });
+                });
+
+                it('user not found by username', async () => {
+                    const user = new User();
+                    user.username = 'username';
+
+                    const administratorToAdd = new User();
+
+                    const appointment = new Appointment();
+                    appointment.creator = user;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                    userRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    appointmentService
+                        .addAdministrator(user, appointment.link, administratorToAdd.username)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned UnknownUserException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(UnknownUserException);
+                        });
+                });
+            });
+        });
+
+        describe('* remove', () => {
+            it('should return nothing if successful', async (done) => {
                 const user = new User();
-                user.username = 'username';
                 user.id = '1';
-                const permissions = {};
-                const slim = false;
+                user.username = 'username';
 
-                const creator = new User();
-                creator.username = 'creator';
+                const administratorToAdd = new User();
+                administratorToAdd.username = 'admin';
 
-                const enrollment1 = new Enrollment();
-                enrollment1.creator = user;
+                const appointment = new Appointment();
+                appointment.creator = user;
+                appointment.administrators = [];
 
-                const notOwned1 = new Appointment();
-                notOwned1.id = '1';
-                notOwned1.creator = creator;
-                notOwned1.enrollments = [enrollment1];
-                notOwned1.link = 'link1';
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                appointmentRepositoryMock.save.mockReturnValueOnce((val) => val);
 
-                const enrollment2 = new Enrollment();
-                enrollment2.creator = user;
+                appointmentService
+                    .removeAdministrator(user, appointment.link, administratorToAdd.username)
+                    .then(() => {
+                        done();
+                    })
+                    .catch((err) => {
+                        throw new Error('I have failed you, Anakin. Should have returned nothing');
+                    });
+            });
 
-                const notOwned2 = new Appointment();
-                notOwned2.id = '2';
-                notOwned2.creator = creator;
-                notOwned2.enrollments = [enrollment2];
-                notOwned2.link = 'link2';
+            describe('* should return error if failed', () => {
+                it('appointment not found', async () => {
+                    const user = new User();
+                    const administratorToAdd = new User();
+                    const appointment = new Appointment();
 
-                jest.spyOn(appointmentService, 'getAppointments')
-                    .mockReturnValueOnce(Promise.resolve([notOwned1, notOwned2]));
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
-                const actual = await appointmentService.getAll(user, permissions, slim);
-                expect(actual).toHaveLength(2);
-                expect(actual).toEqual(
-                    expect.arrayContaining([
-                        expect.objectContaining({
-                            id: notOwned1.id,
-                            reference: expect.arrayContaining(['ENROLLED'])
-                        }),
-                        expect.objectContaining({
-                            id: notOwned2.id,
-                            reference: expect.arrayContaining(['ENROLLED'])
-                        }),
-                    ])
-                );
+                    appointmentService
+                        .removeAdministrator(user, appointment.link, administratorToAdd.username)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityNotFoundException);
+                            expect(err.data).toEqual('appointment');
+                        });
+                });
+
+                it('insufficient permissions', async () => {
+                    const user = new User();
+                    user.username = 'username';
+
+                    const administratorToAdd = new User();
+
+                    const creator = new User();
+                    creator.username = 'creator';
+
+                    const appointment = new Appointment();
+                    appointment.creator = creator;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+
+                    appointmentService
+                        .removeAdministrator(user, appointment.link, administratorToAdd.username)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned InsufficientPermissionsException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                        });
+                });
+            });
+        });
+    });
+
+    describe('* files', () => {
+        describe('* add', () => {
+            it('should return nothing if successful', async (done) => {
+                const user = new User();
+                user.id = '1';
+                user.username = 'username';
+
+                const fileToAdd: { name: string, data: string } = {name: '', data: ''};
+                fileToAdd.name = 'myfile.png';
+                fileToAdd.data = 'data';
+
+                const appointment = new Appointment();
+                appointment.creator = user;
+                appointment.files = [];
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                fileRepositoryMock.save.mockReturnValueOnce((val) => val);
+                appointmentRepositoryMock.save.mockReturnValueOnce((val) => val);
+
+                appointmentService
+                    .addFile(user, appointment.link, fileToAdd)
+                    .then(() => {
+                        done();
+                    })
+                    .catch((err) => {
+                        throw new Error('I have failed you, Anakin. Should have returned nothing');
+                    });
+            });
+
+            describe('* should return error if failed', () => {
+                it('appointment not found', async () => {
+                    const user = new User();
+                    const fileToAdd: { name: string, data: string } = {name: '', data: ''};
+                    const appointment = new Appointment();
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    appointmentService
+                        .addFile(user, appointment.link, fileToAdd)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityNotFoundException);
+                            expect(err.data).toEqual('appointment');
+                        });
+                });
+
+                it('insufficient permissions', async () => {
+                    const user = new User();
+                    user.username = 'username';
+
+                    const fileToAdd: { name: string, data: string } = {name: '', data: ''};
+                    fileToAdd.name = 'myfile.png';
+                    fileToAdd.data = 'data';
+
+                    const creator = new User();
+                    creator.username = 'creator';
+
+                    const appointment = new Appointment();
+                    appointment.creator = creator;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+
+                    appointmentService
+                        .addFile(user, appointment.link, fileToAdd)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned InsufficientPermissionsException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                        });
+                });
+            });
+        });
+
+        describe('* remove', () => {
+            it('should return nothing if successful', async (done) => {
+                const user = new User();
+                user.id = '1';
+                user.username = 'username';
+
+                const fileIdToRemove = '1';
+
+                const appointment = new Appointment();
+                appointment.creator = user;
+                appointment.files = [];
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                fileRepositoryMock.findOne.mockReturnValueOnce(new File());
+                fileRepositoryMock.remove.mockReturnValueOnce((val) => val);
+
+                appointmentService
+                    .removeFile(user, appointment.link, fileIdToRemove)
+                    .then(() => {
+                        done();
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        throw new Error('I have failed you, Anakin. Should have returned nothing');
+                    });
+            });
+
+            describe('* should return error if failed', () => {
+                it('appointment not found', async () => {
+                    const user = new User();
+                    const fileIdToRemove = '1';
+                    const appointment = new Appointment();
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    appointmentService
+                        .removeFile(user, appointment.link, fileIdToRemove)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityNotFoundException);
+                            expect(err.data).toEqual('appointment');
+                        });
+                });
+
+                it('insufficient permissions', async () => {
+                    const user = new User();
+                    user.username = 'username';
+
+                    const fileIdToRemove = '1';
+
+                    const creator = new User();
+                    creator.username = 'creator';
+
+                    const appointment = new Appointment();
+                    appointment.creator = creator;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+
+                    appointmentService
+                        .removeFile(user, appointment.link, fileIdToRemove)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned InsufficientPermissionsException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                        });
+                });
+
+                it('file not found', async () => {
+                    const user = new User();
+                    user.username = 'username';
+
+                    const fileIdToRemove = '1';
+
+                    const appointment = new Appointment();
+                    appointment.creator = user;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                    fileRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    appointmentService
+                        .removeFile(user, appointment.link, fileIdToRemove)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned EntityGoneException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityGoneException);
+                            expect(err.data).toEqual('file');
+                        });
+                });
+            });
+        });
+    });
+
+    describe('* pin appointment', () => {
+        describe('should return void if successful', () => {
+            it('pin', async () => {
+                const appointment = new Appointment();
+                appointment.id = '1';
+                appointment.link = 'link';
+
+                const user = new User();
+                user.pinned = [];
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                userRepositoryMock.findOne.mockReturnValueOnce(user);
+                userRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                appointmentService
+                    .togglePinningAppointment(user, appointment.link)
+                    .then((res) => {
+                        expect(res).toEqual([appointment]);
+                    })
+                    .catch((err) => {
+                        throw new Error('I have failed you, Anakin. Should have returned nothing');
+                    });
+            });
+
+            it('un-pin', async () => {
+                const appointment = new Appointment();
+                appointment.id = '1';
+                appointment.link = 'link';
+
+                const user = new User();
+                user.pinned = [appointment];
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                userRepositoryMock.findOne.mockReturnValueOnce(user);
+                userRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                appointmentService
+                    .togglePinningAppointment(user, appointment.link)
+                    .then((res) => {
+                        expect(res).toEqual([]);
+                    })
+                    .catch(() => {
+                        throw new Error('I have failed you, Anakin. Should have returned nothing');
+                    });
+            });
+        });
+
+        describe('should return error if successful', () => {
+            it('appointment not found', async () => {
+                const appointment = new Appointment();
+                const user = new User();
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                appointmentService
+                    .togglePinningAppointment(user, appointment.link)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have thrown EntityNotFoundException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(EntityNotFoundException);
+                        expect(err.data).toEqual('appointment');
+                    });
+            });
+
+            it('user gone', async () => {
+                const appointment = new Appointment();
+                appointment.id = '1';
+                appointment.link = 'link';
+
+                const user = new User();
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                userRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                appointmentService
+                    .togglePinningAppointment(user, appointment.link)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have thrown EntityNotFoundException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(EntityNotFoundException);
+                        expect(err.data).toEqual('user');
+                    });
             });
         });
     });
@@ -1042,6 +1359,7 @@ export const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(()
     find: jest.fn(),
     update: jest.fn(),
     save: jest.fn(),
+    remove: jest.fn(),
     query: jest.fn(),
     createQueryBuilder: jest.fn(() => ({
         update: jest.fn().mockReturnThis(),

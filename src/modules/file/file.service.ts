@@ -1,5 +1,5 @@
 import {Injectable} from '@nestjs/common';
-import {getRepository, Repository} from 'typeorm';
+import {Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {File} from './file.entity';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
@@ -11,10 +11,11 @@ export class FileService {
     }
 
     async findById(id: string) {
-        const file = await getRepository(File)
-            .createQueryBuilder('file')
-            .where('file.id = :id', {id: id})
-            .getOne();
+        const file = await this.fileRepository.findOne({
+            where: {
+                id: id
+            }
+        });
 
         if (file === undefined) {
             throw new EntityNotFoundException();

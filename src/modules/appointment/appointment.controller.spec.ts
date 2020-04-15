@@ -863,7 +863,7 @@ describe('Appointment Controller', () => {
     describe('* pin appointment', () => {
         describe('* successful should return nothing 204 status code', () => {
             it('successful request', async () => {
-                jest.spyOn(appointmentService, 'pinAppointment')
+                jest.spyOn(appointmentService, 'togglePinningAppointment')
                     .mockImplementation(async (): Promise<void> => Promise.resolve());
 
                 const mockUserToSatisfyParameter = new User();
@@ -881,7 +881,7 @@ describe('Appointment Controller', () => {
             it('not permitted for appointment', async () => {
                 const result = new InsufficientPermissionsException();
 
-                jest.spyOn(appointmentService, 'pinAppointment')
+                jest.spyOn(appointmentService, 'togglePinningAppointment')
                     .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                 const mockUserToSatisfyParameter = new User();
@@ -900,7 +900,7 @@ describe('Appointment Controller', () => {
             it('appointment not found', async () => {
                 const result = new EntityNotFoundException(null, null, 'appointment');
 
-                jest.spyOn(appointmentService, 'pinAppointment')
+                jest.spyOn(appointmentService, 'togglePinningAppointment')
                     .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                 const mockUserToSatisfyParameter = new User();
@@ -919,7 +919,7 @@ describe('Appointment Controller', () => {
             it('undefined error has occurred', async () => {
                 const result = new Error();
 
-                jest.spyOn(appointmentService, 'pinAppointment')
+                jest.spyOn(appointmentService, 'togglePinningAppointment')
                     .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                 const mockUserToSatisfyParameter = new User();

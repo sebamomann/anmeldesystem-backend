@@ -74,7 +74,7 @@ module.exports = {
             (_appointment);
         } else if (_appointment.hidden) {
             const __enrollments = appointmentService
-                .permissionHandling(permissions, _appointment.enrollments);
+                .filterPermittedEnrollments(permissions, _appointment.enrollments);
             enrollmentsObject = {enrollments: __enrollments};
         }
 

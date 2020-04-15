@@ -199,7 +199,7 @@ export class AppointmentController {
                    @Param('link') link: string,
                    @Res() res: Response) {
         return this.appointmentService
-            .pinAppointment(user, link)
+            .togglePinningAppointment(user, link)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
