@@ -15,6 +15,7 @@ import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException'
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {Enrollment} from '../enrollment/enrollment.entity';
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
+import {GeneratorUtil} from '../../util/generator.util';
 
 const crypto = require('crypto');
 var logger = require('../../logger');
@@ -367,28 +368,6 @@ export class AppointmentService {
         return this.appointmentRepository.save(appointment);
     }
 
-    async findBasic(link: string): Promise<Appointment> {
-        return await getRepository(Appointment)
-            .createQueryBuilder('appointment')
-            .where('appointment.link = :link', {link: link})
-            .leftJoinAndSelect('appointment.additions', 'additions')
-            .leftJoinAndSelect('appointment.files', 'files')
-            .leftJoinAndSelect('appointment.administrators', 'administrators')
-            .leftJoinAndSelect('appointment.creator', 'creator')
-            .select(['appointment', 'additions', 'files.name', 'files.id', 'administrators', 'creator'])
-            .getOne();
-    }
-
-    makeid(length) {
-        var result = '';
-        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var charactersLength = characters.length;
-        for (var i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        return result;
-    }
-
     public async addFile(_user: User, link: string, data: any) {
         let appointment;
 
@@ -613,7 +592,7 @@ export class AppointmentService {
 
         if (_link === null || _link === undefined || _link === '') {
             do {
-                link = this.makeid(5);
+                link = GeneratorUtil.makeid(5);
             } while (await this.linkInUse(link));
         } else {
             if (await this.linkInUse(_link)) {
