@@ -806,6 +806,234 @@ describe('AppointmentService', () => {
             });
         });
     });
+
+    describe('* get Appointments', () => {
+        describe('* should return array of entities if successful', () => {
+            it('successful', async () => {
+                const user = new User();
+                user.username = 'username';
+                const permissions = {};
+                const slim = false;
+
+                const appointment1 = new Appointment();
+                appointment1.creator = user;
+                appointment1.enrollments = [];
+
+                jest.spyOn(appointmentService, 'getAppointments')
+                    .mockReturnValueOnce(Promise.resolve([appointment1]));
+
+                const actual = await appointmentService.getAll(user, permissions, slim);
+                expect(actual).toHaveLength(1);
+            });
+
+            it('successful - as creator (2)', async () => {
+                const user = new User();
+                user.username = 'username';
+                const permissions = {};
+                const slim = false;
+
+                const owned1 = new Appointment();
+                owned1.id = '1';
+                owned1.creator = user;
+                owned1.enrollments = [];
+
+                const owned2 = new Appointment();
+                owned2.id = '2';
+                owned2.creator = user;
+                owned2.enrollments = [];
+
+                jest.spyOn(appointmentService, 'getAppointments')
+                    .mockReturnValueOnce(Promise.resolve([owned1, owned2]));
+
+                const actual = await appointmentService.getAll(user, permissions, slim);
+                expect(actual).toHaveLength(2);
+                expect(actual).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            id: owned1.id,
+                            reference: expect.arrayContaining(['CREATOR'])
+                        }),
+                        expect.objectContaining({
+                            id: owned2.id,
+                            reference: expect.arrayContaining(['CREATOR'])
+                        }),
+                    ])
+                );
+            });
+
+            it('successful - as administrator (2)', async () => {
+                const user = new User();
+                user.username = 'username';
+                const permissions = {};
+                const slim = false;
+
+                const creator = new User();
+                creator.username = 'creator';
+
+                const owned1 = new Appointment();
+                owned1.id = '1';
+                owned1.creator = creator;
+                owned1.administrators = [user];
+                owned1.enrollments = [];
+
+                const owned2 = new Appointment();
+                owned2.id = '2';
+                owned2.creator = creator;
+                owned2.administrators = [user];
+                owned2.enrollments = [];
+
+                jest.spyOn(appointmentService, 'getAppointments')
+                    .mockReturnValueOnce(Promise.resolve([owned1, owned2]));
+
+                const actual = await appointmentService.getAll(user, permissions, slim);
+                expect(actual).toHaveLength(2);
+                expect(actual).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            id: owned1.id,
+                            reference: expect.arrayContaining(['ADMIN'])
+                        }),
+                        expect.objectContaining({
+                            id: owned2.id,
+                            reference: expect.arrayContaining(['ADMIN'])
+                        }),
+                    ])
+                );
+            });
+
+            it('successful - pinned (2) - parameter', async () => {
+                const user = new User();
+                const permissions = {'pin1': 'link1', 'pin2': 'link2'};
+                const slim = false;
+
+                const creator = new User();
+                creator.username = 'creator';
+
+                const notOwned1 = new Appointment();
+                notOwned1.id = '1';
+                notOwned1.creator = creator;
+                notOwned1.enrollments = [];
+                notOwned1.link = 'link1';
+
+                const notOwned2 = new Appointment();
+                notOwned2.id = '2';
+                notOwned2.creator = creator;
+                notOwned2.enrollments = [];
+                notOwned2.link = 'link2';
+
+                jest.spyOn(appointmentService, 'getAppointments')
+                    .mockReturnValueOnce(Promise.resolve([notOwned1, notOwned2]));
+
+                const actual = await appointmentService.getAll(user, permissions, slim);
+                expect(actual).toHaveLength(2);
+                expect(actual).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            id: notOwned1.id,
+                            reference: expect.arrayContaining(['PINNED'])
+                        }),
+                        expect.objectContaining({
+                            id: notOwned2.id,
+                            reference: expect.arrayContaining(['PINNED'])
+                        }),
+                    ])
+                );
+            });
+
+            it('successful - pinned (2) - pinner', async () => {
+                const user = new User();
+                user.id = '1';
+                const permissions = {};
+                const slim = false;
+
+                const creator = new User();
+                creator.username = 'creator';
+
+                const notOwned1 = new Appointment();
+                notOwned1.id = '1';
+                notOwned1.creator = creator;
+                notOwned1.enrollments = [];
+                notOwned1.pinners = [user];
+                notOwned1.link = 'link1';
+
+                const notOwned2 = new Appointment();
+                notOwned2.id = '2';
+                notOwned2.creator = creator;
+                notOwned2.enrollments = [];
+                notOwned2.pinners = [user];
+                notOwned2.link = 'link2';
+
+                jest.spyOn(appointmentService, 'getAppointments')
+                    .mockReturnValueOnce(Promise.resolve([notOwned1, notOwned2]));
+
+                const actual = await appointmentService.getAll(user, permissions, slim);
+                expect(actual).toHaveLength(2);
+                expect(actual).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            id: notOwned1.id,
+                            reference: expect.arrayContaining(['PINNED'])
+                        }),
+                        expect.objectContaining({
+                            id: notOwned2.id,
+                            reference: expect.arrayContaining(['PINNED'])
+                        }),
+                    ])
+                );
+            });
+
+            it('successful - enrolled (2)', async () => {
+                const user = new User();
+                user.username = 'username';
+                user.id = '1';
+                const permissions = {};
+                const slim = false;
+
+                const creator = new User();
+                creator.username = 'creator';
+
+                const enrollment1 = new Enrollment();
+                enrollment1.creator = user;
+
+                const notOwned1 = new Appointment();
+                notOwned1.id = '1';
+                notOwned1.creator = creator;
+                notOwned1.enrollments = [enrollment1];
+                notOwned1.link = 'link1';
+
+                const enrollment2 = new Enrollment();
+                enrollment2.creator = user;
+
+                const notOwned2 = new Appointment();
+                notOwned2.id = '2';
+                notOwned2.creator = creator;
+                notOwned2.enrollments = [enrollment2];
+                notOwned2.link = 'link2';
+
+                jest.spyOn(appointmentService, 'getAppointments')
+                    .mockReturnValueOnce(Promise.resolve([notOwned1, notOwned2]));
+
+                const actual = await appointmentService.getAll(user, permissions, slim);
+                expect(actual).toHaveLength(2);
+                expect(actual).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            id: notOwned1.id,
+                            reference: expect.arrayContaining(['ENROLLED'])
+                        }),
+                        expect.objectContaining({
+                            id: notOwned2.id,
+                            reference: expect.arrayContaining(['ENROLLED'])
+                        }),
+                    ])
+                );
+            });
+        });
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
 });
 
 // @ts-ignore

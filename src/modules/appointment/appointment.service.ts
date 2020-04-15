@@ -248,36 +248,35 @@ export class AppointmentService {
     }
 
     public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
-        let pins = [''];
+        let pins = [];
         for (const queryKey of Object.keys(params)) {
             if (queryKey.startsWith('pin')) {
                 pins.push(params[queryKey]);
             }
         }
 
-        let appointments = await getRepository(Appointment)
-            .createQueryBuilder('appointment')
-            .leftJoinAndSelect('appointment.creator', 'creator')
-            .leftJoinAndSelect('appointment.additions', 'additions')
-            .leftJoinAndSelect('appointment.enrollments', 'enrollments')
-            .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
-            .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
-            .leftJoinAndSelect('enrollments.additions', 'enrollment_additions')
-            .leftJoinAndSelect('enrollments.creator', 'enrollment_creator')
-            .leftJoinAndSelect('appointment.files', 'files')
-            .leftJoinAndSelect('appointment.administrators', 'administrators')
-            .leftJoinAndSelect('appointment.pinners', 'pinners')
-            .select(['appointment', 'additions', 'enrollments',
-                'enrollment_passenger', 'enrollment_driver', 'enrollment_creator',
-                'creator.username', 'creator.name', 'files', 'administrators.username', 'administrators.name',
-                'enrollment_additions', 'pinners'])
-            .where('creator.id = :creatorId', {creatorId: user.id})
-            .orWhere('administrators.id = :admin', {admin: user.id})
-            .orWhere('enrollments.creatorId = :user', {user: user.id})
-            .orWhere('pinners.id = :user', {user: user.id})
-            .orWhere('appointment.link IN (:...links)', {links: pins})
-            .orderBy('appointment.date', 'DESC')
-            .getMany();
+        let appointments = await this.getAppointments(user, pins);
+        // let appointments = await this.appointmentRepository.find({
+        //     join: {
+        //         alias: "appointment",
+        //         leftJoinAndSelect: {
+        //             administrators: "appointment.administrators",
+        //             enrollments: "appointment.enrollments",
+        //             enrollmentCreator: "enrollments.creator",
+        //             pinners: "appointment.pinners"
+        //         }
+        //     },
+        //     where: [
+        //         {creator: {id: user.id}},
+        //         {administrators: {id: user.id}},
+        //         {enrollmentCreator: {id: user.id}},
+        //         {pinners: {id: user.id}},
+        //         {link: In(pins)}
+        //     ],
+        //     order: {
+        //         date: 'DESC'
+        //     }
+        // });
 
         appointments.map(fAppointment => {
             if (user != null) {
@@ -297,17 +296,19 @@ export class AppointmentService {
                     fAppointment.reference.push('ENROLLED');
                 }
 
-                if (fAppointment.pinners !== undefined
-                    && fAppointment.pinners.some(sPinner => sPinner.id === user.id)
+                if ((fAppointment.pinners !== undefined
+                    && fAppointment.pinners.some(sPinner => sPinner.id === user.id))
                     || pins.includes(fAppointment.link)) {
                     fAppointment.reference.push('PINNED');
                 }
             }
 
-            fAppointment.enrollments.map(mEnrollments => {
-                mEnrollments.createdByUser = mEnrollments.creator != null;
-                delete mEnrollments.creator;
-            });
+            if (fAppointment.enrollments) {
+                fAppointment.enrollments.map(mEnrollments => {
+                    mEnrollments.createdByUser = mEnrollments.creator != null;
+                    delete mEnrollments.creator;
+                });
+            }
 
             delete fAppointment.pinners;
         });
@@ -669,5 +670,31 @@ export class AppointmentService {
         }
 
         return output;
+    }
+
+    public async getAppointments(user: User, pins) {
+        return await getRepository(Appointment)
+            .createQueryBuilder('appointment')
+            .leftJoinAndSelect('appointment.creator', 'creator')
+            .leftJoinAndSelect('appointment.additions', 'additions')
+            .leftJoinAndSelect('appointment.enrollments', 'enrollments')
+            .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
+            .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
+            .leftJoinAndSelect('enrollments.additions', 'enrollment_additions')
+            .leftJoinAndSelect('enrollments.creator', 'enrollment_creator')
+            .leftJoinAndSelect('appointment.files', 'files')
+            .leftJoinAndSelect('appointment.administrators', 'administrators')
+            .leftJoinAndSelect('appointment.pinners', 'pinners')
+            .select(['appointment', 'additions', 'enrollments',
+                'enrollment_passenger', 'enrollment_driver', 'enrollment_creator',
+                'creator.username', 'creator.name', 'files', 'administrators.username', 'administrators.name',
+                'enrollment_additions', 'pinners'])
+            .where('creator.id = :creatorId', {creatorId: user.id})
+            .orWhere('administrators.id = :admin', {admin: user.id})
+            .orWhere('enrollments.creatorId = :user', {user: user.id})
+            .orWhere('pinners.id = :user', {user: user.id})
+            .orWhere('appointment.link IN (:...links)', {links: pins})
+            .orderBy('appointment.date', 'DESC')
+            .getMany();
     }
 }
