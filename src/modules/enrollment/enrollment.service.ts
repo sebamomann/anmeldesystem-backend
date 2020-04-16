@@ -187,7 +187,7 @@ export class EnrollmentService {
     }
 
     async create(enrollment: Enrollment, link: string, user: User, domain: string, asquery: string) {
-        const appointment: Appointment = await this.appointmentService.find(link, user, null);
+        const appointment = await this.appointmentService.findByLink(link);
 
         try {
             EnrollmentService.checkForEmptyValues(enrollment, user);

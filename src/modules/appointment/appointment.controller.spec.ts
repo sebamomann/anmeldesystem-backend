@@ -535,7 +535,7 @@ describe('Appointment Controller', () => {
             describe('* remove administrator', () => {
                 describe('* successful should return nothing with 204 status code', () => {
                     it('successful request', async () => {
-                        jest.spyOn(appointmentService, 'hasPermission')
+                        jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                             .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
 
                         const mockUserToSatisfyParameter = new User();
@@ -553,7 +553,7 @@ describe('Appointment Controller', () => {
                     it('not permitted for appointment', async () => {
                         const result = new InsufficientPermissionsException();
 
-                        jest.spyOn(appointmentService, 'hasPermission')
+                        jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                             .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                         const mockUserToSatisfyParameter = new User();
@@ -572,7 +572,7 @@ describe('Appointment Controller', () => {
                     it('undefined error has occurred', async () => {
                         const result = new Error();
 
-                        jest.spyOn(appointmentService, 'hasPermission')
+                        jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                             .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                         const mockUserToSatisfyParameter = new User();
@@ -595,7 +595,7 @@ describe('Appointment Controller', () => {
     describe('* check permissions', () => {
         describe('* successful should return nothing 204 status code', () => {
             it('successful request', async () => {
-                jest.spyOn(appointmentService, 'hasPermission')
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                     .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
 
                 const mockUserToSatisfyParameter = new User();
@@ -611,7 +611,7 @@ describe('Appointment Controller', () => {
 
         describe('* failure should return error', () => {
             it('not permitted for appointment (normal permission check)', async () => {
-                jest.spyOn(appointmentService, 'hasPermission')
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                     .mockImplementation(async (): Promise<boolean> => Promise.resolve(false));
 
                 const mockUserToSatisfyParameter = new User();
@@ -630,7 +630,7 @@ describe('Appointment Controller', () => {
             it('not permitted for appointment (appointment not found)', async () => {
                 const result = new InsufficientPermissionsException();
 
-                jest.spyOn(appointmentService, 'hasPermission')
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                     .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                 const mockUserToSatisfyParameter = new User();
@@ -649,7 +649,7 @@ describe('Appointment Controller', () => {
             it('undefined error has occurred', async () => {
                 const result = new Error();
 
-                jest.spyOn(appointmentService, 'hasPermission')
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                     .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                 const mockUserToSatisfyParameter = new User();

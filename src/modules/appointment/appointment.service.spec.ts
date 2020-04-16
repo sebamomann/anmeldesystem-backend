@@ -153,6 +153,23 @@ describe('AppointmentService', () => {
                 expect(actual).not.toHaveProperty('lud');
             });
 
+            it('successful - !hidden', async () => {
+                const user = new User();
+                const link = 'link';
+                const permissions = {};
+                const slim = false;
+
+                const result = new Appointment();
+                result.hidden = false;
+                appointmentRepositoryMock.findOne.mockReturnValue(result);
+
+                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+
+                const actual = await appointmentService.get(user, link, permissions, slim);
+                expect(typeof actual).toBe('object');
+            });
+
             it('successful - hidden and !(creator || admin) should have empty enrollments', async () => {
                 const user = new User();
                 const link = 'link';
@@ -314,6 +331,26 @@ describe('AppointmentService', () => {
                 expect(actual.enrollments[0]).toHaveProperty('createdByUser', true);
             });
         });
+        describe('* should return error if failed', () => {
+            it('appointment not found', async () => {
+                const user = new User();
+                const link = 'link';
+                const permissions = {};
+                const slim = false;
+
+                appointmentRepositoryMock.findOne.mockReturnValue(undefined);
+
+                appointmentService
+                    .get(user, link, permissions, slim)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(EntityNotFoundException);
+                        expect(err.data).toBe('appointment');
+                    });
+            });
+        });
     });
 
     describe('* create appointment', () => {
@@ -355,6 +392,18 @@ describe('AppointmentService', () => {
                     const actual = await appointmentService.create(appointment, user);
                     expect(actual.link).toMatch(/^[A-Za-z0-9]{5}$/);
                 });
+            });
+
+            it('> 0 maxEnrollments', async () => {
+                const appointment = new Appointment();
+                appointment.maxEnrollments = 1;
+                const user = new User();
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+                appointmentRepositoryMock.save.mockImplementation((val) => val);
+
+                const actual = await appointmentService.create(appointment, user);
+                expect(actual.maxEnrollments).toEqual(1);
             });
 
             it('0 maxEnrollments - replace with null', async () => {
@@ -488,7 +537,7 @@ describe('AppointmentService', () => {
                     const toChange = {additions: [existingAddition1, existingAddition2, extraAddition]};
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    jest.spyOn(appointmentService, 'hasPermission').mockReturnValueOnce(Promise.resolve(true));
+                    jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                     additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition1));
                     additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition2));
                     additionRepositoryMock.findOne.mockReturnValueOnce(undefined);
@@ -527,7 +576,7 @@ describe('AppointmentService', () => {
                     const toChange = {additions: [existingAddition1, existingAddition2, extraAddition]};
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    jest.spyOn(appointmentService, 'hasPermission').mockReturnValueOnce(Promise.resolve(true));
+                    jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                     additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition1));
                     additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition2));
                     additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition2));
@@ -564,7 +613,7 @@ describe('AppointmentService', () => {
                     const toChange = {additions: [existingAddition1]};
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    jest.spyOn(appointmentService, 'hasPermission').mockReturnValueOnce(Promise.resolve(true));
+                    jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                     additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition1));
                     additionRepositoryMock.save.mockImplementation((val) => {
                         val.id = '' + Date.now();
@@ -594,7 +643,7 @@ describe('AppointmentService', () => {
                 const toChange = {link: 'newLink'};
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'hasPermission').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
                 jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
@@ -613,7 +662,7 @@ describe('AppointmentService', () => {
                 const toChange = {date: new Date(Date.now() + (5 * 60 * 60 * 1000))};
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'hasPermission').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
                 jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
                 jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
@@ -631,7 +680,7 @@ describe('AppointmentService', () => {
                 const toChange = {deadline: new Date(Date.now() + (2.5 * 60 * 60 * 1000))};
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'hasPermission').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
                 jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
                 jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
@@ -648,7 +697,7 @@ describe('AppointmentService', () => {
                 const toChange = {title: 'newTitle'};
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'hasPermission').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
                 jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
                 jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
@@ -665,7 +714,7 @@ describe('AppointmentService', () => {
                 const toChange = {description: 'newDescription'};
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'hasPermission').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
                 jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
                 jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
@@ -696,17 +745,16 @@ describe('AppointmentService', () => {
                     });
             });
 
-            describe('* no permission', () => {
-                it('* user check', async () => {
-                    const user = new User();
-                    user.username = 'username';
-                    const appointment = new Appointment();
-                    appointment.link = 'currentTitle';
-                    const creator = new User();
-                    user.username = 'secondUsername';
-                    appointment.creator = creator;
+            it('no permissions', async () => {
+                const user = new User();
+                user.username = 'username';
+                const appointment = new Appointment();
+                appointment.link = 'currentTitle';
+                const creator = new User();
+                user.username = 'secondUsername';
+                appointment.creator = creator;
 
-                    const toChange = {title: 'newTitle'};
+                const toChange = {title: 'newTitle'};
 
                     appointmentRepositoryMock.findOne.mockReturnValue(appointment);
 
@@ -720,29 +768,6 @@ describe('AppointmentService', () => {
                         });
                 });
 
-                it('* appointment not found // NEVER GONNA HAPPEN DUE TO PRE-CHECK', async () => {
-                    const user = new User();
-                    user.id = '1';
-                    const appointment = new Appointment();
-                    appointment.link = 'currentTitle';
-                    appointment.creator = user;
-
-                    const toChange = {title: 'newTitle'};
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-
-                    appointmentService
-                        .update(toChange, appointment.link, user)
-                        .then(() => {
-                            throw new Error('I have failed you, Anakin. Should have gotten an InsufficientPermissionsException');
-                        })
-                        .catch((err) => {
-                            expect(err).toBeInstanceOf(InsufficientPermissionsException);
-                        });
-                });
-            });
-
             it('* link in use', async () => {
                 const user = new User();
                 const appointment = new Appointment();
@@ -751,7 +776,7 @@ describe('AppointmentService', () => {
                 const toChange = {link: 'newLink'};
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'hasPermission').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
 
                 appointmentService
@@ -773,7 +798,7 @@ describe('AppointmentService', () => {
                 const toChange = {date: new Date(Date.now() + (2 * 60 * 60 * 1000))};
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'hasPermission').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
 
                 appointmentService
                     .update(toChange, appointment.link, user)
@@ -795,7 +820,7 @@ describe('AppointmentService', () => {
                 const toChange = {deadline: new Date(Date.now() + (5 * 60 * 60 * 1000))};
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'hasPermission').mockReturnValueOnce(Promise.resolve(true));
+                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
 
                 appointmentService
                     .update(toChange, appointment.link, user)
@@ -820,6 +845,24 @@ describe('AppointmentService', () => {
 
                 const appointment1 = new Appointment();
                 appointment1.creator = user;
+                appointment1.enrollments = [];
+
+                jest.spyOn(appointmentService, 'getAppointments')
+                    .mockReturnValueOnce(Promise.resolve([appointment1]));
+
+                const actual = await appointmentService.getAll(user, permissions, slim);
+                expect(actual).toHaveLength(1);
+            });
+
+            it('successful - pin parse', async () => {
+                const user = new User();
+                user.username = 'username';
+                const permissions = {'pin1': 'link'};
+                const slim = false;
+
+                const appointment1 = new Appointment();
+                appointment1.creator = user;
+                appointment1.link = 'link';
                 appointment1.enrollments = [];
 
                 jest.spyOn(appointmentService, 'getAppointments')
@@ -1022,18 +1065,18 @@ describe('AppointmentService', () => {
                 user.id = '1';
                 user.username = 'username';
 
-                const administratorToAdd = new User();
-                administratorToAdd.username = 'admin';
+                const administratorToRemove = new User();
+                administratorToRemove.username = 'admin';
 
                 const appointment = new Appointment();
                 appointment.creator = user;
-                appointment.administrators = [];
+                appointment.administrators = [administratorToRemove];
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
                 appointmentRepositoryMock.save.mockReturnValueOnce((val) => val);
 
                 appointmentService
-                    .removeAdministrator(user, appointment.link, administratorToAdd.username)
+                    .removeAdministrator(user, appointment.link, administratorToRemove.username)
                     .then(() => {
                         done();
                     })
@@ -1185,8 +1228,7 @@ describe('AppointmentService', () => {
                     .then(() => {
                         done();
                     })
-                    .catch((err) => {
-                        console.log(err);
+                    .catch(() => {
                         throw new Error('I have failed you, Anakin. Should have returned nothing');
                     });
             });
@@ -1307,7 +1349,7 @@ describe('AppointmentService', () => {
             });
         });
 
-        describe('should return error if successful', () => {
+        describe('* should return error if successful', () => {
             it('appointment not found', async () => {
                 const appointment = new Appointment();
                 const user = new User();
@@ -1344,6 +1386,260 @@ describe('AppointmentService', () => {
                         expect(err).toBeInstanceOf(EntityNotFoundException);
                         expect(err.data).toEqual('user');
                     });
+            });
+        });
+    });
+
+    describe('* permission checking', () => {
+        describe('* is creator', () => {
+            describe('* should return boolean if successful', () => {
+                it('is creator', async () => {
+                    const user = new User();
+                    user.username = 'username';
+
+                    const appointment = new Appointment();
+                    appointment.creator = user;
+
+                    const actual = await AppointmentService.isCreatorOfAppointment(appointment, user);
+                    expect(actual).toEqual(true);
+                });
+
+                it('is not creator', async () => {
+                    const user = new User();
+                    user.username = 'username';
+
+                    const creator = new User();
+                    user.username = 'creator';
+
+                    const appointment = new Appointment();
+                    appointment.creator = creator;
+
+                    const actual = await AppointmentService.isCreatorOfAppointment(appointment, user);
+                    expect(actual).toEqual(false);
+                });
+            });
+
+            describe('* should return boolean if successful - user not defined', () => {
+                it('user undefined', async () => {
+                    const user = undefined;
+                    const appointment = new Appointment();
+
+                    const actual = await AppointmentService.isCreatorOfAppointment(appointment, user);
+                    expect(actual).toEqual(false);
+                });
+
+                it('user null', async () => {
+                    const user = null;
+                    const appointment = new Appointment();
+
+                    const actual = await AppointmentService.isCreatorOfAppointment(appointment, user);
+                    expect(actual).toEqual(false);
+                });
+            });
+        });
+
+        describe('* is administrator', () => {
+            describe('* should return boolean if successful', () => {
+                it('is administrator', async () => {
+                    const user = new User();
+                    user.username = 'username';
+
+                    const appointment = new Appointment();
+                    appointment.administrators = [user];
+
+                    const actual = await AppointmentService.isAdministratorOfAppointment(appointment, user);
+                    expect(actual).toEqual(true);
+                });
+
+                it('is not administrator', async () => {
+                    const user = new User();
+                    user.username = 'username';
+
+                    const appointment = new Appointment();
+                    appointment.administrators = [];
+
+                    const actual = await AppointmentService.isAdministratorOfAppointment(appointment, user);
+                    expect(actual).toEqual(false);
+                });
+            });
+
+            describe('* should return boolean if successful - user not defined', () => {
+                it('user undefined', async () => {
+                    const user = undefined;
+                    const appointment = new Appointment();
+
+                    const actual = await AppointmentService.isAdministratorOfAppointment(appointment, user);
+                    expect(actual).toEqual(false);
+                });
+
+                it('user null', async () => {
+                    const user = null;
+
+                    const appointment = new Appointment();
+                    appointment.creator = user;
+
+                    const actual = await AppointmentService.isAdministratorOfAppointment(appointment, user);
+                    expect(actual).toEqual(false);
+                });
+            });
+
+            describe('* should return boolean if successful - administrator list undefined', () => {
+                it('user undefined', async () => {
+                    const user = undefined;
+                    const appointment = new Appointment();
+                    appointment.administrators = undefined;
+
+                    const actual = await AppointmentService.isAdministratorOfAppointment(appointment, user);
+                    expect(actual).toEqual(false);
+                });
+            });
+        });
+
+        describe('* is creator or administrator', () => {
+            describe('* check by link', () => {
+                describe('* should return boolean if successful', () => {
+                    it('return true if creator', async () => {
+                        const user = new User();
+                        user.username = 'username';
+
+                        const appointment = new Appointment();
+                        appointment.creator = user;
+                        appointment.link = 'link';
+
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+
+                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment.link);
+                        expect(actual).toBe(true);
+                    });
+
+                    it('return true if admin', async () => {
+                        const user = new User();
+                        user.username = 'username';
+
+                        const creator = new User();
+                        user.username = 'creator';
+
+                        const appointment = new Appointment();
+                        appointment.creator = creator;
+                        appointment.link = 'link';
+                        appointment.administrators = [user];
+
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+
+                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment.link);
+                        expect(actual).toBe(true);
+                    });
+
+                    it('return true if both', async () => {
+                        const user = new User();
+                        user.username = 'username';
+
+                        const appointment = new Appointment();
+                        appointment.creator = user;
+                        appointment.link = 'link';
+                        appointment.administrators = [user];
+
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+
+                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment.link);
+                        expect(actual).toBe(true);
+                    });
+
+                    it('return false if not', async () => {
+                        const user = new User();
+                        user.username = 'username';
+
+                        const creator = new User();
+                        user.username = 'creator';
+
+                        const appointment = new Appointment();
+                        appointment.creator = creator;
+                        appointment.link = 'link';
+
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+
+                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment.link);
+                        expect(actual).toBe(false);
+                    });
+                });
+
+                describe('* should return error if failed', () => {
+                    it('appointment not found', async () => {
+                        const user = new User();
+                        user.username = 'username';
+
+                        const appointment = new Appointment();
+                        appointment.link = 'link';
+
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                        appointmentService
+                            .isCreatorOrAdministrator(user, appointment.link)
+                            .then(() => {
+                                throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
+                            })
+                            .catch((err) => {
+                                expect(err).toBeInstanceOf(EntityNotFoundException);
+                                expect(err.data).toBe('appointment');
+                            });
+                    });
+                });
+            });
+
+            describe('* check by appointment', () => {
+                describe('* should return boolean if successful', () => {
+                    it('return true if creator', async () => {
+                        const user = new User();
+                        user.username = 'username';
+
+                        const appointment = new Appointment();
+                        appointment.creator = user;
+
+                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment);
+                        expect(actual).toBe(true);
+                    });
+
+                    it('return true if admin', async () => {
+                        const user = new User();
+                        user.username = 'username';
+
+                        const creator = new User();
+                        user.username = 'creator';
+
+                        const appointment = new Appointment();
+                        appointment.creator = creator;
+                        appointment.administrators = [user];
+
+                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment);
+                        expect(actual).toBe(true);
+                    });
+
+                    it('return true if both', async () => {
+                        const user = new User();
+                        user.username = 'username';
+
+                        const appointment = new Appointment();
+                        appointment.creator = user;
+                        appointment.administrators = [user];
+
+                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment);
+                        expect(actual).toBe(true);
+                    });
+
+                    it('return false if not', async () => {
+                        const user = new User();
+                        user.username = 'username';
+
+                        const creator = new User();
+                        user.username = 'creator';
+
+                        const appointment = new Appointment();
+                        appointment.creator = creator;
+
+                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment);
+                        expect(actual).toBe(false);
+                    });
+                });
             });
         });
     });

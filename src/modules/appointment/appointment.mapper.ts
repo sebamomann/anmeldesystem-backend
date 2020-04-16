@@ -72,7 +72,7 @@ module.exports = {
                 enrollments,
             }))
             (_appointment);
-        } else if (_appointment.hidden) {
+        } else {
             const __enrollments = appointmentService
                 .filterPermittedEnrollments(permissions, _appointment.enrollments);
             enrollmentsObject = {enrollments: __enrollments};

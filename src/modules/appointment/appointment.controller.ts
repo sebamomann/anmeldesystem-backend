@@ -149,7 +149,7 @@ export class AppointmentController {
                   @Param('link') link: string,
                   @Res() res: Response,) {
         return this.appointmentService
-            .hasPermission(user, link)
+            .isCreatorOrAdministrator(user, link)
             .then((result) => {
                 if (result) {
                     res.status(HttpStatus.NO_CONTENT).json();

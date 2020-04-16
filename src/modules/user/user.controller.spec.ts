@@ -15,6 +15,7 @@ import {InvalidRequestException} from '../../exceptions/InvalidRequestException'
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
+import {EmailChange} from './email-change/email-change.entity';
 
 jest.mock('./user.service');
 jest.mock('../../auth/auth.service');
@@ -666,7 +667,7 @@ describe('User Controller', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
                     jest.spyOn(userService, 'mailChangeResendMail')
-                        .mockImplementation(async (): Promise<string> => Promise.resolve(''));
+                        .mockImplementation(async (): Promise<EmailChange> => Promise.resolve(new EmailChange()));
 
                     const mockUserToSatisfyParameter = new User();
                     const mockDomainToSatisfyParameters = 'my.domain.tld';
@@ -684,7 +685,7 @@ describe('User Controller', () => {
                         'There is no active mail change going on. Email resend is not possible');
 
                     jest.spyOn(userService, 'mailChangeResendMail')
-                        .mockImplementation(async (): Promise<string> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<EmailChange> => Promise.reject(result));
 
                     const mockUserToSatisfyParameter = new User();
                     const mockDomainToSatisfyParameters = 'my.domain.tld';
@@ -703,7 +704,7 @@ describe('User Controller', () => {
                     const result = new Error();
 
                     jest.spyOn(userService, 'mailChangeResendMail')
-                        .mockImplementation(async (): Promise<string> => Promise.reject(result));
+                        .mockImplementation(async (): Promise<EmailChange> => Promise.reject(result));
 
                     const mockUserToSatisfyParameter = new User();
                     const mockDomainToSatisfyParameters = 'my.domain.tld';

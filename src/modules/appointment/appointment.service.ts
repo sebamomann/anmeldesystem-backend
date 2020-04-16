@@ -18,8 +18,8 @@ import {GeneratorUtil} from '../../util/generator.util';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 
 const crypto = require('crypto');
-var logger = require('../../logger');
 const appointmentMapper = require('./appointment.mapper');
+const logger = require('../../logger');
 
 @Injectable()
 export class AppointmentService {
@@ -164,6 +164,9 @@ export class AppointmentService {
         appointment.additions = await this._createAdditionEntitiesAndFilterDuplicates(rawData.additions);
 
         appointment = await this.appointmentRepository.save(appointment);
+
+        appointment.reference = this.parseReferences(user, appointment, []);
+
         appointment = appointmentMapper.permission(this, appointment, user, {});
         appointment = appointmentMapper.slim(this, appointment, false);
         appointment = appointmentMapper.basic(this, appointment);
@@ -190,7 +193,7 @@ export class AppointmentService {
         }
 
         try {
-            if (!(await this.hasPermission(user, link))) {
+            if (!(await this.isCreatorOrAdministrator(user, appointment))) {
                 throw new InsufficientPermissionsException();
             }
         } catch (e) {
@@ -242,6 +245,8 @@ export class AppointmentService {
         }
 
         appointment = await this.appointmentRepository.save(appointment);
+
+        appointment.reference = this.parseReferences(user, appointment, []);
 
         appointment = appointmentMapper.permission(this, appointment, user, {});
         appointment = appointmentMapper.slim(this, appointment, false);
@@ -495,99 +500,28 @@ export class AppointmentService {
         return _user.pinned;
     }
 
-    async find(link: string, user: User, permissions: any, slim: boolean = false): Promise<Appointment> {
-        let appointment = await getRepository(Appointment)
-            .createQueryBuilder('appointment')
-            .where('appointment.link = :link', {link: link})
-            .leftJoinAndSelect('appointment.creator', 'creator')
-            .leftJoinAndSelect('appointment.additions', 'additions')
-            .leftJoinAndSelect('appointment.enrollments', 'enrollments')
-            .leftJoinAndSelect('enrollments.creator', 'enrollment_creator')
-            .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
-            .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
-            .leftJoinAndSelect('enrollments.additions', 'enrollment_additions')
-            .leftJoinAndSelect('appointment.files', 'files')
-            .leftJoinAndSelect('appointment.administrators', 'administrators')
-            .leftJoinAndSelect('appointment.pinners', 'pinners')
-            .select(['appointment', 'additions', 'enrollments',
-                'enrollment_passenger', 'enrollment_driver', 'enrollment_creator', 'enrollments.iat',
-                'creator.username', 'creator.name', 'files.name', 'files.id', 'administrators.name', 'administrators.username',
-                'enrollment_additions', 'pinners'])
-            .orderBy('enrollments.iat', 'ASC')
-            .getOne();
-
-        if (appointment === undefined) {
-            throw new EntityNotFoundException(null, null, 'appointment');
-        }
-
-        if (appointment.pinners !== undefined
-            && user != null
-            && appointment.pinners.some(sPinner => sPinner.id === user.id)) {
-            appointment.reference.push('PINNED');
-        }
-
-        if (slim) {
-            delete appointment.files;
-        }
-
-        if (appointment.hidden &&
-            permissions != null &&
-            !AppointmentService.isCreatorOfAppointment(appointment, user) &&
-            !AppointmentService.isAdministratorOfAppointment(appointment, user)) {
-            let ids = [];
-            let tokens = [];
-            for (const queryKey of Object.keys(permissions)) {
-                if (queryKey.startsWith('perm')) {
-                    ids.push(permissions[queryKey]);
-                }
-
-                if (queryKey.startsWith('token')) {
-                    tokens.push(permissions[queryKey]);
-                }
-            }
-
-            let finalIds = [];
-            ids.forEach((fId, i) => {
-                const token = crypto.createHash('sha256')
-                    .update(fId + process.env.SALT_ENROLLMENT)
-                    .digest('hex');
-                if (tokens[i] !== undefined && token === tokens[i].replace(' ', '+')) {
-                    finalIds.push(fId);
-                }
-            });
-
-            appointment.numberOfEnrollments = appointment.enrollments.length;
-            appointment.enrollments = appointment.enrollments.filter(fEnrollment => {
-                if (finalIds.includes(fEnrollment.id)
-                    || (fEnrollment.creator != null &&
-                        user != null &&
-                        fEnrollment.creator.id === user.id)) {
-                    return fEnrollment;
-                }
-            });
-        }
-
-        appointment.enrollments.map(mEnrollment => {
-            mEnrollment.createdByUser = mEnrollment.creator != null;
-            delete mEnrollment.creator;
-            return mEnrollment;
-        });
-
-        return appointment;
-    }
-
-    arrayBufferToBase64(buffer) {
-        console.log(String.fromCharCode.apply(null, new Uint16Array(buffer)));
-        return String.fromCharCode.apply(null, new Uint16Array(buffer));
-    }
-
-    public async hasPermission(user: User, link: string,): Promise<boolean> {
+    /**
+     * Checks if a user is administrator orCreator of an Appointment
+     *
+     * @param user to check permissions for
+     * @param ref (1) link of appointment
+     *            (2) appointment itself
+     *
+     * @returns boolean true if creator or admin - false if not
+     *
+     * @throws See {@link findByLink} for reference
+     */
+    public async isCreatorOrAdministrator(user: User, ref: string | Appointment,): Promise<boolean> {
         let appointment;
 
-        try {
-            appointment = await this.findByLink(link);
-        } catch (e) {
-            throw new InsufficientPermissionsException();
+        if (typeof ref === 'string') {
+            try {
+                appointment = await this.findByLink(ref);
+            } catch (e) {
+                throw e;
+            }
+        } else {
+            appointment = ref;
         }
 
         return AppointmentService.isCreatorOfAppointment(appointment, user)
@@ -778,5 +712,28 @@ export class AppointmentService {
             .orWhere('appointment.link IN (:...links)', {links: pins})
             .orderBy('appointment.date', 'DESC')
             .getMany();
+
+        // return await this.appointmentRepository.find(
+        //     {
+        //         join: {
+        //             alias: 'appointment', innerJoin: {
+        //                 administrators: 'appointment.administrators',
+        //                 enrollments: 'appointment.enrollments',
+        //                 enrollmentsCreator: 'enrollments.creator',
+        //                 pinners: 'appointment.pinners'
+        //             }
+        //         },
+        //         where: [
+        //             {creator: {id: user.id}},
+        //             {administrators: {id: user.id}},
+        //             {enrollmentsCreator: {id: user.id}},
+        //             {pinners: {id: user.id}},
+        //             {link: In(pins)},
+        //         ],
+        //         order: {
+        //             date: 'DESC'
+        //         },
+        //     }
+        // );
     }
 }
