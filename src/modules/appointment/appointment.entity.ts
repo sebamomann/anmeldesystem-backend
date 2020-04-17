@@ -59,7 +59,7 @@ export class Appointment {
         })
     additions: Addition[];
 
-    @Column('smallint', {default: false})
+    @Column({default: false})
     driverAddition: boolean;
 
     @ManyToMany(type => User,

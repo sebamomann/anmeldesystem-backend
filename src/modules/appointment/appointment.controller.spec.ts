@@ -35,6 +35,10 @@ describe('Appointment Controller', () => {
         appointmentController = module.get<AppointmentController>(AppointmentController);
     });
 
+    it('should be defined', () => {
+        expect(appointmentController).toBeDefined();
+    });
+
     describe('* find appointments by link', () => {
         describe('* successful should return entity of appointment with 200 status code', () => {
             it('successful request', async () => {
@@ -220,7 +224,7 @@ describe('Appointment Controller', () => {
             });
         });
 
-        describe('* failure should return error', () => {
+        describe('* failure should forward error', () => {
             it('description.length < 10', async () => {
                 const result = new InvalidValuesException(null,
                     'Minimum length of 10 needed',

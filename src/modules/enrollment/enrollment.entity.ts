@@ -67,9 +67,6 @@ export class Enrollment {
         })
     comments: Comment[];
 
-    @CreateDateColumn()
-    iat: Date;
-
     @ManyToOne(type => User,
         user => user.enrollments,
         {onDelete: 'CASCADE'})
@@ -86,12 +83,15 @@ export class Enrollment {
         {onDelete: 'CASCADE'})
     mail: Mail;
 
+    @CreateDateColumn()
+    iat: Date;
+
     @UpdateDateColumn({name: 'lud', nullable: true})
     @Exclude({toPlainOnly: true})
     lud: Date;
 
     editKey: string;
-    editMail: string;
+    editMail?: string;
     token?: string;
     createdByUser: boolean;
 }
