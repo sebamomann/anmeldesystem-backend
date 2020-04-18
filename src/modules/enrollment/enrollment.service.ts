@@ -1,6 +1,6 @@
 import {Injectable} from '@nestjs/common';
 import {Enrollment} from './enrollment.entity';
-import {getConnection, Repository} from 'typeorm';
+import {Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Appointment} from '../appointment/appointment.entity';
 import {AppointmentService} from '../appointment/appointment.service';
@@ -17,8 +17,10 @@ import {Mail} from './mail/mail.entity';
 import {MailerService} from '@nest-modules/mailer';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
+import {EntityGoneException} from '../../exceptions/EntityGoneException';
 
 const crypto = require('crypto');
+const logger = require('../../logger');
 const enrollmentMapper = require('./enrollment.mapper');
 
 @Injectable()
@@ -46,30 +48,9 @@ export class EnrollmentService {
             .update(enrollment.id + process.env.SALT_ENROLLMENT)
             .digest('hex');
 
-        return enrollment.token !== null
-            && enrollment.token !== undefined
+        return token !== null
+            && token !== undefined
             && (token.replace(' ', '+') === check);
-    }
-
-    private static checkForEmptyValues(enrollment: Enrollment, user: User, isEdit = false) {
-        let emptyValues = [];
-        let mailAddition = '';
-
-        if (enrollment.name === ''
-            || enrollment.name === null) {
-            emptyValues.push('name');
-        }
-        if (!!user === false
-            && ((enrollment.editMail == ''
-                || enrollment.editMail == null)
-                && !isEdit)) {
-            emptyValues.push('mail');
-            mailAddition = '. Since you are not logged in, you need to provide an email address to to enroll.';
-        }
-        if (emptyValues.length > 0) {
-            throw  new EmptyFieldsException(null,
-                'Please specify following values' + mailAddition, emptyValues);
-        }
     }
 
     private static _handleAdditions(_enrollment: Enrollment, _appointment: Appointment) {
@@ -92,28 +73,30 @@ export class EnrollmentService {
         return output;
     }
 
-    private static allowedToEdit(enrollment: Enrollment, user: User, token: string) {
-        let allowEditByUserId = EnrollmentService.allowEditByUserId(enrollment, user);
-        let isAllowedByKey = EnrollmentService.allowEditByToken(enrollment, token);
+    public async findById(id: string) {
+        let enrollment = await this.enrollmentRepository.findOne({
+            where: {
+                id: id
+            }
+        });
 
-        return (allowEditByUserId
-            || isAllowedByKey);
+        if (enrollment === undefined) {
+            throw new EntityNotFoundException(null, null, 'enrollment');
+        }
+
+        return enrollment;
     }
 
-    private static allowEditByUserId(enrollment: Enrollment, user: User) {
-        let isAppointmentCreator = (enrollment.appointment.creator !== null
-            && user.id === enrollment.appointment.creator.id);
-        let isAppointmentAdministrator = (enrollment.appointment.administrators !== null
-            && enrollment.appointment.administrators.some(iAdministrators => {
-                return iAdministrators.mail === user.mail;
-            }));
-        let isEnrollmentCreator = (enrollment.creator !== null
-            && enrollment.creator.id === user.id);
-
-        return isAppointmentCreator || isAppointmentAdministrator || isEnrollmentCreator;
-    }
-
-    public async get(id: string) {
+    /**
+     * Change a existing Enrollment with the given values. <br/>
+     * The allowedValuesToChange array shows all updatable options.
+     *
+     * @param toChange Values to change
+     * @param id Id of Enrollment to change Values for
+     * @param user Optional user
+     * @param token Optional token to verify permission do change Enrollment
+     */
+    public async update(toChange: any, id: string, user: User, token: string) {
         let enrollment;
 
         try {
@@ -122,10 +105,99 @@ export class EnrollmentService {
             throw e;
         }
 
-        enrollment = enrollmentMapper.basic(this, enrollment);
+        const appointment = enrollment.appointment;
 
-        return enrollment;
+        if (!(await this._hasPermission(enrollment, user, token))) {
+            throw new InsufficientPermissionsException();
+        }
+
+        const allowedValuesToChange = ['name', 'comment', 'driver', 'passenger', 'additions'];
+
+        for (const [key, value] of Object.entries(toChange)) {
+            if (key in enrollment
+                && enrollment[key] !== value
+                && allowedValuesToChange.indexOf(key) > -1) {
+                let changedValue = value;
+
+                if (key === 'name'
+                    && enrollment.name !== toChange.name) {
+                    if (await this.existsByName(toChange.name, appointment)) {
+                        throw new DuplicateValueException('DUPLICATE_ENTRY',
+                            'Following values are already taken',
+                            ['name']);
+                    }
+                }
+
+                if (key === 'driver'
+                    && appointment.driverAddition) {
+                    changedValue = await this._handleDriverRelation(toChange);
+                    enrollment.passenger = null;
+                }
+
+                if (key === 'passenger'
+                    && appointment.driverAddition) {
+                    changedValue = await this._handlePassengerRelation(toChange);
+                    enrollment.driver = null;
+                }
+
+                if (key === 'additions') {
+                    try {
+                        changedValue = EnrollmentService._handleAdditions(toChange, appointment);
+                    } catch (e) {
+                        throw e;
+                    }
+                }
+
+                enrollment[key] = changedValue;
+            }
+        }
+
+        let savedEnrollment = await this.enrollmentRepository.save(enrollment);
+
+        savedEnrollment = enrollmentMapper.basic(this, savedEnrollment);
+
+        return savedEnrollment;
     }
+
+    /**
+     * Delete enrollment by its id
+     *
+     * @param id Id of Enrollment to delete
+     * @param token Optional token to prove edit/delete permissions
+     * @param user Optional when user is in a administrative position of the appointment or enrollment
+     *
+     * @throws EntityGoneException if enrollment doesn't exist anymore
+     * @throws InsufficientPermissionsException if user is not allowed to edit/delete
+     */
+    async delete(id: string, token: string, user: User) {
+        let enrollment;
+
+        try {
+            enrollment = await this.findById(id);
+        } catch (e) {
+            throw new EntityGoneException(null, null, 'enrollment');
+        }
+
+        if (!(await this._hasPermission(enrollment, user, token))) {
+            throw new InsufficientPermissionsException();
+        }
+
+        await this.enrollmentRepository.remove(enrollment);
+    }
+
+    // public async get(id: string) {
+    //     let enrollment;
+    //
+    //     try {
+    //         enrollment = await this.findById(id);
+    //     } catch (e) {
+    //         throw e;
+    //     }
+    //
+    //     enrollment = enrollmentMapper.basic(this, enrollment);
+    //
+    //     return enrollment;
+    // }
 
     /**
      * Create a new enrollment. <br />
@@ -207,15 +279,17 @@ export class EnrollmentService {
     }
 
     /**
-     * Change a existing Enrollment with the given values. <br/>
-     * The allowedValuesToChange array shows all updatable options.
+     * Check if user is allowed to edit/delete an Enrollment
      *
-     * @param toChange Values to change
-     * @param id Id of Enrollment to change Values for
-     * @param user Optional user
-     * @param token Optional token to verify permission do change Enrollment
+     * @param id Id of enrollment to delete
+     * @param user Optional user sending the request
+     * @param token Optional token to prove ownership of enrollment
+     *
+     * @returns allowances Object with either "user" or "token" (or both), depending on successful authorization
+     *
+     * @throws InsufficientPermissionsException if user is not authorized
      */
-    public async update(toChange: any, id: string, user: User, token: string) {
+    public async checkPermissions(id: string, user: User, token: string) {
         let enrollment;
 
         try {
@@ -224,110 +298,21 @@ export class EnrollmentService {
             throw e;
         }
 
-        const appointment = enrollment.appointment;
+        let allowances = [];
 
-        if (!EnrollmentService.allowedToEdit(enrollment, user, token)) {
+        if (await this._allowEditByUserId(enrollment, user)) {
+            allowances.push('user');
+        }
+
+        if (EnrollmentService.allowEditByToken(enrollment, token)) {
+            allowances.push('token');
+        }
+
+        if (allowances.length === 0) {
             throw new InsufficientPermissionsException();
         }
 
-        const allowedValuesToChange = ['name', 'comment', 'driver', 'passenger', 'additions'];
-
-        for (const [key, value] of Object.entries(toChange)) {
-            if (key in enrollment
-                && enrollment[key] !== value
-                && allowedValuesToChange.indexOf(key) > -1) {
-                let changedValue = value;
-
-                if (key === 'name'
-                    && enrollment.name !== toChange.name) {
-                    if (await this.existsByName(toChange.name, appointment)) {
-                        throw new DuplicateValueException('DUPLICATE_ENTRY',
-                            'Following values are already taken',
-                            ['name']);
-                    }
-                }
-
-                if (key === 'driver'
-                    && appointment.driverAddition) {
-                    changedValue = await this._handleDriverRelation(toChange);
-                    enrollment.passenger = null;
-                }
-
-                if (key === 'passenger'
-                    && appointment.driverAddition) {
-                    changedValue = await this._handlePassengerRelation(toChange);
-                    enrollment.driver = null;
-                }
-
-                if (key === 'additions') {
-                    try {
-                        changedValue = EnrollmentService._handleAdditions(toChange, appointment);
-                    } catch (e) {
-                        throw e;
-                    }
-                }
-
-                enrollment[key] = changedValue;
-            }
-        }
-
-        let savedEnrollment = await this.enrollmentRepository.save(enrollment);
-
-        savedEnrollment = enrollmentMapper.basic(this, savedEnrollment);
-
-        return savedEnrollment;
-    }
-
-    async delete(id: string, token: string, user: User) {
-        const enrollment: Enrollment = await this.get(id);
-
-        if (!EnrollmentService.allowedToEdit(enrollment, user, token)) {
-            throw new Error();
-        }
-
-        await getConnection()
-            .createQueryBuilder()
-            .delete()
-            .from(Enrollment)
-            .where('id = :id', {id: id['id']})
-            .execute();
-    }
-
-    /**
-     * tell if by token or user or both
-     * @param id
-     * @param user
-     * @param token
-     */
-    public async checkPermissions(id: string, user: User, token: string) {
-    }
-
-    private async findById(id: string) {
-        let enrollment = await this.enrollmentRepository.findOne({
-            where: {
-                id: id
-            }
-        });
-
-        if (enrollment === undefined) {
-            throw new EntityNotFoundException(null, null, 'enrollment');
-        }
-
-        return enrollment;
-    }
-
-    private async findByName(name: string) {
-        let enrollment = await this.enrollmentRepository.findOne({
-            where: {
-                name: name
-            }
-        });
-
-        if (enrollment === undefined) {
-            throw new EntityNotFoundException(null, null, 'enrollment');
-        }
-
-        return enrollment;
+        return allowances;
     }
 
     private async findByNameAndAppointment(name: string, appointment: Appointment) {
@@ -347,6 +332,16 @@ export class EnrollmentService {
         return enrollment;
     }
 
+    private async existsByName(name: string, appointment: Appointment) {
+        return this.findByNameAndAppointment(name, appointment)
+            .then(() => {
+                return true;
+            })
+            .catch(() => {
+                return false;
+            });
+    }
+
     private async _parseEnrollmentObject(_enrollment: Enrollment, _appointment: Appointment) {
         let output = new Enrollment();
 
@@ -362,16 +357,18 @@ export class EnrollmentService {
         /* Needed due to malicious comparison fo tinyint to boolean */
         if (!!_appointment.driverAddition === true) {
             if (_enrollment.driver !== null && _enrollment.driver !== undefined) {
-                output.driver = await this._handleDriverRelation(_enrollment)
-                    .catch((err => {
-                        throw err;
-                    }));
+                // output.driver = await this._handleDriverRelation(_enrollment)
+                //     .catch((err => {
+                //         throw err;
+                //     }));
+                output.driver = await this._handleDriverRelation(_enrollment);
                 output.passenger = null;
             } else if (_enrollment.passenger !== null && _enrollment.passenger !== undefined) {
-                output.passenger = await this._handlePassengerRelation(_enrollment)
-                    .catch((err => {
-                        throw err;
-                    }));
+                // output.passenger = await this._handlePassengerRelation(_enrollment)
+                //     .catch((err => {
+                //         throw err;
+                //     }));
+                output.passenger = await this._handlePassengerRelation(_enrollment);
                 output.driver = null;
             } else {
                 throw new EmptyFieldsException('EMPTY_FIELDS',
@@ -383,14 +380,20 @@ export class EnrollmentService {
         return output;
     }
 
-    private async existsByName(name: string, appointment: Appointment) {
-        return this.findByNameAndAppointment(name, appointment)
-            .then(() => {
-                return true;
-            })
-            .catch(() => {
-                return false;
-            });
+    private async _hasPermission(enrollment: Enrollment, user: User, token: string) {
+        let allowEditByUserId = await this._allowEditByUserId(enrollment, user);
+        let isAllowedByKey = EnrollmentService.allowEditByToken(enrollment, token);
+
+        return (allowEditByUserId
+            || isAllowedByKey);
+    }
+
+    private async _allowEditByUserId(enrollment: Enrollment, user: User) {
+        let isCreatorOrAdministrator = await this.appointmentService.isCreatorOrAdministrator(user, enrollment.appointment);
+        let isEnrollmentCreator = (enrollment.creator !== null
+            && enrollment.creator.id === user.id);
+
+        return isCreatorOrAdministrator || isEnrollmentCreator;
     }
 
     private async _handlePassengerRelation(_enrollment: Enrollment) {

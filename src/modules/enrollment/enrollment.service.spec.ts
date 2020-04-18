@@ -26,6 +26,8 @@ import {PassengerService} from './passenger/passenger.service';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
+import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
+import {EntityGoneException} from '../../exceptions/EntityGoneException';
 
 const crypto = require('crypto');
 
@@ -162,6 +164,58 @@ describe('EnrollmentService', () => {
                 expect(typeof actual).toBe('object');
                 expect(actual.createdByUser).toBe(false);
                 expect(actual.token).toMatch(/^.{64}$/);
+            });
+
+            it('successful request - with mail - mail send failed', async () => {
+                const user = undefined;
+                const enrollment = new Enrollment();
+                enrollment.editMail = 'mail@example.com';
+                const appointment = new Appointment();
+                appointment.link = 'link';
+                enrollment.appointment = appointment;
+                const domain = 'domain';
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+                mailRepositoryMock.save.mockImplementationOnce((val) => val);
+                enrollmentRepositoryMock.save.mockImplementationOnce((val) => {
+                    val.id = '' + Date.now();
+                    return val;
+                });
+                jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.reject());
+
+                const actual = await enrollmentService.create(enrollment, user, domain);
+                expect(typeof actual).toBe('object');
+                expect(actual.createdByUser).toBe(false);
+                expect(actual.token).toMatch(/^.{64}$/);
+            });
+
+            it('successful request - logged in - empty comment to null', async () => {
+                const user = new User();
+
+                const appointment = new Appointment();
+                appointment.link = 'link';
+
+                const addition = new Addition();
+                addition.id = '1';
+
+                const enrollment = new Enrollment();
+                enrollment.comment = '';
+                enrollment.appointment = appointment;
+
+                const domain = 'domain';
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+                enrollmentRepositoryMock.save.mockImplementationOnce((val) => {
+                    val.id = '' + Date.now();
+                    return val;
+                });
+                jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.resolve({}));
+
+                const actual = await enrollmentService.create(enrollment, user, domain);
+                expect(typeof actual).toBe('object');
+                expect(actual.comment).toBe(null);
             });
 
             it('successful request - logged in - handle additions', async () => {
@@ -375,6 +429,64 @@ describe('EnrollmentService', () => {
 
     describe('* update enrollment', () => {
         describe('* successful should return updated entity', () => {
+            it('update nothing', async () => {
+                const toChange = {};
+                const id = '1';
+                const user = new User();
+                user.id = '1';
+                const token = '';
+
+                const appointment = new Appointment();
+                appointment.creator = user;
+                appointment.administrators = [];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.name = 'oldName';
+                enrollment.creator = user;
+                enrollment.appointment = appointment;
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                const actual = await enrollmentService.update(toChange, id, user, token);
+                expect(actual).toMatchObject({
+                    id: enrollment.id,
+                    name: enrollment.name
+                });
+            });
+
+            it('update non-existent value', async () => {
+                const toChange = {
+                    nonExistent: '1'
+                };
+                const id = '1';
+                const user = new User();
+                user.id = '1';
+                const token = '';
+
+                const appointment = new Appointment();
+                appointment.creator = user;
+                appointment.administrators = [];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.name = 'oldName';
+                enrollment.creator = user;
+                enrollment.appointment = appointment;
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                const actual = await enrollmentService.update(toChange, id, user, token);
+                expect(actual).toMatchObject({
+                    id: enrollment.id,
+                    name: enrollment.name
+                });
+            });
+
             it('update name', async () => {
                 const toChange = {
                     name: 'newName'
@@ -532,125 +644,125 @@ describe('EnrollmentService', () => {
                     expect(actual.additions).toEqual(toChange.additions);
                 });
             });
-        });
 
-        describe('* update driver', () => {
-            it('from passenger to driver', async () => {
-                const driver = new Driver();
-                driver.seats = 1;
-                driver.service = 1;
+            describe('* update driver', () => {
+                it('from passenger to driver', async () => {
+                    const driver = new Driver();
+                    driver.seats = 1;
+                    driver.service = 1;
 
-                const toChange = {
-                    driver: driver
-                };
+                    const toChange = {
+                        driver: driver
+                    };
 
-                const id = '1';
-                const user = new User();
-                user.id = '1';
-                const token = '';
+                    const id = '1';
+                    const user = new User();
+                    user.id = '1';
+                    const token = '';
 
-                const appointment = new Appointment();
-                appointment.creator = user;
-                appointment.administrators = [];
-                appointment.driverAddition = true;
+                    const appointment = new Appointment();
+                    appointment.creator = user;
+                    appointment.administrators = [];
+                    appointment.driverAddition = true;
 
-                const enrollment = new Enrollment();
-                enrollment.id = '1';
-                enrollment.comment = 'old comment';
-                enrollment.creator = user;
-                enrollment.appointment = appointment;
-                enrollment.passenger = new Passenger();
-                enrollment.driver = null;
+                    const enrollment = new Enrollment();
+                    enrollment.id = '1';
+                    enrollment.comment = 'old comment';
+                    enrollment.creator = user;
+                    enrollment.appointment = appointment;
+                    enrollment.passenger = new Passenger();
+                    enrollment.driver = null;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                driverRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                driverRepositoryMock.save.mockImplementationOnce((val) => val);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+                    driverRepositoryMock.findOne.mockReturnValueOnce(undefined);
+                    driverRepositoryMock.save.mockImplementationOnce((val) => val);
+                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
-                const actual = await enrollmentService.update(toChange, id, user, token);
-                expect(actual.driver).toEqual(toChange.driver);
-                expect(actual.passenger).toEqual(undefined);
-            });
+                    const actual = await enrollmentService.update(toChange, id, user, token);
+                    expect(actual.driver).toEqual(toChange.driver);
+                    expect(actual.passenger).toEqual(undefined);
+                });
 
-            it('update driver seats', async () => {
-                const currentDriver = new Driver();
-                currentDriver.seats = 1;
-                currentDriver.service = 1;
+                it('update driver seats', async () => {
+                    const currentDriver = new Driver();
+                    currentDriver.seats = 1;
+                    currentDriver.service = 1;
 
-                const newDriver = new Driver();
-                newDriver.seats = 2;
-                newDriver.service = 1;
+                    const newDriver = new Driver();
+                    newDriver.seats = 2;
+                    newDriver.service = 1;
 
-                const toChange = {
-                    driver: newDriver
-                };
+                    const toChange = {
+                        driver: newDriver
+                    };
 
-                const id = '1';
-                const user = new User();
-                user.id = '1';
-                const token = '';
+                    const id = '1';
+                    const user = new User();
+                    user.id = '1';
+                    const token = '';
 
-                const appointment = new Appointment();
-                appointment.creator = user;
-                appointment.administrators = [];
-                appointment.driverAddition = true;
+                    const appointment = new Appointment();
+                    appointment.creator = user;
+                    appointment.administrators = [];
+                    appointment.driverAddition = true;
 
-                const enrollment = new Enrollment();
-                enrollment.id = '1';
-                enrollment.creator = user;
-                enrollment.appointment = appointment;
-                enrollment.driver = currentDriver;
+                    const enrollment = new Enrollment();
+                    enrollment.id = '1';
+                    enrollment.creator = user;
+                    enrollment.appointment = appointment;
+                    enrollment.driver = currentDriver;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                driverRepositoryMock.findOne.mockReturnValueOnce(currentDriver);
-                driverRepositoryMock.save.mockImplementationOnce((val) => val);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+                    driverRepositoryMock.findOne.mockReturnValueOnce(currentDriver);
+                    driverRepositoryMock.save.mockImplementationOnce((val) => val);
+                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
-                const actual = await enrollmentService.update(toChange, id, user, token);
-                expect(actual.driver).toEqual(toChange.driver);
-                expect(actual.passenger).toEqual(undefined);
-            });
+                    const actual = await enrollmentService.update(toChange, id, user, token);
+                    expect(actual.driver).toEqual(toChange.driver);
+                    expect(actual.passenger).toEqual(undefined);
+                });
 
-            it('update driver service', async () => {
-                const currentDriver = new Driver();
-                currentDriver.seats = 1;
-                currentDriver.service = 1;
+                it('update driver service', async () => {
+                    const currentDriver = new Driver();
+                    currentDriver.seats = 1;
+                    currentDriver.service = 1;
 
-                const newDriver = new Driver();
-                newDriver.seats = 1;
-                newDriver.service = 2;
+                    const newDriver = new Driver();
+                    newDriver.seats = 1;
+                    newDriver.service = 2;
 
-                const toChange = {
-                    driver: newDriver
-                };
+                    const toChange = {
+                        driver: newDriver
+                    };
 
-                const id = '1';
-                const user = new User();
-                user.id = '1';
-                const token = '';
+                    const id = '1';
+                    const user = new User();
+                    user.id = '1';
+                    const token = '';
 
-                const appointment = new Appointment();
-                appointment.creator = user;
-                appointment.administrators = [];
-                appointment.driverAddition = true;
+                    const appointment = new Appointment();
+                    appointment.creator = user;
+                    appointment.administrators = [];
+                    appointment.driverAddition = true;
 
-                const enrollment = new Enrollment();
-                enrollment.id = '1';
-                enrollment.creator = user;
-                enrollment.appointment = appointment;
-                enrollment.driver = currentDriver;
+                    const enrollment = new Enrollment();
+                    enrollment.id = '1';
+                    enrollment.creator = user;
+                    enrollment.appointment = appointment;
+                    enrollment.driver = currentDriver;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                driverRepositoryMock.findOne.mockReturnValueOnce(currentDriver);
-                driverRepositoryMock.save.mockImplementationOnce((val) => val);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+                    driverRepositoryMock.findOne.mockReturnValueOnce(currentDriver);
+                    driverRepositoryMock.save.mockImplementationOnce((val) => val);
+                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
-                const actual = await enrollmentService.update(toChange, id, user, token);
-                expect(actual.driver).toEqual(toChange.driver);
-                expect(actual.passenger).toEqual(undefined);
+                    const actual = await enrollmentService.update(toChange, id, user, token);
+                    expect(actual.driver).toEqual(toChange.driver);
+                    expect(actual.passenger).toEqual(undefined);
+                });
             });
 
             describe('* update passenger', () => {
@@ -720,7 +832,7 @@ describe('EnrollmentService', () => {
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
                     enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                    passengerRepositoryMock.findOne.mockReturnValueOnce(undefined);
+                    passengerRepositoryMock.findOne.mockReturnValueOnce(currentPassenger);
                     passengerRepositoryMock.save.mockImplementationOnce((val) => val);
                     enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
@@ -728,6 +840,464 @@ describe('EnrollmentService', () => {
                     expect(actual.passenger).toEqual(toChange.passenger);
                     expect(actual.driver).toEqual(undefined);
                 });
+            });
+        });
+
+        describe('* failure should return error', () => {
+            it('enrollment not found', async () => {
+                const toChange = {};
+                const id = '1';
+                const user = new User();
+                const token = '';
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                enrollmentService
+                    .update(toChange, id, user, token)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(EntityNotFoundException);
+                        expect(err.data).toBe('enrollment');
+                    });
+            });
+
+            it('insufficient permission', async () => {
+                const creator = new User();
+                creator.id = '1';
+                creator.username = 'creator';
+
+                const toChange = {};
+                const id = '1';
+                const user = new User();
+                user.id = '2';
+                user.username = 'user';
+                const token = '';
+
+                const appointment = new Appointment();
+                appointment.creator = creator;
+                appointment.administrators = [];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.creator = creator;
+                enrollment.appointment = appointment;
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+
+                enrollmentService
+                    .update(toChange, id, user, token)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have gotten an InsufficientPermissionsException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                    });
+            });
+
+            it('name already in use', async () => {
+                const toChange = {
+                    name: 'newName'
+                };
+                const id = '1';
+                const user = new User();
+                user.id = '2';
+                const token = '';
+
+                const appointment = new Appointment();
+                appointment.creator = user;
+                appointment.administrators = [];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.name = 'oldName';
+                enrollment.creator = user;
+                enrollment.appointment = appointment;
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+
+                enrollmentService
+                    .update(toChange, id, user, token)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have gotten an DuplicateValueException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(DuplicateValueException);
+                        expect(err.data).toEqual(['name']);
+                    });
+            });
+
+            it('addition doesnt exist', async () => {
+                const addition = new Addition();
+                addition.id = '1';
+                addition.name = 'addition';
+
+                const toChange = {
+                    additions: [addition]
+                };
+                const id = '1';
+                const user = new User();
+                user.id = '2';
+                const token = '';
+
+                const appointment = new Appointment();
+                appointment.creator = user;
+                appointment.administrators = [];
+                appointment.additions = [];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.creator = user;
+                enrollment.additions = [];
+                enrollment.appointment = appointment;
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                enrollmentService
+                    .update(toChange, id, user, token)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(EntityNotFoundException);
+                        expect(err.data).toEqual(JSON.stringify(addition));
+                    });
+            });
+        });
+    });
+
+    describe('* delete enrollment', () => {
+        describe('* successful should return nothing', () => {
+            it('successful request', async (done) => {
+                const user = new User();
+                user.id = '1';
+                const id = '1';
+                const token = 'token';
+
+                const appointment = new Appointment();
+                appointment.administrators = [];
+                appointment.creator = user;
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.appointment = appointment;
+                enrollment.creator = user;
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+                enrollmentRepositoryMock.remove.mockReturnValueOnce(undefined);
+
+                enrollmentService
+                    .delete(id, token, user)
+                    .then(() => {
+                        done();
+                    })
+                    .catch((err) => {
+                        throw new Error('I have failed you, Anakin. Should have gotten void');
+                    });
+            });
+        });
+
+        describe('* failed request should return error', () => {
+            it('enrollment gone', async () => {
+                const user = new User();
+                user.id = '1';
+                const id = '1';
+                const token = 'token';
+
+                const appointment = new Appointment();
+                appointment.administrators = [];
+                appointment.creator = user;
+
+                const enrollment = new Enrollment();
+                enrollment.appointment = appointment;
+
+                enrollmentRepositoryMock.remove.mockReturnValueOnce(undefined);
+
+                enrollmentService
+                    .delete(id, token, user)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have gotten EntityGoneException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(EntityGoneException);
+                        expect(err.data).toEqual('enrollment');
+                    });
+            });
+
+            it('insufficient permissions', async () => {
+                const creator = new User();
+                creator.id = '2';
+                creator.username = 'username';
+
+                const user = new User();
+                user.id = '1';
+                user.username = 'user';
+                const id = '1';
+                const token = 'token';
+
+                const appointment = new Appointment();
+                appointment.administrators = [];
+                appointment.creator = creator;
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.appointment = appointment;
+                enrollment.creator = creator;
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+
+                enrollmentService
+                    .delete(id, token, user)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have gotten InsufficientPermissionsException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                    });
+            });
+        });
+    });
+
+    describe('* check Permissions', () => {
+        describe('* successful should return allowance object', () => {
+            it('appointment creator', async () => {
+                const user = new User();
+                user.id = '1';
+
+                const otherUser = new User();
+                user.id = '';
+
+                const id = '1';
+                const token = '';
+
+                const appointment = new Appointment();
+                appointment.creator = user;
+                appointment.administrators = [];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.creator = otherUser;
+                enrollment.appointment = appointment;
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+
+                const actual = await enrollmentService.checkPermissions(id, user, token);
+                expect(actual).toEqual(['user']);
+            });
+
+            it('appointment administrator', async () => {
+                const user = new User();
+                user.id = '1';
+
+                const otherUser = new User();
+                user.id = '';
+
+                const id = '1';
+                const token = '';
+
+                const appointment = new Appointment();
+                appointment.creator = otherUser;
+                appointment.administrators = [user];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.creator = otherUser;
+                enrollment.appointment = appointment;
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+
+                const actual = await enrollmentService.checkPermissions(id, user, token);
+                expect(actual).toEqual(['user']);
+            });
+
+            it('enrollment creator', async () => {
+                const user = new User();
+                user.id = '1';
+
+                const otherUser = new User();
+                user.id = '';
+
+                const id = '1';
+                const token = '';
+
+                const appointment = new Appointment();
+                appointment.creator = otherUser;
+                appointment.administrators = [];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.creator = user;
+                enrollment.appointment = appointment;
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+
+                const actual = await enrollmentService.checkPermissions(id, user, token);
+                expect(actual).toEqual(['user']);
+            });
+
+            it('valid token', async () => {
+                const user = new User();
+                user.id = '1';
+                user.username = 'user';
+
+                const otherUser = new User();
+                user.id = '2';
+                user.username = 'creator';
+
+                const appointment = new Appointment();
+                appointment.creator = otherUser;
+                appointment.administrators = [];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.creator = otherUser;
+                enrollment.appointment = appointment;
+
+                const id = '1';
+                const token = crypto.createHash('sha256')
+                    .update(enrollment.id + process.env.SALT_ENROLLMENT)
+                    .digest('hex');
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+
+                const actual = await enrollmentService.checkPermissions(id, user, token);
+                expect(actual).toEqual(['token']);
+            });
+
+            it('appointment creator and valid token', async () => {
+                const user = new User();
+                user.id = '1';
+
+                const otherUser = new User();
+                user.id = '';
+
+                const appointment = new Appointment();
+                appointment.creator = user;
+                appointment.administrators = [];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.creator = otherUser;
+                enrollment.appointment = appointment;
+
+                const id = '1';
+                const token = crypto.createHash('sha256')
+                    .update(enrollment.id + process.env.SALT_ENROLLMENT)
+                    .digest('hex');
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+
+                const actual = await enrollmentService.checkPermissions(id, user, token);
+                expect(actual).toEqual(['user', 'token']);
+            });
+
+            it('appointment administrator and valid token', async () => {
+                const user = new User();
+                user.id = '1';
+
+                const otherUser = new User();
+                user.id = '';
+
+                const appointment = new Appointment();
+                appointment.creator = otherUser;
+                appointment.administrators = [user];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.creator = otherUser;
+                enrollment.appointment = appointment;
+
+                const id = '1';
+                const token = crypto.createHash('sha256')
+                    .update(enrollment.id + process.env.SALT_ENROLLMENT)
+                    .digest('hex');
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+
+                const actual = await enrollmentService.checkPermissions(id, user, token);
+                expect(actual).toEqual(['user', 'token']);
+            });
+
+            it('enrollment creator and valid token', async () => {
+                const user = new User();
+                user.id = '1';
+
+                const otherUser = new User();
+                user.id = '';
+
+                const appointment = new Appointment();
+                appointment.creator = otherUser;
+                appointment.administrators = [];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.creator = user;
+                enrollment.appointment = appointment;
+
+                const id = '1';
+                const token = crypto.createHash('sha256')
+                    .update(enrollment.id + process.env.SALT_ENROLLMENT)
+                    .digest('hex');
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+
+                const actual = await enrollmentService.checkPermissions(id, user, token);
+                expect(actual).toEqual(['user', 'token']);
+            });
+        });
+
+        describe('* failure should return error', () => {
+            it('enrollment not found', async () => {
+                const id = '1';
+                const user = new User();
+                const token = 'token';
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                enrollmentService
+                    .checkPermissions(id, user, token)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(EntityNotFoundException);
+                        expect(err.data).toEqual('enrollment');
+                    });
+            });
+
+            it('insufficient permissions', async () => {
+                const creator = new User();
+                creator.id = '1';
+                creator.username = 'creator';
+
+                const user = new User();
+                user.id = '2';
+                user.username = 'username';
+
+                const appointment = new Appointment();
+                appointment.creator = creator;
+                appointment.administrators = [];
+
+                const enrollment = new Enrollment();
+                enrollment.id = '1';
+                enrollment.creator = creator;
+                enrollment.appointment = appointment;
+
+                const id = '1';
+                const token = 'token';
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+
+                enrollmentService
+                    .checkPermissions(id, user, token)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have gotten an InsufficientPermissionsException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                    });
             });
         });
     });

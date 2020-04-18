@@ -13,13 +13,13 @@ export class PassengerService {
 
     }
 
-    public async findById(id: string) {
-        return await this.passengerRepository.findOne({
-            where: {
-                id: id
-            }
-        });
-    }
+    // public async findById(id: string) {
+    //     return await this.passengerRepository.findOne({
+    //         where: {
+    //             id: id
+    //         }
+    //     });
+    // }
 
     public async findByEnrollment(enrollment: Enrollment) {
         let passenger = await this.passengerRepository.findOne({

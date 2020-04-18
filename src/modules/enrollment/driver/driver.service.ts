@@ -13,13 +13,13 @@ export class DriverService {
 
     }
 
-    public async findById(id: string) {
-        return await this.driverRepository.findOne({
-            where: {
-                id: id
-            }
-        });
-    }
+    // public async findById(id: string) {
+    //     return await this.driverRepository.findOne({
+    //         where: {
+    //             id: id
+    //         }
+    //     });
+    // }
 
     public async findByEnrollment(enrollment: Enrollment) {
         let driver = await this.driverRepository.findOne({

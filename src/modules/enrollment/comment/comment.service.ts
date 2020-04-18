@@ -33,13 +33,13 @@ export class CommentService {
      * @param enrollmentId ID of Enrollment to add Comment to
      * @returns Comment Created Comment entity
      *
-     * @throws See {@link findById} for reference
+     * @throws EntityNotFoundException if enrollment doesnt exist
      */
-    public async create(comment: Comment, enrollmentId: string) {
+    public async create(comment: Comment) {
         let enrollment;
 
         try {
-            enrollment = await this.enrollmentService.findById(enrollmentId);
+            enrollment = await this.enrollmentService.findById(comment.enrollment.id);
         } catch (e) {
             throw e;
         }
