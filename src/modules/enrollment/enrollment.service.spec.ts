@@ -101,7 +101,6 @@ describe('EnrollmentService', () => {
         appointmentService = module.get<AppointmentService>(AppointmentService);
         fileService = module.get<FileService>(FileService);
         additionService = module.get<AdditionService>(AdditionService);
-        mailerService = module.get<MailerService>(MailerService);
 
         enrollmentRepositoryMock = module.get(getRepositoryToken(Enrollment));
         userRepositoryMock = module.get(getRepositoryToken(User));
@@ -182,12 +181,15 @@ describe('EnrollmentService', () => {
                     val.id = '' + Date.now();
                     return val;
                 });
-                jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.reject());
+                jest.spyOn(mailerService, 'sendMail').mockReturnValueOnce(Promise.reject());
 
-                const actual = await enrollmentService.create(enrollment, user, domain);
+                const actual = await enrollmentService
+                    .create(enrollment, user, domain);
+
                 expect(typeof actual).toBe('object');
                 expect(actual.createdByUser).toBe(false);
                 expect(actual.token).toMatch(/^.{64}$/);
+
             });
 
             it('successful request - logged in - empty comment to null', async () => {

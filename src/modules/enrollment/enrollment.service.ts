@@ -142,7 +142,7 @@ export class EnrollmentService {
             let url = `https://${domain}`;
             url += `/${savedEnrollment.id}/${savedEnrollment.token}`;
 
-            this.mailerService
+            await this.mailerService
                 .sendMail({
                     to: savedEnrollment.mail.mail,
                     from: process.env.MAIL_ECA,
@@ -157,7 +157,7 @@ export class EnrollmentService {
                 .then(() => {
                 })
                 .catch(() => {
-                    logger.log('error', 'Could not send enrollment mail to %s', user.mail);
+                    logger.log('error', 'Could not send enrollment mail to %s', savedEnrollment.mail.mail);
                 });
         }
 
