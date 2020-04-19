@@ -5,7 +5,6 @@ import {AppointmentService} from './appointment.service';
 import {AppointmentController} from './appointment.controller';
 
 import {User} from '../user/user.entity';
-import {UserUtil} from '../../util/userUtil.util';
 
 import {ForbiddenException, HttpStatus, NotFoundException} from '@nestjs/common';
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
@@ -209,8 +208,6 @@ describe('Appointment Controller', () => {
 
                 jest.spyOn(appointmentService, 'create')
                     .mockImplementation(async (): Promise<Appointment> => Promise.resolve(result));
-                jest.spyOn(UserUtil, 'minimizeUser')
-                    .mockImplementation((val): User => val);
 
                 const mockUserToSatisfyParameter = new User();
                 const mockAppointmentToSatisfyParameter = new Appointment();

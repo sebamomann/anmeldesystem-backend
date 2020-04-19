@@ -1,6 +1,6 @@
 import {Controller, Get, HttpStatus, Res} from '@nestjs/common';
-import {ReleasenoteService} from "./releasenote.service";
-import {Response} from "express";
+import {ReleasenoteService} from './releasenote.service';
+import {Response} from 'express';
 
 @Controller('releasenote')
 export class ReleasenoteController {
@@ -8,16 +8,14 @@ export class ReleasenoteController {
     }
 
     @Get()
-    findAll(@Res() res: Response) {
+    find(@Res() res: Response) {
         return this.releasenoteService
-            .findAll()
+            .find()
             .then(val => {
-                return res.status(HttpStatus.OK).json(val);
+                res.status(HttpStatus.OK).json(val);
             })
-            .catch(err => {
-                console.log(err);
-                return res.status(HttpStatus.BAD_REQUEST);
+            .catch((err) => {
+                throw err;
             });
     }
-
 }

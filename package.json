@@ -84,6 +84,7 @@
     "coveragePathIgnorePatterns": [
       ".entity.ts",
       ".decorator.ts",
+      ".strategy.ts",
       "src/exceptions"
     ],
     "testEnvironment": "node"

@@ -18,7 +18,7 @@ export class FileService {
         });
 
         if (file === undefined) {
-            throw new EntityNotFoundException();
+            throw new EntityNotFoundException(null, null, 'file');
         }
 
         return file;

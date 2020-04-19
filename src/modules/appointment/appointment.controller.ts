@@ -18,7 +18,6 @@ import {
 
 import {Usr} from '../user/user.decorator';
 import {User} from '../user/user.entity';
-import {UserUtil} from '../../util/userUtil.util';
 
 import {Appointment} from './appointment.entity';
 import {AppointmentService} from './appointment.service';
@@ -87,8 +86,6 @@ export class AppointmentController {
         return this.appointmentService
             .create(appointment, user)
             .then(tAppointment => {
-                delete tAppointment.files;
-                tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
                 res.status(HttpStatus.CREATED).json(tAppointment);
             })
             .catch((err) => {
