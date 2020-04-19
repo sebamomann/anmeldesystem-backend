@@ -88,6 +88,85 @@ export class EnrollmentService {
     }
 
     /**
+     * Create a new enrollment. <br />
+     * The enrollment can either be created by a logged in user, or by providing an email adress.
+     * When providing an email address, then a mail with the edit token gets send to it.
+     *
+     * @param _enrollment Enrollment data to save into database
+     * @param user optional logged in user
+     * @param domain Domain to build link for edit/delete with
+     *
+     * @return Enrollment entity that was created
+     *
+     * @throws See {@link findByLink} for reference
+     * @throws DuplicateValueException if name is already in use
+     * @throws See {@link _parseEnrollmentObject} for reference
+     */
+    public async create(_enrollment: Enrollment, user: User, domain: string) {
+        let appointment;
+
+        try {
+            appointment = await this.appointmentService.findByLink(_enrollment.appointment.link);
+        } catch (e) {
+            throw e;
+        }
+
+        if (await this.existsByName(_enrollment.name, appointment)) {
+            throw new DuplicateValueException(null, null, ['name']);
+        }
+
+        let enrollment = await this._parseEnrollmentObject(_enrollment, appointment)
+            .catch((err => {
+                throw err;
+            }));
+
+        if (_enrollment.editMail != null &&
+            _enrollment.editMail != '') {
+            const mail = new Mail();
+            mail.mail = _enrollment.editMail;
+            enrollment.mail = await this.mailRepository.save(mail);
+        } else {
+            enrollment.creator = user;
+        }
+
+        enrollment.appointment = appointment;
+
+        let savedEnrollment = await this.enrollmentRepository.save(enrollment);
+
+        if (savedEnrollment.creator === null ||
+            savedEnrollment.creator === undefined) {
+            savedEnrollment.token = crypto.createHash('sha256')
+                .update(savedEnrollment.id + process.env.SALT_ENROLLMENT)
+                .digest('hex');
+
+            let url = `https://${domain}`;
+            url += `/${savedEnrollment.id}/${savedEnrollment.token}`;
+
+            this.mailerService
+                .sendMail({
+                    to: savedEnrollment.mail.mail,
+                    from: process.env.MAIL_ECA,
+                    subject: 'Deine Anmeldung zu ' + appointment.title,
+                    template: 'enroll', // The `.pug` or `.hbs` extension is appended automatically.
+                    context: {  // Data to be sent to template engine.
+                        title: appointment.title,
+                        name: savedEnrollment.name,
+                        url: url
+                    },
+                })
+                .then(() => {
+                })
+                .catch(() => {
+                    logger.log('error', 'Could not send enrollment mail to %s', user.mail);
+                });
+        }
+
+        savedEnrollment = enrollmentMapper.basic(this, savedEnrollment);
+
+        return savedEnrollment;
+    }
+
+    /**
      * Change a existing Enrollment with the given values. <br/>
      * The allowedValuesToChange array shows all updatable options.
      *
@@ -198,85 +277,6 @@ export class EnrollmentService {
     //
     //     return enrollment;
     // }
-
-    /**
-     * Create a new enrollment. <br />
-     * The enrollment can either be created by a logged in user, or by providing an email adress.
-     * When providing an email address, then a mail with the edit token gets send to it.
-     *
-     * @param _enrollment Enrollment data to save into database
-     * @param user optional logged in user
-     * @param domain Domain to build link for edit/delete with
-     *
-     * @return Enrollment entity that was created
-     *
-     * @throws See {@link findByLink} for reference
-     * @throws DuplicateValueException if name is already in use
-     * @throws See {@link _parseEnrollmentObject} for reference
-     */
-    public async create(_enrollment: Enrollment, user: User, domain: string) {
-        let appointment;
-
-        try {
-            appointment = await this.appointmentService.findByLink(_enrollment.appointment.link);
-        } catch (e) {
-            throw e;
-        }
-
-        if (await this.existsByName(_enrollment.name, appointment)) {
-            throw new DuplicateValueException(null, null, ['name']);
-        }
-
-        let enrollment = await this._parseEnrollmentObject(_enrollment, appointment)
-            .catch((err => {
-                throw err;
-            }));
-
-        if (_enrollment.editMail != null &&
-            _enrollment.editMail != '') {
-            const mail = new Mail();
-            mail.mail = _enrollment.editMail;
-            enrollment.mail = await this.mailRepository.save(mail);
-        } else {
-            enrollment.creator = user;
-        }
-
-        enrollment.appointment = appointment;
-
-        let savedEnrollment = await this.enrollmentRepository.save(enrollment);
-
-        if (savedEnrollment.creator === null ||
-            savedEnrollment.creator === undefined) {
-            savedEnrollment.token = crypto.createHash('sha256')
-                .update(savedEnrollment.id + process.env.SALT_ENROLLMENT)
-                .digest('hex');
-
-            let url = `https://${domain}`;
-            url += `/${savedEnrollment.id}/${savedEnrollment.token}`;
-
-            this.mailerService
-                .sendMail({
-                    to: savedEnrollment.mail.mail,
-                    from: process.env.MAIL_ECA,
-                    subject: 'Deine Anmeldung zu ' + appointment.title,
-                    template: 'enroll', // The `.pug` or `.hbs` extension is appended automatically.
-                    context: {  // Data to be sent to template engine.
-                        title: appointment.title,
-                        name: savedEnrollment.name,
-                        url: url
-                    },
-                })
-                .then(() => {
-                })
-                .catch(() => {
-                    logger.log('error', 'Could not send enrollment mail to %s', user.mail);
-                });
-        }
-
-        savedEnrollment = enrollmentMapper.basic(this, savedEnrollment);
-
-        return savedEnrollment;
-    }
 
     /**
      * Check if user is allowed to edit/delete an Enrollment

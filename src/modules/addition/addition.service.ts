@@ -13,16 +13,15 @@ export class AdditionService {
 
     }
 
+    /* istanbul ignore next */
     public async findById(id: string) {
-        let addition;
+        let addition = await this.additionRepository.findOne({
+            where: {
+                id: id
+            }
+        });
 
-        try {
-            addition = await this.additionRepository.findOne({
-                where: {
-                    id: id
-                }
-            });
-        } catch (e) {
+        if (addition === undefined) {
             throw new EntityNotFoundException(null, null, 'addition');
         }
 
@@ -30,7 +29,7 @@ export class AdditionService {
     }
 
     public async findByNameAndAppointment(name: string, appointment: Appointment) {
-        return await this.additionRepository.findOne({
+        let addition = await this.additionRepository.findOne({
             where: {
                 name: name,
                 appointment: {
@@ -38,5 +37,11 @@ export class AdditionService {
                 }
             }
         });
+
+        if (addition === undefined) {
+            throw new EntityNotFoundException(null, null, 'addition');
+        }
+
+        return addition;
     }
 }

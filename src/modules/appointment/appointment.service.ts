@@ -672,12 +672,15 @@ export class AppointmentService {
         let output = [];
 
         for (let fAddition of mixedAdditions) {
-            let potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
-            if (potExistingAddition !== undefined) {
+            let potExistingAddition;
+
+            try {
+                potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
+
                 if (!output.some(sAddition => sAddition === potExistingAddition)) {
                     output.push(potExistingAddition);
                 }
-            } else {
+            } catch (e) {
                 potExistingAddition = new Addition();
                 potExistingAddition.name = fAddition.name;
                 potExistingAddition = await this.additionRepository.save(potExistingAddition);
