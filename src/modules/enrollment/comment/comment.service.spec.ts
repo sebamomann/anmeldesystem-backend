@@ -125,6 +125,7 @@ describe('CommentService', () => {
         describe('should return created entity if successful', () => {
             it('successful request', async () => {
                 const enrollment = new Enrollment();
+                enrollment.id = '1';
                 const comment = new Comment();
                 comment.enrollment = enrollment;
 
@@ -132,7 +133,7 @@ describe('CommentService', () => {
                 commentRepositoryMock.save.mockImplementationOnce((val) => val);
 
                 commentService
-                    .create(comment, enrollment.id)
+                    .create(comment)
                     .then((res) => {
                         expect(res).toBeInstanceOf(Comment);
                         expect(res.enrollment).toEqual(enrollment);
@@ -147,14 +148,13 @@ describe('CommentService', () => {
             it('enrollment not found', async () => {
                 const enrollment = new Enrollment();
                 enrollment.id = '1';
-
                 const comment = new Comment();
                 comment.enrollment = enrollment;
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
                 commentService
-                    .create(comment, enrollment.id)
+                    .create(comment)
                     .then(() => {
                         throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
                     })

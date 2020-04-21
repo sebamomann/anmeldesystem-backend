@@ -419,7 +419,7 @@ describe('UserService', () => {
                     userFromJwt.id = '1';
 
                     const currentUser = new User();
-                    currentUser.name = 'currentName';
+                    currentUser.mail = 'current@example.com';
                     userRepositoryMock.findOne.mockReturnValueOnce(currentUser);
 
                     jest.spyOn(userService, 'handleEmailChange').mockReturnValueOnce(Promise.reject(new Error()));

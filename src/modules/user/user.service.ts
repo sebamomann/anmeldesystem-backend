@@ -575,6 +575,8 @@ export class UserService {
         let _user;
 
         try {
+            // TODO
+            // User is already passed
             _user = await this.findByEmail(user.mail);
         } catch (e) {
             throw e;
