@@ -21,6 +21,7 @@ var logger = require('../../logger');
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
 var userMapper = require('./user.mapper');
+const btoa = require('btoa');
 
 @Injectable()
 export class UserService {
@@ -120,14 +121,15 @@ export class UserService {
                 template: 'register',
                 context: {
                     name: user.username,
-                    url: `https://${domain}/${user.mail}/${token}`
+                    url: `https://${domain}/${btoa(user.mail)}/${token}`
                 },
             })
             .then(() => {
             })
-            .catch(() => {
+            .catch((err) => {
                 // maybe cleanup registered user ?
-                logger.log('error', 'Could not send register mail to %s', user.mail);
+                logger.log('error', `Could not send register mail to "${user.mail}"`);
+                logger.log('error', err);
             });
 
         return userMapper.basic(this, savedUser);
@@ -258,7 +260,7 @@ export class UserService {
 
         await this.passwordResetRepository.save(passwordReset);
 
-        let url = `https://${domain}/${mail}/${token}`;
+        let url = `https://${domain}/${btoa(mail)}/${token}`;
 
         this.mailerService
             .sendMail({
@@ -376,11 +378,11 @@ export class UserService {
      */
     public mailChange(mail: string, token: string) {
         return this.mailChangeTokenVerification(mail, token)
-            .then(async () => {
+            .then(async (res) => {
                 let user;
 
                 try {
-                    user = await this.findByEmail(mail);
+                    user = await this.findByEmail(res.oldMail);
                 } catch (e) {
                     throw e;
                 }
@@ -611,7 +613,7 @@ export class UserService {
 
         emailChange = await this.emailChangeRepository.save(emailChange);
 
-        const url = `https://${domain}/${mail}/${token}`;
+        const url = `https://${domain}/${btoa(mail)}/${token}`;
 
         this.mailerService
             .sendMail({

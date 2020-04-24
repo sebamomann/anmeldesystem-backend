@@ -11,7 +11,9 @@ import {AuthGuard} from '@nestjs/passport';
 import {Response} from 'express';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 
-@Controller('user')
+const atob = require('atob');
+
+@Controller('users')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
 export class UserController {
     constructor(private readonly userService: UserService,
@@ -46,6 +48,20 @@ export class UserController {
             });
     }
 
+    @Get('/verify/:mail/:token')
+    activate(@Param('mail') mail: string,
+             @Param('token') token: string,
+             @Res() res: Response) {
+        return this.userService
+            .activate(atob(mail), token)
+            .then(() => {
+                res.status(HttpStatus.NO_CONTENT).json();
+            })
+            .catch(err => {
+                throw err;
+            });
+    }
+
     @Put()
     @UseGuards(AuthGuard('jwt'))
     update(@Usr() user: User,
@@ -56,20 +72,6 @@ export class UserController {
             .then(async result => {
                 result = this.authService.addJwtToObject(result);
                 res.status(HttpStatus.OK).json(result);
-            })
-            .catch(err => {
-                throw err;
-            });
-    }
-
-    @Get('/verify/:mail/:token')
-    activate(@Param('mail') mail: string,
-             @Param('token') token: string,
-             @Res() res: Response) {
-        return this.userService
-            .activate(mail, token)
-            .then(() => {
-                res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
                 throw err;
@@ -95,7 +97,7 @@ export class UserController {
                                    @Param('token') token: string,
                                    @Res() res: Response) {
         return this.userService
-            .resetPasswordTokenVerification(mail, token)
+            .resetPasswordTokenVerification(atob(mail), token)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
@@ -110,7 +112,7 @@ export class UserController {
                   @Body('password') pass: string,
                   @Res() res: Response) {
         return this.userService
-            .updatePassword(mail, token, pass)
+            .updatePassword(atob(mail), token, pass)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
@@ -124,7 +126,7 @@ export class UserController {
                                           @Param('token') token: string,
                                           @Res() res: Response) {
         return this.userService
-            .mailChange(mail, token)
+            .mailChange(atob(mail), token)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
@@ -144,6 +146,7 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
+                console.log(err);
                 throw err;
             });
     }

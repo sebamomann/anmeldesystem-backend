@@ -26,32 +26,36 @@ import {AlreadyUsedException} from '../exceptions/AlreadyUsedException';
 export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         return next.handle()
-            .pipe(catchError(error => {
-                if (error instanceof EntityNotFoundException) {
-                    throw new NotFoundException();
-                } else if (error instanceof InvalidValuesException
-                    || error instanceof InvalidTokenException
-                    || error instanceof ExpiredTokenException
-                    || error instanceof AlreadyUsedException
-                    || error instanceof DuplicateValueException
-                    || error instanceof EmptyFieldsException) {
-                    throw new BadRequestException(error.parse());
-                } else if (error instanceof InsufficientPermissionsException) {
-                    throw new ForbiddenException(error.parse());
-                } else if (error instanceof EntityGoneException) {
-                    throw new GoneException(error.parse());
-                } else {
-                    let error: any = {};
+            .pipe(
+                catchError(
+                    exception => {
+                        if (exception instanceof EntityNotFoundException) {
+                            throw new NotFoundException();
+                        } else if (exception instanceof InvalidValuesException
+                            || exception instanceof InvalidTokenException
+                            || exception instanceof ExpiredTokenException
+                            || exception instanceof AlreadyUsedException
+                            || exception instanceof DuplicateValueException
+                            || exception instanceof EmptyFieldsException) {
+                            throw new BadRequestException(exception.parse());
+                        } else if (exception instanceof InsufficientPermissionsException) {
+                            throw new ForbiddenException(exception.parse());
+                        } else if (exception instanceof EntityGoneException) {
+                            throw new GoneException(exception.parse());
+                        } else {
+                            let error: any = {};
 
-                    let id = GeneratorUtil.makeid(10);
-                    console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(error)}`);
+                            let id = GeneratorUtil.makeid(10);
+                            console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(error)}`);
 
-                    error.code = 'UNDEFINED';
-                    error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
-                    error.data = id;
+                            error.code = 'UNDEFINED';
+                            error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';
+                            error.data = id;
 
-                    throw new InternalServerErrorException(error);
-                }
-            }));
+                            throw new InternalServerErrorException(error);
+                        }
+                    }
+                )
+            );
     }
 }

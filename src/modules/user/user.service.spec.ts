@@ -21,6 +21,7 @@ import {InternalErrorException} from '../../exceptions/InternalErrorException';
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const btoa = require('btoa');
 var userMapper = require('./user.mapper');
 
 describe('UserService', () => {
@@ -564,7 +565,7 @@ describe('UserService', () => {
                 userService
                     .resetPasswordInitialization(mail, domain)
                     .then((res) => {
-                        const regex = new RegExp('https:\/\/' + domain + '\/' + mail + '\/.{64}', 'g');
+                        const regex = new RegExp('https:\/\/' + domain + '\/' + btoa(mail) + '\/.{64}', 'g');
                         expect(res).toMatch(regex);
                         done();
                     })
@@ -587,7 +588,7 @@ describe('UserService', () => {
                 userService
                     .resetPasswordInitialization(mail, domain)
                     .then((res) => {
-                        const regex = new RegExp('https:\/\/' + domain + '\/' + mail + '\/.{64}', 'g');
+                        const regex = new RegExp('https:\/\/' + domain + '\/' + btoa(mail) + '\/.{64}', 'g');
                         expect(res).toMatch(regex);
                         done();
                     })
