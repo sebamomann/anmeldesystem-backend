@@ -110,8 +110,6 @@ export class AppointmentService {
 
         appointment.reference = this.parseReferences(user, appointment, []);
 
-        console.log(appointment);
-
         appointment = appointmentMapper.permission(this, appointment, user, permissions);
         appointment = appointmentMapper.slim(this, appointment, slim);
         appointment = appointmentMapper.basic(this, appointment);
@@ -635,7 +633,6 @@ export class AppointmentService {
                 link = GeneratorUtil.makeid(5);
             } while (await this.linkInUse(link));
         } else {
-            console.log(_link);
             if (await this.linkInUse(_link)) {
                 throw new DuplicateValueException(null, null, ['link']);
             }

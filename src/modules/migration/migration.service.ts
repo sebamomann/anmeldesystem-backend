@@ -1,17 +1,17 @@
-import {Inject, Injectable, Request} from "@nestjs/common";
-import {createConnection, Repository} from "typeorm";
-import {User} from "../user/user.entity";
-import {Appointment} from "../appointment/appointment.entity";
-import {Enrollment} from "../enrollment/enrollment.entity";
-import {Driver} from "../enrollment/driver/driver.entity";
-import {Passenger} from "../enrollment/passenger/passenger.entity";
-import {Key} from "../enrollment/key/key.entity";
-import {REQUEST} from "@nestjs/core";
-import {InjectRepository} from "@nestjs/typeorm";
-import {Addition} from "../addition/addition.entity";
-import {File} from "../file/file.entity";
-import {AppointmentService} from "../appointment/appointment.service";
-import {Comment} from "../enrollment/comment/comment.entity";
+import {Inject, Injectable, Request} from '@nestjs/common';
+import {createConnection, Repository} from 'typeorm';
+import {User} from '../user/user.entity';
+import {Appointment} from '../appointment/appointment.entity';
+import {Enrollment} from '../enrollment/enrollment.entity';
+import {Driver} from '../enrollment/driver/driver.entity';
+import {Passenger} from '../enrollment/passenger/passenger.entity';
+import {Key} from '../enrollment/key/key.entity';
+import {REQUEST} from '@nestjs/core';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Addition} from '../addition/addition.entity';
+import {File} from '../file/file.entity';
+import {AppointmentService} from '../appointment/appointment.service';
+import {Comment} from '../enrollment/comment/comment.entity';
 
 @Injectable()
 export class MigrationService {
@@ -71,7 +71,6 @@ export class MigrationService {
         try {
             const rawData = await conn.query(`SELECT * FROM users`);
             if (rawData.length > 0) {
-                console.log("user");
                 for (const data of rawData) {
                     let user: User = new User();
                     user.username = data.user_uid;
@@ -83,11 +82,9 @@ export class MigrationService {
                             user.password = hash;
 
                             user = await userRepository.save(user);
-                            console.log("stored");
 
                             const appointments = await conn.query(`SELECT * FROM termine WHERE termin_user_id = ?`, [data.user_id]);
                             if (appointments.length > 0) {
-                                console.log("appointments");
                                 for (const fAppointment of appointments) {
                                     let appointment: Appointment = new Appointment();
                                     appointment.title = fAppointment.termin_title;
@@ -102,8 +99,6 @@ export class MigrationService {
                                     const additions = await conn.query(`SELECT * FROM termin_additions WHERE ta_termin_id = ?`, [fAppointment.termin_id]);
                                     let adds = [];
                                     if (additions.length > 0) {
-                                        console.log("additions");
-
                                         for (const fAddition of additions) {
                                             adds.push(fAddition.ta_title);
                                         }
