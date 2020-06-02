@@ -102,11 +102,11 @@ export class EnrollmentService {
      * @throws DuplicateValueException if name is already in use
      * @throws See {@link _parseEnrollmentObject} for reference
      */
-    public async create(_enrollment: Enrollment, user: User, domain: string, link: string) {
+    public async create(_enrollment: Enrollment, user: User, domain: string) {
         let appointment;
 
         try {
-            appointment = await this.appointmentService.findByLink(link);
+            appointment = await this.appointmentService.findByLink(_enrollment.appointment.link);
         } catch (e) {
             throw e;
         }

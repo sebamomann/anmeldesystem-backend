@@ -21,12 +21,11 @@ export class EnrollmentController {
     @Post()
     @UseGuards(JwtOptStrategy)
     create(@Usr() user: User,
-           @Query('link') link: string,
            @Body('domain') domain: string,
            @Body() enrollment: Enrollment,
            @Res() res: Response,) {
         return this.enrollmentService
-            .create(enrollment, user, domain, link)
+            .create(enrollment, user, domain)
             .then(tEnrollment => {
                 res.status(HttpStatus.CREATED).json(tEnrollment);
             })
