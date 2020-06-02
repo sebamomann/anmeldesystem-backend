@@ -77,7 +77,8 @@ export class EnrollmentService {
         let enrollment = await this.enrollmentRepository.findOne({
             where: {
                 id: id
-            }
+            },
+            relations: ['appointment', 'creator'],
         });
 
         if (enrollment === undefined) {
@@ -389,8 +390,11 @@ export class EnrollmentService {
     }
 
     private async _allowEditByUserId(enrollment: Enrollment, user: User) {
+        console.log(user);
+        console.log(enrollment);
+
         let isCreatorOrAdministrator = await this.appointmentService.isCreatorOrAdministrator(user, enrollment.appointment);
-        let isEnrollmentCreator = (enrollment.creator !== null
+        let isEnrollmentCreator = (enrollment.creator !== undefined
             && enrollment.creator.id === user.id);
 
         return isCreatorOrAdministrator || isEnrollmentCreator;
