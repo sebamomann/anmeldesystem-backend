@@ -250,6 +250,10 @@ export class EnrollmentService {
      * @throws InsufficientPermissionsException if user is not allowed to edit/delete
      */
     async delete(id: string, token: string, user: User) {
+        console.log('1 ' + id);
+        console.log('2' + token);
+        console.log('3' + user);
+
         let enrollment;
 
         try {

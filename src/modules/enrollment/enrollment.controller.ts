@@ -53,7 +53,7 @@ export class EnrollmentController {
 
     @Delete(':id/:token*?')
     @UseGuards(JwtOptStrategy)
-    delete(@Param() id: string,
+    delete(@Param('id') id: string,
            @Param('token') token: string,
            @Usr() user: User,
            @Res() res: Response) {
