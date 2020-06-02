@@ -72,7 +72,7 @@ export class AppointmentService {
     }
 
     public async findByLink(link: string): Promise<Appointment> {
-        let appointment = this.appointmentRepository.findOne({
+        let appointment = await this.appointmentRepository.findOne({
             where: {
                 link: link
             },
@@ -632,6 +632,7 @@ export class AppointmentService {
                 link = GeneratorUtil.makeid(5);
             } while (await this.linkInUse(link));
         } else {
+            console.log(_link);
             if (await this.linkInUse(_link)) {
                 throw new DuplicateValueException(null, null, ['link']);
             }
