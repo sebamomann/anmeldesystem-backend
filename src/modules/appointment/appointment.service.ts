@@ -280,6 +280,7 @@ export class AppointmentService {
         }
 
         let appointments = await this.getAppointments(user, pins);
+
         // let appointments = await this.appointmentRepository.find({
         //     join: {
         //         alias: "appointment",
@@ -693,6 +694,10 @@ export class AppointmentService {
     }
 
     public async getAppointments(user: User, pins) {
+        // add value, cuz SQL cant process empty list
+        if (pins.length === 0) {
+            pins.push('_');
+        }
         return await getRepository(Appointment)
             .createQueryBuilder('appointment')
             .leftJoinAndSelect('appointment.creator', 'creator')
