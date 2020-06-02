@@ -81,6 +81,15 @@ module.exports = {
         appointment = Object.assign(appointment, creatorObject);
         appointment = Object.assign(appointment, enrollmentsObject);
 
+        const obj = {
+            creator: {
+                name: _appointment.creator.name,
+                username: _appointment.creator.username,
+            }
+        };
+
+        appointment = Object.assign(appointment, obj);
+
         return appointment;
     },
 

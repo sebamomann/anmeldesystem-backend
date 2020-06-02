@@ -43,7 +43,7 @@ export class AppointmentService {
             return false;
         }
 
-        return _appointment.creator.username === _user.username;
+        return _appointment.creator?.username === _user.username;
     }
 
     public static isAdministratorOfAppointment(_appointment: Appointment, _user: User) {
@@ -76,7 +76,7 @@ export class AppointmentService {
             where: {
                 link: link
             },
-            relations: ['administrators']
+            relations: ['administrators', 'creator']
         });
 
         if (appointment === undefined) {
@@ -109,6 +109,8 @@ export class AppointmentService {
         }
 
         appointment.reference = this.parseReferences(user, appointment, []);
+
+        console.log(appointment);
 
         appointment = appointmentMapper.permission(this, appointment, user, permissions);
         appointment = appointmentMapper.slim(this, appointment, slim);
