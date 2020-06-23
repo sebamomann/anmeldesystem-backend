@@ -3,7 +3,7 @@ def image
 properties([
         parameters([
                 string(name: 'VERSION', defaultValue: '0.0.0'),
-                bool(name: 'LATEST', defaultValue: 'true'),
+                booleanParam(name: 'LATEST', defaultValue: 'true'),
         ])
 ])
 
