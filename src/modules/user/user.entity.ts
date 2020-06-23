@@ -1,15 +1,15 @@
 import {Column, CreateDateColumn, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
-import {Appointment} from "../appointment/appointment.entity";
-import {Enrollment} from "../enrollment/enrollment.entity";
-import {TelegramUser} from "./telegram/telegram-user.entity";
-import {PasswordReset} from "./password-reset/password-reset.entity";
-import {Exclude} from "class-transformer";
-import {EmailChange} from "./email-change/email-change.entity";
+import {Appointment} from '../appointment/appointment.entity';
+import {Enrollment} from '../enrollment/enrollment.entity';
+import {TelegramUser} from './telegram/telegram-user.entity';
+import {PasswordReset} from './password-reset/password-reset.entity';
+import {Exclude} from 'class-transformer';
+import {EmailChange} from './email-change/email-change.entity';
 
 @Entity()
 export class User {
     @PrimaryGeneratedColumn('uuid')
-    id: number;
+    id: string;
 
     @Column()
     name: string;
@@ -39,14 +39,9 @@ export class User {
     )
     appointments: Appointment[];
 
-
     @ManyToMany(type => Appointment,
-        appointment => appointment.administrators,
-        {
-            eager: false
-        })
+        appointment => appointment.administrators)
     administrations: Appointment[];
-
 
     @ManyToMany(type => Appointment,
         appointment => appointment.pinners,
@@ -77,4 +72,6 @@ export class User {
 
     @CreateDateColumn()
     iat: Date;
+
+    token: string;
 }

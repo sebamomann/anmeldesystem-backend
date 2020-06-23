@@ -7,9 +7,21 @@ export class EmptyFieldsException implements Error {
     data: string[];
     code: string;
 
-    constructor(code: string, message: string, data: string[]) {
-        this.code = code;
-        this.message = message;
+    constructor(code: string = null, message: string = null, data: string[] = null) {
+        if (code === null
+            || code === '') {
+            this.code = 'EMPTY_FIELDS';
+        } else {
+            this.code = code;
+        }
+
+        if (message === null
+            || message === '') {
+            this.message = 'Following values need to be specified';
+        } else {
+            this.message = message;
+        }
+
         this.data = data;
     }
 
@@ -21,5 +33,13 @@ export class EmptyFieldsException implements Error {
     }
 
     printStackTrace() {
+    }
+
+    parse() {
+        return {
+            code: this.code,
+            message: this.message,
+            data: this.data
+        };
     }
 }

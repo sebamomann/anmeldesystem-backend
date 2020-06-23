@@ -1,5 +1,4 @@
 import {
-    BadRequestException,
     Body,
     ClassSerializerInterceptor,
     Controller,
@@ -7,8 +6,6 @@ import {
     ForbiddenException,
     Get,
     HttpStatus,
-    Inject,
-    NotFoundException,
     Param,
     Post,
     Put,
@@ -18,151 +15,23 @@ import {
     UseGuards,
     UseInterceptors
 } from '@nestjs/common';
-import {Appointment} from "./appointment.entity";
-import {AppointmentService} from "./appointment.service";
-import {Response} from "express";
-import {AuthGuard} from "@nestjs/passport";
-import {REQUEST} from "@nestjs/core";
-import {Usr} from "../user/user.decorator";
-import {User} from "../user/user.entity";
-import {UserUtil} from "../../util/userUtil.util";
-import {UnknownUsersException} from "../../exceptions/UnknownUsersException";
-import {Etag} from "../../util/etag";
-import {UserController} from "../user/user.controller";
-import {JwtOptStrategy} from "../../auth/jwt-opt.strategy";
+
+import {Usr} from '../user/user.decorator';
+import {User} from '../user/user.entity';
+
+import {Appointment} from './appointment.entity';
+import {AppointmentService} from './appointment.service';
+
+import {AuthGuard} from '@nestjs/passport';
+
+import {JwtOptStrategy} from '../../auth/jwt-opt.strategy';
+import {Response} from 'express';
+import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 
 @Controller('appointment')
+@UseInterceptors(BusinessToHttpExceptionInterceptor)
 export class AppointmentController {
-    constructor(@Inject(REQUEST) private readonly request: Request, private appointmentService: AppointmentService) {
-
-    }
-
-    @Get()
-    @UseGuards(JwtOptStrategy)
-    @UseInterceptors(ClassSerializerInterceptor)
-    findAll(@Usr() user: User,
-            @Query() params: any,
-            @Query('slim') slim: string,
-            @Res() res: Response
-    ) {
-        let _slim = slim === "true";
-        return this.appointmentService
-            .findAll(user, params, _slim)
-            .then(result => {
-                res.status(HttpStatus.OK).json(result);
-            });
-    }
-
-    @Get(":link/permission")
-    @UseGuards(AuthGuard('jwt'))
-    permission(@Param('link') link: string,
-               @Usr() user: User,
-               @Res() res: Response
-    ) {
-        this.appointmentService
-            .hasPermission(link, user)
-            .then(result => {
-                res.status(HttpStatus.OK).json(result);
-            });
-    }
-
-    @Get(':link/pin')
-    @UseGuards(AuthGuard('jwt'))
-    pinAppointment(@Usr() user: User,
-                   @Param('link') link: string,
-                   @Res() res: Response) {
-        this.appointmentService
-            .pinAppointment(user, link)
-            .then(result => {
-                return res.status(HttpStatus.OK).json();
-            })
-            .catch(err => {
-                if (err instanceof NotFoundException) {
-                    throw err;
-                }
-
-                return UserController.passwordresetErrorHandler(err, res);
-            });
-    }
-
-
-    @Post()
-    @UseGuards(AuthGuard('jwt'))
-    create(@Body() appointment: Appointment, @Res() res: Response, @Usr() user: User) {
-        return this.appointmentService
-            .create(appointment, user)
-            .then(tAppointment => {
-                delete tAppointment.files;
-                tAppointment.creator = UserUtil.minimizeUser(tAppointment.creator);
-                res.status(HttpStatus.CREATED).json(tAppointment);
-            })
-            .catch((err) => {
-                let error = {code: '', error: {}};
-                if (err.code === 'ER_DUP_ENTRY') {
-                    error.code = 'ER_DUP_ENTRY';
-                    error.error = {
-                        columns: ["link"]
-                    };
-                } else if (err instanceof UnknownUsersException) {
-                    error.code = "ADMINISTRATORS_NOT_FOUND";
-                    error.error = {
-                        values: err.data
-                    };
-                } else {
-                    error.error = {
-                        undefined: {
-                            message: "Some error occurred. Please try again later or contact the support",
-                            error: err
-                        }
-                    };
-                }
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
-            });
-    }
-
-    @Put(':link')
-    @UseGuards(AuthGuard('jwt'))
-    update(@Body() toChange: any,
-           @Param('link') link: string, @Res() res: Response, @Usr() user: User) {
-        return this.appointmentService
-            .update(toChange, link, user)
-            .then(tAppointment => {
-                res.status(HttpStatus.OK).json(tAppointment);
-            })
-            .catch((err) => {
-                console.log(err);
-
-                let error = {code: '', error: {}};
-                if (err.code === 'ER_DUP_ENTRY') {
-                    error.code = 'ER_DUP_ENTRY';
-                    error.error = {
-                        columns: ["link"]
-                    };
-                } else if (err.code === 'DUPLICATE_ENTRY') {
-                    error.code = 'ER_DUP_ENTRY';
-                    error.error = {
-                        columns: err.data
-                    };
-                } else if (err instanceof UnknownUsersException) {
-                    error.code = "ADMINISTRATORS_NOT_FOUND";
-                    error.error = {
-                        values: err.data
-                    };
-                } else if (err instanceof NotFoundException
-                    || err instanceof ForbiddenException) {
-                    throw err
-                } else {
-                    error.error = {
-                        undefined: {
-                            message: "Some error occurred. Please try again later or contact the support",
-                            error: err
-                        }
-                    };
-                }
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
-            });
+    constructor(private appointmentService: AppointmentService) {
     }
 
     @Get(':link')
@@ -173,33 +42,165 @@ export class AppointmentController {
                @Param('link') link: string,
                @Request() req: Request,
                @Res() res: Response) {
-        let _slim = slim === "true";
+        let _slim = slim === 'true';
+
         return this.appointmentService
-            .find(link, user, permissions, _slim)
+            .get(user, link, permissions, _slim)
             .then(tAppointment => {
-                if (tAppointment != null) {
-                    const etag = Etag.generate(JSON.stringify(tAppointment));
-                    if (req.headers['if-none-match'] && req.headers['if-none-match'] == "W/" + '"' + etag + '"') {
-                        console.log(`appointment ${link} not modified`);
-                        res.status(HttpStatus.NOT_MODIFIED).json();
-                    } else {
-                        console.log(`appointment ${link} modified`);
-                        res.header('etag', "W/" + '"' + etag + '"');
-                        res.status(HttpStatus.OK).json(tAppointment);
-                    }
-                } else {
-                    res.status(HttpStatus.NOT_FOUND).json({error: {not_found: "Appointment not found"}});
+                if (tAppointment === null) {
+                    res.status(HttpStatus.NO_CONTENT).json();
+                    return;
                 }
+
+                res.status(HttpStatus.OK).json(tAppointment);
+            })
+            .catch((err) => {
+                throw err;
+            });
+    }
+
+    @Get()
+    @UseGuards(JwtOptStrategy)
+    @UseInterceptors(ClassSerializerInterceptor)
+    getAll(@Usr() user: User,
+           @Query() params: any,
+           @Query('slim') slim: string,
+           @Res() res: Response,) {
+        let _slim = slim === 'true';
+
+        return this.appointmentService
+            .getAll(user, params, _slim)
+            .then(result => {
+                res.status(HttpStatus.OK).json(result);
+            })
+            .catch(err => {
+                throw err;
+            });
+    }
+
+    @Post()
+    @UseGuards(AuthGuard('jwt'))
+    create(@Usr() user: User,
+           @Body() appointment: Appointment,
+           @Res() res: Response,) {
+        return this.appointmentService
+            .create(appointment, user)
+            .then(tAppointment => {
+                res.status(HttpStatus.CREATED).json(tAppointment);
+            })
+            .catch((err) => {
+                throw err;
+            });
+    }
+
+    @Put(':link')
+    @UseGuards(AuthGuard('jwt'))
+    update(@Usr() user: User,
+           @Param('link') link: string,
+           @Body() toChange: any,
+           @Res() res: Response,) {
+        return this.appointmentService
+            .update(toChange, link, user)
+            .then(tAppointment => {
+                res.status(HttpStatus.OK).json(tAppointment);
+            })
+            .catch((err) => {
+                throw err;
+            });
+    }
+
+    @Post(':link/administrator')
+    @UseGuards(AuthGuard('jwt'))
+    addAdministrator(@Usr() user: User,
+                     @Param('link') link: string,
+                     @Body('username') username: string,
+                     @Res() res: Response,) {
+        return this.appointmentService
+            .addAdministrator(user, link, username)
+            .then(() => {
+                res.status(HttpStatus.NO_CONTENT).json();
             }).catch((err) => {
-                if (err instanceof NotFoundException) {
-                    throw err;
+                throw err;
+            });
+    }
+
+    @Delete(':link/administrator/:username')
+    @UseGuards(AuthGuard('jwt'))
+    removeAdministrator(@Usr() user: User,
+                        @Param('link') link: string,
+                        @Param('username') username: string,
+                        @Res() res: Response) {
+        return this.appointmentService
+            .removeAdministrator(user, link, username)
+            .then(() => {
+                res.status(HttpStatus.NO_CONTENT).json();
+            }).catch((err) => {
+                throw err;
+            });
+    }
+
+    @Get(':link/permission')
+    @UseGuards(AuthGuard('jwt'))
+    hasPermission(@Usr() user: User,
+                  @Param('link') link: string,
+                  @Res() res: Response,) {
+        return this.appointmentService
+            .isCreatorOrAdministrator(user, link)
+            .then((result) => {
+                if (result) {
+                    res.status(HttpStatus.NO_CONTENT).json();
+                    return;
                 }
 
-                console.log(err);
-                let error = {error: {}};
-                error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
+                throw new ForbiddenException();
+            })
+            .catch((err) => {
+                throw err;
+            });
+    }
 
-                res.status(HttpStatus.BAD_REQUEST).json(error);
+    @Post(':link/file')
+    addFile(@Usr() user: User,
+            @Param('link') link: string,
+            @Body() data: { name: string, data: string },
+            @Res() res: Response) {
+        return this.appointmentService
+            .addFile(user, link, data)
+            .then(() => {
+                res.status(HttpStatus.NO_CONTENT).json();
+            })
+            .catch((err) => {
+                throw err;
+            });
+    }
+
+    @Delete(':link/file/:id')
+    removeFile(@Usr() user: User,
+               @Param('link') link: string,
+               @Param('id') id: string,
+               @Res() res: Response) {
+        return this.appointmentService
+            .removeFile(user, link, id)
+            .then(() => {
+                res.status(HttpStatus.NO_CONTENT).json();
+            })
+            .catch((err) => {
+                throw err;
+            });
+    }
+
+    @Get(':link/pin')
+    @UseGuards(AuthGuard('jwt'))
+    pinAppointment(@Usr() user: User,
+                   @Param('link') link: string,
+                   @Res() res: Response) {
+        return this.appointmentService
+            .togglePinningAppointment(user, link)
+            .then(() => {
+                res.status(HttpStatus.NO_CONTENT).json();
+            })
+            .catch(err => {
+                throw err;
             });
     }
 
@@ -239,70 +240,4 @@ export class AppointmentController {
     //             res.status(HttpStatus.BAD_REQUEST).json(error);
     //         });
     // }
-
-    @Post(':link/administrator')
-    addAdministrator(@Param('link') link: string, @Body("username") username: string,
-                     @Request() req: Request, @Res() res: Response) {
-        return this.appointmentService
-            .addAdministrator(link, username)
-            .then(result => {
-                res.status(HttpStatus.OK).json();
-            }).catch((err) => {
-                if (err instanceof NotFoundException || err instanceof BadRequestException) {
-                    throw err;
-                }
-
-                console.log(err);
-                let error = {error: {}};
-                error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
-            });
-    }
-
-    @Delete(':link/administrator/:username')
-    deleteAdministrator(@Param('link') link: string,
-                        @Param('username') username: string,
-                        @Request() req: Request,
-                        @Res() res: Response) {
-        return this.appointmentService
-            .removeAdministrator(link, username)
-            .then(result => {
-                res.status(HttpStatus.OK).json();
-            })
-    }
-
-    @Post(':link/file')
-    addFile(@Param('link') link: string,
-            @Body() data: { name: string, data: string },
-            @Request() req: Request,
-            @Res() res: Response) {
-        return this.appointmentService
-            .addFile(link, data)
-            .then(result => {
-                res.status(HttpStatus.OK).json();
-            }).catch((err) => {
-                if (err instanceof NotFoundException) {
-                    throw err;
-                }
-
-                console.log(err);
-                let error = {error: {}};
-                error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
-
-                res.status(HttpStatus.BAD_REQUEST).json(error);
-            });
-    }
-
-    @Delete(':link/file/:id')
-    deleteFile(@Param('link') link: string,
-               @Param('id') id: string,
-               @Request() req: Request,
-               @Res() res: Response) {
-        return this.appointmentService
-            .removeFile(link, id)
-            .then(result => {
-                res.status(HttpStatus.OK).json();
-            })
-    }
 }

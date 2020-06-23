@@ -1,7 +1,7 @@
 import {Injectable} from '@nestjs/common';
-import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
-import {Releasenote} from "./releasenote.entity";
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository} from 'typeorm';
+import {Releasenote} from './releasenote.entity';
 
 @Injectable()
 export class ReleasenoteService {
@@ -10,11 +10,16 @@ export class ReleasenoteService {
                 private readonly releasenoteRepository: Repository<Releasenote>,) {
     }
 
-    async findAll() {
-        return await this.releasenoteRepository
-            .createQueryBuilder('releasenote')
-            .select('releasenote')
-            .orderBy("releasenote.iat", "DESC")
-            .getMany();
+    /**
+     * Return all releasenotes
+     *
+     * @returns Releasenote[]
+     */
+    public async find() {
+        return await this.releasenoteRepository.find({
+            order: {
+                iat: 'DESC'
+            }
+        });
     }
 }

@@ -1,6 +1,6 @@
 import {Injectable} from '@nestjs/common';
-import {UserService} from "../user/user.service";
-import {AppointmentService} from "../appointment/appointment.service";
+import {UserService} from '../user/user.service';
+import {AppointmentService} from '../appointment/appointment.service';
 
 var crypto = require('crypto');
 
@@ -30,7 +30,7 @@ export class IcalService {
 
             if (hash === token) {
                 console.log("hash valid");
-                const appointments = await this.appointmentService.findAll(user, true);
+                const appointments = await this.appointmentService.getAll(user, true);
 
                 appointments.forEach(fAppointment => {
                     cal.createEvent({

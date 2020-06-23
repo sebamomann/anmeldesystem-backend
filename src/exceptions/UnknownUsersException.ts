@@ -7,7 +7,8 @@ export class UnknownUsersException implements Error {
     data: string[];
     code: string;
 
-    constructor(code: string, message: string, data: string[]) {
+    constructor(code: string = null, message: string = null, data: string[] = null) {
+        this.code = code;
         this.message = message;
         this.data = data;
     }

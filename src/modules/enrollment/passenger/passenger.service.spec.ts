@@ -1,18 +1,27 @@
 import {Test, TestingModule} from '@nestjs/testing';
-import {PassengerService} from "./passenger.service";
+import {PassengerService} from './passenger.service';
+import {MockType, repositoryMockFactory} from '../../user/user.service.spec';
+import {Repository} from 'typeorm';
+import {getRepositoryToken} from '@nestjs/typeorm';
+import {Passenger} from './passenger.entity';
 
 describe('PassengerService', () => {
-    let service: PassengerService;
+    let passengerService: PassengerService;
+
+    let passengerRepositoryMock: MockType<Repository<Passenger>>;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [PassengerService],
+            providers: [PassengerService,
+                {provide: getRepositoryToken(Passenger), useFactory: repositoryMockFactory},],
         }).compile();
 
-        service = module.get<PassengerService>(PassengerService);
+        passengerService = module.get<PassengerService>(PassengerService);
+
+        passengerRepositoryMock = module.get(getRepositoryToken(Passenger));
     });
 
     it('should be defined', () => {
-        expect(service).toBeDefined();
+        expect(passengerService).toBeDefined();
     });
 });

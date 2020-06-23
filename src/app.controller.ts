@@ -1,6 +1,6 @@
 import {Controller, HttpStatus, Post, Request, Res, UseGuards} from '@nestjs/common';
-import {AuthGuard} from "@nestjs/passport";
-import {AuthService} from "./auth/auth.service";
+import {AuthGuard} from '@nestjs/passport';
+import {AuthService} from './auth/auth.service';
 
 @Controller()
 export class AppController {
@@ -11,14 +11,18 @@ export class AppController {
     @UseGuards(AuthGuard('local'))
     async login(@Request() req,
                 @Res() res) {
+
         if (req.user instanceof Date) {
             let error: any = {};
-            error.code = "OLDPASSWORD";
-            error.message = "This password has been changed at " + req.user;
-            error.error = req.user;
+            error.code = 'OLD_PASSWORD';
+            error.message = 'This password has been changed at ' + req.user;
+            error.data = req.user;
+
             return res.status(HttpStatus.UNAUTHORIZED).json(error);
         }
 
-        return res.status(200).json(await this.authService.login(req.user));
+        let _user = await this.authService.addJwtToObject(req.user);
+
+        return res.status(HttpStatus.OK).json(_user);
     }
 }

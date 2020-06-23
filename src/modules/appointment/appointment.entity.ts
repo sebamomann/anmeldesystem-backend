@@ -10,11 +10,11 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from 'typeorm';
-import {Enrollment} from "../enrollment/enrollment.entity";
-import {Addition} from "../addition/addition.entity";
-import {File} from "../file/file.entity";
-import {User} from "../user/user.entity";
-import {Exclude} from "class-transformer";
+import {Enrollment} from '../enrollment/enrollment.entity';
+import {Addition} from '../addition/addition.entity';
+import {File} from '../file/file.entity';
+import {User} from '../user/user.entity';
+import {Exclude} from 'class-transformer';
 
 @Entity()
 export class Appointment {
@@ -33,7 +33,7 @@ export class Appointment {
     @Column({nullable: false})
     location: string;
 
-    @Column('timestamp', {nullable: false, default: () => "CURRENT_TIMESTAMP"})
+    @Column('timestamp', {nullable: false, default: () => 'CURRENT_TIMESTAMP'})
     date: Date;
 
     @Column('timestamp', {default: null})
@@ -46,7 +46,8 @@ export class Appointment {
     hidden: boolean;
 
     @OneToMany(type => Enrollment,
-        enrollment => enrollment.appointment, {
+        enrollment => enrollment.appointment,
+        {
             eager: true
         })
     enrollments: Enrollment[];
@@ -58,18 +59,16 @@ export class Appointment {
         })
     additions: Addition[];
 
-    @Column('smallint', {default: false})
+    @Column({default: false})
     driverAddition: boolean;
 
     @ManyToMany(type => User,
-        user => user.administrations,
-        {eager: false})
+        user => user.administrations)
     @JoinTable()
     administrators: User[];
 
     @ManyToMany(type => User,
-        user => user.pinned,
-        {eager: false})
+        user => user.pinned)
     @JoinTable()
     pinners: User[];
 

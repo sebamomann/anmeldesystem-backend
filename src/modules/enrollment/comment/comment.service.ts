@@ -1,9 +1,8 @@
 import {Injectable} from '@nestjs/common';
-import {Comment} from "./comment.entity";
+import {Comment} from './comment.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
-import {Enrollment} from "../enrollment.entity";
-import {EnrollmentService} from "../enrollment.service";
+import {EnrollmentService} from '../enrollment.service';
 
 @Injectable()
 export class CommentService {
@@ -11,15 +10,39 @@ export class CommentService {
     constructor(@InjectRepository(Comment)
                 private readonly commentRepository: Repository<Comment>,
                 private enrollmentService: EnrollmentService) {
-
     }
 
-    async findById(id: string) {
-        return await this.commentRepository.findOne({where: {id: id}});
-    }
+    // private async findById(id: string) {
+    //     let comment = await this.commentRepository.findOne({
+    //         where: {id: id}
+    //     });
+    //
+    //     if (comment === undefined) {
+    //         throw new EntityNotFoundException(null, null, 'comment');
+    //     }
+    //
+    //     return comment;
+    // }
 
-    async create(comment: Comment, id: string) {
-        const enrollment: Enrollment = await this.enrollmentService.find(id);
+    /**
+     * Create a comment that is connected to the passed enrollment.
+     * The enrollment just needs to include its Id.
+     *
+     * @param comment Comment to add
+     *
+     * @param enrollmentId ID of Enrollment to add Comment to
+     * @returns Comment Created Comment entity
+     *
+     * @throws EntityNotFoundException if enrollment doesnt exist
+     */
+    public async create(comment: Comment) {
+        let enrollment;
+
+        try {
+            enrollment = await this.enrollmentService.findById(comment.enrollment.id);
+        } catch (e) {
+            throw e;
+        }
 
         let commentToDb = new Comment();
         commentToDb.name = comment.name;
@@ -27,6 +50,6 @@ export class CommentService {
 
         comment.enrollment = enrollment;
 
-        return this.commentRepository.save(comment);
+        return await this.commentRepository.save(comment);
     }
 }

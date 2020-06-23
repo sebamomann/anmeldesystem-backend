@@ -1,4 +1,4 @@
-import {AuthGuard} from "@nestjs/passport";
+import {AuthGuard} from '@nestjs/passport';
 
 export class JwtOptStrategy extends AuthGuard('jwt') {
 
@@ -6,5 +6,4 @@ export class JwtOptStrategy extends AuthGuard('jwt') {
     handleRequest(err, user, info, context) {
         return user;
     }
-
 }
