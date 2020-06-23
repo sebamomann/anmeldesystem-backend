@@ -3,6 +3,11 @@ def image
 pipeline {
   agent any
 
+  parameters {
+    string(name: 'VERSION', defaultValue: '0.0.0')
+    bool(name: 'LATEST', defaultValue: 'true')
+  }
+
   stages {
     stage('Build Docker image') {
       steps {
