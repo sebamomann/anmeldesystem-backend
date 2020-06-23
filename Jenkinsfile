@@ -5,7 +5,7 @@ pipeline {
 
   parameters {
     string(name: 'VERSION', defaultValue: '0.0.0')
-    bool(name: 'LATEST', defaultValue: 'true')
+    boolean(name: 'LATEST', defaultValue: 'true')
   }
 
   stages {
