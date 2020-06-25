@@ -260,7 +260,7 @@ export class UserService {
 
         await this.passwordResetRepository.save(passwordReset);
 
-        let url = `https://${domain}/${btoa(mail)}/${token}`;
+        let url = `https://${domain}/${btoa(mail).replace('=', '')}/${token}`;
 
         this.mailerService
             .sendMail({
@@ -296,6 +296,7 @@ export class UserService {
      * @throws See {@link resetPasswordTokenVerification} for reference
      */
     public async updatePassword(mail: string, token: string, pass: string) {
+        console.log(mail);
         return this.resetPasswordTokenVerification(mail, token)
             .then(async () => {
                 let user;
@@ -613,7 +614,7 @@ export class UserService {
 
         emailChange = await this.emailChangeRepository.save(emailChange);
 
-        const url = `https://${domain}/${btoa(mail)}/${token}`;
+        const url = `https://${domain}/${btoa(mail).replace('=', '')}/${token}`;
 
         this.mailerService
             .sendMail({

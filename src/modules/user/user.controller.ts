@@ -12,6 +12,7 @@ import {Response} from 'express';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 
 const atob = require('atob');
+const btoa = require('btoa');
 
 @Controller('users')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
