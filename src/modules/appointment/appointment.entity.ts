@@ -68,7 +68,10 @@ export class Appointment {
     administrators: User[];
 
     @ManyToMany(type => User,
-        user => user.pinned)
+        user => user.pinned,
+        {
+            eager: true
+        })
     @JoinTable()
     pinners: User[];
 
