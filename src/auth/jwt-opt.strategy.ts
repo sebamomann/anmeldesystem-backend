@@ -7,9 +7,6 @@ export class JwtOptStrategy extends AuthGuard('jwt') {
     handleRequest(err, user, info, context) {
         const authHeader = context.switchToHttp().getRequest().headers.authorization;
 
-        console.log(info);
-        console.log(authHeader);
-
         if (info && authHeader !== '' && authHeader !== undefined) {
             throw new UnauthorizedException();
         }
