@@ -30,8 +30,6 @@ export class AuthService {
                 return new Date(passwordChangeDate);
             }
         }
-
-        return null;
     }
 
     public addJwtToObject(user: User) {
