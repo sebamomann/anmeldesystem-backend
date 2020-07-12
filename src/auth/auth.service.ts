@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common';
+import {Injectable, UnauthorizedException} from '@nestjs/common';
 import {UserService} from '../modules/user/user.service';
 import {JwtService} from '@nestjs/jwt';
 import {User} from '../modules/user/user.entity';
@@ -42,5 +42,33 @@ export class AuthService {
         const payload = {sub: user.id, mail: user.mail, username: user.username};
         user.token = this.jwtService.sign(payload);
         return user;
+    }
+
+    async generateAccessToken(data: { user: { id: string }; refreshToken: string }) {
+        let user;
+
+        try {
+            user = await this.userService.findById(data.user.id);
+        } catch (e) {
+            throw e;
+        }
+
+        let session;
+
+        try {
+            session = await this.userService.sessionExists(data.refreshToken, data.user.id);
+        } catch (e) {
+            throw new UnauthorizedException();
+        }
+
+        const _user = userMapper.basic(this.userService, user);
+
+        const token = this.addJwtToObject(_user);
+
+        return {
+            ...user,
+            token: token.token,
+            refreshToken: data.refreshToken,
+        };
     }
 }

@@ -760,4 +760,18 @@ export class UserService {
 
         return session;
     }
+
+    async sessionExists(refreshToken: string, id: string) {
+        const session = await this.sessionRepository.findOne({where: {refreshToken: refreshToken, user: id}});
+
+        if (session == undefined) {
+            throw new EntityNotFoundException();
+        }
+
+        session.last_used = new Date();
+        session.times_used = session.times_used++;
+        await this.sessionRepository.save(session);
+
+        return session;
+    }
 }
