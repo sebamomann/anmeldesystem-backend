@@ -12,7 +12,7 @@ export class AuthService {
                 private readonly jwtService: JwtService) {
     }
 
-    async validateUser(value: string, pass: string): Promise<any> {
+    async login(value: string, pass: string): Promise<any> {
         let user;
 
         try {
@@ -22,6 +22,11 @@ export class AuthService {
         }
 
         if (await bcrypt.compare(pass, user.password)) {
+
+            const session = await this.userService.createSession(user);
+
+            user.refreshToken = session.refreshToken;
+
             return userMapper.basic(this.userService, user);
         } else {
             const passwordChangeDate = await this.userService.getLastPasswordDate(user, pass);

@@ -25,4 +25,32 @@ export class AppController {
 
         return res.status(HttpStatus.OK).json(_user);
     }
+
+    // @Post('auth/token')
+    // generateAccessToken(@Body() data: { user: { id: string }, refreshToken: string },
+    //                     @Res() res: Response,) {
+    //     return this.authService
+    //         .generateAccessToken(data)
+    //         .then((result) => {
+    //             res.status(HttpStatus.CREATED).json({
+    //                 data: result,
+    //                 date: new Date(Date.now())
+    //             });
+    //         })
+    //         .catch((err) => {
+    //             if (err instanceof EntityNotFoundException || err instanceof UnauthorizedException) {
+    //                 res.status(HttpStatus.UNAUTHORIZED).json({
+    //                     code: "UNAUTHORIZED",
+    //                     message: `Missing or invalid Authentication`,
+    //                     date: new Date(Date.now())
+    //                 });
+    //             } else {
+    //                 res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+    //                     code: "UNDEFINED",
+    //                     message: `An undefined error occurred. Please try again`,
+    //                     date: new Date(Date.now())
+    //                 });
+    //             }
+    //         })
+    // }
 }

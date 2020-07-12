@@ -100,7 +100,7 @@ describe('AuthService', () => {
                 userRepositoryMock.findOne.mockReturnValueOnce(user);
                 jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(true);
 
-                const actual = await authService.validateUser(value, password);
+                const actual = await authService.login(value, password);
                 expect(typeof actual).toBe('object');
                 expect(actual.username).toEqual(user.username);
                 expect(actual.mail).toEqual(user.mail);
@@ -114,7 +114,7 @@ describe('AuthService', () => {
 
                 userRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
-                await authService.validateUser(value, password)
+                await authService.login(value, password)
                     .then(() => {
                         throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
                     })
@@ -139,7 +139,7 @@ describe('AuthService', () => {
                 jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(false);
                 jest.spyOn(userService, 'getLastPasswordDate').mockReturnValueOnce(Promise.resolve(_date));
 
-                const actual = await authService.validateUser(value, password);
+                const actual = await authService.login(value, password);
                 expect(actual).toEqual(date);
             });
 
@@ -155,7 +155,7 @@ describe('AuthService', () => {
                 jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(false);
                 jest.spyOn(userService, 'getLastPasswordDate').mockReturnValueOnce(null);
 
-                const actual = await authService.validateUser(value, password);
+                const actual = await authService.login(value, password);
                 expect(actual).toBe(null);
             });
         });

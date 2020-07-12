@@ -5,6 +5,7 @@ import {TelegramUser} from './telegram/telegram-user.entity';
 import {PasswordReset} from './password-reset/password-reset.entity';
 import {Exclude} from 'class-transformer';
 import {EmailChange} from './email-change/email-change.entity';
+import {Session} from './session.entity';
 
 @Entity()
 export class User {
@@ -70,8 +71,15 @@ export class User {
         })
     emailChange: EmailChange[];
 
+    @OneToMany(() => Session, session => session.user,
+        {
+            onUpdate: 'NO ACTION'
+        })
+    sessions: Session[];
+
     @CreateDateColumn()
     iat: Date;
 
     token: string;
+    refreshToken: string;
 }

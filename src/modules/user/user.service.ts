@@ -16,6 +16,8 @@ import {ExpiredTokenException} from '../../exceptions/ExpiredTokenException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {InternalErrorException} from '../../exceptions/InternalErrorException';
+import {GeneratorUtil} from '../../util/generator.util';
+import {Session} from './session.entity';
 
 var logger = require('../../logger');
 var crypto = require('crypto');
@@ -29,6 +31,8 @@ export class UserService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        @InjectRepository(Session)
+        private readonly sessionRepository: Repository<Session>,
         @InjectRepository(TelegramUser)
         private readonly telegramUserRepository: Repository<TelegramUser>,
         @InjectRepository(PasswordReset)
@@ -742,5 +746,18 @@ export class UserService {
             logger.log('error', `Can't execute query to cancel mail change of user ${user.id}`);
             throw new InternalErrorException(null, 'Cannot cancel mail change due to a database error');
         }
+    }
+
+    public async createSession(user) {
+        const refreshToken = GeneratorUtil.makeid(40);
+
+        const session = new Session();
+        session.refreshToken = refreshToken;
+        session.user = user;
+        session.last_used = new Date();
+
+        await this.sessionRepository.save(session);
+
+        return session;
     }
 }

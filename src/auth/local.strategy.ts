@@ -13,7 +13,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         let res;
 
         try {
-            res = await this.authService.validateUser(mail, password);
+            res = await this.authService.login(mail, password);
         } catch (e) {
             throw new UnauthorizedException();
         }
