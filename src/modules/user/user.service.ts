@@ -769,7 +769,7 @@ export class UserService {
         }
 
         session.last_used = new Date();
-        session.times_used = session.times_used++;
+        session.times_used = session.times_used + 1;
         await this.sessionRepository.save(session);
 
         return session;
