@@ -16,6 +16,7 @@ import {Enrollment} from '../enrollment/enrollment.entity';
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {GeneratorUtil} from '../../util/generator.util';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
+import {AppointmentGateway} from './appointment.gateway';
 
 const crypto = require('crypto');
 const appointmentMapper = require('./appointment.mapper');
@@ -34,7 +35,8 @@ export class AppointmentService {
         private readonly userRepository: Repository<User>,
         private additionService: AdditionService,
         private userService: UserService,
-        private fileService: FileService
+        private fileService: FileService,
+        private appointmentGatway: AppointmentGateway
     ) {
     }
 
@@ -251,6 +253,8 @@ export class AppointmentService {
         appointment = appointmentMapper.permission(this, appointment, user, {});
         appointment = appointmentMapper.slim(this, appointment, false);
         appointment = appointmentMapper.basic(this, appointment);
+
+        this.appointmentGatway.appointmentUpdated(appointment);
 
         return appointment;
     }
