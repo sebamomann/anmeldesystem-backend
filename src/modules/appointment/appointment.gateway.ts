@@ -11,7 +11,7 @@ import {Logger} from '@nestjs/common';
 import {Server, Socket} from 'socket.io';
 import {Appointment} from './appointment.entity';
 
-@WebSocketGateway({namespace: 'appointment-socket'})
+@WebSocketGateway({namespace: 'appointment'})
 export class AppointmentGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
     @WebSocketServer() wss: Server;
@@ -38,7 +38,7 @@ export class AppointmentGateway implements OnGatewayInit, OnGatewayConnection, O
     }
 
     public appointmentUpdated(appointment: Appointment) {
-        this.wss.to(appointment.link).emit('updated', appointment);
+        this.wss.to(appointment.link).emit('update', appointment);
     }
 
 }
