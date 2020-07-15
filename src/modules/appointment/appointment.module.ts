@@ -30,8 +30,8 @@ import {AppointmentGateway} from './appointment.gateway';
 
 @Module({
     imports: [TypeOrmModule.forFeature([Appointment, Addition, File, Comment, Enrollment, Driver, Passenger, User, Key, Mail, TelegramUser, PasswordReset, PasswordChange, EmailChange, Session])],
-    providers: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService, FileService, AppointmentGateway],
-    exports: [AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService, FileService, AppointmentGateway],
+    providers: [AppointmentGateway, AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService, FileService],
+    exports: [AppointmentGateway, AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService, FileService],
     controllers: [AppointmentController, MigrationController],
 })
 export class AppointmentModule {

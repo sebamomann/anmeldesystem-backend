@@ -33,7 +33,6 @@ import {EmailChange} from './modules/user/email-change/email-change.entity';
 import {Mail} from './modules/enrollment/mail/mail.entity';
 import {PasswordChange} from './modules/user/password-change/password-change.entity';
 import {Session} from './modules/user/session.entity';
-import {AppointmentGateway} from './modules/appointment/appointment.gateway';
 
 require('dotenv').config();
 const password = process.env.MAIL_ECA_PASSWORD;
@@ -78,7 +77,7 @@ const _mail = process.env.MAIL_ECA;
         ReleasenoteModule,
     ],
     controllers: [AppController],
-    providers: [AppService, AppointmentGateway],
+    providers: [AppService],
 })
 export class AppModule {
     constructor(private readonly connection: Connection) {

@@ -36,7 +36,7 @@ export class AppointmentService {
         private additionService: AdditionService,
         private userService: UserService,
         private fileService: FileService,
-        private appointmentGatway: AppointmentGateway
+        private appointmentGateway: AppointmentGateway
     ) {
     }
 
@@ -88,6 +88,64 @@ export class AppointmentService {
         return appointment;
     }
 
+    public static userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
+        appointment.reference = this.parseReferences(user, appointment, []);
+
+        appointment = appointmentMapper.permission(this, appointment, user, permissions);
+        appointment = appointmentMapper.slim(this, appointment, slim);
+        appointment = appointmentMapper.basic(this, appointment);
+
+        return appointment;
+    }
+
+    /**
+     * Check the users correlation to the appointment. <br />
+     * Following correlations (references) are possible
+     * <ol>
+     *     <li>CREATOR</li>
+     *     <li>ADMIN</li>
+     *     <li>ENROLLED</li>
+     *     <li>PINNED</li>
+     * </ol>
+     * Note that a permission granted via passing a link, the correlation is also marked as "PINNED".<br/>
+     * Multiple correlations are possible without any restrictions.
+     *
+     * @param user Requester (if existing) to correlate
+     * @param appointment Appointment to correlate user with
+     * @param pins Links of pinned Appointments (passed via query parameter)
+     *
+     * @returns string[] Array of all correlations regarding User and Appointment
+     */
+    public static parseReferences(user: User, appointment: Appointment, pins: string[]) {
+        const reference = [];
+
+        if (user != null) {
+            if (AppointmentService.isAdministratorOfAppointment(appointment, user)) {
+                reference.push('ADMIN');
+            }
+
+            if (AppointmentService.isCreatorOfAppointment(appointment, user)) {
+                reference.push('CREATOR');
+            }
+
+            if (appointment.enrollments !== undefined
+                && appointment.enrollments.some(sEnrollment => {
+                    return sEnrollment.creator != null
+                        && sEnrollment.creator.id === user.id;
+                })) {
+                reference.push('ENROLLED');
+            }
+
+            if ((appointment.pinners !== undefined
+                && appointment.pinners.some(sPinner => sPinner.id === user.id))
+                || pins.includes(appointment.link)) {
+                reference.push('PINNED');
+            }
+        }
+
+        return reference;
+    }
+
     /**
      * Get a appointment by its link. Checking for permissions by query parameter,
      * being creator or being administrator.
@@ -110,13 +168,9 @@ export class AppointmentService {
             throw e;
         }
 
-        appointment.reference = this.parseReferences(user, appointment, []);
+        appointment = AppointmentService.userBasedAppointmentPreparation(appointment, user, permissions, slim);
 
-        appointment = appointmentMapper.permission(this, appointment, user, permissions);
-        appointment = appointmentMapper.slim(this, appointment, slim);
-        appointment = appointmentMapper.basic(this, appointment);
-
-        this.appointmentGatway.appointmentUpdated(appointment);
+        this.appointmentGateway.appointmentUpdated(appointment);
 
         return appointment;
     }
@@ -169,7 +223,7 @@ export class AppointmentService {
 
         appointment = await this.appointmentRepository.save(appointment);
 
-        appointment.reference = this.parseReferences(user, appointment, []);
+        appointment.reference = AppointmentService.parseReferences(user, appointment, []);
 
         appointment = appointmentMapper.permission(this, appointment, user, {});
         appointment = appointmentMapper.slim(this, appointment, false);
@@ -250,75 +304,13 @@ export class AppointmentService {
 
         appointment = await this.appointmentRepository.save(appointment);
 
-        appointment.reference = this.parseReferences(user, appointment, []);
+        appointment.reference = AppointmentService.parseReferences(user, appointment, []);
 
         appointment = appointmentMapper.permission(this, appointment, user, {});
         appointment = appointmentMapper.slim(this, appointment, false);
         appointment = appointmentMapper.basic(this, appointment);
 
         return appointment;
-    }
-
-    /**
-     * Fetch all Appointments, the user is allowed to see.
-     * This includes being the creator, an administrator or being enrolled into this appoinment.
-     * Additionally, pinned appointments get returned. Further an array of links can be passed
-     * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
-     * <br />
-     * When passing a link with this request, the corresponding Appointment gets marked as "PINNED" <br />
-     * <br />
-     * All appointments include a reference. See {@link parseReferences} for more information
-     *
-     * @param user Requester (if existing)
-     * @param params All query parameters to parse pinned links
-     * @param slim Delete information overhead. See {@link appointmentMapper.slim} for more information.
-     *
-     * @returns Appointment[]
-     */
-    public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
-        let pins = [];
-        for (const queryKey of Object.keys(params)) {
-            if (queryKey.startsWith('pin')) {
-                pins.push(params[queryKey]);
-            }
-        }
-
-        let appointments = await this.getAppointments(user, pins);
-
-        // let appointments = await this.appointmentRepository.find({
-        //     join: {
-        //         alias: "appointment",
-        //         leftJoinAndSelect: {
-        //             administrators: "appointment.administrators",
-        //             enrollments: "appointment.enrollments",
-        //             enrollmentCreator: "enrollments.creator",
-        //             pinners: "appointment.pinners"
-        //         }
-        //     },
-        //     where: [
-        //         {creator: {id: user.id}},
-        //         {administrators: {id: user.id}},
-        //         {enrollmentCreator: {id: user.id}},
-        //         {pinners: {id: user.id}},
-        //         {link: In(pins)}
-        //     ],
-        //     order: {
-        //         date: 'DESC'
-        //     }
-        // });
-
-        appointments.map(fAppointment => {
-            fAppointment.reference = this.parseReferences(user, fAppointment, pins);
-        });
-
-        appointments.map(appointment => {
-            appointment = appointmentMapper.permission(this, appointment, user, {});
-            appointment = appointmentMapper.slim(this, appointment, slim);
-            appointment = appointmentMapper.basic(this, appointment);
-            return appointment;
-        });
-
-        return appointments;
     }
 
     /**
@@ -582,51 +574,65 @@ export class AppointmentService {
     }
 
     /**
-     * Check the users correlation to the appointment. <br />
-     * Following correlations (references) are possible
-     * <ol>
-     *     <li>CREATOR</li>
-     *     <li>ADMIN</li>
-     *     <li>ENROLLED</li>
-     *     <li>PINNED</li>
-     * </ol>
-     * Note that a permission granted via passing a link, the correlation is also marked as "PINNED".<br/>
-     * Multiple correlations are possible without any restrictions.
+     * Fetch all Appointments, the user is allowed to see.
+     * This includes being the creator, an administrator or being enrolled into this appoinment.
+     * Additionally, pinned appointments get returned. Further an array of links can be passed
+     * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
+     * <br />
+     * When passing a link with this request, the corresponding Appointment gets marked as "PINNED" <br />
+     * <br />
+     * All appointments include a reference. See {@link parseReferences} for more information
      *
-     * @param user Requester (if existing) to correlate
-     * @param appointment Appointment to correlate user with
-     * @param pins Links of pinned Appointments (passed via query parameter)
+     * @param user Requester (if existing)
+     * @param params All query parameters to parse pinned links
+     * @param slim Delete information overhead. See {@link appointmentMapper.slim} for more information.
      *
-     * @returns string[] Array of all correlations regarding User and Appointment
+     * @returns Appointment[]
      */
-    public parseReferences(user: User, appointment: Appointment, pins: string[]) {
-        const reference = [];
-
-        if (user != null) {
-            if (AppointmentService.isAdministratorOfAppointment(appointment, user)) {
-                reference.push('ADMIN');
-            }
-
-            if (AppointmentService.isCreatorOfAppointment(appointment, user)) {
-                reference.push('CREATOR');
-            }
-
-            if (appointment.enrollments !== undefined
-                && appointment.enrollments.some(sEnrollment => {
-                    return sEnrollment.creator != null
-                        && sEnrollment.creator.id === user.id;
-                })) {
-                reference.push('ENROLLED');
-            }
-
-            if ((appointment.pinners !== undefined
-                && appointment.pinners.some(sPinner => sPinner.id === user.id))
-                || pins.includes(appointment.link)) {
-                reference.push('PINNED');
+    public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
+        let pins = [];
+        for (const queryKey of Object.keys(params)) {
+            if (queryKey.startsWith('pin')) {
+                pins.push(params[queryKey]);
             }
         }
 
-        return reference;
+        let appointments = await this.getAppointments(user, pins);
+
+        // let appointments = await this.appointmentRepository.find({
+        //     join: {
+        //         alias: "appointment",
+        //         leftJoinAndSelect: {
+        //             administrators: "appointment.administrators",
+        //             enrollments: "appointment.enrollments",
+        //             enrollmentCreator: "enrollments.creator",
+        //             pinners: "appointment.pinners"
+        //         }
+        //     },
+        //     where: [
+        //         {creator: {id: user.id}},
+        //         {administrators: {id: user.id}},
+        //         {enrollmentCreator: {id: user.id}},
+        //         {pinners: {id: user.id}},
+        //         {link: In(pins)}
+        //     ],
+        //     order: {
+        //         date: 'DESC'
+        //     }
+        // });
+
+        appointments.map(fAppointment => {
+            fAppointment.reference = AppointmentService.parseReferences(user, fAppointment, pins);
+        });
+
+        appointments.map(appointment => {
+            appointment = appointmentMapper.permission(this, appointment, user, {});
+            appointment = appointmentMapper.slim(this, appointment, slim);
+            appointment = appointmentMapper.basic(this, appointment);
+            return appointment;
+        });
+
+        return appointments;
     }
 
     private async handleAppointmentLink(_link: string) {
