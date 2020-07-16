@@ -61,6 +61,6 @@ export class AppointmentGateway implements OnGatewayInit, OnGatewayConnection, O
     }
 
     public appointmentUpdated(appointment: Appointment) {
-        this.wss.to(appointment.link).emit('update', appointment);
+        this.wss.to(appointment.link).emit('update', appointment.link);
     }
 }

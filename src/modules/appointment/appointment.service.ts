@@ -170,8 +170,6 @@ export class AppointmentService {
 
         appointment = AppointmentService.userBasedAppointmentPreparation(appointment, user, permissions, slim);
 
-        this.appointmentGateway.appointmentUpdated(appointment);
-
         return appointment;
     }
 
@@ -309,6 +307,8 @@ export class AppointmentService {
         appointment = appointmentMapper.permission(this, appointment, user, {});
         appointment = appointmentMapper.slim(this, appointment, false);
         appointment = appointmentMapper.basic(this, appointment);
+
+        this.appointmentGateway.appointmentUpdated(appointment);
 
         return appointment;
     }
