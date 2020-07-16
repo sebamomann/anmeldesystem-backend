@@ -590,6 +590,7 @@ export class AppointmentService {
      * @returns Appointment[]
      */
     public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
+
         let pins = [];
         for (const queryKey of Object.keys(params)) {
             if (queryKey.startsWith('pin')) {

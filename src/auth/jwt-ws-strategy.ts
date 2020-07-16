@@ -29,7 +29,6 @@ export class WsJwtGuard implements CanActivate {
             }
         }
 
-        return Boolean();
-
+        return Boolean(true);
     }
 }

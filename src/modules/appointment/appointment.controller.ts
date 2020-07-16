@@ -55,7 +55,6 @@ export class AppointmentController {
                 res.status(HttpStatus.OK).json(tAppointment);
             })
             .catch((err) => {
-                console.log(err);
                 throw err;
             });
     }
@@ -68,13 +67,13 @@ export class AppointmentController {
            @Query('slim') slim: string,
            @Res() res: Response,) {
         let _slim = slim === 'true';
-
         return this.appointmentService
             .getAll(user, params, _slim)
             .then(result => {
                 res.status(HttpStatus.OK).json(result);
             })
             .catch(err => {
+                console.log(err);
                 throw err;
             });
     }
