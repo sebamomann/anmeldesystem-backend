@@ -11,7 +11,7 @@ import {JwtStrategy} from './jwt.strategy';
         forwardRef(() => UserModule),
         JwtModule.register({
             secret: jwtConstants.secret,
-            signOptions: {expiresIn: '15s'},
+            signOptions: {expiresIn: '15m'},
         }),
     ],
     providers: [AuthService, LocalStrategy, JwtStrategy],
