@@ -18,6 +18,7 @@ import {MailerService} from '@nest-modules/mailer';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
+import {AppointmentGateway} from '../appointment/appointment.gateway';
 
 const crypto = require('crypto');
 const logger = require('../../logger');
@@ -39,7 +40,8 @@ export class EnrollmentService {
                 private readonly additionService: AdditionService,
                 private readonly passengerService: PassengerService,
                 private readonly driverService: DriverService,
-                private readonly mailerService: MailerService,) {
+                private readonly mailerService: MailerService,
+                private readonly appointmentGateway: AppointmentGateway) {
 
     }
 
@@ -164,6 +166,8 @@ export class EnrollmentService {
 
         savedEnrollment = enrollmentMapper.basic(this, savedEnrollment);
 
+        this.appointmentGateway.appointmentUpdated(_enrollment.appointment);
+
         return savedEnrollment;
     }
 
@@ -236,6 +240,8 @@ export class EnrollmentService {
 
         savedEnrollment = enrollmentMapper.basic(this, savedEnrollment);
 
+        this.appointmentGateway.appointmentUpdated(appointment.link);
+
         return savedEnrollment;
     }
 
@@ -263,6 +269,8 @@ export class EnrollmentService {
         }
 
         await this.enrollmentRepository.remove(enrollment);
+
+        this.appointmentGateway.appointmentUpdated(enrollment.appointment.link);
     }
 
     // public async get(id: string) {

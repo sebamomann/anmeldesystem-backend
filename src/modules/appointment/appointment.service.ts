@@ -423,6 +423,8 @@ export class AppointmentService {
         appointment.files.push(savedFile);
 
         await this.appointmentRepository.save(appointment);
+
+        this.appointmentGateway.appointmentUpdated(appointment);
     }
 
     /**
@@ -460,6 +462,8 @@ export class AppointmentService {
         }
 
         await this.fileRepository.remove(file);
+
+        this.appointmentGateway.appointmentUpdated(appointment);
     }
 
     /**
@@ -527,17 +531,17 @@ export class AppointmentService {
 
     /**
      * Filters out all enrollments, the requester is not allowed to see.<br />
-     * Done by validation the query parameters (id and token) passed with te request.
+     * Done by validation the enrollment query parameters (id and token) passed with te request.
      * If the token is valid and the enrollment id exists in the enrollments array, then return it.<br/>
      * <br />
-     * The query parameters are determined by the starting sequence
+     * The query parameters are determined by the starting sequence `perm` and `token`
      * <br />
-     * "perm" for the id (e.g. perm1, perm2, perm3) <br />
-     * "token" for the validation token of the id (e.g. token1, token2, token3) <br/>
+     * `perm` for the id (e.g. perm1, perm2, perm3) <br />
+     * `token` for the validation token of the id (e.g. token1, token2, token3) <br/>
      * <br />
      *
      * IMPORTANT - The order of the ids with their corresponding token is important!.
-     * The second id passed, will be verified with the second passed token!
+     * The second id passed, will be verified with the second PASSED token (not token number)!
      *
      * @param permissions All raw query parameters
      * @param enrollments Enrollments to filter
@@ -599,28 +603,6 @@ export class AppointmentService {
         }
 
         let appointments = await this.getAppointments(user, pins);
-
-        // let appointments = await this.appointmentRepository.find({
-        //     join: {
-        //         alias: "appointment",
-        //         leftJoinAndSelect: {
-        //             administrators: "appointment.administrators",
-        //             enrollments: "appointment.enrollments",
-        //             enrollmentCreator: "enrollments.creator",
-        //             pinners: "appointment.pinners"
-        //         }
-        //     },
-        //     where: [
-        //         {creator: {id: user.id}},
-        //         {administrators: {id: user.id}},
-        //         {enrollmentCreator: {id: user.id}},
-        //         {pinners: {id: user.id}},
-        //         {link: In(pins)}
-        //     ],
-        //     order: {
-        //         date: 'DESC'
-        //     }
-        // });
 
         appointments.map(fAppointment => {
             fAppointment.reference = AppointmentService.parseReferences(user, fAppointment, pins);

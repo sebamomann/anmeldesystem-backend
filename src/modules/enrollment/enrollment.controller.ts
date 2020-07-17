@@ -1,12 +1,14 @@
-import {Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Query, Res, UseGuards} from '@nestjs/common';
+import {Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Query, Res, UseGuards, UseInterceptors} from '@nestjs/common';
 import {Response} from 'express';
 import {EnrollmentService} from './enrollment.service';
 import {Enrollment} from './enrollment.entity';
 import {Usr} from '../user/user.decorator';
 import {User} from '../user/user.entity';
 import {JwtOptStrategy} from '../../auth/jwt-opt.strategy';
+import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 
 @Controller('enrollment')
+@UseInterceptors(BusinessToHttpExceptionInterceptor)
 export class EnrollmentController {
 
     constructor(private enrollmentService: EnrollmentService) {
@@ -30,6 +32,7 @@ export class EnrollmentController {
                 res.status(HttpStatus.CREATED).json(tEnrollment);
             })
             .catch((err) => {
+                console.log(err);
                 throw err;
             });
     }
