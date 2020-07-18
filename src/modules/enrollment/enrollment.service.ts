@@ -422,9 +422,7 @@ export class EnrollmentService {
         //     throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', ['passenger_requirement']);
         // }
 
-        output.requirement = _enrollment.passenger.requirement;
-
-        console.log(_enrollment.passenger.requirement);
+        output.requirement = _enrollment.passenger?.requirement;
 
         if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
             console.log('passenger values changed');
@@ -462,8 +460,8 @@ export class EnrollmentService {
         //     throw new InvalidValuesException('INVALID_VALUE', 'Minimum of 1 needed', ['driver_seats']);
         // }
 
-        output.seats = _enrollment.driver.seats;
-        output.service = _enrollment.driver.service;
+        output.seats = _enrollment.driver?.seats;
+        output.service = _enrollment.driver?.service;
 
         if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
             console.log('driver values changed');

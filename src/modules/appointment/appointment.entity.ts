@@ -83,7 +83,10 @@ export class Appointment {
     files: File[];
 
     @ManyToOne(type => User,
-        user => user.appointments)
+        user => user.appointments,
+        {
+            eager: true
+        })
     @JoinColumn()
     creator: User;
 

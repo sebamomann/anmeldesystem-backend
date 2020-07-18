@@ -71,8 +71,8 @@ export class EnrollmentController {
             });
     }
 
-    @Get('/:id/check-permission')
     @UseGuards(JwtOptStrategy)
+    @Get('/:id/check-permission')
     checkPermissions(@Usr() user: User,
                      @Query('token') token: string,
                      @Param('id') id: string,
