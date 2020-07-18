@@ -55,6 +55,8 @@ export class AppointmentGateway implements OnGatewayInit, OnGatewayConnection, O
     @UseGuards(WsJwtGuard)
     @SubscribeMessage('subscribe-appointment')
     handleSubscription(client: Socket, data: any): WsResponse<string> {
+        client.leaveAll();
+
         client.join(data.appointment.link);
 
         return {event: 'subscribe-appointment', data: 'success'};
