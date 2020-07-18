@@ -408,10 +408,12 @@ export class EnrollmentService {
 
     private async _handlePassengerRelation(_enrollment: Enrollment) {
         let output = new Passenger();
+        let output_orig = new Passenger();
 
-        this.passengerService.findByEnrollment(_enrollment)
+        await this.passengerService.findByEnrollment(_enrollment)
             .then((res) => {
-                output = res;
+                output = JSON.parse(JSON.stringify(res));
+                output_orig = JSON.parse(JSON.stringify(res));
             })
             .catch(() => {
             });
@@ -422,12 +424,19 @@ export class EnrollmentService {
 
         output.requirement = _enrollment.passenger.requirement;
 
-        return await this.passengerRepository.save(output);
+        console.log(_enrollment.passenger.requirement);
+
+        if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
+            console.log('passenger values changed');
+            return await this.passengerRepository.save(output);
+        }
+
+        return output;
     }
 
     private async _handleDriverRelation(_enrollment: Enrollment) {
         let output = new Driver();
-        let output_orig: Driver = new Driver();
+        let output_orig = new Driver();
 
         await this.driverService.findByEnrollment(_enrollment)
             .then((res) => {
