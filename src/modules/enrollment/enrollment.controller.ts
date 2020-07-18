@@ -40,16 +40,17 @@ export class EnrollmentController {
     @Put(':id/:token*?')
     @UseGuards(JwtOptStrategy)
     update(@Usr() user: User,
-           @Param() id: string,
-           @Param() token: string,
+           @Param('id') id: string,
+           @Param('token') token: string,
            @Body() toChange: Enrollment,
            @Res() res: Response) {
         return this.enrollmentService
-            .update(toChange, id, user, token)
+            .update(toChange, id, user)
             .then((tEnrollment) => {
                 res.status(HttpStatus.OK).json(tEnrollment);
             })
             .catch((err) => {
+                console.log(err);
                 throw err;
             });
     }

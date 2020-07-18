@@ -178,9 +178,8 @@ export class EnrollmentService {
      * @param toChange Values to change
      * @param id Id of Enrollment to change Values for
      * @param user Optional user
-     * @param token Optional token to verify permission do change Enrollment
      */
-    public async update(toChange: any, id: string, user: User, token: string) {
+    public async update(toChange: any, id: string, user: User) {
         let enrollment;
 
         try {
@@ -191,7 +190,7 @@ export class EnrollmentService {
 
         const appointment = enrollment.appointment;
 
-        if (!(await this._hasPermission(enrollment, user, token))) {
+        if (!(await this._hasPermission(enrollment, user, toChange.token))) {
             throw new InsufficientPermissionsException();
         }
 
@@ -205,6 +204,7 @@ export class EnrollmentService {
 
                 if (key === 'name'
                     && enrollment.name !== toChange.name) {
+                    console.log('updateName');
                     if (await this.existsByName(toChange.name, appointment)) {
                         throw new DuplicateValueException('DUPLICATE_ENTRY',
                             'Following values are already taken',
@@ -240,7 +240,7 @@ export class EnrollmentService {
 
         savedEnrollment = enrollmentMapper.basic(this, savedEnrollment);
 
-        this.appointmentGateway.appointmentUpdated(appointment.link);
+        this.appointmentGateway.appointmentUpdated(appointment);
 
         return savedEnrollment;
     }
@@ -427,10 +427,12 @@ export class EnrollmentService {
 
     private async _handleDriverRelation(_enrollment: Enrollment) {
         let output = new Driver();
+        let output_orig: Driver = new Driver();
 
-        this.driverService.findByEnrollment(_enrollment)
+        await this.driverService.findByEnrollment(_enrollment)
             .then((res) => {
-                output = res;
+                output = JSON.parse(JSON.stringify(res));
+                output_orig = JSON.parse(JSON.stringify(res));
             })
             .catch(() => {
             });
@@ -454,6 +456,11 @@ export class EnrollmentService {
         output.seats = _enrollment.driver.seats;
         output.service = _enrollment.driver.service;
 
-        return await this.driverRepository.save(output);
+        if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
+            console.log('driver values changed');
+            return await this.driverRepository.save(output);
+        }
+
+        return output;
     }
 }

@@ -548,7 +548,7 @@ export class AppointmentService {
      *
      * @returns Enrollment[] ALl filtered enrollments
      */
-    public filterPermittedEnrollments(permissions: any, enrollments: Enrollment[]) {
+    public static filterPermittedEnrollments(permissions: any, enrollments: Enrollment[]) {
         let extractedIds = [];
         let extractedTokens = [];
         for (const queryKey of Object.keys(permissions)) {
