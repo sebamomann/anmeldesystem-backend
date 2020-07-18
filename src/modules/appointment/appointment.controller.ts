@@ -160,6 +160,7 @@ export class AppointmentController {
     }
 
     @Post(':link/file')
+    @UseGuards(AuthGuard('jwt'))
     addFile(@Usr() user: User,
             @Param('link') link: string,
             @Body() data: { name: string, data: string },
@@ -175,6 +176,7 @@ export class AppointmentController {
     }
 
     @Delete(':link/file/:id')
+    @UseGuards(AuthGuard('jwt'))
     removeFile(@Usr() user: User,
                @Param('link') link: string,
                @Param('id') id: string,
