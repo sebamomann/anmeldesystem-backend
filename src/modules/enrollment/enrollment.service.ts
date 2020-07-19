@@ -270,7 +270,7 @@ export class EnrollmentService {
 
         await this.enrollmentRepository.remove(enrollment);
 
-        this.appointmentGateway.appointmentUpdated(enrollment.appointment.link);
+        this.appointmentGateway.appointmentUpdated(enrollment.appointment);
     }
 
     // public async get(id: string) {

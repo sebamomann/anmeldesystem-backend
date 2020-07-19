@@ -1,4 +1,4 @@
-import {Injectable, UnauthorizedException} from '@nestjs/common';
+import {ForbiddenException, Injectable, UnauthorizedException} from '@nestjs/common';
 import {UserService} from '../modules/user/user.service';
 import {JwtService} from '@nestjs/jwt';
 import {User} from '../modules/user/user.entity';
@@ -21,19 +21,23 @@ export class AuthService {
             throw e;
         }
 
-        if (await bcrypt.compare(pass, user.password)) {
+        if (user.activated === 1) {
+            if (await bcrypt.compare(pass, user.password)) {
 
-            const session = await this.userService.createSession(user);
+                const session = await this.userService.createSession(user);
 
-            user.refreshToken = session.refreshToken;
+                user.refreshToken = session.refreshToken;
 
-            return userMapper.basic(this.userService, user);
-        } else {
-            const passwordChangeDate = await this.userService.getLastPasswordDate(user, pass);
+                return userMapper.basic(this.userService, user);
+            } else {
+                const passwordChangeDate = await this.userService.getLastPasswordDate(user, pass);
 
-            if (passwordChangeDate != null) {
-                return new Date(passwordChangeDate);
+                if (passwordChangeDate != null) {
+                    return new Date(passwordChangeDate);
+                }
             }
+        } else {
+            throw new ForbiddenException();
         }
     }
 
