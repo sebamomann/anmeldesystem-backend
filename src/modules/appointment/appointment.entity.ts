@@ -63,7 +63,10 @@ export class Appointment {
     driverAddition: boolean;
 
     @ManyToMany(type => User,
-        user => user.administrations)
+        user => user.administrations,
+        {
+            eager: true,
+        })
     @JoinTable()
     administrators: User[];
 
