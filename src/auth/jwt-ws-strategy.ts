@@ -5,6 +5,7 @@ import {CanActivate, ExecutionContext, Injectable} from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import {User} from '../modules/user/user.entity';
 import {jwtConstants} from './constants';
+import {WsException} from '@nestjs/websockets';
 
 require('dotenv').config();
 
@@ -19,13 +20,13 @@ export class WsJwtGuard implements CanActivate {
 
         if (auth !== undefined) {
             const authToken = auth.split(' ')[1];
-            const jwtPayload: any = <User> jwt.verify(authToken, jwtConstants.secret);
 
             try {
+                const jwtPayload: any = <User> jwt.verify(authToken, jwtConstants.secret);
                 context.switchToWs().getData().user = jwtPayload;
                 return Boolean(jwtPayload);
             } catch (e) {
-
+                throw new WsException('Invalid credentials.');
             }
         }
 

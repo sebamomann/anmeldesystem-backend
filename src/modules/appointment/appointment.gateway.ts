@@ -44,6 +44,7 @@ export class AppointmentGateway implements OnGatewayInit, OnGatewayConnection, O
         this.logger.log('Initialized');
     }
 
+    @UseGuards(WsJwtGuard)
     handleConnection(@ConnectedSocket() client: Socket, ...args: any[]): any {
         this.logger.log(`Client connected: ${client.id}`);
     }
