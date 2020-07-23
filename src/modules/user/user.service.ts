@@ -518,7 +518,7 @@ export class UserService {
 
         const passwordChangeListByReset = await this.passwordResetRepository.find({
             where: {
-                oldPassword: IsNull(),
+                oldPassword: !IsNull(),
                 user: {
                     id: user.id
                 }
@@ -539,7 +539,7 @@ export class UserService {
 
         const passwordChangeListByChange = await this.passwordChangeRepository.find({
             where: {
-                oldPassword: IsNull(),
+                oldPassword: !IsNull(),
                 user: {
                     id: user.id
                 }
