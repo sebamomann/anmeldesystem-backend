@@ -1,4 +1,4 @@
-import {ForbiddenException, Injectable, UnauthorizedException} from '@nestjs/common';
+import {Injectable, UnauthorizedException} from '@nestjs/common';
 import {UserService} from '../modules/user/user.service';
 import {JwtService} from '@nestjs/jwt';
 import {User} from '../modules/user/user.entity';
@@ -18,7 +18,7 @@ export class AuthService {
         try {
             user = await this.userService.findByEmailOrUsername(value);
         } catch (e) {
-            throw e;
+            throw new UnauthorizedException();
         }
 
         if (user.activated === 1) {
@@ -33,11 +33,15 @@ export class AuthService {
                 const passwordChangeDate = await this.userService.getLastPasswordDate(user, pass);
 
                 if (passwordChangeDate != null) {
-                    return new Date(passwordChangeDate);
+                    throw new UnauthorizedException({
+                        code: 'INVALID_PASSWORD',
+                        message: 'This password has been changed',
+                        data: new Date(passwordChangeDate)
+                    });
                 }
             }
         } else {
-            throw new ForbiddenException();
+            throw new UnauthorizedException({code: 'ACCOUNT_LOCK', message: 'This account has not been activated yet', data: 'NOT_ACTIVATED'});
         }
     }
 
