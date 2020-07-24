@@ -1,7 +1,7 @@
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {User} from './user.entity';
-import {IsNull, Not, Repository} from 'typeorm';
+import {IsNull, MoreThan, Not, Repository} from 'typeorm';
 import {TelegramUser} from './telegram/telegram-user.entity';
 import {MailerService} from '@nest-modules/mailer';
 import {PasswordReset} from './password-reset/password-reset.entity';
@@ -591,7 +591,7 @@ export class UserService {
             throw e;
         }
 
-        if (await this._existsByMail(mail)) {
+        if (await this._existsByMail(mail) || await this._emailBlocked(mail)) {
             throw new DuplicateValueException(null, null, ['email']);
         }
 
@@ -775,5 +775,14 @@ export class UserService {
         await this.sessionRepository.save(session);
 
         return session;
+    }
+
+    private async _emailBlocked(mail: any) {
+        return await this.emailChangeRepository.findOne({
+            where: {
+                used: MoreThan(new Date(new Date().getTime() - 15 * 60000)),
+                oldMail: mail
+            }
+        }) !== undefined;
     }
 }
