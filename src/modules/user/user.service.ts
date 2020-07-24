@@ -18,6 +18,7 @@ import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {InternalErrorException} from '../../exceptions/InternalErrorException';
 import {GeneratorUtil} from '../../util/generator.util';
 import {Session} from './session.entity';
+import {DomainUtil} from '../../util/domain.util';
 
 var logger = require('../../logger');
 var crypto = require('crypto');
@@ -125,7 +126,7 @@ export class UserService {
                 template: 'register',
                 context: {
                     name: user.username,
-                    url: `https://${domain}/${btoa(user.mail)}/${token}`
+                    url: `https://${DomainUtil.replaceDomain(domain, btoa(user.mail), token)}`
                 },
             })
             .then(() => {
