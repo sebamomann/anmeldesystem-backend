@@ -18,6 +18,7 @@ import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {InternalErrorException} from '../../exceptions/InternalErrorException';
 import {GeneratorUtil} from '../../util/generator.util';
 import {Session} from './session.entity';
+import {DomainUtil} from '../../util/domain.util';
 
 var logger = require('../../logger');
 var crypto = require('crypto');
@@ -125,7 +126,7 @@ export class UserService {
                 template: 'register',
                 context: {
                     name: user.username,
-                    url: `https://${domain}/${btoa(user.mail)}/${token}`
+                    url: `https://${DomainUtil.replaceDomain(domain, btoa(user.mail), token)}`
                 },
             })
             .then(() => {
@@ -158,6 +159,7 @@ export class UserService {
 
                 if (key === 'mail') {
                     try {
+                        console.log(userFromJwt);
                         const emailChange = await this.handleEmailChange(userFromJwt, valuesToUpdate);
                         user.emailChange = [emailChange];
                     } catch (e) {
@@ -264,7 +266,7 @@ export class UserService {
 
         await this.passwordResetRepository.save(passwordReset);
 
-        let url = `https://${domain}/${btoa(mail).replace('=', '')}/${token}`;
+        let url = `https://${DomainUtil.replaceDomain(domain, btoa(mail).replace('=', ''), token)}`;
 
         this.mailerService
             .sendMail({
@@ -584,7 +586,7 @@ export class UserService {
         try {
             // TODO
             // User is already passed
-            _user = await this.findByEmail(user.mail);
+            _user = await this.findById(user.id);
         } catch (e) {
             throw e;
         }
@@ -618,7 +620,7 @@ export class UserService {
 
         emailChange = await this.emailChangeRepository.save(emailChange);
 
-        const url = `https://${domain}/${btoa(mail).replace('=', '')}/${token}`;
+        const url = `https://${DomainUtil.replaceDomain(domain, btoa(mail).replace('=', ''), token)}`;
 
         this.mailerService
             .sendMail({

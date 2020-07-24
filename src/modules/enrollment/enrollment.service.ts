@@ -19,6 +19,7 @@ import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException'
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {AppointmentGateway} from '../appointment/appointment.gateway';
+import {DomainUtil} from '../../util/domain.util';
 
 const crypto = require('crypto');
 const logger = require('../../logger');
@@ -142,8 +143,7 @@ export class EnrollmentService {
                 .update(savedEnrollment.id + process.env.SALT_ENROLLMENT)
                 .digest('hex');
 
-            let url = `https://${domain}`;
-            url += `/${savedEnrollment.id}/${savedEnrollment.token}`;
+            let url = `https://${DomainUtil.replaceDomain(domain, savedEnrollment.id, savedEnrollment.token)}`;
 
             await this.mailerService
                 .sendMail({
