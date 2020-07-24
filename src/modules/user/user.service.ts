@@ -159,6 +159,7 @@ export class UserService {
 
                 if (key === 'mail') {
                     try {
+                        console.log(userFromJwt);
                         const emailChange = await this.handleEmailChange(userFromJwt, valuesToUpdate);
                         user.emailChange = [emailChange];
                     } catch (e) {
@@ -585,7 +586,7 @@ export class UserService {
         try {
             // TODO
             // User is already passed
-            _user = await this.findByEmail(user.mail);
+            _user = await this.findById(user.id);
         } catch (e) {
             throw e;
         }
