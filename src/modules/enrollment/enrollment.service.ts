@@ -355,7 +355,8 @@ export class EnrollmentService {
         let output = new Enrollment();
 
         output.name = _enrollment.name;
-        output.comment = _enrollment.comment === '' ? null : _enrollment.comment;
+        const trimmed = _enrollment.comment.trim();
+        output.comment = trimmed === '' ? null : trimmed;
 
         try {
             output.additions = EnrollmentService._handleAdditions(_enrollment, _appointment);
@@ -366,17 +367,9 @@ export class EnrollmentService {
         /* Needed due to malicious comparison fo tinyint to boolean */
         if (!!_appointment.driverAddition === true) {
             if (_enrollment.driver !== null && _enrollment.driver !== undefined) {
-                // output.driver = await this._handleDriverRelation(_enrollment)
-                //     .catch((err => {
-                //         throw err;
-                //     }));
                 output.driver = await this._handleDriverRelation(_enrollment);
                 output.passenger = null;
             } else if (_enrollment.passenger !== null && _enrollment.passenger !== undefined) {
-                // output.passenger = await this._handlePassengerRelation(_enrollment)
-                //     .catch((err => {
-                //         throw err;
-                //     }));
                 output.passenger = await this._handlePassengerRelation(_enrollment);
                 output.driver = null;
             } else {
