@@ -265,7 +265,7 @@ export class UserService {
 
         await this.passwordResetRepository.save(passwordReset);
 
-        let url = `https://${domain}/${btoa(mail).replace('=', '')}/${token}`;
+        let url = `https://${DomainUtil.replaceDomain(domain, btoa(mail).replace('=', ''), token)}`;
 
         this.mailerService
             .sendMail({
@@ -619,7 +619,7 @@ export class UserService {
 
         emailChange = await this.emailChangeRepository.save(emailChange);
 
-        const url = `https://${domain}/${btoa(mail).replace('=', '')}/${token}`;
+        const url = `https://${DomainUtil.replaceDomain(domain, btoa(mail).replace('=', ''), token)}`;
 
         this.mailerService
             .sendMail({
