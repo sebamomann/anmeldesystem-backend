@@ -99,8 +99,8 @@ export class AppointmentService {
      *     <li>ENROLLED</li>
      *     <li>PINNED</li>
      * </ol>
-     * Note that a permission granted via passing a link, the correlation is also marked as "PINNED".<br/>
-     * Multiple correlations are possible without any restrictions.
+     * Note that a permission granted via passing a link is also marked as "PINNED".<br/>
+     * Multiple correlations are possible. Two references of the same type are not possible
      *
      * @param user Requester (if existing) to correlate
      * @param appointment Appointment to correlate user with
@@ -527,8 +527,8 @@ export class AppointmentService {
      * Appointment can be passed as reference or just the link of the appointment
      *
      * @param user to check permissions for
-     * @param ref (1) link of appointment
-     *            (2) appointment itself
+     * @param ref (1) link of Appointment
+     *            (2) Appointment itself
      *
      * @returns boolean true if creator or admin - false if not
      *

@@ -296,7 +296,7 @@ describe('AppointmentService', () => {
 
                         appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
-                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
+                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
                         expect(__actual).toBeTruthy();
                     });
 
@@ -316,7 +316,7 @@ describe('AppointmentService', () => {
 
                         appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
-                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
+                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
                         expect(__actual).toBeTruthy();
                     });
 
@@ -333,23 +333,22 @@ describe('AppointmentService', () => {
 
                         appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
-                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
+                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
                         expect(__actual).toBeTruthy();
                     });
                 });
 
-                describe('* should return error if failed', () => {
-                    it('appointment not found', async () => {
-                        const user = new User();
-                        user.username = 'username';
+                describe('* should return false if failed', () => {
+                    it('invalid appointment link provided', async () => {
+                        const __given_link = 'nonExistantLink';
 
-                        const appointment = new Appointment();
-                        appointment.link = 'link';
+                        const __given_user = new User();
+                        __given_user.username = 'username';
 
                         appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
                         appointmentService
-                            .isCreatorOrAdministrator(user, appointment.link)
+                            .isCreatorOrAdministrator(__given_user, __given_link)
                             .then(() => {
                                 throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
                             })
@@ -359,60 +358,97 @@ describe('AppointmentService', () => {
                             });
                     });
                 });
+
+                it('* not being creator or administrator', async () => {
+                    const __given_link = 'link';
+
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __existing_creator = new User();
+                    __existing_creator.username = 'creator';
+
+                    const __existing_admin = new User();
+                    __existing_admin.username = 'admin';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.administrators = [__existing_admin];
+                    __existing_appointment.link = __given_link;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                    const __actual = await appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
+                    expect(__actual).toBeFalsy();
+                });
             });
 
-            describe('* check by appointment', () => {
-                describe('* should return boolean if successful', () => {
-                    it('return true if creator', async () => {
-                        const user = new User();
-                        user.username = 'username';
+            describe('* pass appointment object', () => {
+                describe('* should return true if successful', () => {
+                    it('* requesting as creator', async () => {
+                        const __given_user = new User();
+                        __given_user.username = 'username';
 
-                        const appointment = new Appointment();
-                        appointment.creator = user;
+                        const __existing_appointment = new Appointment();
+                        __existing_appointment.creator = __given_user;
 
-                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment);
-                        expect(actual).toBe(true);
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
+                        expect(__actual).toBeTruthy();
                     });
 
-                    it('return true if admin', async () => {
-                        const user = new User();
-                        user.username = 'username';
+                    it('* requesting as administrator', async () => {
+                        const __given_user = new User();
+                        __given_user.username = 'username';
 
-                        const creator = new User();
-                        user.username = 'creator';
+                        const __existing_creator = new User();
+                        __existing_creator.username = 'creator';
 
-                        const appointment = new Appointment();
-                        appointment.creator = creator;
-                        appointment.administrators = [user];
+                        const __existing_appointment = new Appointment();
+                        __existing_appointment.creator = __existing_creator;
+                        __existing_appointment.administrators = [__given_user];
 
-                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment);
-                        expect(actual).toBe(true);
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
+                        expect(__actual).toBeTruthy();
                     });
 
-                    it('return true if both', async () => {
-                        const user = new User();
-                        user.username = 'username';
+                    it('* requesting as creator and administrator', async () => {
+                        const __given_user = new User();
+                        __given_user.username = 'username';
 
-                        const appointment = new Appointment();
-                        appointment.creator = user;
-                        appointment.administrators = [user];
+                        const __existing_appointment = new Appointment();
+                        __existing_appointment.creator = __given_user;
+                        __existing_appointment.administrators = [__given_user];
 
-                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment);
-                        expect(actual).toBe(true);
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
+                        expect(__actual).toBeTruthy();
                     });
+                });
 
-                    it('return false if not', async () => {
-                        const user = new User();
-                        user.username = 'username';
+                describe('* should return false if failed', () => {
+                    it('* not being creator or administrator', async () => {
+                        const __given_user = new User();
+                        __given_user.username = 'username';
 
-                        const creator = new User();
-                        user.username = 'creator';
+                        const __existing_creator = new User();
+                        __existing_creator.username = 'creator';
 
-                        const appointment = new Appointment();
-                        appointment.creator = creator;
+                        const __existing_admin = new User();
+                        __existing_admin.username = 'admin';
 
-                        const actual = await appointmentService.isCreatorOrAdministrator(user, appointment);
-                        expect(actual).toBe(false);
+                        const __existing_appointment = new Appointment();
+                        __existing_appointment.creator = __existing_creator;
+                        __existing_appointment.administrators = [__existing_admin];
+
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                        const __actual = await appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
+                        expect(__actual).toBeFalsy();
                     });
                 });
             });
