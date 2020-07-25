@@ -100,268 +100,157 @@ describe('AppointmentService', () => {
         expect(appointmentService).toBeDefined();
     });
 
-    describe('* handle date validation', () => {
-        it('* on valid date return date (date > deadline)', () => {
-            const __given_date = new Date();
-            const __given_deadline = new Date(__given_date.getTime() - 15 * 60000);
-
-            const __actual = AppointmentService._handleDateValidation(__given_date, __given_deadline);
-            expect(__actual).toEqual(__given_date);
-        });
-
-        it('* on invalid date return error (date < deadline)', (done) => {
-            const __given_date = new Date();
-            const __given_deadline = new Date(__given_date.getTime() + 15 * 60000);
-
-            try {
-                AppointmentService._handleDateValidation(__given_date, __given_deadline);
-                done.fail(new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException'));
-            } catch (e) {
-                expect(e).toBeInstanceOf(InvalidValuesException);
-                expect(e.data).toEqual(['date']);
-                done();
-            }
-        });
-    });
-
-    describe('* handle deadline validation', () => {
-        it('* on valid deadline return deadline (date > deadline)', () => {
-            const __given_date = new Date();
-            const __given_deadline = new Date(__given_date.getTime() - 15 * 60000);
-
-            const __actual = AppointmentService._handleDeadlineValidation(__given_date, __given_deadline);
-            expect(__actual).toEqual(__given_deadline);
-        });
-
-        it('* on invalid deadline return error (date < deadline)', (done) => {
-            const __given_date = new Date();
-            const __given_deadline = new Date(__given_date.getTime() + 15 * 60000);
-
-            try {
-                AppointmentService._handleDeadlineValidation(__given_date, __given_deadline);
-                done.fail(new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException'));
-            } catch (e) {
-                expect(e).toBeInstanceOf(InvalidValuesException);
-                expect(e.data).toEqual(['deadline']);
-                done();
-            }
-        });
-    });
-
-    describe('* permission checking', () => {
-        describe('* is creator', () => {
-            it('* valid should return true', () => {
-                const __given_user = new User();
-                __given_user.username = 'username';
-
-                const __given_appointment = new Appointment();
-                __given_appointment.creator = __given_user;
-
-                const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
-                expect(__actual).toBeTruthy();
-            });
-
-            describe('* invalid should return false', () => {
-                it('* invalid user object - null', () => {
-                    const __given_user = undefined;
-
-                    const __appointment_creator = new User();
-                    __appointment_creator.username = 'username';
-
-                    const __given_appointment = new Appointment();
-                    __given_appointment.creator = __appointment_creator;
-
-                    const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
-                    expect(__actual).toBeFalsy();
-                });
-
-                it('* invalid user object - undefined', () => {
-                    const __given_user = null;
-
-                    const __appointment_creator = new User();
-                    __appointment_creator.username = 'username';
-
-                    const __given_appointment = new Appointment();
-                    __given_appointment.creator = __appointment_creator;
-
-                    const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
-                    expect(__actual).toBeFalsy();
-                });
-
-                it('* wrong username', () => {
-                    const __given_user = new User();
-                    __given_user.username = 'username';
-
-                    const __appointment_creator = new User();
-                    __appointment_creator.username = 'creator';
-
-                    const __given_appointment = new Appointment();
-                    __given_appointment.creator = __appointment_creator;
-
-                    const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
-                    expect(__actual).toBeFalsy();
-                });
-            });
-        });
-
-        describe('* is administrator', () => {
-            it('* valid should return true', () => {
-                const __given_user = new User();
-                __given_user.username = 'username';
-
-                const __given_appointment = new Appointment();
-                __given_appointment.administrators = [__given_user];
-
-                const __actual = AppointmentService._isAdministratorOfAppointment(__given_appointment, __given_user);
-                expect(__actual).toBeTruthy();
-            });
-
-            describe('* invalid should return false', () => {
-                it('* invalid user object - null', () => {
-                    const __given_user = undefined;
-
-                    const __appointment_admin = new User();
-                    __appointment_admin.username = 'username';
-
-                    const __given_appointment = new Appointment();
-                    __given_appointment.administrators = [__appointment_admin];
-
-                    const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
-                    expect(__actual).toBeFalsy();
-                });
-
-                it('* invalid user object - undefined', () => {
-                    const __given_user = null;
-
-                    const __appointment_admin = new User();
-                    __appointment_admin.username = 'username';
-
-                    const __given_appointment = new Appointment();
-                    __given_appointment.administrators = [__appointment_admin];
-
-                    const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
-                    expect(__actual).toBeFalsy();
-                });
-
-                it('* wrong username', () => {
-                    const __given_user = new User();
-                    __given_user.username = 'username';
-
-                    const __appointment_admin = new User();
-                    __appointment_admin.username = 'administrator';
-
-                    const __given_appointment = new Appointment();
-                    __given_appointment.administrators = [__appointment_admin];
-
-                    const __actual = AppointmentService._isAdministratorOfAppointment(__given_appointment, __given_user);
-                    expect(__actual).toBeFalsy();
-                });
-
-                it('* undefined administrator list', () => {
-                    const __given_user = new User();
-                    __given_user.username = 'username';
-
-                    const __given_appointment = new Appointment();
-                    __given_appointment.administrators = undefined;
-
-                    const __actual = AppointmentService._isAdministratorOfAppointment(__given_appointment, __given_user);
-                    expect(__actual).toBeFalsy();
-                });
-
-                it('* empty administrator list', () => {
-                    const __given_user = new User();
-                    __given_user.username = 'username';
-
-                    const __given_appointment = new Appointment();
-                    __given_appointment.administrators = [];
-
-                    const __actual = AppointmentService._isAdministratorOfAppointment(__given_appointment, __given_user);
-                    expect(__actual).toBeFalsy();
-                });
-            });
-        });
-
-        describe('* is creator or administrator', () => {
-            describe('* pass link', () => {
-                describe('* should return true if successful', () => {
-                    it('* requesting as creator', async () => {
-                        const __given_link = 'link';
-
-                        const __given_user = new User();
-                        __given_user.username = 'username';
-
-                        const __existing_appointment = new Appointment();
-                        __existing_appointment.creator = __given_user;
-                        __existing_appointment.link = __given_link;
-
-                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
-
-                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
-                        expect(__actual).toBeTruthy();
-                    });
-
-                    it('* requesting as administrator', async () => {
-                        const __given_link = 'link';
-
-                        const __given_user = new User();
-                        __given_user.username = 'username';
-
-                        const __existing_creator = new User();
-                        __existing_creator.username = 'creator';
-
-                        const __existing_appointment = new Appointment();
-                        __existing_appointment.creator = __existing_creator;
-                        __existing_appointment.administrators = [__given_user];
-                        __existing_appointment.link = __given_link;
-
-                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
-
-                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
-                        expect(__actual).toBeTruthy();
-                    });
-
-                    it('* requesting as creator and administrator', async () => {
-                        const __given_link = 'link';
-
-                        const __given_user = new User();
-                        __given_user.username = 'username';
-
-                        const __existing_appointment = new Appointment();
-                        __existing_appointment.creator = __given_user;
-                        __existing_appointment.administrators = [__given_user];
-                        __existing_appointment.link = __given_link;
-
-                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
-
-                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
-                        expect(__actual).toBeTruthy();
-                    });
-                });
-
-                describe('* should return false if failed', () => {
-                    it('invalid appointment link provided', async () => {
-                        const __given_link = 'nonExistantLink';
-
-                        const __given_user = new User();
-                        __given_user.username = 'username';
-
-                        appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-
-                        appointmentService
-                            .isCreatorOrAdministrator(__given_user, __given_link)
-                            .then(() => {
-                                throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
-                            })
-                            .catch((err) => {
-                                expect(err).toBeInstanceOf(EntityNotFoundException);
-                                expect(err.data).toBe('appointment');
-                            });
-                    });
-                });
-
-                it('* not being creator or administrator', async () => {
+    describe('* is creator or administrator', () => {
+        describe('* pass link', () => {
+            describe('* should return true if successful', () => {
+                it('* requesting as creator', async () => {
                     const __given_link = 'link';
 
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __given_user;
+                    __existing_appointment.link = __given_link;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                    const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
+                    expect(__actual).toBeTruthy();
+                });
+
+                it('* requesting as administrator', async () => {
+                    const __given_link = 'link';
+
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __existing_creator = new User();
+                    __existing_creator.username = 'creator';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.administrators = [__given_user];
+                    __existing_appointment.link = __given_link;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                    const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
+                    expect(__actual).toBeTruthy();
+                });
+
+                it('* requesting as creator and administrator', async () => {
+                    const __given_link = 'link';
+
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __given_user;
+                    __existing_appointment.administrators = [__given_user];
+                    __existing_appointment.link = __given_link;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                    const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
+                    expect(__actual).toBeTruthy();
+                });
+            });
+
+            describe('* should return false if failed', () => {
+                it('invalid appointment link provided', async () => {
+                    const __given_link = 'nonExistantLink';
+
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    appointmentService
+                        .isCreatorOrAdministrator(__given_user, __given_link)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityNotFoundException);
+                            expect(err.data).toBe('appointment');
+                        });
+                });
+            });
+
+            it('* not being creator or administrator', async () => {
+                const __given_link = 'link';
+
+                const __given_user = new User();
+                __given_user.username = 'username';
+
+                const __existing_creator = new User();
+                __existing_creator.username = 'creator';
+
+                const __existing_admin = new User();
+                __existing_admin.username = 'admin';
+
+                const __existing_appointment = new Appointment();
+                __existing_appointment.creator = __existing_creator;
+                __existing_appointment.administrators = [__existing_admin];
+                __existing_appointment.link = __given_link;
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                const __actual = await appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
+                expect(__actual).toBeFalsy();
+            });
+        });
+
+        describe('* pass appointment object', () => {
+            describe('* should return true if successful', () => {
+                it('* requesting as creator', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __given_user;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                    const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
+                    expect(__actual).toBeTruthy();
+                });
+
+                it('* requesting as administrator', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __existing_creator = new User();
+                    __existing_creator.username = 'creator';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.administrators = [__given_user];
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                    const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
+                    expect(__actual).toBeTruthy();
+                });
+
+                it('* requesting as creator and administrator', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __given_user;
+                    __existing_appointment.administrators = [__given_user];
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                    const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
+                    expect(__actual).toBeTruthy();
+                });
+            });
+
+            describe('* should return false if failed', () => {
+                it('* not being creator or administrator', async () => {
                     const __given_user = new User();
                     __given_user.username = 'username';
 
@@ -374,82 +263,11 @@ describe('AppointmentService', () => {
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creator = __existing_creator;
                     __existing_appointment.administrators = [__existing_admin];
-                    __existing_appointment.link = __given_link;
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
-                    const __actual = await appointmentService.isCreatorOrAdministrator(__given_user, __given_link);
+                    const __actual = await appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
                     expect(__actual).toBeFalsy();
-                });
-            });
-
-            describe('* pass appointment object', () => {
-                describe('* should return true if successful', () => {
-                    it('* requesting as creator', async () => {
-                        const __given_user = new User();
-                        __given_user.username = 'username';
-
-                        const __existing_appointment = new Appointment();
-                        __existing_appointment.creator = __given_user;
-
-                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
-
-                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
-                        expect(__actual).toBeTruthy();
-                    });
-
-                    it('* requesting as administrator', async () => {
-                        const __given_user = new User();
-                        __given_user.username = 'username';
-
-                        const __existing_creator = new User();
-                        __existing_creator.username = 'creator';
-
-                        const __existing_appointment = new Appointment();
-                        __existing_appointment.creator = __existing_creator;
-                        __existing_appointment.administrators = [__given_user];
-
-                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
-
-                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
-                        expect(__actual).toBeTruthy();
-                    });
-
-                    it('* requesting as creator and administrator', async () => {
-                        const __given_user = new User();
-                        __given_user.username = 'username';
-
-                        const __existing_appointment = new Appointment();
-                        __existing_appointment.creator = __given_user;
-                        __existing_appointment.administrators = [__given_user];
-
-                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
-
-                        const __actual = appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
-                        expect(__actual).toBeTruthy();
-                    });
-                });
-
-                describe('* should return false if failed', () => {
-                    it('* not being creator or administrator', async () => {
-                        const __given_user = new User();
-                        __given_user.username = 'username';
-
-                        const __existing_creator = new User();
-                        __existing_creator.username = 'creator';
-
-                        const __existing_admin = new User();
-                        __existing_admin.username = 'admin';
-
-                        const __existing_appointment = new Appointment();
-                        __existing_appointment.creator = __existing_creator;
-                        __existing_appointment.administrators = [__existing_admin];
-
-                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
-
-                        const __actual = await appointmentService.isCreatorOrAdministrator(__given_user, __existing_appointment);
-                        expect(__actual).toBeFalsy();
-                    });
                 });
             });
         });
@@ -1231,96 +1049,6 @@ describe('AppointmentService', () => {
                 const actual = await appointmentService.getAll(user, permissions, slim);
                 expect(actual).toHaveLength(1);
             });
-        });
-    });
-
-    describe('* parse references', () => {
-        it('successful - as creator', async () => {
-            const user = new User();
-            user.username = 'username';
-            const pins = [];
-
-            const appointment = new Appointment();
-            appointment.id = '1';
-            appointment.creator = user;
-            appointment.enrollments = [];
-
-            const actual = AppointmentService.parseReferences(user, appointment, pins);
-            expect(actual).toEqual(['CREATOR']);
-        });
-
-        it('successful - as administrator', async () => {
-            const user = new User();
-            user.username = 'username';
-            const pins = [];
-
-            const creator = new User();
-            creator.username = 'creator';
-
-            const appointment = new Appointment();
-            appointment.id = '1';
-            appointment.creator = creator;
-            appointment.administrators = [user];
-            appointment.enrollments = [];
-
-            const actual = AppointmentService.parseReferences(user, appointment, pins);
-            expect(actual).toEqual(['ADMIN']);
-        });
-
-        it('successful - pinned', async () => {
-            const user = new User();
-            user.username = 'username';
-            const pins = [];
-
-            const creator = new User();
-            creator.username = 'creator';
-
-            const appointment = new Appointment();
-            appointment.id = '1';
-            appointment.creator = creator;
-            appointment.pinners = [user];
-            appointment.enrollments = [];
-
-            const actual = AppointmentService.parseReferences(user, appointment, pins);
-            expect(actual).toEqual(['PINNED']);
-        });
-
-        it('successful - pinned - parameter', async () => {
-            const user = new User();
-            user.username = 'username';
-            const pins = ['link'];
-
-            const creator = new User();
-            creator.username = 'creator';
-
-            const appointment = new Appointment();
-            appointment.id = '1';
-            appointment.link = 'link';
-            appointment.creator = creator;
-            appointment.enrollments = [];
-
-            const actual = AppointmentService.parseReferences(user, appointment, pins);
-            expect(actual).toEqual(['PINNED']);
-        });
-
-        it('successful - enrolled', async () => {
-            const user = new User();
-            user.username = 'username';
-            const pins = [];
-
-            const creator = new User();
-            creator.username = 'creator';
-
-            const enrollment = new Enrollment();
-            enrollment.creator = user;
-
-            const appointment = new Appointment();
-            appointment.id = '1';
-            appointment.creator = creator;
-            appointment.enrollments = [enrollment];
-
-            const actual = AppointmentService.parseReferences(user, appointment, pins);
-            expect(actual).toEqual(['ENROLLED']);
         });
     });
 

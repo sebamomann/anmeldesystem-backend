@@ -13,10 +13,10 @@ import {InsufficientPermissionsException} from '../../exceptions/InsufficientPer
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {Enrollment} from '../enrollment/enrollment.entity';
-import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {GeneratorUtil} from '../../util/generator.util';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
+import {AppointmentUtil} from './appointment.util';
 
 const crypto = require('crypto');
 const appointmentMapper = require('./appointment.mapper');
@@ -34,112 +34,8 @@ export class AppointmentService {
     ) {
     }
 
-    /**
-     * Compare deadline and set date, to check if the date is before the deadline
-     *
-     * @param date Date of appointment
-     * @param deadline Date deadline of appointment
-     */
-    public static _handleDateValidation(date, deadline) {
-        if (date < deadline) {
-            throw new InvalidValuesException(null, 'The date can not be before the deadline', ['date']);
-        }
-
-        return date;
-    }
-
-    /**
-     * Compare deadline and set date, to check if the deadline is after the appointment date
-     *
-     * @param date Date of appointment
-     * @param deadline Date deadline of appointment
-     */
-    public static _handleDeadlineValidation(date, deadline) {
-        if (deadline > date) {
-            throw new InvalidValuesException(null, 'The deadline can not be after the date', ['deadline']);
-        }
-
-        return deadline;
-    }
-
-    /**
-     * Check if passed user is the creator of the given appointment
-     *
-     * @param appointment Appointment to check ownership for
-     * @param user User to check ownership for
-     */
-    public static _isCreatorOfAppointment(appointment: Appointment, user: User) {
-        if (user === undefined || user === null || !user) {
-            return false;
-        }
-
-        return appointment.creator.username === user.username;
-    }
-
-    /**
-     * Check if passed user is administrator of the given appointment
-     *
-     * @param appointment Appointment to check ownership for
-     * @param user User to check ownership for
-     */
-    public static _isAdministratorOfAppointment(appointment: Appointment, user: User) {
-        if (user === undefined || user === null || !user) {
-            return false;
-        }
-
-        return appointment.administrators?.some(sAdministrator => sAdministrator.username === user.username);
-    }
-
-    /**
-     * Check the users correlation to the appointment. <br />
-     * Following correlations (references) are possible
-     * <ol>
-     *     <li>CREATOR</li>
-     *     <li>ADMIN</li>
-     *     <li>ENROLLED</li>
-     *     <li>PINNED</li>
-     * </ol>
-     * Note that a permission granted via passing a link is also marked as "PINNED".<br/>
-     * Multiple correlations are possible. Two references of the same type are not possible
-     *
-     * @param user Requester (if existing) to correlate
-     * @param appointment Appointment to correlate user with
-     * @param pins Links of pinned Appointments (passed via query parameter)
-     *
-     * @returns string[] Array of all correlations regarding User and Appointment
-     */
-    public static parseReferences(user: User, appointment: Appointment, pins: string[]) {
-        const reference = [];
-
-        if (user != null) {
-            if (AppointmentService._isAdministratorOfAppointment(appointment, user)) {
-                reference.push('ADMIN');
-            }
-
-            if (AppointmentService._isCreatorOfAppointment(appointment, user)) {
-                reference.push('CREATOR');
-            }
-
-            if (appointment.enrollments !== undefined
-                && appointment.enrollments.some(sEnrollment => {
-                    return sEnrollment.creator != null
-                        && sEnrollment.creator.id === user.id;
-                })) {
-                reference.push('ENROLLED');
-            }
-
-            if ((appointment.pinners !== undefined
-                && appointment.pinners.some(sPinner => sPinner.id === user.id))
-                || pins.includes(appointment.link)) {
-                reference.push('PINNED');
-            }
-        }
-
-        return reference;
-    }
-
     public static userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
-        appointment.reference = this.parseReferences(user, appointment, []);
+        appointment.reference = AppointmentUtil.parseReferences(user, appointment, []);
 
         appointment = appointmentMapper.permission(this, appointment, user, permissions);
         appointment = appointmentMapper.slim(this, appointment, slim);
@@ -223,7 +119,7 @@ export class AppointmentService {
         // Only date validation needed
         // date < deadline === deadline > date
         try {
-            appointment.date = await AppointmentService._handleDateValidation(rawData.date, rawData.deadline);
+            appointment.date = await AppointmentUtil._handleDateValidation(rawData.date, rawData.deadline);
         } catch (e) {
             throw e;
         }
@@ -242,7 +138,7 @@ export class AppointmentService {
 
         appointment = await this.appointmentRepository.save(appointment);
 
-        appointment.reference = AppointmentService.parseReferences(user, appointment, []);
+        appointment.reference = AppointmentUtil.parseReferences(user, appointment, []);
 
         appointment = appointmentMapper.permission(this, appointment, user, {});
         appointment = appointmentMapper.slim(this, appointment, false);
@@ -301,7 +197,7 @@ export class AppointmentService {
 
                 if (key === 'date') {
                     try {
-                        changedValue = await AppointmentService._handleDateValidation(value, appointment.deadline);
+                        changedValue = await AppointmentUtil._handleDateValidation(value, appointment.deadline);
                     } catch (e) {
                         throw e;
                     }
@@ -309,7 +205,7 @@ export class AppointmentService {
 
                 if (key === 'deadline') {
                     try {
-                        changedValue = await AppointmentService._handleDeadlineValidation(appointment.date, value);
+                        changedValue = await AppointmentUtil._handleDeadlineValidation(appointment.date, value);
                     } catch (e) {
                         throw e;
                     }
@@ -323,7 +219,7 @@ export class AppointmentService {
 
         appointment = await this.appointmentRepository.save(appointment);
 
-        appointment.reference = AppointmentService.parseReferences(user, appointment, []);
+        appointment.reference = AppointmentUtil.parseReferences(user, appointment, []);
 
         appointment = appointmentMapper.permission(this, appointment, user, {});
         appointment = appointmentMapper.slim(this, appointment, false);
@@ -357,7 +253,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService._isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil._isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -398,7 +294,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService._isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil._isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -432,7 +328,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService._isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil._isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -470,7 +366,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService._isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil._isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -547,8 +443,8 @@ export class AppointmentService {
             appointment = ref;
         }
 
-        return AppointmentService._isCreatorOfAppointment(appointment, user)
-            || AppointmentService._isAdministratorOfAppointment(appointment, user);
+        return AppointmentUtil._isCreatorOfAppointment(appointment, user)
+            || AppointmentUtil._isAdministratorOfAppointment(appointment, user);
     }
 
     /**
@@ -627,7 +523,7 @@ export class AppointmentService {
         let appointments = await this.getAppointments(user, pins);
 
         appointments.map(fAppointment => {
-            fAppointment.reference = AppointmentService.parseReferences(user, fAppointment, pins);
+            fAppointment.reference = AppointmentUtil.parseReferences(user, fAppointment, pins);
         });
 
         appointments.map(appointment => {
