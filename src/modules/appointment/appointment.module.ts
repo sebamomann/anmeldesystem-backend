@@ -18,8 +18,6 @@ import {User} from '../user/user.entity';
 import {Key} from '../enrollment/key/key.entity';
 import {PassengerService} from '../enrollment/passenger/passenger.service';
 import {TelegramUser} from '../user/telegram/telegram-user.entity';
-import {MigrationController} from '../migration/migration.controller';
-import {MigrationService} from '../migration/migration.service';
 import {PasswordReset} from '../user/password-reset/password-reset.entity';
 import {FileService} from '../file/file.service';
 import {EmailChange} from '../user/email-change/email-change.entity';
@@ -30,9 +28,9 @@ import {AppointmentGateway} from './appointment.gateway';
 
 @Module({
     imports: [TypeOrmModule.forFeature([Appointment, Addition, File, Comment, Enrollment, Driver, Passenger, User, Key, Mail, TelegramUser, PasswordReset, PasswordChange, EmailChange, Session])],
-    providers: [AppointmentGateway, AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService, FileService],
-    exports: [AppointmentGateway, AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, MigrationService, FileService],
-    controllers: [AppointmentController, MigrationController],
+    providers: [AppointmentGateway, AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, FileService],
+    exports: [AppointmentGateway, AppointmentService, AdditionService, CommentService, EnrollmentService, DriverService, UserService, PassengerService, FileService],
+    controllers: [AppointmentController],
 })
 export class AppointmentModule {
 }
