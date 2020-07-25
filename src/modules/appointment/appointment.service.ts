@@ -523,7 +523,8 @@ export class AppointmentService {
     }
 
     /**
-     * Checks if a user is administrator orCreator of an Appointment
+     * Checks if a user is administrator or creator of an Appointment.<br/>
+     * Appointment can be passed as reference or just the link of the appointment
      *
      * @param user to check permissions for
      * @param ref (1) link of appointment
@@ -533,7 +534,7 @@ export class AppointmentService {
      *
      * @throws See {@link findByLink} for reference
      */
-    public async isCreatorOrAdministrator(user: User, ref: string | Appointment,): Promise<boolean> {
+    public async isCreatorOrAdministrator(user: User, ref: string | Appointment): Promise<boolean> {
         let appointment;
 
         if (typeof ref === 'string') {
