@@ -34,8 +34,8 @@ export class AppointmentService {
     ) {
     }
 
-    public static userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
-        appointment.reference = AppointmentUtil.parseReferences(user, appointment, []);
+    private static userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
+        appointment.reference = AppointmentUtil.parseReferences(user, appointment, []); // empty pins because fnc is only called on single appointment get request
 
         appointment = appointmentMapper.permission(this, appointment, user, permissions);
         appointment = appointmentMapper.slim(this, appointment, slim);
