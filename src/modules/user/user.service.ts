@@ -770,7 +770,7 @@ export class UserService {
     async sessionExists(refreshToken: string, id: string) {
         const session = await this.sessionRepository.findOne({where: {refreshToken: refreshToken, user: id}});
 
-        if (session == undefined) {
+        if (session === undefined) {
             throw new EntityNotFoundException();
         }
 
