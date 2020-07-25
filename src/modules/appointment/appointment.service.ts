@@ -34,24 +34,13 @@ export class AppointmentService {
     ) {
     }
 
-    public static isCreatorOfAppointment(_appointment: Appointment, _user: User) {
-        if (_user === undefined || _user === null || !_user) {
-            return false;
-        }
-
-        return _appointment.creator?.username === _user.username;
-    }
-
-    public static isAdministratorOfAppointment(_appointment: Appointment, _user: User) {
-        if (_user === undefined || _user === null || !_user) {
-            return false;
-        }
-
-        return _appointment.administrators !== undefined
-            && _appointment.administrators.some(sAdministrator => sAdministrator.username === _user.username);
-    }
-
-    private static async _handleDateValidation(date, deadline) {
+    /**
+     * Compare deadline and set date, to check if the date is before the deadline
+     *
+     * @param date Date of appointment
+     * @param deadline Date deadline of appointment
+     */
+    public static _handleDateValidation(date, deadline) {
         if (date < deadline) {
             throw new InvalidValuesException(null, 'The date can not be before the deadline', ['date']);
         }
@@ -59,7 +48,13 @@ export class AppointmentService {
         return date;
     }
 
-    private static async _handleDeadlineValidation(date, deadline) {
+    /**
+     * Compare deadline and set date, to check if the deadline is after the appointment date
+     *
+     * @param date Date of appointment
+     * @param deadline Date deadline of appointment
+     */
+    public static _handleDeadlineValidation(date, deadline) {
         if (deadline > date) {
             throw new InvalidValuesException(null, 'The deadline can not be after the date', ['deadline']);
         }
@@ -67,29 +62,32 @@ export class AppointmentService {
         return deadline;
     }
 
-    public async findByLink(link: string): Promise<Appointment> {
-        let appointment = await this.appointmentRepository.findOne({
-            where: {
-                link: link
-            },
-            relations: ['administrators', 'creator']
-        });
-
-        if (appointment === undefined) {
-            throw new EntityNotFoundException(null, null, 'appointment');
+    /**
+     * Check if passed user is the creator of the given appointment
+     *
+     * @param appointment Appointment to check ownership for
+     * @param user User to check ownership for
+     */
+    public static _isCreatorOfAppointment(appointment: Appointment, user: User) {
+        if (user === undefined || user === null || !user) {
+            return false;
         }
 
-        return appointment;
+        return appointment.creator.username === user.username;
     }
 
-    public static userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
-        appointment.reference = this.parseReferences(user, appointment, []);
+    /**
+     * Check if passed user is administrator of the given appointment
+     *
+     * @param appointment Appointment to check ownership for
+     * @param user User to check ownership for
+     */
+    public static _isAdministratorOfAppointment(appointment: Appointment, user: User) {
+        if (user === undefined || user === null || !user) {
+            return false;
+        }
 
-        appointment = appointmentMapper.permission(this, appointment, user, permissions);
-        appointment = appointmentMapper.slim(this, appointment, slim);
-        appointment = appointmentMapper.basic(this, appointment);
-
-        return appointment;
+        return appointment.administrators?.some(sAdministrator => sAdministrator.username === user.username);
     }
 
     /**
@@ -114,11 +112,11 @@ export class AppointmentService {
         const reference = [];
 
         if (user != null) {
-            if (AppointmentService.isAdministratorOfAppointment(appointment, user)) {
+            if (AppointmentService._isAdministratorOfAppointment(appointment, user)) {
                 reference.push('ADMIN');
             }
 
-            if (AppointmentService.isCreatorOfAppointment(appointment, user)) {
+            if (AppointmentService._isCreatorOfAppointment(appointment, user)) {
                 reference.push('CREATOR');
             }
 
@@ -138,6 +136,35 @@ export class AppointmentService {
         }
 
         return reference;
+    }
+
+    public static userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
+        appointment.reference = this.parseReferences(user, appointment, []);
+
+        appointment = appointmentMapper.permission(this, appointment, user, permissions);
+        appointment = appointmentMapper.slim(this, appointment, slim);
+        appointment = appointmentMapper.basic(this, appointment);
+
+        return appointment;
+    }
+
+    /** MAIN FUNCTIONS  **/
+    /** MAIN FUNCTIONS  **/
+
+
+    public async findByLink(link: string): Promise<Appointment> {
+        let appointment = await this.appointmentRepository.findOne({
+            where: {
+                link: link
+            },
+            relations: ['administrators', 'creator']
+        });
+
+        if (appointment === undefined) {
+            throw new EntityNotFoundException(null, null, 'appointment');
+        }
+
+        return appointment;
     }
 
     /**
@@ -330,7 +357,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentService._isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -371,7 +398,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentService._isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -405,7 +432,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentService._isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -443,7 +470,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentService._isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -519,8 +546,8 @@ export class AppointmentService {
             appointment = ref;
         }
 
-        return AppointmentService.isCreatorOfAppointment(appointment, user)
-            || AppointmentService.isAdministratorOfAppointment(appointment, user);
+        return AppointmentService._isCreatorOfAppointment(appointment, user)
+            || AppointmentService._isAdministratorOfAppointment(appointment, user);
     }
 
     /**

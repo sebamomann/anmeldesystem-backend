@@ -54,7 +54,7 @@ module.exports = {
         }))
         (_appointment);
 
-        if (AppointmentService.isCreatorOfAppointment(_appointment, _user)) {
+        if (AppointmentService._isCreatorOfAppointment(_appointment, _user)) {
             creatorObject = (({
                                   iat, lud,
                               }) => ({
@@ -64,8 +64,8 @@ module.exports = {
         }
 
         if (!_appointment.hidden
-            || (AppointmentService.isCreatorOfAppointment(_appointment, _user)
-                || AppointmentService.isAdministratorOfAppointment(_appointment, _user))) {
+            || (AppointmentService._isCreatorOfAppointment(_appointment, _user)
+                || AppointmentService._isAdministratorOfAppointment(_appointment, _user))) {
             enrollmentsObject = (({
                                       enrollments,
                                   }) => ({

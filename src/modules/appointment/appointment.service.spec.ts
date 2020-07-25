@@ -22,6 +22,8 @@ import {InsufficientPermissionsException} from '../../exceptions/InsufficientPer
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
+import {AppointmentGateway} from './appointment.gateway';
+import {Session} from '../user/session.entity';
 
 const crypto = require('crypto');
 
@@ -36,6 +38,7 @@ describe('AppointmentService', () => {
 
     let appointmentRepositoryMock: MockType<Repository<Appointment>>;
     let userRepositoryMock: MockType<Repository<User>>;
+    let sessionRepositoryMock: MockType<Repository<Session>>;
     let fileRepositoryMock: MockType<Repository<File>>;
     let additionRepositoryMock: MockType<Repository<Addition>>;
     let telegramUserRepositoryMock: MockType<Repository<TelegramUser>>;
@@ -46,12 +49,14 @@ describe('AppointmentService', () => {
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [AppointmentService,
+                AppointmentGateway,
                 UserService,
                 AdditionService,
                 FileService,
                 MailerService,
                 {provide: getRepositoryToken(Appointment), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
+                {provide: getRepositoryToken(Session), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(File), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Addition), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(TelegramUser), useFactory: repositoryMockFactory},
@@ -95,6 +100,188 @@ describe('AppointmentService', () => {
         expect(appointmentService).toBeDefined();
     });
 
+    describe('* handle date validation', () => {
+        it('* on valid date return date (date > deadline)', () => {
+            const __given_date = new Date();
+            const __given_deadline = new Date(__given_date.getTime() - 15 * 60000);
+
+            const __actual = AppointmentService._handleDateValidation(__given_date, __given_deadline);
+            expect(__actual).toEqual(__given_date);
+        });
+
+        it('* on invalid date return error (date < deadline)', (done) => {
+            const __given_date = new Date();
+            const __given_deadline = new Date(__given_date.getTime() + 15 * 60000);
+
+            try {
+                AppointmentService._handleDateValidation(__given_date, __given_deadline);
+                done.fail(new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException'));
+            } catch (e) {
+                expect(e).toBeInstanceOf(InvalidValuesException);
+                expect(e.data).toEqual(['date']);
+                done();
+            }
+        });
+    });
+
+    describe('* handle deadline validation', () => {
+        it('* on valid deadline return deadline (date > deadline)', () => {
+            const __given_date = new Date();
+            const __given_deadline = new Date(__given_date.getTime() - 15 * 60000);
+
+            const __actual = AppointmentService._handleDeadlineValidation(__given_date, __given_deadline);
+            expect(__actual).toEqual(__given_deadline);
+        });
+
+        it('* on invalid deadline return error (date < deadline)', (done) => {
+            const __given_date = new Date();
+            const __given_deadline = new Date(__given_date.getTime() + 15 * 60000);
+
+            try {
+                AppointmentService._handleDeadlineValidation(__given_date, __given_deadline);
+                done.fail(new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException'));
+            } catch (e) {
+                expect(e).toBeInstanceOf(InvalidValuesException);
+                expect(e.data).toEqual(['deadline']);
+                done();
+            }
+        });
+    });
+
+    describe('* permission checking', () => {
+        describe('* is creator', () => {
+            it('* valid should return true', () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+
+                const __given_appointment = new Appointment();
+                __given_appointment.creator = __given_user;
+
+                const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
+                expect(__actual).toBeTruthy();
+            });
+
+            describe('* invalid should return false', () => {
+                it('* invalid user object - null', () => {
+                    const __given_user = undefined;
+
+                    const __appointment_creator = new User();
+                    __appointment_creator.username = 'username';
+
+                    const __given_appointment = new Appointment();
+                    __given_appointment.creator = __appointment_creator;
+
+                    const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
+                    expect(__actual).toBeFalsy();
+                });
+
+                it('* invalid user object - undefined', () => {
+                    const __given_user = null;
+
+                    const __appointment_creator = new User();
+                    __appointment_creator.username = 'username';
+
+                    const __given_appointment = new Appointment();
+                    __given_appointment.creator = __appointment_creator;
+
+                    const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
+                    expect(__actual).toBeFalsy();
+                });
+
+                it('* wrong username', () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __appointment_creator = new User();
+                    __appointment_creator.username = 'creator';
+
+                    const __given_appointment = new Appointment();
+                    __given_appointment.creator = __appointment_creator;
+
+                    const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
+                    expect(__actual).toBeFalsy();
+                });
+            });
+        });
+
+        describe('* is administrator', () => {
+            it('* valid should return true', () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+
+                const __given_appointment = new Appointment();
+                __given_appointment.administrators = [__given_user];
+
+                const __actual = AppointmentService._isAdministratorOfAppointment(__given_appointment, __given_user);
+                expect(__actual).toBeTruthy();
+            });
+
+            describe('* invalid should return false', () => {
+                it('* invalid user object - null', () => {
+                    const __given_user = undefined;
+
+                    const __appointment_admin = new User();
+                    __appointment_admin.username = 'username';
+
+                    const __given_appointment = new Appointment();
+                    __given_appointment.administrators = [__appointment_admin];
+
+                    const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
+                    expect(__actual).toBeFalsy();
+                });
+
+                it('* invalid user object - undefined', () => {
+                    const __given_user = null;
+
+                    const __appointment_admin = new User();
+                    __appointment_admin.username = 'username';
+
+                    const __given_appointment = new Appointment();
+                    __given_appointment.administrators = [__appointment_admin];
+
+                    const __actual = AppointmentService._isCreatorOfAppointment(__given_appointment, __given_user);
+                    expect(__actual).toBeFalsy();
+                });
+
+                it('* wrong username', () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __appointment_admin = new User();
+                    __appointment_admin.username = 'administrator';
+
+                    const __given_appointment = new Appointment();
+                    __given_appointment.administrators = [__appointment_admin];
+
+                    const __actual = AppointmentService._isAdministratorOfAppointment(__given_appointment, __given_user);
+                    expect(__actual).toBeFalsy();
+                });
+
+                it('* undefined administrator list', () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __given_appointment = new Appointment();
+                    __given_appointment.administrators = undefined;
+
+                    const __actual = AppointmentService._isAdministratorOfAppointment(__given_appointment, __given_user);
+                    expect(__actual).toBeFalsy();
+                });
+
+                it('* empty administrator list', () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __given_appointment = new Appointment();
+                    __given_appointment.administrators = [];
+
+                    const __actual = AppointmentService._isAdministratorOfAppointment(__given_appointment, __given_user);
+                    expect(__actual).toBeFalsy();
+                });
+            });
+        });
+    });
+
     describe('UTIL - find appointment', () => {
         describe('* by link', () => {
 
@@ -112,8 +299,8 @@ describe('AppointmentService', () => {
                 const result = new Appointment();
                 appointmentRepositoryMock.findOne.mockReturnValue(result);
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(typeof actual).toBe('object');
@@ -128,8 +315,8 @@ describe('AppointmentService', () => {
                 const result = new Appointment();
                 appointmentRepositoryMock.findOne.mockReturnValue(result);
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(true);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(true);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(actual).toHaveProperty('iat');
@@ -145,8 +332,8 @@ describe('AppointmentService', () => {
                 const result = new Appointment();
                 appointmentRepositoryMock.findOne.mockReturnValue(result);
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(actual).not.toHaveProperty('iat');
@@ -163,8 +350,8 @@ describe('AppointmentService', () => {
                 result.hidden = false;
                 appointmentRepositoryMock.findOne.mockReturnValue(result);
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(typeof actual).toBe('object');
@@ -181,8 +368,8 @@ describe('AppointmentService', () => {
                 result.enrollments = [new Enrollment(), new Enrollment()];
                 appointmentRepositoryMock.findOne.mockReturnValue(result);
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(actual.enrollments).toEqual([]);
@@ -207,8 +394,8 @@ describe('AppointmentService', () => {
 
                 permissions = {'perm1': enrollment.id, 'token1': token};
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(actual.enrollments).toHaveLength(1);
@@ -225,8 +412,8 @@ describe('AppointmentService', () => {
                 result.enrollments = [new Enrollment(), new Enrollment()];
                 appointmentRepositoryMock.findOne.mockReturnValue(result);
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(true);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(true);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(actual.enrollments).toHaveLength(2);
@@ -243,8 +430,8 @@ describe('AppointmentService', () => {
                 result.enrollments = [new Enrollment(), new Enrollment()];
                 appointmentRepositoryMock.findOne.mockReturnValue(result);
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(true);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(true);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(actual.enrollments).toHaveLength(2);
@@ -261,8 +448,8 @@ describe('AppointmentService', () => {
                 result.files = [];
                 appointmentRepositoryMock.findOne.mockReturnValue(result);
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(true);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(true);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(true);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(true);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(actual).not.toHaveProperty('files');
@@ -283,8 +470,8 @@ describe('AppointmentService', () => {
                 result.administrators = [administrator];
                 appointmentRepositoryMock.findOne.mockReturnValue(result);
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(actual.administrators[0]).toMatchObject({
@@ -304,8 +491,8 @@ describe('AppointmentService', () => {
                 result.enrollments = [enrollment];
                 appointmentRepositoryMock.findOne.mockReturnValue(result);
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(actual.enrollments[0]).toHaveProperty('createdByUser', false);
@@ -324,8 +511,8 @@ describe('AppointmentService', () => {
                 result.enrollments = [enrollment];
                 appointmentRepositoryMock.findOne.mockReturnValue(result);
 
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.get(user, link, permissions, slim);
                 expect(actual.enrollments[0]).toHaveProperty('createdByUser', true);
@@ -546,8 +733,8 @@ describe('AppointmentService', () => {
                         return val;
                     });
                     appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                    jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                    jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                    jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                    jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                     const actual = await appointmentService.update(toChange, appointment.link, user);
                     expect(actual.additions).toHaveLength(3);
@@ -585,8 +772,8 @@ describe('AppointmentService', () => {
                         return val;
                     });
                     appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                    jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                    jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                    jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                    jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                     const actual = await appointmentService.update(toChange, appointment.link, user);
                     expect(actual.additions).toHaveLength(2);
@@ -620,8 +807,8 @@ describe('AppointmentService', () => {
                         return val;
                     });
                     appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                    jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                    jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                    jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                    jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                     const actual = await appointmentService.update(toChange, appointment.link, user);
                     expect(actual.additions).toHaveLength(1);
@@ -646,8 +833,8 @@ describe('AppointmentService', () => {
                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.update(toChange, appointment.link, user);
                 expect(actual.link).toEqual(toChange.link);
@@ -664,8 +851,8 @@ describe('AppointmentService', () => {
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.update(toChange, appointment.link, user);
                 expect(actual.date).toEqual(toChange.date);
@@ -682,8 +869,8 @@ describe('AppointmentService', () => {
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.update(toChange, appointment.link, user);
                 expect(actual.deadline).toEqual(toChange.deadline);
@@ -699,8 +886,8 @@ describe('AppointmentService', () => {
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.update(toChange, appointment.link, user);
                 expect(actual.title).toEqual(toChange.title);
@@ -716,8 +903,8 @@ describe('AppointmentService', () => {
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                jest.spyOn(AppointmentService, 'isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, 'isAdministratorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
 
                 const actual = await appointmentService.update(toChange, appointment.link, user);
                 expect(actual.description).toEqual(toChange.description);
@@ -756,17 +943,17 @@ describe('AppointmentService', () => {
 
                 const toChange = {title: 'newTitle'};
 
-                    appointmentRepositoryMock.findOne.mockReturnValue(appointment);
+                appointmentRepositoryMock.findOne.mockReturnValue(appointment);
 
-                    appointmentService
-                        .update(toChange, appointment.link, user)
-                        .then(() => {
-                            throw new Error('I have failed you, Anakin. Should have gotten an InsufficientPermissionsException');
-                        })
-                        .catch((err) => {
-                            expect(err).toBeInstanceOf(InsufficientPermissionsException);
-                        });
-                });
+                appointmentService
+                    .update(toChange, appointment.link, user)
+                    .then(() => {
+                        throw new Error('I have failed you, Anakin. Should have gotten an InsufficientPermissionsException');
+                    })
+                    .catch((err) => {
+                        expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                    });
+            });
 
             it('* link in use', async () => {
                 const user = new User();
@@ -885,7 +1072,7 @@ describe('AppointmentService', () => {
             appointment.creator = user;
             appointment.enrollments = [];
 
-            const actual = await appointmentService.parseReferences(user, appointment, pins);
+            const actual = AppointmentService.parseReferences(user, appointment, pins);
             expect(actual).toEqual(['CREATOR']);
         });
 
@@ -903,7 +1090,7 @@ describe('AppointmentService', () => {
             appointment.administrators = [user];
             appointment.enrollments = [];
 
-            const actual = await appointmentService.parseReferences(user, appointment, pins);
+            const actual = AppointmentService.parseReferences(user, appointment, pins);
             expect(actual).toEqual(['ADMIN']);
         });
 
@@ -921,7 +1108,7 @@ describe('AppointmentService', () => {
             appointment.pinners = [user];
             appointment.enrollments = [];
 
-            const actual = await appointmentService.parseReferences(user, appointment, pins);
+            const actual = AppointmentService.parseReferences(user, appointment, pins);
             expect(actual).toEqual(['PINNED']);
         });
 
@@ -939,7 +1126,7 @@ describe('AppointmentService', () => {
             appointment.creator = creator;
             appointment.enrollments = [];
 
-            const actual = await appointmentService.parseReferences(user, appointment, pins);
+            const actual = AppointmentService.parseReferences(user, appointment, pins);
             expect(actual).toEqual(['PINNED']);
         });
 
@@ -959,7 +1146,7 @@ describe('AppointmentService', () => {
             appointment.creator = creator;
             appointment.enrollments = [enrollment];
 
-            const actual = await appointmentService.parseReferences(user, appointment, pins);
+            const actual = AppointmentService.parseReferences(user, appointment, pins);
             expect(actual).toEqual(['ENROLLED']);
         });
     });
@@ -1400,7 +1587,7 @@ describe('AppointmentService', () => {
                     const appointment = new Appointment();
                     appointment.creator = user;
 
-                    const actual = await AppointmentService.isCreatorOfAppointment(appointment, user);
+                    const actual = await AppointmentService._isCreatorOfAppointment(appointment, user);
                     expect(actual).toEqual(true);
                 });
 
@@ -1414,7 +1601,7 @@ describe('AppointmentService', () => {
                     const appointment = new Appointment();
                     appointment.creator = creator;
 
-                    const actual = await AppointmentService.isCreatorOfAppointment(appointment, user);
+                    const actual = await AppointmentService._isCreatorOfAppointment(appointment, user);
                     expect(actual).toEqual(false);
                 });
             });
@@ -1424,7 +1611,7 @@ describe('AppointmentService', () => {
                     const user = undefined;
                     const appointment = new Appointment();
 
-                    const actual = await AppointmentService.isCreatorOfAppointment(appointment, user);
+                    const actual = await AppointmentService._isCreatorOfAppointment(appointment, user);
                     expect(actual).toEqual(false);
                 });
 
@@ -1432,7 +1619,7 @@ describe('AppointmentService', () => {
                     const user = null;
                     const appointment = new Appointment();
 
-                    const actual = await AppointmentService.isCreatorOfAppointment(appointment, user);
+                    const actual = await AppointmentService._isCreatorOfAppointment(appointment, user);
                     expect(actual).toEqual(false);
                 });
             });
@@ -1447,7 +1634,7 @@ describe('AppointmentService', () => {
                     const appointment = new Appointment();
                     appointment.administrators = [user];
 
-                    const actual = await AppointmentService.isAdministratorOfAppointment(appointment, user);
+                    const actual = await AppointmentService._isAdministratorOfAppointment(appointment, user);
                     expect(actual).toEqual(true);
                 });
 
@@ -1458,7 +1645,7 @@ describe('AppointmentService', () => {
                     const appointment = new Appointment();
                     appointment.administrators = [];
 
-                    const actual = await AppointmentService.isAdministratorOfAppointment(appointment, user);
+                    const actual = await AppointmentService._isAdministratorOfAppointment(appointment, user);
                     expect(actual).toEqual(false);
                 });
             });
@@ -1468,7 +1655,7 @@ describe('AppointmentService', () => {
                     const user = undefined;
                     const appointment = new Appointment();
 
-                    const actual = await AppointmentService.isAdministratorOfAppointment(appointment, user);
+                    const actual = await AppointmentService._isAdministratorOfAppointment(appointment, user);
                     expect(actual).toEqual(false);
                 });
 
@@ -1478,7 +1665,7 @@ describe('AppointmentService', () => {
                     const appointment = new Appointment();
                     appointment.creator = user;
 
-                    const actual = await AppointmentService.isAdministratorOfAppointment(appointment, user);
+                    const actual = await AppointmentService._isAdministratorOfAppointment(appointment, user);
                     expect(actual).toEqual(false);
                 });
             });
@@ -1489,7 +1676,7 @@ describe('AppointmentService', () => {
                     const appointment = new Appointment();
                     appointment.administrators = undefined;
 
-                    const actual = await AppointmentService.isAdministratorOfAppointment(appointment, user);
+                    const actual = await AppointmentService._isAdministratorOfAppointment(appointment, user);
                     expect(actual).toEqual(false);
                 });
             });
