@@ -10,6 +10,14 @@ export class FileService {
                 private fileRepository: Repository<File>) {
     }
 
+    public async __save(file: File) {
+        return await this.fileRepository.save(file);
+    }
+
+    public async __remove(file: any) {
+        return await this.fileRepository.remove(file);
+    }
+
     async findById(id: string) {
         const file = await this.fileRepository.findOne({
             where: {

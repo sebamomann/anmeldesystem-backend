@@ -10,7 +10,6 @@ import {Passenger} from './passenger/passenger.entity';
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {User} from '../user/user.entity';
-import {Key} from './key/key.entity';
 import {PassengerService} from './passenger/passenger.service';
 import {DriverService} from './driver/driver.service';
 import {Mail} from './mail/mail.entity';
@@ -29,12 +28,6 @@ const enrollmentMapper = require('./enrollment.mapper');
 export class EnrollmentService {
     constructor(@InjectRepository(Enrollment)
                 private readonly enrollmentRepository: Repository<Enrollment>,
-                @InjectRepository(Driver)
-                private readonly driverRepository: Repository<Driver>,
-                @InjectRepository(Passenger)
-                private readonly passengerRepository: Repository<Passenger>,
-                @InjectRepository(Key)
-                private readonly keyRepository: Repository<Key>,
                 @InjectRepository(Mail)
                 private readonly mailRepository: Repository<Mail>,
                 private readonly appointmentService: AppointmentService,
@@ -43,7 +36,6 @@ export class EnrollmentService {
                 private readonly driverService: DriverService,
                 private readonly mailerService: MailerService,
                 private readonly appointmentGateway: AppointmentGateway) {
-
     }
 
     public static allowEditByToken(enrollment: Enrollment, token: string) {
@@ -419,7 +411,7 @@ export class EnrollmentService {
 
         if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
             console.log('passenger values changed');
-            return await this.passengerRepository.save(output);
+            return await this.passengerService.__save(output);
         }
 
         return output;
@@ -458,7 +450,7 @@ export class EnrollmentService {
 
         if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
             console.log('driver values changed');
-            return await this.driverRepository.save(output);
+            return await this.driverService.__save(output);
         }
 
         return output;

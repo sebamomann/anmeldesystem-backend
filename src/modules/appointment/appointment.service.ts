@@ -27,15 +27,9 @@ export class AppointmentService {
     constructor(
         @InjectRepository(Appointment)
         private readonly appointmentRepository: Repository<Appointment>,
-        @InjectRepository(Addition)
-        private readonly additionRepository: Repository<Addition>,
-        @InjectRepository(File)
-        private readonly fileRepository: Repository<File>,
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
         private additionService: AdditionService,
-        private userService: UserService,
         private fileService: FileService,
+        private userService: UserService,
         private appointmentGateway: AppointmentGateway
     ) {
     }
@@ -419,7 +413,7 @@ export class AppointmentService {
         file.name = data.name;
         file.data = data.data;
 
-        const savedFile = await this.fileRepository.save(file);
+        const savedFile = await this.fileService.__save(file);
         appointment.files.push(savedFile);
 
         await this.appointmentRepository.save(appointment);
@@ -461,7 +455,7 @@ export class AppointmentService {
             throw new EntityGoneException(null, null, 'file');
         }
 
-        await this.fileRepository.remove(file);
+        await this.fileService.__remove(file);
 
         this.appointmentGateway.appointmentUpdated(appointment);
     }
@@ -496,7 +490,7 @@ export class AppointmentService {
             _user.pinned.push(appointment);
         }
 
-        _user = await this.userRepository.save(_user);
+        _user = await this.userService.__save(_user);
 
         return _user.pinned;
     }
@@ -653,7 +647,7 @@ export class AppointmentService {
                 if (!output.some(sAddition => sAddition.name === fAddition.name)) {
                     let _addition: Addition = new Addition();
                     _addition.name = fAddition.name;
-                    await this.additionRepository.save(_addition);
+                    await this.additionService.__save(_addition);
                     output.push(_addition);
                 }
             }
@@ -677,7 +671,7 @@ export class AppointmentService {
             } catch (e) {
                 potExistingAddition = new Addition();
                 potExistingAddition.name = fAddition.name;
-                potExistingAddition = await this.additionRepository.save(potExistingAddition);
+                potExistingAddition = await this.additionService.__save(potExistingAddition);
                 output.push(potExistingAddition);
             }
         }

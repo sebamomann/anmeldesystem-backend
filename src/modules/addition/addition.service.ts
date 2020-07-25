@@ -7,10 +7,12 @@ import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException'
 
 @Injectable()
 export class AdditionService {
-
     constructor(@InjectRepository(Addition)
                 private readonly additionRepository: Repository<Addition>) {
+    }
 
+    public async __save(addition: any) {
+        return await this.additionRepository.save(addition);
     }
 
     /* istanbul ignore next */

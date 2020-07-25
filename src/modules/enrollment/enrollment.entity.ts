@@ -18,7 +18,6 @@ import {Driver} from './driver/driver.entity';
 import {Passenger} from './passenger/passenger.entity';
 import {Comment} from './comment/comment.entity';
 import {User} from '../user/user.entity';
-import {Key} from './key/key.entity';
 import {Exclude} from 'class-transformer';
 import {Mail} from './mail/mail.entity';
 
@@ -72,11 +71,6 @@ export class Enrollment {
         {onDelete: 'CASCADE'})
     @JoinColumn()
     creator: User;
-
-    @OneToOne(type => Key,
-        key => key.enrollment,
-        {onDelete: 'CASCADE'})
-    key: Key;
 
     @OneToOne(type => Mail,
         mail => mail.enrollment,

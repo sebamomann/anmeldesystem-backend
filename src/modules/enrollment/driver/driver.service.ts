@@ -10,7 +10,10 @@ export class DriverService {
 
     constructor(@InjectRepository(Driver)
                 private readonly driverRepository: Repository<Driver>) {
+    }
 
+    public async __save(driver: Driver) {
+        return await this.driverRepository.save(driver);
     }
 
     // public async findById(id: string) {
