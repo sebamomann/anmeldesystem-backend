@@ -176,11 +176,7 @@ export class AppointmentService {
 
         appointmentToDB = await this.appointmentRepository.save(appointmentToDB);
 
-        appointmentToDB.reference = AppointmentUtil.parseReferences(user, appointmentToDB, []);
-
-        appointmentToDB = appointmentMapper.permission(this, appointmentToDB, user, {});
-        appointmentToDB = appointmentMapper.slim(this, appointmentToDB, false);
-        appointmentToDB = appointmentMapper.basic(this, appointmentToDB);
+        appointmentToDB = AppointmentService.userBasedAppointmentPreparation(appointmentToDB, user, {}, false);
 
         return appointmentToDB;
     }
