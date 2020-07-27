@@ -395,6 +395,9 @@ describe('AppointmentUtil', () => {
         });
     });
 
+    // TODO
+    // missing function filterPermittedEnrollments();
+
     afterEach(() => {
         jest.restoreAllMocks();
     });

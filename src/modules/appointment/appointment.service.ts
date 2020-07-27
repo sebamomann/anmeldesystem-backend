@@ -12,13 +12,11 @@ import {FileService} from '../file/file.service';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
-import {Enrollment} from '../enrollment/enrollment.entity';
 import {GeneratorUtil} from '../../util/generator.util';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
 import {AppointmentUtil} from './appointment.util';
 
-const crypto = require('crypto');
 const appointmentMapper = require('./appointment.mapper');
 const logger = require('../../logger');
 
@@ -189,7 +187,7 @@ export class AppointmentService {
                 let changedValue = value;
 
                 if (key === 'additions') {
-                    changedValue = await this._handleAdditionsUpdate(value, appointment);
+                    changedValue = await this._handleAdditionUpdate(value, appointment);
                 }
 
                 if (key === 'link') {
@@ -453,54 +451,6 @@ export class AppointmentService {
     }
 
     /**
-     * Filters out all enrollments, the requester is not allowed to see.<br />
-     * Done by validation the enrollment query parameters (id and token) passed with te request.
-     * If the token is valid and the enrollment id exists in the enrollments array, then return it.<br/>
-     * <br />
-     * The query parameters are determined by the starting sequence `perm` and `token`
-     * <br />
-     * `perm` for the id (e.g. perm1, perm2, perm3) <br />
-     * `token` for the validation token of the id (e.g. token1, token2, token3) <br/>
-     * <br />
-     *
-     * IMPORTANT - The order of the ids with their corresponding token is important!.
-     * The second id passed, will be verified with the second PASSED token (not token number)!
-     *
-     * @param permissions All raw query parameters
-     * @param enrollments Enrollments to filter
-     *
-     * @returns Enrollment[] ALl filtered enrollments
-     */
-    public static filterPermittedEnrollments(permissions: any, enrollments: Enrollment[]) {
-        let extractedIds = [];
-        let extractedTokens = [];
-        for (const queryKey of Object.keys(permissions)) {
-            if (queryKey.startsWith('perm')) {
-                extractedIds.push(permissions[queryKey]);
-            } else if (queryKey.startsWith('token')) {
-                extractedTokens.push(permissions[queryKey]);
-            }
-        }
-
-        let validIds = [];
-        extractedIds.forEach((fId, i) => {
-            const token = crypto.createHash('sha256')
-                .update(fId + process.env.SALT_ENROLLMENT)
-                .digest('hex');
-            if (extractedTokens[i] !== undefined
-                && token === extractedTokens[i].replace(' ', '+')) {
-                validIds.push(fId);
-            }
-        });
-
-        return enrollments.filter(fEnrollment => {
-            if (validIds.includes(fEnrollment.id)) {
-                return fEnrollment;
-            }
-        });
-    }
-
-    /**
      * Fetch all Appointments, the user is allowed to see.
      * This includes being the creator, an administrator or being enrolled into this appoinment.
      * Additionally, pinned appointments get returned. Further an array of links can be passed
@@ -587,7 +537,7 @@ export class AppointmentService {
         return output;
     }
 
-    private async _handleAdditionsUpdate(mixedAdditions, appointment: Appointment) {
+    private async _handleAdditionUpdate(mixedAdditions, appointment: Appointment) {
         let output = [];
 
         for (let fAddition of mixedAdditions) {

@@ -74,7 +74,7 @@ module.exports = {
             }))
             (_appointment);
         } else {
-            const __enrollments = AppointmentService
+            const __enrollments = AppointmentUtil
                 .filterPermittedEnrollments(permissions, _appointment.enrollments);
             enrollmentsObject = {enrollments: __enrollments};
         }
