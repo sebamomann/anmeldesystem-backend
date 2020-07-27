@@ -267,12 +267,12 @@ export class AppointmentService {
 
         } catch (e) {
             throw new UnknownUserException('NOT_FOUND',
-                `User not found by username`);
+                `User not found by username`, username);
         }
 
         appointment.administrators.push(admin);
 
-        await this.appointmentRepository.save(appointment);
+        return await this.appointmentRepository.save(appointment);
     }
 
     /**
@@ -342,14 +342,15 @@ export class AppointmentService {
         const savedFile = await this.fileService.__save(file);
         appointment.files.push(savedFile);
 
-        await this.appointmentRepository.save(appointment);
-
         this.appointmentGateway.appointmentUpdated(appointment);
+
+        return await this.appointmentRepository.save(appointment);
     }
 
     /**
      * Remove an file of a specific appointment. <br />
-     * Operation can only be executed by the owner of the Appointment.
+     * Operation can only be executed by the owner of the Appointment. <br/>
+     * In contrast to removing administrators, here the entire database entry can be removed since a file is not used in multiple appointments.
      *
      * @param _user Requester  (should be owner of appointment)
      * @param link Link of appointment
@@ -377,13 +378,17 @@ export class AppointmentService {
 
         try {
             file = await this.fileService.findById(id);
+            await this.fileService.__remove(file);
+
+            const index = appointment.files.indexOf(file);
+            appointment.files.splice(index, 1);
         } catch (e) {
             throw new EntityGoneException(null, null, 'file');
         }
 
-        await this.fileService.__remove(file);
-
         this.appointmentGateway.appointmentUpdated(appointment);
+
+        return appointment;
     }
 
     /**

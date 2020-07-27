@@ -1494,6 +1494,356 @@ describe('AppointmentService', () => {
         });
     });
 
+    describe('* handle administrators', () => {
+        describe('* add', () => {
+            it('* successful should return updated entity', async () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_link = 'link';
+                const __given_username = 'admin_to_be';
+
+                const __existing_user = new User();
+                __existing_user.username = __given_username;
+
+                const __existing_appointment = new Appointment();
+                __existing_appointment.creator = __given_user;
+                __existing_appointment.administrators = [];
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+                userRepositoryMock.findOne.mockReturnValueOnce(__existing_user); // check if admin to actually exsists
+
+                appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                const __expected = {...__existing_appointment};
+                __expected.administrators = [__existing_user];
+
+                const __actual = await appointmentService.addAdministrator(__given_user, __given_link, __given_username);
+                expect(__actual).toEqual(__expected);
+            });
+
+            describe('* failure should return error', () => {
+                it('* appointment not found', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_username = 'admin_to_be';
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    appointmentService
+                        .addAdministrator(__given_user, __given_link, __given_username)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityNotFoundException);
+                            expect(err.data).toEqual('appointment');
+                        });
+                });
+
+                it('* insufficient permissions', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_username = 'admin_to_be';
+
+                    const __existing_creator = new User();
+                    __existing_creator.username = 'creator';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.administrators = [];
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                    appointmentService
+                        .addAdministrator(__given_user, __given_link, __given_username)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned InsufficientPermissionsException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                        });
+                });
+
+                it('* admin to be not found by username', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_username = 'admin_to_be';
+
+                    const __existing_user = new User();
+                    __existing_user.username = __given_username;
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __given_user;
+                    __existing_appointment.administrators = [];
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+                    userRepositoryMock.findOne.mockReturnValueOnce(undefined); // check if admin to actually exsists
+
+                    appointmentService
+                        .addAdministrator(__given_user, __given_link, __given_username)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned UnknownUserException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(UnknownUserException);
+                            expect(err.data).toBe(__existing_user.username);
+                        });
+                });
+            });
+        });
+
+        describe('* remove', () => {
+            it('* successful should return updated entity', async () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_link = 'link';
+                const __given_username = 'admin_to_remove';
+
+                const __existing_user = new User();
+                __existing_user.username = __given_username;
+
+                const __existing_appointment = new Appointment();
+                __existing_appointment.creator = __given_user;
+                __existing_appointment.administrators = [__existing_user];
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+                userRepositoryMock.findOne.mockReturnValueOnce(__existing_user); // check if admin to actually exsists
+
+                appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                const __expected = {...__existing_appointment};
+                __expected.administrators = [];
+
+                const __actual = await appointmentService
+                    .removeAdministrator(__given_user, __given_link, __given_username);
+                expect(__actual).toEqual(__expected);
+            });
+
+            describe('* failure should return error', () => {
+                it('* appointment not found', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_username = 'admin_to_remove';
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    appointmentService
+                        .removeAdministrator(__given_user, __given_link, __given_username)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityNotFoundException);
+                            expect(err.data).toEqual('appointment');
+                        });
+                });
+
+                it('* insufficient permissions', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_username = 'admin_to_remove';
+
+                    const __existing_user = new User();
+                    __existing_user.username = __given_username;
+
+                    const __existing_creator = new User();
+                    __existing_creator.username = 'creator';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.administrators = [__existing_user];
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                    appointmentService
+                        .removeAdministrator(__given_user, __given_link, __given_username)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned InsufficientPermissionsException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                        });
+                });
+            });
+        });
+    });
+
+    describe('* handle files', () => {
+        describe('* add', () => {
+            it('* successful should return updated entity', async () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_link = 'link';
+                const __given_data = {name: 'name.txt', data: '123'};
+
+                const __existing_appointment = new Appointment();
+                __existing_appointment.creator = __given_user;
+                __existing_appointment.files = [];
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+                fileRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                    return;
+                });
+
+                const __expected_file = new File();
+                __expected_file.name = __given_data.name;
+                __expected_file.data = __given_data.data;
+
+                const __expected = {...__existing_appointment};
+                __expected.files = [__expected_file];
+
+                const __actual = await appointmentService.addFile(__given_user, __given_link, __given_data);
+                expect(__actual).toEqual(__expected);
+            });
+
+            describe('* failure should return error', () => {
+                it('* appointment not found', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_data = {name: 'name.txt', data: '123'};
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    appointmentService.addFile(__given_user, __given_link, __given_data)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityNotFoundException);
+                            expect(err.data).toEqual('appointment');
+                        });
+                });
+
+                it('* insufficient permissions', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_data = {name: 'name.txt', data: '123'};
+
+                    const __existing_user = new User();
+                    __existing_user.username = 'creator';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __existing_user;
+                    __existing_appointment.files = [];
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+                    fileRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                    appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                        return;
+                    });
+
+                    const __expected_file = new File();
+                    __expected_file.name = __given_data.name;
+                    __expected_file.data = __given_data.data;
+
+                    const __expected = {...__existing_appointment};
+                    __expected.files = [__expected_file];
+
+                    appointmentService.addFile(__given_user, __given_link, __given_data)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned InsufficientPermissionsException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                        });
+                });
+
+            });
+        });
+
+        describe('* remove', () => {
+            it('* successful should return updated entity', async () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_link = 'link';
+                const __given_id = 'c4703eae-a93b-484d-8eee-63d0779825b0';
+
+                const __existing_file = new File();
+                __existing_file.id = __given_id;
+                __existing_file.name = 'name.txt';
+                __existing_file.data = '123';
+
+                const __existing_appointment = new Appointment();
+                __existing_appointment.creator = __given_user;
+                __existing_appointment.files = [];
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+                fileRepositoryMock.findOne.mockReturnValueOnce(__existing_file);
+                fileRepositoryMock.remove.mockReturnValueOnce(undefined);
+
+                jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                    return;
+                });
+
+                const __expected = {...__existing_appointment};
+                __expected.files = [];
+
+                const __actual = await appointmentService.removeFile(__given_user, __given_link, __given_id);
+                expect(__actual).toEqual(__expected);
+            });
+
+            describe('* failure should return error', () => {
+                it('* appointment not found', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_id = 'c4703eae-a93b-484d-8eee-63d0779825b0';
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    appointmentService
+                        .removeFile(__given_user, __given_link, __given_id)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityNotFoundException);
+                            expect(err.data).toEqual('appointment');
+                        });
+                });
+
+                it('* insufficient permissions', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_id = 'c4703eae-a93b-484d-8eee-63d0779825b0';
+
+                    const __existing_creator = new User();
+                    __existing_creator.username = 'creator';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.files = [];
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                    appointmentService
+                        .removeFile(__given_user, __given_link, __given_id)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have returned InsufficientPermissionsException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(InsufficientPermissionsException);
+                        });
+                });
+            });
+        });
+    });
+
     describe('* get Appointments', () => {
         describe('* should return array of entities if successful', () => {
             it('successful', async () => {
