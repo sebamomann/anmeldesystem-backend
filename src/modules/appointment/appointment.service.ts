@@ -11,7 +11,6 @@ import {UserService} from '../user/user.service';
 import {FileService} from '../file/file.service';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
-import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {GeneratorUtil} from '../../util/generator.util';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
@@ -93,6 +92,42 @@ export class AppointmentService {
         appointment = AppointmentService.userBasedAppointmentPreparation(appointment, user, permissions, slim);
 
         return appointment;
+    }
+
+    /**
+     * Fetch all Appointments, the user is allowed to see.
+     * This includes being the creator, an administrator or being enrolled into this appoinment.
+     * Additionally, pinned appointments get returned. Further an array of links can be passed
+     * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
+     * <br />
+     * When passing a link with this request, the corresponding Appointment gets marked as "PINNED" <br />
+     * <br />
+     * All appointments include a reference. See {@link parseReferences} for more information
+     *
+     * @param user Requester (if existing)
+     * @param params All query parameters to parse pinned links
+     * @param slim Delete information overhead. See {@link appointmentMapper.slim} for more information.
+     *
+     * @returns Appointment[]
+     */
+    public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
+
+        let pins = [];
+        for (const queryKey of Object.keys(params)) {
+            if (queryKey.startsWith('pin')) {
+                pins.push(params[queryKey]);
+            }
+        }
+
+        let appointments = await this.getAppointments(user, pins);
+
+        appointments.map(fAppointment => {
+            fAppointment.reference = AppointmentUtil.parseReferences(user, fAppointment, pins);
+        });
+
+        appointments.map(appointment => AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, slim));
+
+        return appointments;
     }
 
     /**
@@ -382,17 +417,18 @@ export class AppointmentService {
 
             const index = appointment.files.indexOf(file);
             appointment.files.splice(index, 1);
-        } catch (e) {
-            throw new EntityGoneException(null, null, 'file');
-        }
 
-        this.appointmentGateway.appointmentUpdated(appointment);
+            this.appointmentGateway.appointmentUpdated(appointment);
+        } catch (e) {
+            //
+        }
 
         return appointment;
     }
 
     /**
-     * Toggle the pinning state of an appointment in relation to the user.
+     * Toggle the pinning state of an appointment in relation to the user. <br/>
+     * Update user entity instead of appointment entity
      *
      * @param user Requester, wanting to pin the appointment
      * @param link Link of appointment to pin
@@ -409,7 +445,7 @@ export class AppointmentService {
         let _user;
 
         try {
-            _user = await this.userService.findById(user.id);
+            _user = await this.userService.findById(user.id); // check if user even exists anymore or not
         } catch (e) {
             throw e;
         }
@@ -423,7 +459,7 @@ export class AppointmentService {
 
         _user = await this.userService.__save(_user);
 
-        return _user.pinned;
+        return _user;
     }
 
     /**
@@ -453,47 +489,6 @@ export class AppointmentService {
 
         return AppointmentUtil.isCreatorOfAppointment(appointment, user)
             || AppointmentUtil.isAdministratorOfAppointment(appointment, user);
-    }
-
-    /**
-     * Fetch all Appointments, the user is allowed to see.
-     * This includes being the creator, an administrator or being enrolled into this appoinment.
-     * Additionally, pinned appointments get returned. Further an array of links can be passed
-     * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
-     * <br />
-     * When passing a link with this request, the corresponding Appointment gets marked as "PINNED" <br />
-     * <br />
-     * All appointments include a reference. See {@link parseReferences} for more information
-     *
-     * @param user Requester (if existing)
-     * @param params All query parameters to parse pinned links
-     * @param slim Delete information overhead. See {@link appointmentMapper.slim} for more information.
-     *
-     * @returns Appointment[]
-     */
-    public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
-
-        let pins = [];
-        for (const queryKey of Object.keys(params)) {
-            if (queryKey.startsWith('pin')) {
-                pins.push(params[queryKey]);
-            }
-        }
-
-        let appointments = await this.getAppointments(user, pins);
-
-        appointments.map(fAppointment => {
-            fAppointment.reference = AppointmentUtil.parseReferences(user, fAppointment, pins);
-        });
-
-        appointments.map(appointment => {
-            appointment = appointmentMapper.permission(this, appointment, user, {});
-            appointment = appointmentMapper.slim(this, appointment, slim);
-            appointment = appointmentMapper.basic(this, appointment);
-            return appointment;
-        });
-
-        return appointments;
     }
 
     private async handleAppointmentLink(_link: string) {
@@ -565,7 +560,8 @@ export class AppointmentService {
         return output;
     }
 
-    public async getAppointments(user: User, pins) {
+    /* istanbul ignore next */
+    private async getAppointments(user: User, pins) {
         // add value, cuz SQL cant process empty list
         if (pins.length === 0) {
             pins.push('_');
