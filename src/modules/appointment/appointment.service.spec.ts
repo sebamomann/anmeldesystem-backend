@@ -15,7 +15,6 @@ import {PasswordChange} from '../user/password-change/password-change.entity';
 import {EmailChange} from '../user/email-change/email-change.entity';
 import {MAILER_OPTIONS} from '@nest-modules/mailer/dist/constants/mailer-options.constant';
 import {MailerService} from '@nest-modules/mailer';
-import {Enrollment} from '../enrollment/enrollment.entity';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
@@ -24,6 +23,7 @@ import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {AppointmentGateway} from './appointment.gateway';
 import {Session} from '../user/session.entity';
+import {Enrollment} from '../enrollment/enrollment.entity';
 
 const crypto = require('crypto');
 
@@ -273,253 +273,528 @@ describe('AppointmentService', () => {
         });
     });
 
-    describe('UTIL - find appointment', () => {
+    describe('* find appointment', () => {
         describe('* by link', () => {
+            it('* successful should return appointment object', async () => {
+                const __given_link = 'link';
 
+                const __existing_appointment = new Appointment();
+                __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                __existing_appointment.link = __given_link;
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                const __expected = __existing_appointment;
+                __expected.reference = [];
+
+                const __actual = await appointmentService.findByLink(__given_link);
+                expect(__actual).toEqual(__expected);
+            });
+
+            describe('* failure should return error', () => {
+                it('* appointment not found', async () => {
+                    const __given_link = 'link';
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    appointmentService.findByLink(__given_link)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
+                        })
+                        .catch((err) => {
+                            expect(err).toBeInstanceOf(EntityNotFoundException);
+                            expect(err.data).toBe('appointment');
+                        });
+                });
+            });
         });
     });
 
     describe('* get appointment', () => {
-        describe('* should return entity if successful', () => {
-            it('successful', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = false;
+        describe('* should return appointment object if successful', () => {
+            it('* having no reference to the appointment', async () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_link = 'link';
+                const __given_permissions = {};
+                const __given_slim = false;
 
-                const result = new Appointment();
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
+                const __existing_creator = new User();
+                __existing_creator.username = 'creator';
 
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+                const __existing_appointment = new Appointment();
+                __existing_appointment.creator = __existing_creator;
 
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(typeof actual).toBe('object');
+                appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                expect(__actual).toBe(__existing_appointment);
             });
 
-            it('successful - as creator should include "iat" and "lud"', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = false;
+            describe('iat and lud inclusion', () => {
+                it('* being creator should include', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_permissions = {};
+                    const __given_slim = false;
 
-                const result = new Appointment();
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                    __existing_appointment.creator = __given_user;
+                    __existing_appointment.lud = new Date(Date.now());
+                    __existing_appointment.iat = new Date(Date.now());
 
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(true);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+                    appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
 
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(actual).toHaveProperty('iat');
-                expect(actual).toHaveProperty('lud');
-            });
+                    const __expected = {...__existing_appointment};
+                    __expected.reference = ['CREATOR'];
 
-            it('successful - as !creator should !include "iat" and "lud"', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = false;
+                    const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
 
-                const result = new Appointment();
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
+                    expect(__actual).toEqual(__expected);
+                });
 
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+                it('* not being creator should not include', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_permissions = {};
+                    const __given_slim = false;
 
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(actual).not.toHaveProperty('iat');
-                expect(actual).not.toHaveProperty('lud');
-            });
+                    const __existing_creator = new User();
+                    __existing_creator.username = 'creator';
 
-            it('successful - !hidden', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = false;
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.lud = new Date(Date.now());
+                    __existing_appointment.iat = new Date(Date.now());
 
-                const result = new Appointment();
-                result.hidden = false;
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
+                    appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
 
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+                    const __expected = {...__existing_appointment};
+                    delete __expected.iat;
+                    delete __expected.lud;
+                    __expected.reference = [];
 
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(typeof actual).toBe('object');
-            });
+                    const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
 
-            it('successful - hidden and !(creator || admin) should have empty enrollments', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = false;
-
-                const result = new Appointment();
-                result.hidden = true;
-                result.enrollments = [new Enrollment(), new Enrollment()];
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
-
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(actual.enrollments).toEqual([]);
-            });
-
-            it('successful - hidden and !(creator || admin) should have enrollments when permission correct', async () => {
-                const user = new User();
-                const link = 'link';
-                let permissions = {};
-                const slim = false;
-
-                const result = new Appointment();
-                result.hidden = true;
-                const enrollment = new Enrollment();
-                enrollment.id = '1';
-                result.enrollments = [enrollment, new Enrollment()];
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
-
-                const token = crypto.createHash('sha256')
-                    .update(enrollment.id + process.env.SALT_ENROLLMENT)
-                    .digest('hex');
-
-                permissions = {'perm1': enrollment.id, 'token1': token};
-
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(actual.enrollments).toHaveLength(1);
-            });
-
-            it('successful - hidden and creator should enrollments', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = false;
-
-                const result = new Appointment();
-                result.hidden = true;
-                result.enrollments = [new Enrollment(), new Enrollment()];
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
-
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(true);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(actual.enrollments).toHaveLength(2);
-            });
-
-            it('successful - hidden and admin should enrollments', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = false;
-
-                const result = new Appointment();
-                result.hidden = true;
-                result.enrollments = [new Enrollment(), new Enrollment()];
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
-
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(true);
-
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(actual.enrollments).toHaveLength(2);
-            });
-
-            it('successful - slim should rm files and enrollments', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = true;
-
-                const result = new Appointment();
-                result.enrollments = [];
-                result.files = [];
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
-
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(true);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(true);
-
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(actual).not.toHaveProperty('files');
-                expect(actual).not.toHaveProperty('enrollments');
-            });
-
-            it('successful - administrators should just have attributes "name" and "username"', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = false;
-
-                const result = new Appointment();
-                const administrator = new User();
-                administrator.username = 'username';
-                administrator.name = 'name';
-                administrator.mail = 'admin@example.com';
-                result.administrators = [administrator];
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
-
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(actual.administrators[0]).toMatchObject({
-                    name: administrator.name,
-                    username: administrator.username
+                    expect(__actual).toEqual(__expected);
                 });
             });
 
-            it('successful - enrollment !by creator replaced by "isCreator: false"', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = false;
+            describe('* hidden appointment', () => {
+                it('* !(creator || admin) and no permissions should have empty enrollment list', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_permissions = {};
+                    const __given_slim = false;
 
-                const result = new Appointment();
-                const enrollment = new Enrollment();
-                result.enrollments = [enrollment];
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
+                    const __existing_creator = new User();
+                    __existing_creator.username = 'creator';
 
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                    __existing_appointment.hidden = true;
+                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.enrollments = [new Enrollment(), new Enrollment()];
 
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(actual.enrollments[0]).toHaveProperty('createdByUser', false);
+                    appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                    const __expected = {...__existing_appointment};
+                    __expected.enrollments = [];
+
+                    const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                    expect(__actual).toEqual(__expected);
+                });
+
+                describe('* !(creator || admin) but correct permissions should have !empty enrollment list', () => {
+                    it('* one valid permission', async () => {
+                        const __given_user = new User();
+                        __given_user.username = 'username';
+                        const __given_link = 'link';
+                        const __given_slim = false;
+
+                        const __existing_creator = new User();
+                        __existing_creator.username = 'creator';
+
+                        const __existing_appointment = new Appointment();
+                        __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                        __existing_appointment.hidden = true;
+                        __existing_appointment.creator = __existing_creator;
+
+                        const __existing_enrollment_perm = new Enrollment();
+                        __existing_enrollment_perm.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
+                        __existing_enrollment_perm.name = 'owning user';
+
+                        const __existing_enrollment_no_perm = new Enrollment();
+                        __existing_enrollment_no_perm.id = '507b1d1a-1f03-4927-bfad-babfa90ca6a6';
+                        __existing_enrollment_no_perm.name = 'not owning user';
+
+                        __existing_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_no_perm];
+
+                        const token = crypto.createHash('sha256')
+                            .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
+                            .digest('hex');
+
+                        const __given_permissions = {perm1: __existing_enrollment_perm.id, token};
+
+                        appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                        const __expected = {...__existing_appointment};
+                        __expected.enrollments = [__existing_enrollment_perm];
+
+                        const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                        expect(__actual).toEqual(__expected);
+                    });
+
+                    it('* two valid permissions', async () => {
+                        const __given_user = new User();
+                        __given_user.username = 'username';
+                        const __given_link = 'link';
+                        const __given_slim = false;
+
+                        const __existing_creator = new User();
+                        __existing_creator.username = 'creator';
+
+                        const __existing_appointment = new Appointment();
+                        __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                        __existing_appointment.hidden = true;
+                        __existing_appointment.creator = __existing_creator;
+
+                        const __existing_enrollment_perm = new Enrollment();
+                        __existing_enrollment_perm.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
+                        __existing_enrollment_perm.name = 'owning user';
+
+                        const __existing_enrollment_perm_2 = new Enrollment();
+                        __existing_enrollment_perm_2.id = '507b1d1a-1f03-4927-bfad-babfa90ca6a6';
+                        __existing_enrollment_perm_2.name = 'not owning user';
+
+                        __existing_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
+
+                        const token = crypto.createHash('sha256')
+                            .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
+                            .digest('hex');
+
+                        const token_2 = crypto.createHash('sha256')
+                            .update(__existing_enrollment_perm_2.id + process.env.SALT_ENROLLMENT)
+                            .digest('hex');
+
+                        const __given_permissions = {
+                            perm1: __existing_enrollment_perm.id,
+                            token1: token,
+                            perm2: __existing_enrollment_perm_2.id,
+                            token2: token_2
+                        };
+
+                        appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                        const __expected = {...__existing_appointment};
+                        __expected.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
+
+                        const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                        expect(__actual).toEqual(__expected);
+                    });
+
+                    describe('* one valid and one invalid permission', () => {
+                        it('* invalid token', async () => {
+                            const __given_user = new User();
+                            __given_user.username = 'username';
+                            const __given_link = 'link';
+                            const __given_slim = false;
+
+                            const __existing_creator = new User();
+                            __existing_creator.username = 'creator';
+
+                            const __existing_appointment = new Appointment();
+                            __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                            __existing_appointment.hidden = true;
+                            __existing_appointment.creator = __existing_creator;
+
+                            const __existing_enrollment_perm = new Enrollment();
+                            __existing_enrollment_perm.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
+                            __existing_enrollment_perm.name = 'owning user';
+
+                            const __existing_enrollment_perm_2 = new Enrollment();
+                            __existing_enrollment_perm_2.id = '507b1d1a-1f03-4927-bfad-babfa90ca6a6';
+                            __existing_enrollment_perm_2.name = 'not owning user';
+
+                            __existing_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
+
+                            const token = crypto.createHash('sha256')
+                                .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
+                                .digest('hex');
+
+                            const token_2 = 'INVALID_TOKEN';
+
+                            const __given_permissions = {
+                                perm1: __existing_enrollment_perm.id,
+                                token1: token,
+                                perm2: __existing_enrollment_perm_2.id,
+                                token2: token_2
+                            };
+
+                            appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                            const __expected = {...__existing_appointment};
+                            __expected.enrollments = [__existing_enrollment_perm];
+
+                            const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                            expect(__actual).toEqual(__expected);
+                        });
+
+                        it('* non existing enrollment (id) but correct crresponding token', async () => {
+                            const __given_user = new User();
+                            __given_user.username = 'username';
+                            const __given_link = 'link';
+                            const __given_slim = false;
+
+                            const __existing_creator = new User();
+                            __existing_creator.username = 'creator';
+
+                            const __existing_appointment = new Appointment();
+                            __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                            __existing_appointment.hidden = true;
+                            __existing_appointment.creator = __existing_creator;
+
+                            const __existing_enrollment_perm = new Enrollment();
+                            __existing_enrollment_perm.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
+                            __existing_enrollment_perm.name = 'owning user';
+
+                            const __existing_enrollment_perm_2 = new Enrollment();
+                            __existing_enrollment_perm_2.id = '507b1d1a-1f03-4927-bfad-babfa90ca6a6';
+                            __existing_enrollment_perm_2.name = 'not owning user';
+
+                            __existing_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
+
+                            const token = crypto.createHash('sha256')
+                                .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
+                                .digest('hex');
+
+                            const fakeId = 'NON_EXISTING_ID';
+
+                            const token_2 = crypto.createHash('sha256')
+                                .update(fakeId + process.env.SALT_ENROLLMENT)
+                                .digest('hex');
+
+                            const __given_permissions = {
+                                perm1: __existing_enrollment_perm.id,
+                                token1: token,
+                                perm2: fakeId,
+                                token2: token_2
+                            };
+
+                            appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                            const __expected = {...__existing_appointment};
+                            __expected.enrollments = [__existing_enrollment_perm];
+
+                            const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                            expect(__actual).toEqual(__expected);
+                        });
+                    });
+                });
+
+                it('* creator should see all enrollments', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_permissions = {};
+                    const __given_slim = false;
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                    __existing_appointment.hidden = true;
+                    __existing_appointment.creator = __given_user;
+                    __existing_appointment.enrollments = [new Enrollment(), new Enrollment()];
+
+                    appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                    const __expected = {...__existing_appointment};
+                    __expected.reference = ['CREATOR'];
+
+                    const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                    expect(__actual).toEqual(__expected);
+                });
+
+                it('*admin should see all enrollments', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_link = 'link';
+                    const __given_permissions = {};
+                    const __given_slim = false;
+
+                    const __existing_creator = new User();
+                    __existing_creator.username = 'creator';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                    __existing_appointment.hidden = true;
+                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.administrators = [__given_user];
+                    __existing_appointment.enrollments = [new Enrollment(), new Enrollment()];
+
+                    appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                    const __expected = {...__existing_appointment};
+                    __expected.reference = ['ADMIN'];
+
+                    const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                    expect(__actual).toEqual(__expected);
+                });
             });
 
-            it('successful - enrollment by creator replaced by "isCreator: true"', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = false;
+            it('* slim should remove files and enrollments', async () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_link = 'link';
+                const __given_permissions = {};
+                const __given_slim = true;
 
-                const result = new Appointment();
-                const enroller = new User();
-                const enrollment = new Enrollment();
-                enrollment.creator = enroller;
-                result.enrollments = [enrollment];
-                appointmentRepositoryMock.findOne.mockReturnValue(result);
+                const __existing_creator = new User();
+                __existing_creator.username = 'creator';
 
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+                const __existing_appointment = new Appointment();
+                __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                __existing_appointment.hidden = false;
+                __existing_appointment.creator = __existing_creator;
+                __existing_appointment.enrollments = [new Enrollment(), new Enrollment()];
+                __existing_appointment.files = [new File(), new File()];
 
-                const actual = await appointmentService.get(user, link, permissions, slim);
-                expect(actual.enrollments[0]).toHaveProperty('createdByUser', true);
+                appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                const __expected = {...__existing_appointment};
+                delete __expected.enrollments;
+                delete __expected.files;
+
+                const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                expect(__actual).toEqual(__expected);
+            });
+
+            it('* administrators should just have attributes "name" and "username"', async () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_link = 'link';
+                const __given_permissions = {};
+                const __given_slim = false;
+
+                const __existing_creator = new User();
+                __existing_creator.username = 'creator';
+
+                const __existing_admin = new User();
+                __existing_admin.id = 'f48de1b3-6900-4f0e-939b-78fec185b615';
+                __existing_admin.username = 'admin';
+                __existing_admin.name = 'Administrator';
+
+                const __existing_appointment = new Appointment();
+                __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                __existing_appointment.hidden = false;
+                __existing_appointment.creator = __existing_creator;
+                __existing_appointment.administrators = [__existing_admin];
+
+                appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                const __expected = {...__existing_appointment};
+                const __expected_admin = new User();
+                __expected_admin.name = __existing_admin.name;
+                __expected_admin.username = __existing_admin.username;
+                __expected.administrators = [__expected_admin];
+
+                const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                expect(__actual).toEqual(__expected);
+            });
+
+            it('* enrollment !created by any user should have attribute "isCreator: false"', async () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_link = 'link';
+                const __given_slim = false;
+                const __given_permissions = {};
+
+                const __existing_creator = new User();
+                __existing_creator.username = 'creator';
+
+                const __existing_appointment = new Appointment();
+                __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                __existing_appointment.hidden = false;
+                __existing_appointment.creator = __existing_creator;
+
+                const __existing_enrollment = new Enrollment();
+                __existing_enrollment.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
+                __existing_enrollment.name = 'owning user';
+
+                __existing_appointment.enrollments = [__existing_enrollment];
+
+                appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                const __expected_enrollment = {...__existing_enrollment};
+                __expected_enrollment.createdByUser = false;
+
+                const __expected = {...__existing_appointment};
+                __expected.enrollments = [__expected_enrollment];
+
+                const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                expect(__actual).toEqual(__expected);
+            });
+
+            it('* enrollment created by any user should have attribute "isCreator: true"', async () => {
+                const __given_user = new User();
+                __given_user.id = '7f4147ed-495a-4971-a970-8e5f86795a50';
+                __given_user.username = 'username';
+                const __given_link = 'link';
+                const __given_slim = false;
+                const __given_permissions = {};
+
+                const __existing_enrollment_creator = new User();
+                __existing_enrollment_creator.id = '96511a3c-cace-4a67-ad0c-436a37038c38';
+                __existing_enrollment_creator.username = 'enrollment_creator';
+
+                const __existing_creator = new User();
+                __existing_creator.username = 'creator';
+
+                const __existing_appointment = new Appointment();
+                __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                __existing_appointment.hidden = false;
+                __existing_appointment.creator = __existing_creator;
+
+                const __existing_enrollment = new Enrollment();
+                __existing_enrollment.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
+                __existing_enrollment.name = 'owning user';
+                __existing_enrollment.creator = __existing_enrollment_creator;
+
+                __existing_appointment.enrollments = [__existing_enrollment];
+
+                appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
+
+                const __expected_enrollment = {...__existing_enrollment};
+                __expected_enrollment.createdByUser = true;
+                delete __expected_enrollment.creator;
+
+                const __expected = {...__existing_appointment};
+                __expected.enrollments = [__expected_enrollment];
+
+                const __actual = await appointmentService.get(__given_user, __given_link, __given_permissions, __given_slim);
+                expect(__actual).toEqual(__expected);
             });
         });
-        describe('* should return error if failed', () => {
-            it('appointment not found', async () => {
-                const user = new User();
-                const link = 'link';
-                const permissions = {};
-                const slim = false;
 
-                appointmentRepositoryMock.findOne.mockReturnValue(undefined);
+        describe('* failure should return error', () => {
+            it('* appointment not found', async () => {
+                const __given_user = new User();
+                __given_user.id = '7f4147ed-495a-4971-a970-8e5f86795a50';
+                __given_user.username = 'username';
+                const __given_link = 'link';
+                const __given_slim = false;
+                const __given_permissions = {};
+
+                const __existing_appointment = undefined;
+
+                appointmentRepositoryMock.findOne.mockReturnValue(__existing_appointment);
 
                 appointmentService
-                    .get(user, link, permissions, slim)
+                    .get(__given_user, __given_link, __given_permissions, __given_slim)
                     .then(() => {
                         throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
                     })
@@ -532,158 +807,185 @@ describe('AppointmentService', () => {
     });
 
     describe('* create appointment', () => {
-        describe('* should return created entity if successful', () => {
-            describe('* link', () => {
-                it('valid link - return given link', async () => {
-                    const appointment = new Appointment();
-                    appointment.link = 'unusedLink';
+        describe('* successful should return created entity', () => {
+            describe('* link handling', () => {
+                it('* link specified', async () => {
+                    const __given_appointment = new Appointment();
+                    __given_appointment.link = 'unusedLink';
 
-                    const user = new User();
+                    const __given_user = new User();
+                    __given_user.username = 'username';
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                    appointmentRepositoryMock.save.mockImplementation((val) => val);
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // cant find appointment with specific link
+                    appointmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
 
-                    const actual = await appointmentService.create(appointment, user);
-                    expect(actual.link).toEqual(appointment.link);
+                    const __actual = await appointmentService.create(__given_appointment, __given_user);
+                    expect(__actual.link).toEqual(__given_appointment.link);
                 });
 
-                it('empty link - return autogenerated', async () => {
-                    const appointment = new Appointment();
-                    appointment.link = '';
-                    const user = new User();
+                describe('* link not specified', () => {
+                    it('* empty', async () => {
+                        const __given_appointment = new Appointment();
+                        __given_appointment.link = '';
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                    appointmentRepositoryMock.save.mockImplementation((val) => val);
+                        const __given_user = new User();
+                        __given_user.username = 'username';
 
-                    const actual = await appointmentService.create(appointment, user);
-                    expect(actual.link).toMatch(/^[A-Za-z0-9]{5}$/);
-                });
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // cant find appointment with specific link
+                        appointmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
 
-                it('no link - return autogenerated', async () => {
-                    const appointment = new Appointment();
-                    appointment.link = undefined;
-                    const user = new User();
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                    appointmentRepositoryMock.save.mockImplementation((val) => val);
-
-                    const actual = await appointmentService.create(appointment, user);
-                    expect(actual.link).toMatch(/^[A-Za-z0-9]{5}$/);
-                });
-            });
-
-            it('> 0 maxEnrollments', async () => {
-                const appointment = new Appointment();
-                appointment.maxEnrollments = 1;
-                const user = new User();
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                appointmentRepositoryMock.save.mockImplementation((val) => val);
-
-                const actual = await appointmentService.create(appointment, user);
-                expect(actual.maxEnrollments).toEqual(1);
-            });
-
-            it('0 maxEnrollments - replace with null', async () => {
-                const appointment = new Appointment();
-                appointment.maxEnrollments = 0;
-                const user = new User();
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                appointmentRepositoryMock.save.mockImplementation((val) => val);
-
-                const actual = await appointmentService.create(appointment, user);
-                expect(actual.maxEnrollments).toEqual(null);
-            });
-
-            describe('* handle additions', () => {
-                it('add additions correctly (2)', async () => {
-                    const appointment = new Appointment();
-                    const addition1 = new Addition();
-                    addition1.name = 'addition1';
-                    const addition2 = new Addition();
-                    addition2.name = 'addition2';
-                    appointment.additions = [
-                        addition1, addition2
-                    ];
-                    const user = new User();
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                    additionRepositoryMock.save.mockImplementation((val) => {
-                        val.id = '' + Date.now();
-                        return val;
+                        const __actual = await appointmentService.create(__given_appointment, __given_user);
+                        expect(__actual.link).toMatch(/^[A-Za-z0-9]{5}$/);
                     });
+
+                    it('* undefined', async () => {
+                        const __given_appointment = new Appointment();
+
+                        const __given_user = new User();
+                        __given_user.username = 'username';
+
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // cant find appointment with specific link
+                        appointmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
+
+                        const __actual = await appointmentService.create(__given_appointment, __given_user);
+                        expect(__actual.link).toMatch(/^[A-Za-z0-9]{5}$/);
+                    });
+                });
+            });
+
+            describe('* enrollment limit handling', () => {
+                it('* valid limit set', async () => {
+                    const __given_appointment = new Appointment();
+                    __given_appointment.maxEnrollments = 10;
+
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // cant find appointment with specific link
+                    appointmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
+
+                    const __actual = await appointmentService.create(__given_appointment, __given_user);
+                    expect(__actual.maxEnrollments).toEqual(__given_appointment.maxEnrollments);
+                });
+
+                describe('* no limit should set limit to null', () => {
+                    it('* limit < min boundary', async () => {
+                        const __given_appointment = new Appointment();
+                        __given_appointment.maxEnrollments = 0;
+
+                        const __given_user = new User();
+                        __given_user.username = 'username';
+
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // cant find appointment with specific link
+                        appointmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
+
+                        const __actual = await appointmentService.create(__given_appointment, __given_user);
+                        expect(__actual.maxEnrollments).toEqual(null);
+                    });
+
+                    it('* limit undefined', async () => {
+                        const __given_appointment = new Appointment();
+
+                        const __given_user = new User();
+                        __given_user.username = 'username';
+
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // cant find appointment with specific link
+                        appointmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
+
+                        const __actual = await appointmentService.create(__given_appointment, __given_user);
+                        expect(__actual.maxEnrollments).toEqual(null);
+                    });
+                });
+            });
+
+            describe('* addition handling', () => {
+                it('* add (2) additions', async () => {
+                    const __given_addition_1 = new Addition();
+                    __given_addition_1.name = 'addition1';
+                    const __given_addition_2 = new Addition();
+                    __given_addition_2.name = 'addition2';
+
+                    const __given_appointment = new Appointment();
+                    __given_appointment.additions = [
+                        __given_addition_1,
+                        __given_addition_2
+                    ];
+
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // link not in use
                     appointmentRepositoryMock.save.mockImplementation((val) => val);
 
-                    const actual = await appointmentService.create(appointment, user);
-                    expect(actual.additions).toHaveLength(2);
-                    expect(actual.additions).toEqual(
-                        expect.arrayContaining([
-                            expect.objectContaining({name: addition1.name, id: expect.stringMatching(/.+/)}),
-                            expect.objectContaining({name: addition2.name, id: expect.stringMatching(/.+/)}),
-                        ])
-                    );
+                    additionRepositoryMock.save.mockImplementation((val) => val);
+
+                    const __actual = await appointmentService.create(__given_appointment, __given_user);
+                    expect(__actual.additions).toHaveLength(2);
+                    expect(__actual.additions.sort()).toEqual([__given_addition_1, __given_addition_2].sort());
                 });
 
                 it('add additions correctly (2) - remove duplicates (1)', async () => {
-                    const appointment = new Appointment();
-                    const addition1 = new Addition();
-                    addition1.name = 'addition1';
-                    appointment.additions = [
-                        addition1, addition1
-                    ];
-                    const user = new User();
+                    const __given_addition_1 = new Addition();
+                    __given_addition_1.name = 'addition';
+                    const __given_addition_2 = new Addition();
+                    __given_addition_2.name = 'addition';
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                    additionRepositoryMock.save.mockImplementation((val) => {
-                        val.id = '' + Date.now();
-                        return val;
-                    });
+                    const __given_appointment = new Appointment();
+                    __given_appointment.additions = [
+                        __given_addition_1,
+                        __given_addition_2
+                    ];
+
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // link not in use
                     appointmentRepositoryMock.save.mockImplementation((val) => val);
 
-                    const actual = await appointmentService.create(appointment, user);
-                    expect(actual.additions).toHaveLength(1);
-                    expect(actual.additions).toEqual(
-                        expect.arrayContaining([
-                            expect.objectContaining({name: addition1.name, id: expect.stringMatching(/.+/)}),
-                        ])
-                    );
+                    additionRepositoryMock.save.mockImplementation((val) => val);
+
+                    const __actual = await appointmentService.create(__given_appointment, __given_user);
+                    expect(__actual.additions).toHaveLength(1);
+                    expect(__actual.additions).toEqual([__given_addition_1]);
                 });
             });
         });
 
-        describe('* should return error if failed', () => {
-            it('duplicate value (link)', async () => {
-                const appointment = new Appointment();
-                appointment.link = 'usedLink';
+        describe('* failure should return error', () => {
+            it('* specified link in use', async () => {
+                const __existing_appointment = new Appointment();
+                __existing_appointment.link = 'link';
 
-                const user = new User();
+                const __given_appointment = new Appointment();
+                __given_appointment.link = __existing_appointment.link;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(new Appointment());
-                appointmentRepositoryMock.save.mockImplementation((val) => val);
+                const __given_user = new User();
+                __given_user.username = 'username';
 
-                appointmentService
-                    .create(appointment, user)
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                appointmentService.create(__given_appointment, __given_user)
                     .then(() => {
                         throw new Error('I have failed you, Anakin. Should have returned DuplicateValueException');
                     })
                     .catch((err) => {
                         expect(err).toBeInstanceOf(DuplicateValueException);
+                        expect(err.data).toEqual(['link']);
                     });
             });
 
-            it('deadline after date', async () => {
-                const appointment = new Appointment();
-                appointment.date = new Date(Date.now() + (3 * 60 * 60 * 2000));
-                appointment.deadline = new Date(Date.now() + (4 * 60 * 60 * 2000));
+            it('* deadline date after actual date', async () => {
+                const __given_appointment = new Appointment();
+                __given_appointment.date = new Date(Date.now() + (3 * 60 * 60 * 2000));
+                __given_appointment.deadline = new Date(Date.now() + (4 * 60 * 60 * 2000));
 
-                const user = new User();
+                const __given_user = new User();
+                __given_user.username = 'username';
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(new Appointment());
-                appointmentRepositoryMock.save.mockImplementation((val) => val);
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
                 appointmentService
-                    .create(appointment, user)
+                    .create(__given_appointment, __given_user)
                     .then(() => {
                         throw new Error('I have failed you, Anakin. Should have returned InvalidValuesException');
                     })
@@ -695,323 +997,323 @@ describe('AppointmentService', () => {
         });
     });
 
-    describe('* update appointment', () => {
-        describe('* should return updated entity if successful', () => {
-            describe('* update additions', () => {
-                it('add one', async () => {
-                    const user = new User();
-                    const appointment = new Appointment();
-                    appointment.link = 'link';
-                    const existingAddition1 = new Addition();
-                    existingAddition1.id = 'id1';
-                    existingAddition1.name = 'addition1';
-                    const existingAddition2 = new Addition();
-                    existingAddition2.id = 'id2';
-                    existingAddition2.name = 'addition2';
-
-                    appointment.additions = [existingAddition1, existingAddition2];
-
-                    const extraAddition = {name: 'addition3'};
-                    const toChange = {additions: [existingAddition1, existingAddition2, extraAddition]};
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
-                    additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition1));
-                    additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition2));
-                    additionRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                    additionRepositoryMock.save.mockImplementation((val) => {
-                        val.id = '' + Date.now();
-                        return val;
-                    });
-                    appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                    jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                    jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                    const actual = await appointmentService.update(toChange, appointment.link, user);
-                    expect(actual.additions).toHaveLength(3);
-                    expect(actual.additions).toEqual(expect.arrayContaining([
-                            expect.objectContaining({name: existingAddition1.name, id: existingAddition1.id}),
-                            expect.objectContaining({name: existingAddition2.name, id: existingAddition2.id}),
-                            expect.objectContaining({name: extraAddition.name, id: expect.stringMatching(/.+/)}),
-                        ])
-                    );
-                });
-
-                it('add one (name already exists) - should not be added', async () => {
-                    const user = new User();
-                    const appointment = new Appointment();
-                    appointment.link = 'link';
-                    const existingAddition1 = new Addition();
-                    existingAddition1.id = 'id1';
-                    existingAddition1.name = 'addition1';
-                    const existingAddition2 = new Addition();
-                    existingAddition2.id = 'id2';
-                    existingAddition2.name = 'existingAddition';
-
-                    appointment.additions = [existingAddition1, existingAddition2];
-
-                    const extraAddition = {name: 'existingAddition'};
-                    const toChange = {additions: [existingAddition1, existingAddition2, extraAddition]};
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
-                    additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition1));
-                    additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition2));
-                    additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition2));
-                    additionRepositoryMock.save.mockImplementation((val) => {
-                        val.id = '' + Date.now();
-                        return val;
-                    });
-                    appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                    jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                    jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                    const actual = await appointmentService.update(toChange, appointment.link, user);
-                    expect(actual.additions).toHaveLength(2);
-                    expect(actual.additions).toEqual(expect.arrayContaining([
-                            expect.objectContaining({name: existingAddition1.name, id: existingAddition1.id}),
-                            expect.objectContaining({name: existingAddition2.name, id: existingAddition2.id}),
-                        ])
-                    );
-                });
-
-                it('remove one', async () => {
-                    const user = new User();
-                    const appointment = new Appointment();
-                    appointment.link = 'link';
-                    const existingAddition1 = new Addition();
-                    existingAddition1.id = 'id1';
-                    existingAddition1.name = 'addition1';
-                    const existingAddition2 = new Addition();
-                    existingAddition2.id = 'id2';
-                    existingAddition2.name = 'addition2';
-
-                    appointment.additions = [existingAddition1, existingAddition2];
-
-                    const toChange = {additions: [existingAddition1]};
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
-                    additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition1));
-                    additionRepositoryMock.save.mockImplementation((val) => {
-                        val.id = '' + Date.now();
-                        return val;
-                    });
-                    appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                    jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                    jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                    const actual = await appointmentService.update(toChange, appointment.link, user);
-                    expect(actual.additions).toHaveLength(1);
-                    expect(actual.additions).toEqual(expect.arrayContaining([
-                            expect.objectContaining({
-                                name: existingAddition1.name,
-                                id: existingAddition1.id
-                            }),
-                        ])
-                    );
-                });
-            });
-
-            it('* update link', async () => {
-                const user = new User();
-                const appointment = new Appointment();
-                appointment.link = 'link';
-
-                const toChange = {link: 'newLink'};
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                const actual = await appointmentService.update(toChange, appointment.link, user);
-                expect(actual.link).toEqual(toChange.link);
-            });
-
-            it('* update date', async () => {
-                const user = new User();
-                const appointment = new Appointment();
-                appointment.date = new Date(Date.now() + (3 * 60 * 60 * 1000));
-                appointment.deadline = new Date(Date.now() + (2 * 60 * 60 * 1000));
-
-                const toChange = {date: new Date(Date.now() + (5 * 60 * 60 * 1000))};
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
-                appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                const actual = await appointmentService.update(toChange, appointment.link, user);
-                expect(actual.date).toEqual(toChange.date);
-            });
-
-            it('* update deadline', async () => {
-                const user = new User();
-                const appointment = new Appointment();
-                appointment.date = new Date(Date.now() + (3 * 60 * 60 * 1000));
-                appointment.deadline = new Date(Date.now() + (2 * 60 * 60 * 1000));
-
-                const toChange = {deadline: new Date(Date.now() + (2.5 * 60 * 60 * 1000))};
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
-                appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                const actual = await appointmentService.update(toChange, appointment.link, user);
-                expect(actual.deadline).toEqual(toChange.deadline);
-            });
-
-            it('* update title', async () => {
-                const user = new User();
-                const appointment = new Appointment();
-                appointment.title = 'currentTitle';
-
-                const toChange = {title: 'newTitle'};
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
-                appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                const actual = await appointmentService.update(toChange, appointment.link, user);
-                expect(actual.title).toEqual(toChange.title);
-            });
-
-            it('* update description', async () => {
-                const user = new User();
-                const appointment = new Appointment();
-                appointment.description = 'currentDescription';
-
-                const toChange = {description: 'newDescription'};
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
-                appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
-                jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
-
-                const actual = await appointmentService.update(toChange, appointment.link, user);
-                expect(actual.description).toEqual(toChange.description);
-            });
-        });
-
-        describe('* should return error if failed', () => {
-            it('appointment not found', async () => {
-                const user = new User();
-                const appointment = new Appointment();
-                appointment.link = 'currentTitle';
-
-                const toChange = {title: 'newTitle'};
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-
-                appointmentService
-                    .update(toChange, appointment.link, user)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(EntityNotFoundException);
-                        expect(err.data).toBe('appointment');
-                    });
-            });
-
-            it('no permissions', async () => {
-                const user = new User();
-                user.username = 'username';
-                const appointment = new Appointment();
-                appointment.link = 'currentTitle';
-                const creator = new User();
-                user.username = 'secondUsername';
-                appointment.creator = creator;
-
-                const toChange = {title: 'newTitle'};
-
-                appointmentRepositoryMock.findOne.mockReturnValue(appointment);
-
-                appointmentService
-                    .update(toChange, appointment.link, user)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an InsufficientPermissionsException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(InsufficientPermissionsException);
-                    });
-            });
-
-            it('* link in use', async () => {
-                const user = new User();
-                const appointment = new Appointment();
-                appointment.link = 'link';
-
-                const toChange = {link: 'newLink'};
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-
-                appointmentService
-                    .update(toChange, appointment.link, user)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an DuplicateValueException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(DuplicateValueException);
-                    });
-            });
-
-            it('* date before deadline', async () => {
-                const user = new User();
-                const appointment = new Appointment();
-                appointment.date = new Date(Date.now() + (4 * 60 * 60 * 1000));
-                appointment.deadline = new Date(Date.now() + (3 * 60 * 60 * 1000));
-
-                const toChange = {date: new Date(Date.now() + (2 * 60 * 60 * 1000))};
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
-
-                appointmentService
-                    .update(toChange, appointment.link, user)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(InvalidValuesException);
-                        expect(err.data).toEqual(['date']);
-                    });
-            });
-
-            it('* deadline after date', async () => {
-                const user = new User();
-                const appointment = new Appointment();
-                appointment.date = new Date(Date.now() + (4 * 60 * 60 * 1000));
-                appointment.deadline = new Date(Date.now() + (3 * 60 * 60 * 1000));
-
-                const toChange = {deadline: new Date(Date.now() + (5 * 60 * 60 * 1000))};
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
-
-                appointmentService
-                    .update(toChange, appointment.link, user)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(InvalidValuesException);
-                        expect(err.data).toEqual(['deadline']);
-                    });
-            });
-        });
-    });
+    // describe('* update appointment', () => {
+    //     describe('* should return updated entity if successful', () => {
+    //         describe('* update additions', () => {
+    //             it('add one', async () => {
+    //                 const user = new User();
+    //                 const appointment = new Appointment();
+    //                 appointment.link = 'link';
+    //                 const existingAddition1 = new Addition();
+    //                 existingAddition1.id = 'id1';
+    //                 existingAddition1.name = 'addition1';
+    //                 const existingAddition2 = new Addition();
+    //                 existingAddition2.id = 'id2';
+    //                 existingAddition2.name = 'addition2';
+    //
+    //                 appointment.additions = [existingAddition1, existingAddition2];
+    //
+    //                 const extraAddition = {name: 'addition3'};
+    //                 const toChange = {additions: [existingAddition1, existingAddition2, extraAddition]};
+    //
+    //                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
+    //                 additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition1));
+    //                 additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition2));
+    //                 additionRepositoryMock.findOne.mockReturnValueOnce(undefined);
+    //                 additionRepositoryMock.save.mockImplementation((val) => {
+    //                     val.id = '' + Date.now();
+    //                     return val;
+    //                 });
+    //                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+    //                 jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+    //                 jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+    //
+    //                 const actual = await appointmentService.update(toChange, appointment.link, user);
+    //                 expect(actual.additions).toHaveLength(3);
+    //                 expect(actual.additions).toEqual(expect.arrayContaining([
+    //                         expect.objectContaining({name: existingAddition1.name, id: existingAddition1.id}),
+    //                         expect.objectContaining({name: existingAddition2.name, id: existingAddition2.id}),
+    //                         expect.objectContaining({name: extraAddition.name, id: expect.stringMatching(/.+/)}),
+    //                     ])
+    //                 );
+    //             });
+    //
+    //             it('add one (name already exists) - should not be added', async () => {
+    //                 const user = new User();
+    //                 const appointment = new Appointment();
+    //                 appointment.link = 'link';
+    //                 const existingAddition1 = new Addition();
+    //                 existingAddition1.id = 'id1';
+    //                 existingAddition1.name = 'addition1';
+    //                 const existingAddition2 = new Addition();
+    //                 existingAddition2.id = 'id2';
+    //                 existingAddition2.name = 'existingAddition';
+    //
+    //                 appointment.additions = [existingAddition1, existingAddition2];
+    //
+    //                 const extraAddition = {name: 'existingAddition'};
+    //                 const toChange = {additions: [existingAddition1, existingAddition2, extraAddition]};
+    //
+    //                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
+    //                 additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition1));
+    //                 additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition2));
+    //                 additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition2));
+    //                 additionRepositoryMock.save.mockImplementation((val) => {
+    //                     val.id = '' + Date.now();
+    //                     return val;
+    //                 });
+    //                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+    //                 jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+    //                 jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+    //
+    //                 const actual = await appointmentService.update(toChange, appointment.link, user);
+    //                 expect(actual.additions).toHaveLength(2);
+    //                 expect(actual.additions).toEqual(expect.arrayContaining([
+    //                         expect.objectContaining({name: existingAddition1.name, id: existingAddition1.id}),
+    //                         expect.objectContaining({name: existingAddition2.name, id: existingAddition2.id}),
+    //                     ])
+    //                 );
+    //             });
+    //
+    //             it('remove one', async () => {
+    //                 const user = new User();
+    //                 const appointment = new Appointment();
+    //                 appointment.link = 'link';
+    //                 const existingAddition1 = new Addition();
+    //                 existingAddition1.id = 'id1';
+    //                 existingAddition1.name = 'addition1';
+    //                 const existingAddition2 = new Addition();
+    //                 existingAddition2.id = 'id2';
+    //                 existingAddition2.name = 'addition2';
+    //
+    //                 appointment.additions = [existingAddition1, existingAddition2];
+    //
+    //                 const toChange = {additions: [existingAddition1]};
+    //
+    //                 appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
+    //                 additionRepositoryMock.findOne.mockReturnValueOnce(Promise.resolve(existingAddition1));
+    //                 additionRepositoryMock.save.mockImplementation((val) => {
+    //                     val.id = '' + Date.now();
+    //                     return val;
+    //                 });
+    //                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+    //                 jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+    //                 jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+    //
+    //                 const actual = await appointmentService.update(toChange, appointment.link, user);
+    //                 expect(actual.additions).toHaveLength(1);
+    //                 expect(actual.additions).toEqual(expect.arrayContaining([
+    //                         expect.objectContaining({
+    //                             name: existingAddition1.name,
+    //                             id: existingAddition1.id
+    //                         }),
+    //                     ])
+    //                 );
+    //             });
+    //         });
+    //
+    //         it('* update link', async () => {
+    //             const user = new User();
+    //             const appointment = new Appointment();
+    //             appointment.link = 'link';
+    //
+    //             const toChange = {link: 'newLink'};
+    //
+    //             appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //             jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
+    //             appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+    //             appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+    //             jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+    //             jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+    //
+    //             const actual = await appointmentService.update(toChange, appointment.link, user);
+    //             expect(actual.link).toEqual(toChange.link);
+    //         });
+    //
+    //         it('* update date', async () => {
+    //             const user = new User();
+    //             const appointment = new Appointment();
+    //             appointment.date = new Date(Date.now() + (3 * 60 * 60 * 1000));
+    //             appointment.deadline = new Date(Date.now() + (2 * 60 * 60 * 1000));
+    //
+    //             const toChange = {date: new Date(Date.now() + (5 * 60 * 60 * 1000))};
+    //
+    //             appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //             jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
+    //             appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+    //             jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+    //             jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+    //
+    //             const actual = await appointmentService.update(toChange, appointment.link, user);
+    //             expect(actual.date).toEqual(toChange.date);
+    //         });
+    //
+    //         it('* update deadline', async () => {
+    //             const user = new User();
+    //             const appointment = new Appointment();
+    //             appointment.date = new Date(Date.now() + (3 * 60 * 60 * 1000));
+    //             appointment.deadline = new Date(Date.now() + (2 * 60 * 60 * 1000));
+    //
+    //             const toChange = {deadline: new Date(Date.now() + (2.5 * 60 * 60 * 1000))};
+    //
+    //             appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //             jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
+    //             appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+    //             jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+    //             jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+    //
+    //             const actual = await appointmentService.update(toChange, appointment.link, user);
+    //             expect(actual.deadline).toEqual(toChange.deadline);
+    //         });
+    //
+    //         it('* update title', async () => {
+    //             const user = new User();
+    //             const appointment = new Appointment();
+    //             appointment.title = 'currentTitle';
+    //
+    //             const toChange = {title: 'newTitle'};
+    //
+    //             appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //             jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
+    //             appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+    //             jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+    //             jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+    //
+    //             const actual = await appointmentService.update(toChange, appointment.link, user);
+    //             expect(actual.title).toEqual(toChange.title);
+    //         });
+    //
+    //         it('* update description', async () => {
+    //             const user = new User();
+    //             const appointment = new Appointment();
+    //             appointment.description = 'currentDescription';
+    //
+    //             const toChange = {description: 'newDescription'};
+    //
+    //             appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //             jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
+    //             appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+    //             jest.spyOn(AppointmentService, '_isCreatorOfAppointment').mockReturnValue(false);
+    //             jest.spyOn(AppointmentService, '_isAdministratorOfAppointment').mockReturnValue(false);
+    //
+    //             const actual = await appointmentService.update(toChange, appointment.link, user);
+    //             expect(actual.description).toEqual(toChange.description);
+    //         });
+    //     });
+    //
+    //     describe('* should return error if failed', () => {
+    //         it('appointment not found', async () => {
+    //             const user = new User();
+    //             const appointment = new Appointment();
+    //             appointment.link = 'currentTitle';
+    //
+    //             const toChange = {title: 'newTitle'};
+    //
+    //             appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+    //
+    //             appointmentService
+    //                 .update(toChange, appointment.link, user)
+    //                 .then(() => {
+    //                     throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
+    //                 })
+    //                 .catch((err) => {
+    //                     expect(err).toBeInstanceOf(EntityNotFoundException);
+    //                     expect(err.data).toBe('appointment');
+    //                 });
+    //         });
+    //
+    //         it('no permissions', async () => {
+    //             const user = new User();
+    //             user.username = 'username';
+    //             const appointment = new Appointment();
+    //             appointment.link = 'currentTitle';
+    //             const creator = new User();
+    //             user.username = 'secondUsername';
+    //             appointment.creator = creator;
+    //
+    //             const toChange = {title: 'newTitle'};
+    //
+    //             appointmentRepositoryMock.findOne.mockReturnValue(appointment);
+    //
+    //             appointmentService
+    //                 .update(toChange, appointment.link, user)
+    //                 .then(() => {
+    //                     throw new Error('I have failed you, Anakin. Should have gotten an InsufficientPermissionsException');
+    //                 })
+    //                 .catch((err) => {
+    //                     expect(err).toBeInstanceOf(InsufficientPermissionsException);
+    //                 });
+    //         });
+    //
+    //         it('* link in use', async () => {
+    //             const user = new User();
+    //             const appointment = new Appointment();
+    //             appointment.link = 'link';
+    //
+    //             const toChange = {link: 'newLink'};
+    //
+    //             appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //             jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
+    //             appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //
+    //             appointmentService
+    //                 .update(toChange, appointment.link, user)
+    //                 .then(() => {
+    //                     throw new Error('I have failed you, Anakin. Should have gotten an DuplicateValueException');
+    //                 })
+    //                 .catch((err) => {
+    //                     expect(err).toBeInstanceOf(DuplicateValueException);
+    //                 });
+    //         });
+    //
+    //         it('* date before deadline', async () => {
+    //             const user = new User();
+    //             const appointment = new Appointment();
+    //             appointment.date = new Date(Date.now() + (4 * 60 * 60 * 1000));
+    //             appointment.deadline = new Date(Date.now() + (3 * 60 * 60 * 1000));
+    //
+    //             const toChange = {date: new Date(Date.now() + (2 * 60 * 60 * 1000))};
+    //
+    //             appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //             jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
+    //
+    //             appointmentService
+    //                 .update(toChange, appointment.link, user)
+    //                 .then(() => {
+    //                     throw new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException');
+    //                 })
+    //                 .catch((err) => {
+    //                     expect(err).toBeInstanceOf(InvalidValuesException);
+    //                     expect(err.data).toEqual(['date']);
+    //                 });
+    //         });
+    //
+    //         it('* deadline after date', async () => {
+    //             const user = new User();
+    //             const appointment = new Appointment();
+    //             appointment.date = new Date(Date.now() + (4 * 60 * 60 * 1000));
+    //             appointment.deadline = new Date(Date.now() + (3 * 60 * 60 * 1000));
+    //
+    //             const toChange = {deadline: new Date(Date.now() + (5 * 60 * 60 * 1000))};
+    //
+    //             appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+    //             jest.spyOn(appointmentService, 'isCreatorOrAdministrator').mockReturnValueOnce(Promise.resolve(true));
+    //
+    //             appointmentService
+    //                 .update(toChange, appointment.link, user)
+    //                 .then(() => {
+    //                     throw new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException');
+    //                 })
+    //                 .catch((err) => {
+    //                     expect(err).toBeInstanceOf(InvalidValuesException);
+    //                     expect(err.data).toEqual(['deadline']);
+    //                 });
+    //         });
+    //     });
+    // });
 
     describe('* get Appointments', () => {
         describe('* should return array of entities if successful', () => {

@@ -2,6 +2,7 @@ import {AppointmentService} from './appointment.service';
 import {User} from '../user/user.entity';
 import {Appointment} from './appointment.entity';
 import {Enrollment} from '../enrollment/enrollment.entity';
+import {AppointmentUtil} from './appointment.util';
 
 module.exports = {
     basic: function(appointmentService, appointment) {
@@ -54,7 +55,7 @@ module.exports = {
         }))
         (_appointment);
 
-        if (AppointmentService._isCreatorOfAppointment(_appointment, _user)) {
+        if (AppointmentUtil.isCreatorOfAppointment(_appointment, _user)) {
             creatorObject = (({
                                   iat, lud,
                               }) => ({
@@ -64,8 +65,8 @@ module.exports = {
         }
 
         if (!_appointment.hidden
-            || (AppointmentService._isCreatorOfAppointment(_appointment, _user)
-                || AppointmentService._isAdministratorOfAppointment(_appointment, _user))) {
+            || (AppointmentUtil.isCreatorOfAppointment(_appointment, _user)
+                || AppointmentUtil.isAdministratorOfAppointment(_appointment, _user))) {
             enrollmentsObject = (({
                                       enrollments,
                                   }) => ({

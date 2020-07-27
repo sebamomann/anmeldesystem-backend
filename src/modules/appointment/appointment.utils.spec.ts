@@ -14,7 +14,7 @@ describe('AppointmentUtil', () => {
             const __given_date = new Date();
             const __given_deadline = new Date(__given_date.getTime() - 15 * 60000);
 
-            const __actual = AppointmentUtil._handleDateValidation(__given_date, __given_deadline);
+            const __actual = AppointmentUtil.handleDateValidation(__given_date, __given_deadline);
             expect(__actual).toEqual(__given_date);
         });
 
@@ -23,7 +23,7 @@ describe('AppointmentUtil', () => {
             const __given_deadline = new Date(__given_date.getTime() + 15 * 60000);
 
             try {
-                AppointmentUtil._handleDateValidation(__given_date, __given_deadline);
+                AppointmentUtil.handleDateValidation(__given_date, __given_deadline);
                 done.fail(new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException'));
             } catch (e) {
                 expect(e).toBeInstanceOf(InvalidValuesException);
@@ -38,7 +38,7 @@ describe('AppointmentUtil', () => {
             const __given_date = new Date();
             const __given_deadline = new Date(__given_date.getTime() - 15 * 60000);
 
-            const __actual = AppointmentUtil._handleDeadlineValidation(__given_date, __given_deadline);
+            const __actual = AppointmentUtil.handleDeadlineValidation(__given_date, __given_deadline);
             expect(__actual).toEqual(__given_deadline);
         });
 
@@ -47,7 +47,7 @@ describe('AppointmentUtil', () => {
             const __given_deadline = new Date(__given_date.getTime() + 15 * 60000);
 
             try {
-                AppointmentUtil._handleDeadlineValidation(__given_date, __given_deadline);
+                AppointmentUtil.handleDeadlineValidation(__given_date, __given_deadline);
                 done.fail(new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException'));
             } catch (e) {
                 expect(e).toBeInstanceOf(InvalidValuesException);
@@ -66,7 +66,7 @@ describe('AppointmentUtil', () => {
                 const __given_appointment = new Appointment();
                 __given_appointment.creator = __given_user;
 
-                const __actual = AppointmentUtil._isCreatorOfAppointment(__given_appointment, __given_user);
+                const __actual = AppointmentUtil.isCreatorOfAppointment(__given_appointment, __given_user);
                 expect(__actual).toBeTruthy();
             });
 
@@ -80,7 +80,7 @@ describe('AppointmentUtil', () => {
                     const __given_appointment = new Appointment();
                     __given_appointment.creator = __appointment_creator;
 
-                    const __actual = AppointmentUtil._isCreatorOfAppointment(__given_appointment, __given_user);
+                    const __actual = AppointmentUtil.isCreatorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
                 });
 
@@ -93,7 +93,7 @@ describe('AppointmentUtil', () => {
                     const __given_appointment = new Appointment();
                     __given_appointment.creator = __appointment_creator;
 
-                    const __actual = AppointmentUtil._isCreatorOfAppointment(__given_appointment, __given_user);
+                    const __actual = AppointmentUtil.isCreatorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
                 });
 
@@ -107,7 +107,7 @@ describe('AppointmentUtil', () => {
                     const __given_appointment = new Appointment();
                     __given_appointment.creator = __appointment_creator;
 
-                    const __actual = AppointmentUtil._isCreatorOfAppointment(__given_appointment, __given_user);
+                    const __actual = AppointmentUtil.isCreatorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
                 });
             });
@@ -121,7 +121,7 @@ describe('AppointmentUtil', () => {
                 const __given_appointment = new Appointment();
                 __given_appointment.administrators = [__given_user];
 
-                const __actual = AppointmentUtil._isAdministratorOfAppointment(__given_appointment, __given_user);
+                const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                 expect(__actual).toBeTruthy();
             });
 
@@ -135,7 +135,7 @@ describe('AppointmentUtil', () => {
                     const __given_appointment = new Appointment();
                     __given_appointment.administrators = [__appointment_admin];
 
-                    const __actual = AppointmentUtil._isAdministratorOfAppointment(__given_appointment, __given_user);
+                    const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
                 });
 
@@ -148,7 +148,7 @@ describe('AppointmentUtil', () => {
                     const __given_appointment = new Appointment();
                     __given_appointment.administrators = [__appointment_admin];
 
-                    const __actual = AppointmentUtil._isAdministratorOfAppointment(__given_appointment, __given_user);
+                    const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
                 });
 
@@ -162,7 +162,7 @@ describe('AppointmentUtil', () => {
                     const __given_appointment = new Appointment();
                     __given_appointment.administrators = [__appointment_admin];
 
-                    const __actual = AppointmentUtil._isAdministratorOfAppointment(__given_appointment, __given_user);
+                    const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
                 });
 
@@ -173,7 +173,7 @@ describe('AppointmentUtil', () => {
                     const __given_appointment = new Appointment();
                     __given_appointment.administrators = undefined;
 
-                    const __actual = AppointmentUtil._isAdministratorOfAppointment(__given_appointment, __given_user);
+                    const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
                 });
 
@@ -184,7 +184,7 @@ describe('AppointmentUtil', () => {
                     const __given_appointment = new Appointment();
                     __given_appointment.administrators = [];
 
-                    const __actual = AppointmentUtil._isAdministratorOfAppointment(__given_appointment, __given_user);
+                    const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
                 });
             });

@@ -9,7 +9,7 @@ export class AppointmentUtil {
      * @param date Date of appointment
      * @param deadline Date deadline of appointment
      */
-    public static _handleDateValidation(date, deadline) {
+    public static handleDateValidation(date, deadline) {
         if (date < deadline) {
             throw new InvalidValuesException(null, 'The date can not be before the deadline', ['date']);
         }
@@ -23,7 +23,7 @@ export class AppointmentUtil {
      * @param date Date of appointment
      * @param deadline Date deadline of appointment
      */
-    public static _handleDeadlineValidation(date, deadline) {
+    public static handleDeadlineValidation(date, deadline) {
         if (deadline > date) {
             throw new InvalidValuesException(null, 'The deadline can not be after the date', ['deadline']);
         }
@@ -37,7 +37,7 @@ export class AppointmentUtil {
      * @param appointment Appointment to check ownership for
      * @param user User to check ownership for
      */
-    public static _isCreatorOfAppointment(appointment: Appointment, user: User) {
+    public static isCreatorOfAppointment(appointment: Appointment, user: User) {
         if (user === undefined || user === null || !user) {
             return false;
         }
@@ -51,7 +51,7 @@ export class AppointmentUtil {
      * @param appointment Appointment to check ownership for
      * @param user User to check ownership for
      */
-    public static _isAdministratorOfAppointment(appointment: Appointment, user: User) {
+    public static isAdministratorOfAppointment(appointment: Appointment, user: User) {
         if (user === undefined || user === null || !user) {
             return false;
         }
@@ -84,11 +84,11 @@ export class AppointmentUtil {
             return [];
         }
 
-        if (AppointmentUtil._isAdministratorOfAppointment(appointment, user)) {
+        if (AppointmentUtil.isAdministratorOfAppointment(appointment, user)) {
             references.push('ADMIN');
         }
 
-        if (AppointmentUtil._isCreatorOfAppointment(appointment, user)) {
+        if (AppointmentUtil.isCreatorOfAppointment(appointment, user)) {
             references.push('CREATOR');
         }
 

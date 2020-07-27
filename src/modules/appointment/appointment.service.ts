@@ -45,15 +45,22 @@ export class AppointmentService {
     }
 
     /** MAIN FUNCTIONS  **/
+
     /** MAIN FUNCTIONS  **/
 
-
+    /**
+     * Find Appointment with its relations by its link.
+     *
+     * @param link String link of Appointment
+     *
+     * @throws EntityNotFoundException if given link does not match any appointment
+     */
     public async findByLink(link: string): Promise<Appointment> {
         let appointment = await this.appointmentRepository.findOne({
             where: {
                 link: link
             },
-            relations: ['administrators', 'creator']
+            relations: ['administrators', 'creator'] // might not be needed anymore
         });
 
         if (appointment === undefined) {
@@ -64,7 +71,7 @@ export class AppointmentService {
     }
 
     /**
-     * Get a appointment by its link. Checking for permissions by query parameter,
+     * Get an Appointment by its link. Checking for permissions by analysing query parameter,
      * being creator or being administrator.
      *
      * @param user Requester
@@ -95,56 +102,54 @@ export class AppointmentService {
      * Not all options are passed here. Only the core information gets processed.
      * All other information are getting set via the specific options
      *
-     * @param rawData Appointment data to create appointment with
+     * @param appointmentData Appointment data to create appointment with
      * @param user Requester
      *
      * @returns Created appointment after applying filters
      *
      * @throws DuplicateValueException if link is already in use
      */
-    public async create(rawData: Appointment, user: User) {
-        let appointment = new Appointment();
+    public async create(appointmentData: Appointment, user: User): Promise<Appointment> {
+        let appointmentToDB = new Appointment();
 
-        appointment.title = rawData.title;
-        appointment.description = rawData.description;
+        appointmentToDB.title = appointmentData.title;
+        appointmentToDB.description = appointmentData.description;
 
         try {
-            appointment.link = await this.handleAppointmentLink(rawData.link);
+            appointmentToDB.link = await this.handleAppointmentLink(appointmentData.link);
         } catch (e) {
             throw e;
         }
 
-        appointment.location = rawData.location;
+        appointmentToDB.location = appointmentData.location;
 
-        // Only date validation needed
-        // date < deadline === deadline > date
         try {
-            appointment.date = await AppointmentUtil._handleDateValidation(rawData.date, rawData.deadline);
+            appointmentToDB.date = await AppointmentUtil.handleDateValidation(appointmentData.date, appointmentData.deadline);
         } catch (e) {
             throw e;
         }
 
-        appointment.deadline = rawData.deadline;
+        appointmentToDB.deadline = appointmentData.deadline;
 
-        if (rawData.maxEnrollments > 0) {
-            appointment.maxEnrollments = rawData.maxEnrollments;
+        if (appointmentData.maxEnrollments > 0) {
+            appointmentToDB.maxEnrollments = appointmentData.maxEnrollments;
         } else {
-            appointment.maxEnrollments = null;
+            appointmentToDB.maxEnrollments = null;
         }
 
-        appointment.driverAddition = rawData.driverAddition;
-        appointment.creator = user;
-        appointment.additions = await this._createAdditionEntitiesAndFilterDuplicates(rawData.additions);
+        appointmentToDB.driverAddition = appointmentData.driverAddition;
+        appointmentToDB.creator = user;
+        appointmentToDB.additions = await this._createAdditionEntitiesAndFilterDuplicates(appointmentData.additions);
 
-        appointment = await this.appointmentRepository.save(appointment);
+        appointmentToDB = await this.appointmentRepository.save(appointmentToDB);
 
-        appointment.reference = AppointmentUtil.parseReferences(user, appointment, []);
+        appointmentToDB.reference = AppointmentUtil.parseReferences(user, appointmentToDB, []);
 
-        appointment = appointmentMapper.permission(this, appointment, user, {});
-        appointment = appointmentMapper.slim(this, appointment, false);
-        appointment = appointmentMapper.basic(this, appointment);
+        appointmentToDB = appointmentMapper.permission(this, appointmentToDB, user, {});
+        appointmentToDB = appointmentMapper.slim(this, appointmentToDB, false);
+        appointmentToDB = appointmentMapper.basic(this, appointmentToDB);
 
-        return appointment;
+        return appointmentToDB;
     }
 
     /**
@@ -167,7 +172,7 @@ export class AppointmentService {
 
         try {
             if (!(await this.isCreatorOrAdministrator(user, appointment))) {
-                throw new InsufficientPermissionsException();
+                throw  new InsufficientPermissionsException();
             }
         } catch (e) {
             throw new InsufficientPermissionsException();
@@ -197,7 +202,7 @@ export class AppointmentService {
 
                 if (key === 'date') {
                     try {
-                        changedValue = await AppointmentUtil._handleDateValidation(value, appointment.deadline);
+                        changedValue = await AppointmentUtil.handleDateValidation(value, appointment.deadline);
                     } catch (e) {
                         throw e;
                     }
@@ -205,7 +210,7 @@ export class AppointmentService {
 
                 if (key === 'deadline') {
                     try {
-                        changedValue = await AppointmentUtil._handleDeadlineValidation(appointment.date, value);
+                        changedValue = await AppointmentUtil.handleDeadlineValidation(appointment.date, value);
                     } catch (e) {
                         throw e;
                     }
@@ -253,7 +258,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentUtil._isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -294,7 +299,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentUtil._isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -328,7 +333,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentUtil._isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -366,7 +371,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentUtil._isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -443,8 +448,8 @@ export class AppointmentService {
             appointment = ref;
         }
 
-        return AppointmentUtil._isCreatorOfAppointment(appointment, user)
-            || AppointmentUtil._isAdministratorOfAppointment(appointment, user);
+        return AppointmentUtil.isCreatorOfAppointment(appointment, user)
+            || AppointmentUtil.isAdministratorOfAppointment(appointment, user);
     }
 
     /**
@@ -539,7 +544,7 @@ export class AppointmentService {
     private async handleAppointmentLink(_link: string) {
         let link = '';
 
-        if (_link === null || _link === undefined || _link === '') {
+        if (_link === undefined || _link === '') {
             do {
                 link = GeneratorUtil.makeid(5);
             } while (await this.linkInUse(link));
@@ -563,16 +568,18 @@ export class AppointmentService {
         }
     }
 
-    private async _createAdditionEntitiesAndFilterDuplicates(_additions) {
+    private async _createAdditionEntitiesAndFilterDuplicates(additions: Addition[]) {
         let output = [];
 
-        if (_additions !== undefined) {
-            for (const fAddition of _additions) {
+        if (additions !== undefined) {
+            for (const fAddition of additions) {
                 if (!output.some(sAddition => sAddition.name === fAddition.name)) {
-                    let _addition: Addition = new Addition();
-                    _addition.name = fAddition.name;
-                    await this.additionService.__save(_addition);
-                    output.push(_addition);
+                    let addition: Addition = new Addition();
+                    addition.name = fAddition.name;
+
+                    await this.additionService.__save(addition);
+
+                    output.push(addition);
                 }
             }
         }
