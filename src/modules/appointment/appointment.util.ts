@@ -35,6 +35,18 @@ export class AppointmentUtil {
     }
 
     /**
+     * Check if passed user is the creator or administrator of the given appointment
+     *
+     * @param appointment Appointment to check permission for
+     * @param user User to check ownership for
+     */
+    public static isCreatorOrAdministrator(appointment: Appointment, user: User) {
+        return this.isCreatorOfAppointment(appointment, user)
+            || this.isAdministratorOfAppointment(appointment, user);
+
+    }
+
+    /**
      * Check if passed user is the creator of the given appointment
      *
      * @param appointment Appointment to check ownership for

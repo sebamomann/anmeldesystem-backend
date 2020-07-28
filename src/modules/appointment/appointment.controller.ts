@@ -73,7 +73,6 @@ export class AppointmentController {
                 res.status(HttpStatus.OK).json(result);
             })
             .catch(err => {
-                console.log(err);
                 throw err;
             });
     }
@@ -202,7 +201,7 @@ export class AppointmentController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch(err => {
-                console.log(err);
+
                 throw err;
             });
     }
@@ -236,7 +235,7 @@ export class AppointmentController {
     //                 throw err;
     //             }
     //
-    //             console.log(err);
+    //             
     //             let error = {error: {}};
     //             error.error = {undefined: {message: "Some error occurred. Please try again later or contact the support"}};
     //

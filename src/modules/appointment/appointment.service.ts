@@ -15,8 +15,8 @@ import {GeneratorUtil} from '../../util/generator.util';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
 import {AppointmentUtil} from './appointment.util';
+import {AppointmentMapper} from './appointment.mapper';
 
-const appointmentMapper = require('./appointment.mapper');
 const logger = require('../../logger');
 
 @Injectable()
@@ -34,9 +34,9 @@ export class AppointmentService {
     private static userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
         appointment.reference = AppointmentUtil.parseReferences(user, appointment, []); // empty pins because fnc is only called on single appointment get request
 
-        appointment = appointmentMapper.permission(this, appointment, user, permissions);
-        appointment = appointmentMapper.slim(this, appointment, slim);
-        appointment = appointmentMapper.basic(this, appointment);
+        appointment = AppointmentMapper.permission(appointment, user, permissions);
+        appointment = AppointmentMapper.slim(appointment, slim);
+        appointment = AppointmentMapper.basic(appointment);
 
         return appointment;
     }
@@ -106,7 +106,7 @@ export class AppointmentService {
      *
      * @param user Requester (if existing)
      * @param params All query parameters to parse pinned links
-     * @param slim Delete information overhead. See {@link appointmentMapper.slim} for more information.
+     * @param slim Delete information overhead. See {@link AppointmentMapper.slim} for more information.
      *
      * @returns Appointment[]
      */
@@ -253,11 +253,7 @@ export class AppointmentService {
 
         appointment = await this.appointmentRepository.save(appointment);
 
-        appointment.reference = AppointmentUtil.parseReferences(user, appointment, []);
-
-        appointment = appointmentMapper.permission(this, appointment, user, {});
-        appointment = appointmentMapper.slim(this, appointment, false);
-        appointment = appointmentMapper.basic(this, appointment);
+        appointment = AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, false);
 
         this.appointmentGateway.appointmentUpdated(appointment);
 
@@ -483,8 +479,7 @@ export class AppointmentService {
             appointment = ref;
         }
 
-        return AppointmentUtil.isCreatorOfAppointment(appointment, user)
-            || AppointmentUtil.isAdministratorOfAppointment(appointment, user);
+        return AppointmentUtil.isCreatorOrAdministrator(appointment, user);
     }
 
     private async handleAppointmentLink(_link: string) {
