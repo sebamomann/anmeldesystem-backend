@@ -19,6 +19,7 @@ import {InsufficientPermissionsException} from '../../exceptions/InsufficientPer
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {AppointmentGateway} from '../appointment/appointment.gateway';
 import {DomainUtil} from '../../util/domain.util';
+import {EnrollmentUtil} from './enrollment.util';
 
 const crypto = require('crypto');
 const logger = require('../../logger');
@@ -36,36 +37,6 @@ export class EnrollmentService {
                 private readonly driverService: DriverService,
                 private readonly mailerService: MailerService,
                 private readonly appointmentGateway: AppointmentGateway) {
-    }
-
-    public static allowEditByToken(enrollment: Enrollment, token: string) {
-        const check = crypto.createHash('sha256')
-            .update(enrollment.id + process.env.SALT_ENROLLMENT)
-            .digest('hex');
-
-        return token !== null
-            && token !== undefined
-            && (token.replace(' ', '+') === check);
-    }
-
-    private static _handleAdditions(_enrollment: Enrollment, _appointment: Appointment) {
-        let output = [];
-
-        if (Array.isArray(_enrollment.additions)) {
-            for (const fAddition of _enrollment.additions) {
-                const additions = _appointment.additions.filter(filterAddition => filterAddition.id === fAddition.id);
-
-                if (additions.length > 0) {
-                    output.push(additions[0]);
-                } else {
-                    throw new EntityNotFoundException(null,
-                        'The following addition can not be found in the appointment',
-                        JSON.stringify(fAddition));
-                }
-            }
-        }
-
-        return output;
     }
 
     public async findById(id: string) {
@@ -182,7 +153,7 @@ export class EnrollmentService {
 
         const appointment = enrollment.appointment;
 
-        if (!(await this._hasPermission(enrollment, user, toChange.token))) {
+        if (!EnrollmentUtil.hasPermission(enrollment, user, toChange.token)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -218,7 +189,7 @@ export class EnrollmentService {
 
                 if (key === 'additions') {
                     try {
-                        changedValue = EnrollmentService._handleAdditions(toChange, appointment);
+                        changedValue = EnrollmentUtil.filterValidAdditions(toChange, appointment);
                     } catch (e) {
                         throw e;
                     }
@@ -256,7 +227,7 @@ export class EnrollmentService {
             throw new EntityGoneException(null, null, 'enrollment');
         }
 
-        if (!(await this._hasPermission(enrollment, user, token))) {
+        if (!(await EnrollmentUtil.hasPermission(enrollment, user, token))) {
             throw new InsufficientPermissionsException();
         }
 
@@ -301,11 +272,11 @@ export class EnrollmentService {
 
         let allowances = [];
 
-        if (await this._allowEditByUserId(enrollment, user)) {
+        if (await EnrollmentUtil.permissionByUser(enrollment, user)) {
             allowances.push('user');
         }
 
-        if (EnrollmentService.allowEditByToken(enrollment, token)) {
+        if (EnrollmentUtil.permissionByToken(enrollment, token)) {
             allowances.push('token');
         }
 
@@ -351,7 +322,7 @@ export class EnrollmentService {
         output.comment = trimmed === '' ? null : trimmed;
 
         try {
-            output.additions = EnrollmentService._handleAdditions(_enrollment, _appointment);
+            output.additions = EnrollmentUtil.filterValidAdditions(_enrollment, _appointment);
         } catch (e) {
             throw e;
         }
@@ -372,23 +343,6 @@ export class EnrollmentService {
         }
 
         return output;
-    }
-
-    private async _hasPermission(enrollment: Enrollment, user: User, token: string) {
-        let allowEditByUserId = await this._allowEditByUserId(enrollment, user);
-        let isAllowedByKey = EnrollmentService.allowEditByToken(enrollment, token);
-
-        return (allowEditByUserId
-            || isAllowedByKey);
-    }
-
-    private async _allowEditByUserId(enrollment: Enrollment, user: User) {
-        let isCreatorOrAdministrator = await this.appointmentService.isCreatorOrAdministrator(user, enrollment.appointment);
-        let isEnrollmentCreator = (enrollment.creator !== undefined
-            && enrollment.creator !== null
-            && enrollment.creator.id === user.id);
-
-        return isCreatorOrAdministrator || isEnrollmentCreator;
     }
 
     private async _handlePassengerRelation(_enrollment: Enrollment) {
