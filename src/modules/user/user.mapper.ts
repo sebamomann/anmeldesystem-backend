@@ -5,8 +5,24 @@ const emailChangeMapper = require('./email-change/email-change.mapper');
 
 module.exports = {
     basic: function(userService: UserService, _user: User) {
-        const newUser = (({id, name, username, mail, emailChange, iat, refreshToken}) =>
-            ({id, name, username, mail, emailChange: userService.retrieveActiveMailChanges(emailChange), iat, refreshToken}))
+        const newUser = (({
+                              id,
+                              name,
+                              username,
+                              mail,
+                              emailChange,
+                              iat,
+                              refreshToken
+                          }) =>
+            ({
+                id,
+                name,
+                username,
+                mail,
+                emailChange: userService.retrieveActiveMailChanges(emailChange),
+                iat,
+                refreshToken,
+            }))
         (_user);
 
         if (newUser.emailChange.length === 0) {
