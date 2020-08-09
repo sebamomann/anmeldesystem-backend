@@ -37,7 +37,6 @@ describe('AppointmentService', () => {
     beforeEach(async () => {
         module = await Test.createTestingModule({
             providers: [AppointmentService,
-                AppointmentGateway,
                 UserService,
                 AdditionService,
                 FileService,

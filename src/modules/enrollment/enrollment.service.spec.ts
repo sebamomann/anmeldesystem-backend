@@ -19,7 +19,6 @@ import {Addition} from '../addition/addition.entity';
 import {Enrollment} from './enrollment.entity';
 import {Driver} from './driver/driver.entity';
 import {Passenger} from './passenger/passenger.entity';
-import {Key} from './key/key.entity';
 import {Mail} from './mail/mail.entity';
 import {DriverService} from './driver/driver.service';
 import {PassengerService} from './passenger/passenger.service';
@@ -28,6 +27,8 @@ import {DuplicateValueException} from '../../exceptions/DuplicateValueException'
 import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
+import {AppointmentGateway} from '../appointment/appointment.gateway';
+import {Session} from '../user/session.entity';
 
 const crypto = require('crypto');
 
@@ -38,6 +39,7 @@ describe('EnrollmentService', () => {
     let fileService: FileService;
     let additionService: AdditionService;
     let mailerService: MailerService;
+    let appointmentGateway: AppointmentGateway;
     let module: TestingModule;
     let enrollmentRepositoryMock: MockType<Repository<Enrollment>>;
     let appointmentRepositoryMock: MockType<Repository<Appointment>>;
@@ -50,7 +52,6 @@ describe('EnrollmentService', () => {
     let emailChangeRepositoryMock: MockType<Repository<EmailChange>>;
     let driverRepositoryMock: MockType<Repository<Driver>>;
     let passengerRepositoryMock: MockType<Repository<Passenger>>;
-    let keyRepositoryMock: MockType<Repository<Key>>;
     let mailRepositoryMock: MockType<Repository<Mail>>;
 
     beforeEach(async () => {
@@ -64,20 +65,25 @@ describe('EnrollmentService', () => {
                 MailerService,
                 DriverService,
                 PassengerService,
+                AppointmentGateway,
+                UserService,
+                AdditionService,
+                FileService,
+                MailerService,
+                AppointmentGateway,
                 {provide: getRepositoryToken(Enrollment), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
+                {provide: getRepositoryToken(Driver), useFactory: repositoryMockFactory},
+                {provide: getRepositoryToken(Passenger), useFactory: repositoryMockFactory},
+                {provide: getRepositoryToken(Mail), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Appointment), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
+                {provide: getRepositoryToken(Session), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(File), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Addition), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(TelegramUser), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(PasswordReset), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(PasswordChange), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(EmailChange), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(Driver), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(Passenger), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(Key), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(Mail), useFactory: repositoryMockFactory},
                 {
                     name: MAILER_OPTIONS,
                     provide: MAILER_OPTIONS,
@@ -101,6 +107,7 @@ describe('EnrollmentService', () => {
         appointmentService = module.get<AppointmentService>(AppointmentService);
         fileService = module.get<FileService>(FileService);
         additionService = module.get<AdditionService>(AdditionService);
+        appointmentGateway = module.get<AppointmentGateway>(AppointmentGateway);
 
         enrollmentRepositoryMock = module.get(getRepositoryToken(Enrollment));
         userRepositoryMock = module.get(getRepositoryToken(User));
@@ -113,7 +120,6 @@ describe('EnrollmentService', () => {
         fileRepositoryMock = module.get(getRepositoryToken(File));
         driverRepositoryMock = module.get(getRepositoryToken(Driver));
         passengerRepositoryMock = module.get(getRepositoryToken(Passenger));
-        keyRepositoryMock = module.get(getRepositoryToken(Key));
         mailRepositoryMock = module.get(getRepositoryToken(Mail));
     });
 
@@ -121,853 +127,619 @@ describe('EnrollmentService', () => {
         expect(enrollmentService).toBeDefined();
     });
 
+    describe('* find enrollment', () => {
+        describe('* by id', () => {
+            it('* successful should return enrollment object', async () => {
+                const __given_id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+
+                const __existing_enrollment = new Enrollment();
+                __existing_enrollment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
+
+                const __expected = __existing_enrollment;
+
+                const __actual = await enrollmentService.findById(__given_id);
+                expect(__actual).toEqual(__expected);
+            });
+
+            describe('* failure should return error', () => {
+                it('* enrollment not found', async (done) => {
+                    const __given_id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+
+                    const __existing_enrollment = new Enrollment();
+                    __existing_enrollment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+
+                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+
+                    try {
+                        await enrollmentService.findById(__given_id);
+                        done.fail(new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException'));
+                    } catch (e) {
+                        expect(e).toBeInstanceOf(EntityNotFoundException);
+                        expect(e.data).toEqual('enrollment');
+                        done();
+                    }
+                });
+            });
+        });
+    });
+
     describe('* create enrollment', () => {
         describe('* successful should return created entity', () => {
-            it('successful request - as logged in user', async () => {
-                const user = new User();
-                const enrollment = new Enrollment();
-                const appointment = new Appointment();
-                appointment.link = 'link';
-                enrollment.appointment = appointment;
-                const domain = 'domain';
+            describe('* comment management', () => {
+                it('* trimming', async () => {
+                    const __given_enrollment = new Enrollment();
+                    const __given_user = new User();
+                    __given_user.username = 'username';
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-                jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.resolve({}));
+                    const __given_domain = 'example.com/{{0}}/{{1}}';
 
-                const actual = await enrollmentService.create(enrollment, user, domain);
-                expect(typeof actual).toBe('object');
-                expect(actual.createdByUser).toBe(true);
+                    const __expected_comment = 'my cool comment';
+
+                    __given_enrollment.comment = ` ${__expected_comment}  `;
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.link = 'link';
+
+                    __given_enrollment.appointment = __existing_appointment;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+
+                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
+                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
+
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                        return;
+                    });
+
+                    const __actual = await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+
+                    expect(__actual.comment).toBe(__expected_comment);
+                });
+
+                it('* null on empty', async () => {
+                    const __given_enrollment = new Enrollment();
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __given_domain = 'example.com/{{0}}/{{1}}';
+
+                    __given_enrollment.comment = ``;
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.link = 'link';
+
+                    __given_enrollment.appointment = __existing_appointment;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+
+                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
+                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
+
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                        return;
+                    });
+
+                    const __actual = await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+                    const __expected_comment = null;
+
+                    expect(__actual.comment).toBe(__expected_comment);
+                });
             });
 
-            it('successful request - with mail', async () => {
-                const user = undefined;
-                const enrollment = new Enrollment();
-                enrollment.editMail = 'mail@example.com';
-                const appointment = new Appointment();
-                appointment.link = 'link';
-                enrollment.appointment = appointment;
-                const domain = 'domain';
+            describe('* driver addition management', () => {
+                it('* as passenger', async () => {
+                    const __given_enrollment = new Enrollment();
+                    __given_enrollment.passenger = new Passenger();
+                    __given_enrollment.passenger.requirement = 2;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                mailRepositoryMock.save.mockImplementationOnce((val) => val);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => {
-                    val.id = '' + Date.now();
-                    return val;
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __given_domain = 'example.com/{{0}}/{{1}}';
+
+                    const __expected_comment = 'my cool comment';
+
+                    __given_enrollment.comment = ` ${__expected_comment}  `;
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.link = 'link';
+                    __existing_appointment.driverAddition = true;
+
+                    __given_enrollment.appointment = __existing_appointment;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+
+                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
+
+                    passengerRepositoryMock.findOne.mockImplementationOnce(undefined);
+                    passengerRepositoryMock.save.mockImplementation((val) => val);
+
+                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
+
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                        return;
+                    });
+
+                    const __actual = await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+
+                    expect(__actual.passenger.requirement).toBe(__given_enrollment.passenger.requirement);
+                    expect(__actual.driver).toBeUndefined();
+                    // checking passenger management
+                    expect(passengerRepositoryMock.findOne).toHaveBeenCalledTimes(1);
+                    expect(passengerRepositoryMock.save).toHaveBeenCalledTimes(1);
                 });
-                jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.resolve({}));
 
-                const actual = await enrollmentService.create(enrollment, user, domain);
-                expect(typeof actual).toBe('object');
-                expect(actual.createdByUser).toBe(false);
-                expect(actual.token).toMatch(/^.{64}$/);
+                it('* as driver', async () => {
+                    const __given_enrollment = new Enrollment();
+                    __given_enrollment.driver = new Driver();
+                    __given_enrollment.driver.service = 1;
+                    __given_enrollment.driver.seats = 4;
+
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+
+                    const __given_domain = 'example.com/{{0}}/{{1}}';
+
+                    const __expected_comment = 'my cool comment';
+
+                    __given_enrollment.comment = ` ${__expected_comment}  `;
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.link = 'link';
+                    __existing_appointment.driverAddition = true;
+
+                    __given_enrollment.appointment = __existing_appointment;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+
+                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
+
+                    driverRepositoryMock.findOne.mockImplementationOnce(undefined);
+                    driverRepositoryMock.save.mockImplementation((val) => val);
+
+                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
+
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                        return;
+                    });
+
+                    const __expected_driver = new Driver();
+                    __expected_driver.seats = __given_enrollment.driver.seats;
+                    __expected_driver.service = __given_enrollment.driver.service;
+
+                    const __actual = await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+
+                    expect(__actual.driver).toEqual(__expected_driver);
+                    expect(__actual.passenger).toBeUndefined();
+                    // checking passenger management
+                    expect(driverRepositoryMock.findOne).toHaveBeenCalledTimes(1);
+                    expect(driverRepositoryMock.save).toHaveBeenCalledTimes(1);
+                });
             });
 
-            it('successful request - with mail - mail send failed', async () => {
-                const user = undefined;
-                const enrollment = new Enrollment();
-                enrollment.editMail = 'mail@example.com';
-                const appointment = new Appointment();
-                appointment.link = 'link';
-                enrollment.appointment = appointment;
-                const domain = 'domain';
+            describe('* enrollment creator', () => {
+                it('* as not logged in user', async () => {
+                    const __given_enrollment = new Enrollment();
+                    const __given_user = undefined;
+                    const __given_domain = 'example.com/{{0}}/{{1}}';
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                mailRepositoryMock.save.mockImplementationOnce((val) => val);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => {
-                    val.id = '' + Date.now();
-                    return val;
+                    __given_enrollment.comment = 'comment';
+                    __given_enrollment.editMail = 'mail@example.com';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.link = 'link';
+
+                    __given_enrollment.appointment = __existing_appointment;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+
+                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
+
+                    mailRepositoryMock.save.mockImplementation((val) => val);
+
+                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
+
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                        return;
+                    });
+
+                    jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.resolve({}));
+
+                    const __expected_mail = new Mail();
+                    __expected_mail.mail = __given_enrollment.editMail;
+
+                    await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+
+                    expect(mailRepositoryMock.save).toHaveBeenCalledTimes(1);
+                    expect(mailRepositoryMock.save).toHaveBeenCalledWith(__expected_mail);
                 });
-                jest.spyOn(mailerService, 'sendMail').mockReturnValueOnce(Promise.reject());
 
-                const actual = await enrollmentService
-                    .create(enrollment, user, domain);
+                it('* as logged in user', async () => {
+                    const __given_enrollment = new Enrollment();
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_domain = 'example.com/{{0}}/{{1}}';
 
-                expect(typeof actual).toBe('object');
-                expect(actual.createdByUser).toBe(false);
-                expect(actual.token).toMatch(/^.{64}$/);
+                    __given_enrollment.comment = 'comment';
 
-            });
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.link = 'link';
 
-            it('successful request - logged in - empty comment to null', async () => {
-                const user = new User();
+                    __given_enrollment.appointment = __existing_appointment;
 
-                const appointment = new Appointment();
-                appointment.link = 'link';
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
 
-                const addition = new Addition();
-                addition.id = '1';
+                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
 
-                const enrollment = new Enrollment();
-                enrollment.comment = '';
-                enrollment.appointment = appointment;
+                    mailRepositoryMock.save.mockImplementation((val) => val);
 
-                const domain = 'domain';
+                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => {
-                    val.id = '' + Date.now();
-                    return val;
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                        return;
+                    });
+
+                    await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+
+                    expect(mailRepositoryMock.save).toHaveBeenCalledTimes(0);
                 });
-                jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.resolve({}));
 
-                const actual = await enrollmentService.create(enrollment, user, domain);
-                expect(typeof actual).toBe('object');
-                expect(actual.comment).toBe(null);
-            });
+                it('* editMail > user', async () => {
+                    const __given_enrollment = new Enrollment();
+                    const __given_user = new User();
+                    __given_user.username = 'username';
+                    const __given_domain = 'example.com/{{0}}/{{1}}';
 
-            it('successful request - logged in - handle additions', async () => {
-                const user = new User();
+                    __given_enrollment.editMail = 'mail@example.ocm';
+                    __given_enrollment.comment = 'comment';
 
-                const appointment = new Appointment();
-                appointment.link = 'link';
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.link = 'link';
 
-                const addition = new Addition();
-                addition.id = '1';
-                appointment.additions = [addition];
+                    __given_enrollment.appointment = __existing_appointment;
 
-                const enrollment = new Enrollment();
-                enrollment.additions = [addition];
-                enrollment.appointment = appointment;
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
 
-                const domain = 'domain';
+                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => {
-                    val.id = '' + Date.now();
-                    return val;
+                    mailRepositoryMock.save.mockImplementation((val) => val);
+
+                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
+
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                        return;
+                    });
+
+                    jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.resolve({}));
+
+                    await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+
+                    expect(mailRepositoryMock.save).toHaveBeenCalledTimes(1);
                 });
-                jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.resolve({}));
-
-                const actual = await enrollmentService.create(enrollment, user, domain);
-                expect(typeof actual).toBe('object');
-                expect(actual.additions).toEqual([addition]);
-            });
-
-            it('successful request - logged in - as driver', async () => {
-                const user = new User();
-
-                const appointment = new Appointment();
-                appointment.link = 'link';
-                appointment.driverAddition = true;
-
-                const addition = new Addition();
-                addition.id = '1';
-                appointment.additions = [addition];
-
-                const enrollment = new Enrollment();
-                enrollment.additions = [addition];
-                enrollment.appointment = appointment;
-
-                const driver = new Driver();
-                driver.seats = 4;
-                driver.service = 1;
-                enrollment.driver = driver;
-
-                const domain = 'domain';
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                driverRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                driverRepositoryMock.save.mockImplementationOnce((val) => {
-                    val.id = '' + Date.now();
-                    return val;
-                });
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => {
-                    val.id = '' + Date.now();
-                    return val;
-                });
-                jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.resolve({}));
-
-                const actual = await enrollmentService.create(enrollment, user, domain);
-                expect(typeof actual).toBe('object');
-                expect(actual.driver).toMatchObject({
-                    seats: driver.seats,
-                    service: driver.service
-                });
-                expect(actual.passenger).toBe(undefined);
-            });
-
-            it('successful request - logged in - as passenger', async () => {
-                const user = new User();
-
-                const appointment = new Appointment();
-                appointment.link = 'link';
-                appointment.driverAddition = true;
-
-                const addition = new Addition();
-                addition.id = '1';
-                appointment.additions = [addition];
-
-                const enrollment = new Enrollment();
-                enrollment.additions = [addition];
-                enrollment.appointment = appointment;
-
-                const passenger = new Passenger();
-                passenger.requirement = 1;
-                enrollment.passenger = passenger;
-
-                const domain = 'domain';
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                passengerRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                passengerRepositoryMock.save.mockImplementationOnce((val) => {
-                    val.id = '' + Date.now();
-                    return val;
-                });
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => {
-                    val.id = '' + Date.now();
-                    return val;
-                });
-                jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.resolve({}));
-
-                const actual = await enrollmentService.create(enrollment, user, domain);
-                expect(typeof actual).toBe('object');
-                expect(actual.passenger).toMatchObject({
-                    requirement: passenger.requirement
-                });
-                expect(actual.driver).toBe(undefined);
             });
         });
 
         describe('* failure should return error', () => {
-            it('appointment not found', async () => {
-                const enrollment = new Enrollment();
-                const appointment = new Appointment();
-                appointment.link = 'link';
-                enrollment.appointment = appointment;
-                const user = undefined;
-                const domain = 'domain';
+            it('appointment not found', async (done) => {
+                const __given_enrollment = new Enrollment();
+                __given_enrollment.appointment = new Appointment();
+                __given_enrollment.appointment.link = 'link';
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_domain = 'example.com/{{0}}/{{1}}';
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+                const __existing_appointment = undefined;
 
-                enrollmentService.create(enrollment, user, domain)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(EntityNotFoundException);
-                        expect(err.data).toBe('appointment');
-                    });
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+
+                try {
+                    await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+                    done.fail(new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException'));
+                } catch (e) {
+                    expect(e).toBeInstanceOf(EntityNotFoundException);
+                    expect(e.data).toEqual('appointment');
+                    done();
+                }
             });
 
-            it('name already in use', async () => {
-                const enrollment = new Enrollment();
-                const appointment = new Appointment();
-                appointment.link = 'link';
-                enrollment.appointment = appointment;
-                const user = undefined;
-                const domain = 'domain';
+            it('* name already in use', async (done) => {
+                const __given_enrollment = new Enrollment();
+                __given_enrollment.name = 'existingName';
+                __given_enrollment.appointment = new Appointment();
+                __given_enrollment.appointment.link = 'link';
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_domain = 'example.com/{{0}}/{{1}}';
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(new Appointment());
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+                const __existing_appointment = __given_enrollment.appointment;
+                const __existing_enrollment = new Enrollment();
+                __existing_enrollment.name = __given_enrollment.name;
 
-                enrollmentService.create(enrollment, user, domain)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an DuplicateValueException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(DuplicateValueException);
-                        expect(err.data).toEqual(['name']);
-                    });
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment); // cant find appointment with specific link
+
+                try {
+                    await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+                    done.fail(new Error('I have failed you, Anakin. Should have gotten an DuplicateValueException'));
+                } catch (e) {
+                    expect(e).toBeInstanceOf(DuplicateValueException);
+                    expect(e.data).toEqual(['name']);
+                    done();
+                }
             });
 
-            it('addition not existing', async () => {
-                const enrollment = new Enrollment();
-                const addition = new Addition();
-                addition.id = '1';
-                addition.name = 'addition';
-                enrollment.additions = [addition];
-                const appointment = new Appointment();
-                appointment.link = 'link';
-                appointment.additions = [];
-                enrollment.appointment = appointment;
-                const user = undefined;
-                const domain = 'domain';
+            it('* driver/passenger not defined', async (done) => {
+                const __given_enrollment = new Enrollment();
+                __given_enrollment.name = 'existingName';
+                __given_enrollment.comment = 'comment';
+                __given_enrollment.appointment = new Appointment();
+                __given_enrollment.appointment.link = 'link';
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_domain = 'example.com/{{0}}/{{1}}';
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                const __existing_appointment = __given_enrollment.appointment;
+                __existing_appointment.driverAddition = true;
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
-                enrollmentService.create(enrollment, user, domain)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(EntityNotFoundException);
-                        expect(err.data).toEqual(JSON.stringify(addition));
-                    });
+                try {
+                    await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+                    done.fail(new Error('I have failed you, Anakin. Should have gotten an EmptyFieldsException'));
+                } catch (e) {
+                    expect(e).toBeInstanceOf(EmptyFieldsException);
+                    expect(e.data).toEqual(['driver', 'passenger']);
+                    done();
+                }
             });
 
-            it('neither driver nor passenger // SHOULD NOT HAPPEN DUE TO PRE CHECK', async () => {
-                const enrollment = new Enrollment();
-                const user = undefined;
-                const domain = 'domain';
+            it('* invalid addition provided', async (done) => {
+                const __given_enrollment = new Enrollment();
+                __given_enrollment.name = 'existingName';
+                __given_enrollment.comment = 'comment';
+                __given_enrollment.additions = [new Addition()];
+                __given_enrollment.additions[0].name = 'additonUndefined';
+                __given_enrollment.additions[0].id = '940599c5-b6fb-4f33-a090-017e31c2b22a';
+                __given_enrollment.appointment = new Appointment();
+                __given_enrollment.appointment.link = 'link';
+                __given_enrollment.appointment.additions = [new Addition()];
+                __given_enrollment.appointment.additions[0].id = '08f642cf-ee55-4b18-84e4-69e218088753';
+                __given_enrollment.appointment.additions[0].name = 'additionExisting';
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_domain = 'example.com/{{0}}/{{1}}';
 
-                const appointment = new Appointment();
-                appointment.driverAddition = true;
-                appointment.link = 'link';
-                enrollment.appointment = appointment;
+                const __existing_appointment = __given_enrollment.appointment;
+                __existing_appointment.driverAddition = true;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
-                enrollmentService.create(enrollment, user, domain)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an EmptyFieldsException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(EmptyFieldsException);
-                        expect(err.data).toEqual(['driver', 'passenger']);
-                    });
+                try {
+                    await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+                    done.fail(new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException'));
+                } catch (e) {
+                    expect(e).toBeInstanceOf(EntityNotFoundException);
+                    expect(e.data).toEqual(JSON.stringify(__given_enrollment.additions[0]));
+                    done();
+                }
             });
         });
     });
 
     describe('* update enrollment', () => {
-        describe('* successful should return updated entity', () => {
-            it('update nothing', async () => {
-                const toChange = {};
-                const id = '1';
-                const user = new User();
-                user.id = '1';
-                const token = '';
+        it('* update name', async () => {
+            const __given_enrollment_change_data = {
+                name: 'newName'
+            };
+            const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
+            const __given_user = new User();
+            __given_user.username = 'username';
 
-                const appointment = new Appointment();
-                appointment.creator = user;
-                appointment.administrators = [];
+            const __existing_enrollment = new Enrollment();
+            __existing_enrollment.id = __given_enrollment_id;
+            __existing_enrollment.name = 'name';
+            __existing_enrollment.creator = __given_user;
+            __existing_enrollment.appointment = new Appointment();
+            __existing_enrollment.appointment.creator = new User();
+            __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
-                const enrollment = new Enrollment();
-                enrollment.id = '1';
-                enrollment.name = 'oldName';
-                enrollment.creator = user;
-                enrollment.appointment = appointment;
+            enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
+            enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // new name not in use
+            enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                const actual = await enrollmentService.update(toChange, id, user, token);
-                expect(actual).toMatchObject({
-                    id: enrollment.id,
-                    name: enrollment.name
-                });
+            jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                return;
             });
 
-            it('update non-existent value', async () => {
-                const toChange = {
-                    nonExistent: '1'
-                };
-                const id = '1';
-                const user = new User();
-                user.id = '1';
-                const token = '';
+            const __expected = __given_enrollment_change_data.name;
 
-                const appointment = new Appointment();
-                appointment.creator = user;
-                appointment.administrators = [];
+            const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
+            expect(__actual.name).toBe(__expected);
 
-                const enrollment = new Enrollment();
-                enrollment.id = '1';
-                enrollment.name = 'oldName';
-                enrollment.creator = user;
-                enrollment.appointment = appointment;
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                const actual = await enrollmentService.update(toChange, id, user, token);
-                expect(actual).toMatchObject({
-                    id: enrollment.id,
-                    name: enrollment.name
-                });
-            });
-
-            it('update name', async () => {
-                const toChange = {
-                    name: 'newName'
-                };
-                const id = '1';
-                const user = new User();
-                user.id = '1';
-                const token = '';
-
-                const appointment = new Appointment();
-                appointment.creator = user;
-                appointment.administrators = [];
-
-                const enrollment = new Enrollment();
-                enrollment.id = '1';
-                enrollment.name = 'oldName';
-                enrollment.creator = user;
-                enrollment.appointment = appointment;
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                const actual = await enrollmentService.update(toChange, id, user, token);
-                expect(actual.name).toEqual(toChange.name);
-            });
-
-            it('update comment', async () => {
-                const toChange = {
-                    comment: 'this is a new comment'
-                };
-                const id = '1';
-                const user = new User();
-                user.id = '1';
-                const token = '';
-
-                const appointment = new Appointment();
-                appointment.creator = user;
-                appointment.administrators = [];
-
-                const enrollment = new Enrollment();
-                enrollment.id = '1';
-                enrollment.comment = 'old comment';
-                enrollment.creator = user;
-                enrollment.appointment = appointment;
-
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                const actual = await enrollmentService.update(toChange, id, user, token);
-                expect(actual.comment).toEqual(toChange.comment);
-            });
-
-            describe('* update additions', () => {
-                it('add one', async () => {
-                    const addition = new Addition();
-                    addition.id = '1';
-                    addition.name = 'addition';
-
-                    const toChange = {
-                        additions: [addition]
-                    };
-                    const id = '1';
-                    const user = new User();
-                    user.id = '1';
-                    const token = '';
-
-                    const appointment = new Appointment();
-                    appointment.creator = user;
-                    appointment.administrators = [];
-                    appointment.additions = [addition];
-
-                    const enrollment = new Enrollment();
-                    enrollment.id = '1';
-                    enrollment.comment = 'old comment';
-                    enrollment.creator = user;
-                    enrollment.appointment = appointment;
-                    enrollment.additions = [];
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                    const actual = await enrollmentService.update(toChange, id, user, token);
-                    expect(actual.additions).toEqual(toChange.additions);
-                });
-
-                it('remove one - from 1', async () => {
-                    const addition = new Addition();
-                    addition.id = '1';
-                    addition.name = 'addition';
-
-                    const toChange = {
-                        additions: []
-                    };
-                    const id = '1';
-                    const user = new User();
-                    user.id = '1';
-                    const token = '';
-
-                    const appointment = new Appointment();
-                    appointment.creator = user;
-                    appointment.administrators = [];
-                    appointment.additions = [addition];
-
-                    const enrollment = new Enrollment();
-                    enrollment.id = '1';
-                    enrollment.comment = 'old comment';
-                    enrollment.creator = user;
-                    enrollment.appointment = appointment;
-                    enrollment.additions = [addition];
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                    const actual = await enrollmentService.update(toChange, id, user, token);
-                    expect(actual.additions).toEqual(toChange.additions);
-                });
-
-                it('remove one - from 2', async () => {
-                    const addition1 = new Addition();
-                    addition1.id = '1';
-                    addition1.name = 'addition1';
-                    const addition2 = new Addition();
-                    addition2.id = '2';
-                    addition2.name = 'addition2';
-
-                    const toChange = {
-                        additions: [addition1]
-                    };
-                    const id = '1';
-                    const user = new User();
-                    user.id = '1';
-                    const token = '';
-
-                    const appointment = new Appointment();
-                    appointment.creator = user;
-                    appointment.administrators = [];
-                    appointment.additions = [addition1, addition2];
-
-                    const enrollment = new Enrollment();
-                    enrollment.id = '1';
-                    enrollment.comment = 'old comment';
-                    enrollment.creator = user;
-                    enrollment.appointment = appointment;
-                    enrollment.additions = [addition1, addition2];
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                    const actual = await enrollmentService.update(toChange, id, user, token);
-                    expect(actual.additions).toEqual(toChange.additions);
-                });
-            });
-
-            describe('* update driver', () => {
-                it('from passenger to driver', async () => {
-                    const driver = new Driver();
-                    driver.seats = 1;
-                    driver.service = 1;
-
-                    const toChange = {
-                        driver: driver
-                    };
-
-                    const id = '1';
-                    const user = new User();
-                    user.id = '1';
-                    const token = '';
-
-                    const appointment = new Appointment();
-                    appointment.creator = user;
-                    appointment.administrators = [];
-                    appointment.driverAddition = true;
-
-                    const enrollment = new Enrollment();
-                    enrollment.id = '1';
-                    enrollment.comment = 'old comment';
-                    enrollment.creator = user;
-                    enrollment.appointment = appointment;
-                    enrollment.passenger = new Passenger();
-                    enrollment.driver = null;
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                    driverRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                    driverRepositoryMock.save.mockImplementationOnce((val) => val);
-                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                    const actual = await enrollmentService.update(toChange, id, user, token);
-                    expect(actual.driver).toEqual(toChange.driver);
-                    expect(actual.passenger).toEqual(undefined);
-                });
-
-                it('update driver seats', async () => {
-                    const currentDriver = new Driver();
-                    currentDriver.seats = 1;
-                    currentDriver.service = 1;
-
-                    const newDriver = new Driver();
-                    newDriver.seats = 2;
-                    newDriver.service = 1;
-
-                    const toChange = {
-                        driver: newDriver
-                    };
-
-                    const id = '1';
-                    const user = new User();
-                    user.id = '1';
-                    const token = '';
-
-                    const appointment = new Appointment();
-                    appointment.creator = user;
-                    appointment.administrators = [];
-                    appointment.driverAddition = true;
-
-                    const enrollment = new Enrollment();
-                    enrollment.id = '1';
-                    enrollment.creator = user;
-                    enrollment.appointment = appointment;
-                    enrollment.driver = currentDriver;
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                    driverRepositoryMock.findOne.mockReturnValueOnce(currentDriver);
-                    driverRepositoryMock.save.mockImplementationOnce((val) => val);
-                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                    const actual = await enrollmentService.update(toChange, id, user, token);
-                    expect(actual.driver).toEqual(toChange.driver);
-                    expect(actual.passenger).toEqual(undefined);
-                });
-
-                it('update driver service', async () => {
-                    const currentDriver = new Driver();
-                    currentDriver.seats = 1;
-                    currentDriver.service = 1;
-
-                    const newDriver = new Driver();
-                    newDriver.seats = 1;
-                    newDriver.service = 2;
-
-                    const toChange = {
-                        driver: newDriver
-                    };
-
-                    const id = '1';
-                    const user = new User();
-                    user.id = '1';
-                    const token = '';
-
-                    const appointment = new Appointment();
-                    appointment.creator = user;
-                    appointment.administrators = [];
-                    appointment.driverAddition = true;
-
-                    const enrollment = new Enrollment();
-                    enrollment.id = '1';
-                    enrollment.creator = user;
-                    enrollment.appointment = appointment;
-                    enrollment.driver = currentDriver;
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                    driverRepositoryMock.findOne.mockReturnValueOnce(currentDriver);
-                    driverRepositoryMock.save.mockImplementationOnce((val) => val);
-                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                    const actual = await enrollmentService.update(toChange, id, user, token);
-                    expect(actual.driver).toEqual(toChange.driver);
-                    expect(actual.passenger).toEqual(undefined);
-                });
-            });
-
-            describe('* update passenger', () => {
-                it('from driver to passenger', async () => {
-                    const passenger = new Passenger();
-                    passenger.requirement = 1;
-
-                    const toChange = {
-                        passenger: passenger
-                    };
-
-                    const id = '1';
-                    const user = new User();
-                    user.id = '1';
-                    const token = '';
-
-                    const appointment = new Appointment();
-                    appointment.creator = user;
-                    appointment.administrators = [];
-                    appointment.driverAddition = true;
-
-                    const enrollment = new Enrollment();
-                    enrollment.id = '1';
-                    enrollment.creator = user;
-                    enrollment.appointment = appointment;
-                    enrollment.driver = new Driver();
-                    enrollment.passenger = null;
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                    passengerRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                    passengerRepositoryMock.save.mockImplementationOnce((val) => val);
-                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                    const actual = await enrollmentService.update(toChange, id, user, token);
-                    expect(actual.passenger).toEqual(toChange.passenger);
-                    expect(actual.driver).toEqual(undefined);
-                });
-
-                it('update passenger requirement', async () => {
-                    const currentPassenger = new Passenger();
-                    currentPassenger.requirement = 1;
-
-                    const newPassenger = new Passenger();
-                    newPassenger.requirement = 2;
-
-                    const toChange = {
-                        passenger: newPassenger
-                    };
-
-                    const id = '1';
-                    const user = new User();
-                    user.id = '1';
-                    const token = '';
-
-                    const appointment = new Appointment();
-                    appointment.creator = user;
-                    appointment.administrators = [];
-                    appointment.driverAddition = true;
-
-                    const enrollment = new Enrollment();
-                    enrollment.id = '1';
-                    enrollment.creator = user;
-                    enrollment.appointment = appointment;
-                    enrollment.driver = null;
-                    enrollment.passenger = currentPassenger;
-
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(appointment);
-                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                    passengerRepositoryMock.findOne.mockReturnValueOnce(currentPassenger);
-                    passengerRepositoryMock.save.mockImplementationOnce((val) => val);
-                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
-
-                    const actual = await enrollmentService.update(toChange, id, user, token);
-                    expect(actual.passenger).toEqual(toChange.passenger);
-                    expect(actual.driver).toEqual(undefined);
-                });
-            });
         });
 
-        describe('* failure should return error', () => {
-            it('enrollment not found', async () => {
-                const toChange = {};
-                const id = '1';
-                const user = new User();
-                const token = '';
+        it('* update comment', async () => {
+            const __given_enrollment_change_data = {
+                comment: 'newComment'
+            };
+            const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
+            const __given_user = new User();
+            __given_user.username = 'username';
 
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            const __existing_enrollment = new Enrollment();
+            __existing_enrollment.id = __given_enrollment_id;
+            __existing_enrollment.comment = 'comment';
+            __existing_enrollment.creator = __given_user;
+            __existing_enrollment.appointment = new Appointment();
+            __existing_enrollment.appointment.creator = new User();
+            __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
-                enrollmentService
-                    .update(toChange, id, user, token)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(EntityNotFoundException);
-                        expect(err.data).toBe('enrollment');
-                    });
+            enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
+            enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+            jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                return;
             });
 
-            it('insufficient permission', async () => {
-                const creator = new User();
-                creator.id = '1';
-                creator.username = 'creator';
+            const __expected = __given_enrollment_change_data.comment;
 
-                const toChange = {};
-                const id = '1';
-                const user = new User();
-                user.id = '2';
-                user.username = 'user';
-                const token = '';
+            const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
+            expect(__actual.comment).toBe(__expected);
 
-                const appointment = new Appointment();
-                appointment.creator = creator;
-                appointment.administrators = [];
+        });
 
-                const enrollment = new Enrollment();
-                enrollment.id = '1';
-                enrollment.creator = creator;
-                enrollment.appointment = appointment;
+        it('* update driver values', async () => {
+            const __given_enrollment_change_data = {
+                driver: {
+                    seats: 4,
+                    service: 1,
+                }
+            };
+            const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
+            const __given_user = new User();
+            __given_user.username = 'username';
 
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+            const __existing_enrollment = new Enrollment();
+            __existing_enrollment.id = __given_enrollment_id;
+            __existing_enrollment.driver = new Driver();
+            __existing_enrollment.driver.seats = 5;
+            __existing_enrollment.driver.service = 2;
+            __existing_enrollment.creator = __given_user;
+            __existing_enrollment.appointment = new Appointment();
+            __existing_enrollment.appointment.driverAddition = true;
+            __existing_enrollment.appointment.creator = new User();
+            __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
-                enrollmentService
-                    .update(toChange, id, user, token)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an InsufficientPermissionsException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(InsufficientPermissionsException);
-                    });
+            enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
+            driverRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment.driver);
+            driverRepositoryMock.save.mockImplementationOnce((val) => val);
+            enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+            jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                return;
             });
 
-            it('name already in use', async () => {
-                const toChange = {
-                    name: 'newName'
-                };
-                const id = '1';
-                const user = new User();
-                user.id = '2';
-                const token = '';
+            const __expected = __given_enrollment_change_data.driver;
 
-                const appointment = new Appointment();
-                appointment.creator = user;
-                appointment.administrators = [];
+            const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
+            expect(__actual.driver).toEqual(__expected);
+            expect(__actual.passenger).toBeUndefined();
+        });
 
-                const enrollment = new Enrollment();
-                enrollment.id = '1';
-                enrollment.name = 'oldName';
-                enrollment.creator = user;
-                enrollment.appointment = appointment;
+        it('* update passenger values', async () => {
+            const __given_enrollment_change_data = {
+                passenger: {
+                    requirement: 1,
+                }
+            };
+            const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
+            const __given_user = new User();
+            __given_user.username = 'username';
 
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+            const __existing_enrollment = new Enrollment();
+            __existing_enrollment.id = __given_enrollment_id;
+            __existing_enrollment.passenger = new Passenger();
+            __existing_enrollment.passenger.requirement = 2;
+            __existing_enrollment.creator = __given_user;
+            __existing_enrollment.appointment = new Appointment();
+            __existing_enrollment.appointment.driverAddition = true;
+            __existing_enrollment.appointment.creator = new User();
+            __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
-                enrollmentService
-                    .update(toChange, id, user, token)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an DuplicateValueException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(DuplicateValueException);
-                        expect(err.data).toEqual(['name']);
-                    });
+            enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
+            passengerRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment.passenger);
+            passengerRepositoryMock.save.mockImplementationOnce((val) => val);
+            enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+            jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                return;
             });
 
-            it('addition doesnt exist', async () => {
-                const addition = new Addition();
-                addition.id = '1';
-                addition.name = 'addition';
+            const __expected = __given_enrollment_change_data.passenger;
 
-                const toChange = {
-                    additions: [addition]
-                };
-                const id = '1';
-                const user = new User();
-                user.id = '2';
-                const token = '';
+            const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
+            expect(__actual.passenger).toEqual(__expected);
+            expect(__actual.driver).toBeUndefined();
+        });
 
-                const appointment = new Appointment();
-                appointment.creator = user;
-                appointment.administrators = [];
-                appointment.additions = [];
+        it('* change driver to passenger', async () => {
+            const __given_enrollment_change_data = {
+                passenger: {
+                    requirement: 1,
+                }
+            };
+            const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
+            const __given_user = new User();
+            __given_user.username = 'username';
 
-                const enrollment = new Enrollment();
-                enrollment.id = '1';
-                enrollment.creator = user;
-                enrollment.additions = [];
-                enrollment.appointment = appointment;
+            const __existing_enrollment = new Enrollment();
+            __existing_enrollment.id = __given_enrollment_id;
+            __existing_enrollment.driver = new Driver();
+            __existing_enrollment.driver.seats = 5;
+            __existing_enrollment.driver.service = 2;
+            __existing_enrollment.passenger = undefined;
+            __existing_enrollment.creator = __given_user;
+            __existing_enrollment.appointment = new Appointment();
+            __existing_enrollment.appointment.driverAddition = true;
+            __existing_enrollment.appointment.creator = new User();
+            __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
+            passengerRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            passengerRepositoryMock.save.mockImplementationOnce((val) => val);
+            enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
-                enrollmentService
-                    .update(toChange, id, user, token)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
-                    })
-                    .catch((err) => {
-                        expect(err).toBeInstanceOf(EntityNotFoundException);
-                        expect(err.data).toEqual(JSON.stringify(addition));
-                    });
+            jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                return;
             });
+
+            const __expected = __given_enrollment_change_data.passenger;
+
+            const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
+            expect(__actual.passenger).toEqual(__expected);
+            expect(__actual.driver).toBeUndefined();
+        });
+
+        it('* change passenger to driver', async () => {
+            const __given_enrollment_change_data = {
+                driver: {
+                    seats: 4,
+                    service: 1,
+                }
+            };
+            const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
+            const __given_user = new User();
+            __given_user.username = 'username';
+
+            const __existing_enrollment = new Enrollment();
+            __existing_enrollment.id = __given_enrollment_id;
+            __existing_enrollment.passenger = new Passenger();
+            __existing_enrollment.passenger.requirement = 2;
+            __existing_enrollment.driver = undefined;
+            __existing_enrollment.creator = __given_user;
+            __existing_enrollment.appointment = new Appointment();
+            __existing_enrollment.appointment.driverAddition = true;
+            __existing_enrollment.appointment.creator = new User();
+            __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+
+            enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
+            driverRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            driverRepositoryMock.save.mockImplementationOnce((val) => val);
+            enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+            jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                return;
+            });
+
+            const __expected = __given_enrollment_change_data.driver;
+
+            const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
+            expect(__actual.driver).toEqual(__expected);
+            expect(__actual.passenger).toBeUndefined();
         });
     });
 

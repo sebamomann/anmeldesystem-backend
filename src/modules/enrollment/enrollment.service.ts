@@ -87,12 +87,15 @@ export class EnrollmentService {
                 throw err;
             }));
 
+        let enrolledByUser = false;
+
         if (_enrollment.editMail != null &&
             _enrollment.editMail != '') {
             const mail = new Mail();
             mail.mail = _enrollment.editMail;
             enrollment.mail = await this.mailRepository.save(mail);
-        } else {
+        } else if (user !== undefined) {
+            enrolledByUser = true;
             enrollment.creator = user;
         }
 
@@ -100,8 +103,7 @@ export class EnrollmentService {
 
         let savedEnrollment = await this.enrollmentRepository.save(enrollment);
 
-        if (savedEnrollment.creator === null ||
-            savedEnrollment.creator === undefined) {
+        if (!enrolledByUser) {
             savedEnrollment.token = crypto.createHash('sha256')
                 .update(savedEnrollment.id + process.env.SALT_ENROLLMENT)
                 .digest('hex');
@@ -127,7 +129,7 @@ export class EnrollmentService {
                 });
         }
 
-        savedEnrollment = enrollmentMapper.basic(this, savedEnrollment);
+        savedEnrollment = enrollmentMapper.basic(savedEnrollment);
 
         this.appointmentGateway.appointmentUpdated(_enrollment.appointment);
 
@@ -167,7 +169,6 @@ export class EnrollmentService {
 
                 if (key === 'name'
                     && enrollment.name !== toChange.name) {
-                    console.log('updateName');
                     if (await this.existsByName(toChange.name, appointment)) {
                         throw new DuplicateValueException('DUPLICATE_ENTRY',
                             'Following values are already taken',
@@ -201,7 +202,7 @@ export class EnrollmentService {
 
         let savedEnrollment = await this.enrollmentRepository.save(enrollment);
 
-        savedEnrollment = enrollmentMapper.basic(this, savedEnrollment);
+        savedEnrollment = enrollmentMapper.basic(savedEnrollment);
 
         this.appointmentGateway.appointmentUpdated(appointment);
 
@@ -331,10 +332,8 @@ export class EnrollmentService {
         if (!!_appointment.driverAddition === true) {
             if (_enrollment.driver !== null && _enrollment.driver !== undefined) {
                 output.driver = await this._handleDriverRelation(_enrollment);
-                output.passenger = null;
             } else if (_enrollment.passenger !== null && _enrollment.passenger !== undefined) {
                 output.passenger = await this._handlePassengerRelation(_enrollment);
-                output.driver = null;
             } else {
                 throw new EmptyFieldsException('EMPTY_FIELDS',
                     'Please specify one of the following values',
@@ -364,7 +363,6 @@ export class EnrollmentService {
         output.requirement = _enrollment.passenger?.requirement;
 
         if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
-            console.log('passenger values changed');
             return await this.passengerService.__save(output);
         }
 
@@ -403,7 +401,6 @@ export class EnrollmentService {
         output.service = _enrollment.driver?.service;
 
         if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
-            console.log('driver values changed');
             return await this.driverService.__save(output);
         }
 
