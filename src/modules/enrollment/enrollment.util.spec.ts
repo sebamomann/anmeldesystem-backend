@@ -5,6 +5,8 @@ import {Appointment} from '../appointment/appointment.entity';
 import {Addition} from '../addition/addition.entity';
 import {AppointmentUtil} from '../appointment/appointment.util';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
+import {Passenger} from './passenger/passenger.entity';
+import {Driver} from './driver/driver.entity';
 
 const crypto = require('crypto');
 
@@ -347,6 +349,93 @@ describe('AppointmentUtil', () => {
                 expect(e.data).toEqual(JSON.stringify(__given_addition));
                 done();
             }
+        });
+    });
+
+    describe('* handle driver relation', () => {
+        it('* return object if changes apply', async () => {
+            const __given_driver_to_be = new Driver();
+            __given_driver_to_be.service = 4;
+            __given_driver_to_be.seats = 2;
+
+            const __given_driver_existing = new Driver();
+            __given_driver_existing.service = 5;
+            __given_driver_existing.seats = 1;
+
+            const __expected = __given_driver_to_be;
+
+            const __actual = EnrollmentUtil.handleDriverRelation(__given_driver_to_be, __given_driver_existing);
+
+            expect(__actual).toEqual(__expected);
+        });
+
+        it('* current object undefined', async () => {
+            const __given_driver_to_be = new Driver();
+            __given_driver_to_be.service = 4;
+            __given_driver_to_be.seats = 2;
+
+            const __given_driver_existing = undefined;
+
+            const __expected = __given_driver_to_be;
+
+            const __actual = EnrollmentUtil.handleDriverRelation(__given_driver_to_be, __given_driver_existing);
+
+            expect(__actual).toEqual(__expected);
+        });
+
+        it('* return undefined if no changes apply', async () => {
+            const __given_driver_to_be = new Driver();
+            __given_driver_to_be.service = 4;
+            __given_driver_to_be.seats = 2;
+
+            const __given_driver_existing = new Driver();
+            __given_driver_existing.service = 4;
+            __given_driver_existing.seats = 2;
+
+            const __actual = EnrollmentUtil.handleDriverRelation(__given_driver_to_be, __given_driver_existing);
+
+            expect(__actual).toBeUndefined();
+        });
+    });
+
+    describe('* handle passenger relation', () => {
+        it('* return object if changes apply', async () => {
+            const __given_passenger_to_be = new Passenger();
+            __given_passenger_to_be.requirement = 2;
+
+            const __given_passenger_existing = new Passenger();
+            __given_passenger_existing.requirement = 1;
+
+            const __expected = __given_passenger_to_be;
+
+            const __actual = EnrollmentUtil.handlePassengerRelation(__given_passenger_to_be, __given_passenger_existing);
+
+            expect(__actual).toEqual(__expected);
+        });
+
+        it('* current object undefined', async () => {
+            const __given_passenger_to_be = new Passenger();
+            __given_passenger_to_be.requirement = 2;
+
+            const __given_passenger_existing = undefined;
+
+            const __expected = __given_passenger_to_be;
+
+            const __actual = EnrollmentUtil.handlePassengerRelation(__given_passenger_to_be, __given_passenger_existing);
+
+            expect(__actual).toEqual(__expected);
+        });
+
+        it('* return undefined if no changes apply', async () => {
+            const __given_passenger_to_be = new Passenger();
+            __given_passenger_to_be.requirement = 2;
+
+            const __given_passenger_existing = new Passenger();
+            __given_passenger_existing.requirement = 2;
+
+            const __actual = EnrollmentUtil.handlePassengerRelation(__given_passenger_to_be, __given_passenger_existing);
+
+            expect(__actual).toBeUndefined();
         });
     });
 

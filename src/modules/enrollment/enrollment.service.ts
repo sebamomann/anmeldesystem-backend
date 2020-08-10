@@ -5,9 +5,6 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Appointment} from '../appointment/appointment.entity';
 import {AppointmentService} from '../appointment/appointment.service';
 import {AdditionService} from '../addition/addition.service';
-import {Driver} from './driver/driver.entity';
-import {Passenger} from './passenger/passenger.entity';
-import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {User} from '../user/user.entity';
 import {PassengerService} from './passenger/passenger.service';
@@ -20,6 +17,7 @@ import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {AppointmentGateway} from '../appointment/appointment.gateway';
 import {DomainUtil} from '../../util/domain.util';
 import {EnrollmentUtil} from './enrollment.util';
+import {MissingAuthenticationException} from '../../exceptions/MissingAuthenticationException';
 
 const crypto = require('crypto');
 const logger = require('../../logger');
@@ -67,7 +65,7 @@ export class EnrollmentService {
      *
      * @throws See {@link findByLink} for reference
      * @throws DuplicateValueException if name is already in use
-     * @throws See {@link _parseEnrollmentObject} for reference
+     * @throws See {@link parseEnrollmentObject} for reference
      */
     public async create(_enrollment: Enrollment, user: User, domain: string) {
         let appointment;
@@ -78,14 +76,19 @@ export class EnrollmentService {
             throw e;
         }
 
-        if (await this.existsByName(_enrollment.name, appointment)) {
+        if (await this._existsByName(_enrollment.name, appointment)) {
             throw new DuplicateValueException(null, null, ['name']);
         }
 
-        let enrollment = await this._parseEnrollmentObject(_enrollment, appointment)
-            .catch((err => {
-                throw err;
-            }));
+        let enrollment;
+
+        try {
+            enrollment = await EnrollmentUtil.parseEnrollmentObject(_enrollment, appointment);
+        } catch (e) {
+            throw e;
+        }
+
+        this._storeDriverAdditions(enrollment, appointment);
 
         let enrolledByUser = false;
 
@@ -97,6 +100,8 @@ export class EnrollmentService {
         } else if (user !== undefined) {
             enrolledByUser = true;
             enrollment.creator = user;
+        } else {
+            throw new MissingAuthenticationException(null, 'Valid authentication by email or authentication header needed', null);
         }
 
         enrollment.appointment = appointment;
@@ -125,6 +130,7 @@ export class EnrollmentService {
                 .then(() => {
                 })
                 .catch(() => {
+                    /* istanbul ignore next */
                     logger.log('error', 'Could not send enrollment mail to %s', savedEnrollment.mail.mail);
                 });
         }
@@ -165,11 +171,11 @@ export class EnrollmentService {
             if (key in enrollment
                 && enrollment[key] !== value
                 && allowedValuesToChange.indexOf(key) > -1) {
-                let changedValue = value;
+                let changedValue: any = value;
 
                 if (key === 'name'
                     && enrollment.name !== toChange.name) {
-                    if (await this.existsByName(toChange.name, appointment)) {
+                    if (await this._existsByName(toChange.name, appointment)) {
                         throw new DuplicateValueException('DUPLICATE_ENTRY',
                             'Following values are already taken',
                             ['name']);
@@ -178,13 +184,47 @@ export class EnrollmentService {
 
                 if (key === 'driver'
                     && appointment.driverAddition) {
-                    changedValue = await this._handleDriverRelation(toChange);
+                    let current_driver = undefined;
+
+                    await this.driverService
+                        .findByEnrollment(enrollment)
+                        .then((res) => {
+                            current_driver = res;
+                        })
+                        .catch(() => {
+                        });
+                    changedValue = await EnrollmentUtil.handleDriverRelation(toChange.driver, current_driver);
+
+                    if (changedValue !== undefined) {
+                        this.driverService.__save(changedValue);
+                        enrollment.driver = changedValue;
+                    } else {
+                        changedValue = toChange.driver;
+                    }
+
                     enrollment.passenger = null;
                 }
 
                 if (key === 'passenger'
                     && appointment.driverAddition) {
-                    changedValue = await this._handlePassengerRelation(toChange);
+                    let current_passenger = undefined;
+
+                    await this.passengerService
+                        .findByEnrollment(enrollment)
+                        .then((res) => {
+                            current_passenger = res;
+                        })
+                        .catch(() => {
+                        });
+                    changedValue = await EnrollmentUtil.handlePassengerRelation(toChange.passenger, current_passenger);
+
+                    if (changedValue !== undefined) {
+                        this.passengerService.__save(changedValue);
+                        enrollment.passenger = changedValue;
+                    } else {
+                        changedValue = toChange.passenger;
+                    }
+
                     enrollment.driver = null;
                 }
 
@@ -207,6 +247,33 @@ export class EnrollmentService {
         this.appointmentGateway.appointmentUpdated(appointment);
 
         return savedEnrollment;
+    }
+
+    private async _existsByName(name: string, appointment: Appointment) {
+        return this._findByEnrollmentNameAndAppointment(name, appointment)
+            .then(() => {
+                return true;
+            })
+            .catch(() => {
+                return false;
+            });
+    }
+
+    private async _findByEnrollmentNameAndAppointment(name: string, appointment: Appointment) {
+        let enrollment = await this.enrollmentRepository.findOne({
+            where: {
+                name: name,
+                appointment: {
+                    id: appointment.id
+                }
+            }
+        });
+
+        if (enrollment === undefined) {
+            throw new EntityNotFoundException(null, null, 'enrollment');
+        }
+
+        return enrollment;
     }
 
     /**
@@ -236,20 +303,6 @@ export class EnrollmentService {
 
         this.appointmentGateway.appointmentUpdated(enrollment.appointment);
     }
-
-    // public async get(id: string) {
-    //     let enrollment;
-    //
-    //     try {
-    //         enrollment = await this.findById(id);
-    //     } catch (e) {
-    //         throw e;
-    //     }
-    //
-    //     enrollment = enrollmentMapper.basic(this, enrollment);
-    //
-    //     return enrollment;
-    // }
 
     /**
      * Check if user is allowed to edit/delete an Enrollment
@@ -288,122 +341,17 @@ export class EnrollmentService {
         return allowances;
     }
 
-    private async findByNameAndAppointment(name: string, appointment: Appointment) {
-        let enrollment = await this.enrollmentRepository.findOne({
-            where: {
-                name: name,
-                appointment: {
-                    id: appointment.id
-                }
-            }
-        });
-
-        if (enrollment === undefined) {
-            throw new EntityNotFoundException(null, null, 'enrollment');
-        }
-
-        return enrollment;
-    }
-
-    private async existsByName(name: string, appointment: Appointment) {
-        return this.findByNameAndAppointment(name, appointment)
-            .then(() => {
-                return true;
-            })
-            .catch(() => {
-                return false;
-            });
-    }
-
-    private async _parseEnrollmentObject(_enrollment: Enrollment, _appointment: Appointment) {
-        let output = new Enrollment();
-
-        output.name = _enrollment.name;
-        const trimmed = _enrollment.comment.trim();
-        output.comment = trimmed === '' ? null : trimmed;
-
-        try {
-            output.additions = EnrollmentUtil.filterValidAdditions(_enrollment, _appointment);
-        } catch (e) {
-            throw e;
-        }
-
+    private _storeDriverAdditions(enrollment: any, appointment: Appointment) {
         /* Needed due to malicious comparison fo tinyint to boolean */
-        if (!!_appointment.driverAddition === true) {
-            if (_enrollment.driver !== null && _enrollment.driver !== undefined) {
-                output.driver = await this._handleDriverRelation(_enrollment);
-            } else if (_enrollment.passenger !== null && _enrollment.passenger !== undefined) {
-                output.passenger = await this._handlePassengerRelation(_enrollment);
+        if (!!appointment.driverAddition === true) {
+            let string = '';
+            if (enrollment.driver !== undefined) { // check for none of both not needed, because error would be thrown beforehand
+                string = 'driver';
             } else {
-                throw new EmptyFieldsException('EMPTY_FIELDS',
-                    'Please specify one of the following values',
-                    ['driver', 'passenger']);
+                string = 'passenger';
             }
+
+            this[string + 'Service'].__save(enrollment[string]);
         }
-
-        return output;
-    }
-
-    private async _handlePassengerRelation(_enrollment: Enrollment) {
-        let output = new Passenger();
-        let output_orig = new Passenger();
-
-        await this.passengerService.findByEnrollment(_enrollment)
-            .then((res) => {
-                output = JSON.parse(JSON.stringify(res));
-                output_orig = JSON.parse(JSON.stringify(res));
-            })
-            .catch(() => {
-            });
-
-        // if (_enrollment.passenger.requirement === undefined) {
-        //     throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', ['passenger_requirement']);
-        // }
-
-        output.requirement = _enrollment.passenger?.requirement;
-
-        if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
-            return await this.passengerService.__save(output);
-        }
-
-        return output;
-    }
-
-    private async _handleDriverRelation(_enrollment: Enrollment) {
-        let output = new Driver();
-        let output_orig = new Driver();
-
-        await this.driverService.findByEnrollment(_enrollment)
-            .then((res) => {
-                output = JSON.parse(JSON.stringify(res));
-                output_orig = JSON.parse(JSON.stringify(res));
-            })
-            .catch(() => {
-            });
-
-        // let emptyFields = [];
-        // if (_enrollment.driver.seats === undefined) {
-        //     emptyFields.push('driver_seats');
-        // }
-        // if (_enrollment.driver.service === undefined) {
-        //     emptyFields.push('driver_service');
-        // }
-        //
-        // if (emptyFields.length > 0) {
-        //     throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', emptyFields);
-        // }
-        //
-        // if (_enrollment.driver.seats <= 0) {
-        //     throw new InvalidValuesException('INVALID_VALUE', 'Minimum of 1 needed', ['driver_seats']);
-        // }
-
-        output.seats = _enrollment.driver?.seats;
-        output.service = _enrollment.driver?.service;
-
-        if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
-            return await this.driverService.__save(output);
-        }
-
-        return output;
     }
 }
