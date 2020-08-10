@@ -60,31 +60,16 @@ export class EnrollmentUtil {
         return output;
     }
 
-    public static async parseEnrollmentObject(_enrollment: Enrollment, _appointment: Appointment) {
+    public static parseEnrollmentObject(enrollment: Enrollment, appointment: Appointment) {
         let output = new Enrollment();
 
-        output.name = _enrollment.name;
-        const trimmed = _enrollment.comment.trim();
-        output.comment = trimmed === '' ? null : trimmed;
+        output.name = enrollment.name;
 
-        try {
-            output.additions = EnrollmentUtil.filterValidAdditions(_enrollment, _appointment);
-        } catch (e) {
-            throw e;
-        }
+        const trimmedComment = enrollment.comment.trim();
+        output.comment = trimmedComment === '' ? null : trimmedComment;
+        output.additions = EnrollmentUtil.filterValidAdditions(enrollment, appointment);
 
-        /* Needed due to malicious comparison fo tinyint to boolean */
-        if (!!_appointment.driverAddition === true) {
-            if (_enrollment.driver !== null && _enrollment.driver !== undefined) {
-                output.driver = await EnrollmentUtil.handleDriverRelation(_enrollment.driver, undefined);
-            } else if (_enrollment.passenger !== null && _enrollment.passenger !== undefined) {
-                output.passenger = await EnrollmentUtil.handlePassengerRelation(_enrollment.passenger, undefined);
-            } else {
-                throw new EmptyFieldsException('EMPTY_FIELDS',
-                    'Please specify one of the following values',
-                    ['driver', 'passenger']);
-            }
-        }
+        this._handleDriverAddition(output, enrollment, appointment);
 
         return output;
     }
@@ -124,5 +109,19 @@ export class EnrollmentUtil {
         }
 
         return undefined;
+    }
+
+    private static _handleDriverAddition(output: Enrollment, enrollment: Enrollment, appointment: Appointment) {
+        if (appointment.driverAddition) { // if (!!_appointment.driverAddition === true) {
+            if (enrollment?.driver) {
+                output.driver = EnrollmentUtil.handleDriverRelation(enrollment.driver, undefined);
+            } else if (enrollment?.passenger) {
+                output.passenger = EnrollmentUtil.handlePassengerRelation(enrollment.passenger, undefined);
+            } else {
+                throw new EmptyFieldsException('EMPTY_FIELDS',
+                    'Please specify one of the following values',
+                    ['driver', 'passenger']);
+            }
+        }
     }
 }

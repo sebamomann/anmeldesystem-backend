@@ -654,6 +654,7 @@ describe('EnrollmentService', () => {
                 const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
                 expect(__actual.driver).toEqual(__expected);
                 expect(__actual.passenger).toBeUndefined();
+                expect(driverRepositoryMock.save).toHaveBeenCalledTimes(1);
             });
 
             it('* update driver values - nothing changed', async () => {
@@ -728,6 +729,7 @@ describe('EnrollmentService', () => {
                 const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
                 expect(__actual.passenger).toEqual(__expected);
                 expect(__actual.driver).toBeUndefined();
+                expect(passengerRepositoryMock.save).toHaveBeenCalledTimes(1);
             });
 
             it('* update passenger values - nothing changed', async () => {
@@ -802,6 +804,7 @@ describe('EnrollmentService', () => {
                 const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
                 expect(__actual.passenger).toEqual(__expected);
                 expect(__actual.driver).toBeUndefined();
+                expect(passengerRepositoryMock.save).toHaveBeenCalledTimes(1);
             });
 
             it('* change passenger to driver', async () => {
@@ -840,6 +843,7 @@ describe('EnrollmentService', () => {
                 const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
                 expect(__actual.driver).toEqual(__expected);
                 expect(__actual.passenger).toBeUndefined();
+                expect(driverRepositoryMock.save).toHaveBeenCalledTimes(1);
             });
 
             it('* update additions', async () => {

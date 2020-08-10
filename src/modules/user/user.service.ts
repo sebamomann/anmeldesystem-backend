@@ -76,7 +76,7 @@ export class UserService {
         return user;
     }
 
-    async findByEmailOrUsername(value: string) {
+    public async findByEmailOrUsername(value: string) {
         const user = await this.userRepository.findOne({where: [{mail: value}, {username: value}]});
 
         if (user === undefined) {
@@ -96,6 +96,10 @@ export class UserService {
         }
 
         return userMapper.basic(this, _user);
+    }
+
+    public async __save(user: any) {
+        return await this.userRepository.save(user);
     }
 
     public async register(user: User, domain: string) {
@@ -138,10 +142,6 @@ export class UserService {
             });
 
         return userMapper.basic(this, savedUser);
-    }
-
-    public async __save(user: any) {
-        return await this.userRepository.save(user);
     }
 
     public async update(valuesToUpdate: any, userFromJwt: User) {
@@ -645,13 +645,6 @@ export class UserService {
 
         return emailChange;
     }
-
-    // async addTelegramUser(telegramUser: TelegramUser, user: User) {
-    //     let savedTelegramUser = await this.telegramUserRepository.save(telegramUser);
-    //     let userFromDb = await this.find(user.id);
-    //     userFromDb.telegramUser = savedTelegramUser;
-    //     return this.userRepository.save(userFromDb);
-    // }
 
     /**
      * Fetch the current active mail change from the mailChange list. <br />
