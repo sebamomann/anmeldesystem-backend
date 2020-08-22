@@ -42,7 +42,7 @@ pipeline {
                     retry(5){
                         sleep 10
                         HEALTH = sh (
-                                script: 'docker inspect -f \'{{json .State.Health.Status}}\' newmanDB',
+                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' newmanDB',
                                 returnStdout: true
                         ).trim()
                         echo "${HEALTH}"
@@ -70,7 +70,7 @@ pipeline {
                     retry(5){
                         sleep 10
                         HEALTH = sh (
-                                script: 'docker inspect -f \'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
+                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
                                 returnStdout: true
                         ).trim()
                         echo "${HEALTH}"
