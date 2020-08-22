@@ -70,7 +70,7 @@ pipeline {
                     retry(5){
                         sleep 10
                         HEALTH = sh (
-                                script: 'docker inspect -f \'{{json .State.Health.Status}}\' anmeldesystem-backend-newmananmeldesystem-backend-newman',
+                                script: 'docker inspect -f \'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
                                 returnStdout: true
                         ).trim()
                         echo "${HEALTH}"
