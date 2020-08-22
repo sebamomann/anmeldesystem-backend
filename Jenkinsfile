@@ -58,7 +58,7 @@ pipeline {
         stage('Newman exec') {
             steps {
                 script {
-                    sh 'sudo chmod 777 collection/collection.json'
+                    sh 'chmod 777 collection/collection.json'
                     sh 'docker run ' +
                             '-v $(pwd)/collection/collection.json:/etc/newman/collection.json ' +
                             '--name newman ' +
