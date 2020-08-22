@@ -97,7 +97,7 @@ pipeline {
                 }
 
                 try {
-                    sh 'docker container rm stop newman -f'
+                    sh 'docker container rm newman -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
