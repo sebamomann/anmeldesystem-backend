@@ -59,7 +59,7 @@ pipeline {
             steps {
                 script {
                     sh 'docker run ' +
-                            '-v $(pwd)/postman_collection.json:/etc/newman/collection.json ' +
+                            '-v $(pwd)/collection:/etc/newman' +
                             '--name newman ' +
                             '--net newmanNet ' +
                             '-t postman/newman:alpine ' +
