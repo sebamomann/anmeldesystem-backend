@@ -35,6 +35,7 @@ pipeline {
                             '-p 34299:3306 ' +
                             '--env MYSQL_ROOT_PASSWORD=password ' +
                             '--env MYSQL_DATABASE=anmeldesystem-api ' +
+                            '--env MYSQL_ROOT_HOST=%'
                             '--name newmanDB ' +
                             '--net newmanNet ' +
                             '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
