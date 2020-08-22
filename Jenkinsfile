@@ -55,7 +55,7 @@ pipeline {
                         }
                     }
 
-                    sh 'docker exec newmanDB sh -c "mysql -u root password \'password\' -e \'grant all privileges on *.* to \'root\'@\'%\' identified by \'password\';\' -e \'flush privileges;\'"'
+                    sh 'docker exec newmanDB sh -c "mysql -u root password \'password\' -e \"grant all privileges on *.* to \'root\'@\'%\' identified by \'password\';\" -e \"flush privileges;\""'
 
                     sh 'docker run -d ' +
                             '--name anmeldesystem-backend-newman ' +
