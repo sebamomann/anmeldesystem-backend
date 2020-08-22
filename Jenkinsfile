@@ -112,9 +112,9 @@ pipeline {
 //            }
 //        }
     }
-    post {
-        always {
-            script {
+//    post {
+//        always {
+//            script {
 //                try {
 //                    sh 'docker container rm anmeldesystem-backend-newman -f'
 //                } catch (err) {
@@ -132,7 +132,7 @@ pipeline {
 //                } catch (err) {
 //                    echo err.getMessage()
 //                }
-            }
-        }
-    }
+//            }
+//        }
+//    }
 }
