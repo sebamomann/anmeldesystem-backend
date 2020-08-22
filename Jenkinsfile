@@ -63,7 +63,7 @@ pipeline {
                             '--name newman ' +
                             '--net newmanNet ' +
                             '-t postman/newman:alpine ' +
-                            'run "https://github.com/sebamomann/anmeldesystem-backend/blob/test/collection.json"'
+                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/test/collection.json"'
                 }
             }
         }
