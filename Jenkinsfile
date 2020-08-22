@@ -40,7 +40,7 @@ pipeline {
                             'mysql'
                     sh 'docker run -d ' +
                             '--name anmeldesystem-backend-newman ' +
-                            '-p 34289:8080 ' +
+                            '-p 34298:8080 ' +
                             '--env DB_USERNAME=root ' +
                             '--env DB_PASSWORD=password ' +
                             '--env DB_HOST=newmanDB ' +
