@@ -67,15 +67,6 @@ pipeline {
                 }
             }
         }
-        stage('Newman cleanup'){
-            steps {
-                script {
-                    sh 'docker stop anmeldesystem-backend-newman' +
-                    sh 'docker stop newmanDB'
-                    sh 'docker stop newman'
-                }
-            }
-        }
 //        stage('Publish to registry') {
 //            steps {
 //                script {
@@ -89,5 +80,28 @@ pipeline {
 //                }
 //            }
 //        }
+    }
+    post {
+        always {
+            script {
+                try {
+                    sh 'docker stop anmeldesystem-backend-newman'
+                } catch (err) {
+                    echo err.getMessage()
+                }
+
+                try {
+                    sh 'docker stop newmanDB'
+                } catch (err) {
+                    echo err.getMessage()
+                }
+
+                try {
+                    sh 'docker stop newman'
+                } catch (err) {
+                    echo err.getMessage()
+                }
+            }
+        }
     }
 }
