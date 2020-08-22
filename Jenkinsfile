@@ -39,7 +39,7 @@ pipeline {
                             '--net newmanNet ' +
                             'mysql'
 
-                    sh 'while ! newmanDB ping -h0.0.0.0 --silent; do sleep 1; done'
+                    sh 'while ! localhost:34299 ping -h0.0.0.0 --silent; do sleep 1; done'
 
                     sh 'docker run -d ' +
                             '--name anmeldesystem-backend-newman ' +
@@ -56,7 +56,7 @@ pipeline {
                             '--net newmanNet ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
 
-                    sh 'while ! anmeldesystem-backend-newman ping -h0.0.0.0 --silent; do sleep 1; done'
+                    sh 'while ! localhostlocalhost:34298 ping -h0.0.0.0 --silent; do sleep 1; done'
                 }
             }
         }
