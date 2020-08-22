@@ -261,7 +261,7 @@ export class EnrollmentService {
 
     private async _sendEmailToEnrollmentCreator(savedEnrollment: Enrollment, domain: string, appointment) {
         savedEnrollment.token = crypto.createHash('sha256')
-            .update(savedEnrollment.id + process.env.SALT_ENROLLMENT)
+            .update(savedEnrollment.id + process.env.SALT_ENROLLMENT + '')
             .digest('hex');
 
         let url = `https://${DomainUtil.replaceDomain(domain, savedEnrollment.id, savedEnrollment.token)}`;
