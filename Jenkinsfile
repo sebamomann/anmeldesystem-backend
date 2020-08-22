@@ -61,7 +61,7 @@ pipeline {
                             '-p 34298:8080 ' +
                             '--env DB_USERNAME=root ' +
                             '--env DB_PASSWORD=password ' +
-                            '--env DB_HOST=newmanDB ' +
+                            '--env DB_HOST=localhost  ' +
                             '--env DB_PORT=34299 ' +
                             '--env DB_NAME=anmeldesystem-api ' +
                             '--env SALT_JWT=salt ' +
