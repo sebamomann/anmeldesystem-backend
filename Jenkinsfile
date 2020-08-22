@@ -54,7 +54,7 @@ pipeline {
                         }
                     }
 
-                    sh 'docker exec newmanDB sh -c "mysqladmin -u root password \'password\'"'
+//                    sh 'docker exec newmanDB sh -c "mysqladmin -u root password \'password\'"'
 
                     sh 'docker run -d ' +
                             '--name anmeldesystem-backend-newman ' +
