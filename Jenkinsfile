@@ -58,6 +58,7 @@ pipeline {
         stage('Newman exec') {
             steps {
                 script {
+                    sh 'docker logs anmeldesystem-backend-newman'
                     sh 'docker run ' +
                             '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
                             '--name newman ' +
