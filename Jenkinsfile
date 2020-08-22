@@ -39,7 +39,18 @@ pipeline {
                             '--net newmanNet ' +
                             'mysql'
 
-                    sh 'while ! localhost:34299 ping -h0.0.0.0 --silent; do sleep 1; done'
+                    retry(5){
+                        sleep 10
+                        HEALTH = sh (
+                                script: 'docker inspect -f \'{{json .State.Health.Status}}\' newmanDB',
+                                returnStdout: true
+                        ).trim()
+                        echo "${HEALTH}"
+
+                        if(HEALTH == "running"){
+                            return true
+                        }
+                    }
 
                     sh 'docker run -d ' +
                             '--name anmeldesystem-backend-newman ' +
@@ -56,7 +67,18 @@ pipeline {
                             '--net newmanNet ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
 
-                    sh 'while ! localhostlocalhost:34298 ping -h0.0.0.0 --silent; do sleep 1; done'
+                    retry(5){
+                        sleep 10
+                        HEALTH = sh (
+                                script: 'docker inspect -f \'{{json .State.Health.Status}}\' anmeldesystem-backend-newmananmeldesystem-backend-newman',
+                                returnStdout: true
+                        ).trim()
+                        echo "${HEALTH}"
+
+                        if(HEALTH == "running"){
+                            return true
+                        }
+                    }
                 }
             }
         }
