@@ -8,11 +8,11 @@ properties([
 ])
 
 pipeline {
+    agent any
+
     options {
         ansiColor('xterm')
     }
-
-    agent any
 
     stages {
         stage('Build Docker image') {
