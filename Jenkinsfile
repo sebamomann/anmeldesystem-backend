@@ -63,7 +63,7 @@ pipeline {
                             '--name newman ' +
                             '--net newmanNet ' +
                             '-t postman/newman:alpine ' +
-                            'run collection.json'
+                            'run "collection.json"'
                 }
             }
         }
