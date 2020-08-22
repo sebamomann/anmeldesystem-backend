@@ -31,15 +31,16 @@ pipeline {
                         echo err.getMessage()
                     }
 
-                    sh 'docker run -d ' +
-                            '-p 34299:3306 ' +
+                    sh 'docker run ' +
+                            '-p 34299:3306 ' + // 0.0.0.0
+                            '--name newmanDB ' +
                             '--env MYSQL_ROOT_PASSWORD=password ' +
                             '--env MYSQL_DATABASE=anmeldesystem-api ' +
                             '--env MYSQL_ROOT_HOST=% ' +
-                            '--name newmanDB ' +
                             '--net newmanNet ' +
                             '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
                             '--health-interval=2s ' +
+                            '-d ' +
                             'mysql'
 
                     retry(5){
@@ -54,8 +55,6 @@ pipeline {
                             return true
                         }
                     }
-
-                    sh 'docker exec newmanDB sh -c "mysql -u root password \'password\' -e "grant all privileges on *.* to \'root\'@\'%\' identified by \'password\';\" -e "flush privileges;""'
 
                     sh 'docker run -d ' +
                             '--name anmeldesystem-backend-newman ' +
