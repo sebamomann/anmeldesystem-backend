@@ -25,7 +25,7 @@ pipeline {
         stage('Newman prepare') {
             steps {
                 script {
-                    sh' - docker network create newmanNet'
+                    sh 'docker network create newmanNet'
                     sh 'docker run -d ' +
                             '-p 34299:3306 ' +
                             '--env MYSQL_ROOT_PASSWORD=password ' +
