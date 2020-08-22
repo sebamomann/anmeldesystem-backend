@@ -110,7 +110,7 @@ export class AppointmentController {
 
     @Post(':link/administrator')
     @UseGuards(AuthGuard('jwt'))
-    addAdministrator(@Usr() user: User,
+    addAdministrator(@Usr() user: User, // TODO currently can be addeded multioople times ?
                      @Param('link') link: string,
                      @Body('username') username: string,
                      @Res() res: Response,) {

@@ -588,6 +588,7 @@ describe('EnrollmentService', () => {
 
             });
 
+
             it('* update comment', async () => {
                 const __given_enrollment_change_data = {
                     comment: 'newComment'
@@ -695,6 +696,44 @@ describe('EnrollmentService', () => {
                 expect(driverRepositoryMock.save).toHaveBeenCalledTimes(0);
             });
 
+            it('* update driver values - driver addition not set', async () => {
+                const __given_enrollment_change_data = {
+                    driver: {
+                        seats: 5,
+                        service: 2,
+                    }
+                };
+                const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
+                const __given_user = new User();
+                __given_user.username = 'username';
+
+                const __existing_enrollment = new Enrollment();
+                __existing_enrollment.id = __given_enrollment_id;
+                __existing_enrollment.driver = new Driver();
+                __existing_enrollment.driver.seats = 5;
+                __existing_enrollment.driver.service = 2;
+                __existing_enrollment.creator = __given_user;
+                __existing_enrollment.appointment = new Appointment();
+                __existing_enrollment.appointment.driverAddition = false;
+                __existing_enrollment.appointment.creator = new User();
+                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
+                driverRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment.driver);
+                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                    return;
+                });
+
+                const __expected = __given_enrollment_change_data.driver;
+
+                const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
+                expect(__actual.driver).toEqual(__expected);
+                expect(__actual.passenger).toBeUndefined();
+                expect(driverRepositoryMock.save).toHaveBeenCalledTimes(0);
+            });
+
             it('* update passenger values', async () => {
                 const __given_enrollment_change_data = {
                     passenger: {
@@ -749,6 +788,42 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = true;
+                __existing_enrollment.appointment.creator = new User();
+                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
+                passengerRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment.passenger);
+                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                    return;
+                });
+
+                const __expected = __given_enrollment_change_data.passenger;
+
+                const __actual = await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
+                expect(__actual.passenger).toEqual(__expected);
+                expect(__actual.driver).toBeUndefined();
+                expect(passengerRepositoryMock.save).toHaveBeenCalledTimes(0);
+            });
+
+            it('* update passenger values - driver addition not set', async () => {
+                const __given_enrollment_change_data = {
+                    passenger: {
+                        requirement: 1,
+                    }
+                };
+                const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
+                const __given_user = new User();
+                __given_user.username = 'username';
+
+                const __existing_enrollment = new Enrollment();
+                __existing_enrollment.id = __given_enrollment_id;
+                __existing_enrollment.passenger = new Passenger();
+                __existing_enrollment.passenger.requirement = 1;
+                __existing_enrollment.creator = __given_user;
+                __existing_enrollment.appointment = new Appointment();
+                __existing_enrollment.appointment.driverAddition = false;
                 __existing_enrollment.appointment.creator = new User();
                 __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 

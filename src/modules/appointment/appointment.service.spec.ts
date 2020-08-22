@@ -603,7 +603,7 @@ describe('AppointmentService', () => {
                     __existing_appointment.additions = [__existing_addition_1, __existing_addition_2];
 
                     const __given_appointment_change_addition = new Addition();
-                    __given_appointment_change_addition.name = 'TAKENNAME';
+                    __given_appointment_change_addition.name = __existing_addition_2.name;
                     const __given_appointment_change_data = {
                         additions: [
                             __existing_addition_1,
@@ -882,6 +882,9 @@ describe('AppointmentService', () => {
                     const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
                     expect(__actual.driverAddition).toEqual(__expected);
                 });
+
+                // TODO
+                // max enrollments -1 -> null
             });
 
             it('* update non existing attribute', async () => {

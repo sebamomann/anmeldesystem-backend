@@ -1,9 +1,11 @@
 import {User} from './user.entity';
 import {UserService} from './user.service';
+import {UserUtil} from '../../util/user.util';
 
 const emailChangeMapper = require('./email-change/email-change.mapper');
 
 module.exports = {
+    // TODO refresh token should not be returned actually ....
     basic: function(userService: UserService, _user: User) {
         const newUser = (({
                               id,
@@ -19,7 +21,7 @@ module.exports = {
                 name,
                 username,
                 mail,
-                emailChange: userService.retrieveActiveMailChanges(emailChange),
+                emailChange: UserUtil.filterActiveEmailChanges(emailChange), // shouldn't be like that, dont pass service
                 iat,
                 refreshToken,
             }))

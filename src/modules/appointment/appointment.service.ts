@@ -211,15 +211,11 @@ export class AppointmentService {
             'location', 'date', 'deadline', 'maxEnrollments', 'hidden', 'additions',
             'driverAddition'];
 
-        for (const [key, value] of Object.entries(toChange)) {
+        for (const [key, value] of Object.entries(toChange)) { // TODO REFACTOR LIKE AT USER AND ENROLLMENT
             if (key in appointment
                 && appointment[key] !== value
                 && allowedValuesToChange.indexOf(key) > -1) {
                 let changedValue = value;
-
-                if (key === 'additions') {
-                    changedValue = await this._handleAdditionUpdate(value, appointment);
-                }
 
                 if (key === 'link') {
                     if (await this.linkInUse(value)) {
@@ -227,6 +223,10 @@ export class AppointmentService {
                     }
 
                     changedValue = value;
+                }
+
+                if (key === 'additions') {
+                    changedValue = await this._handleAdditionUpdate(value, appointment);
                 }
 
                 if (key === 'date') {
@@ -242,6 +242,14 @@ export class AppointmentService {
                         changedValue = await AppointmentUtil.handleDeadlineValidation(appointment.date, value);
                     } catch (e) {
                         throw e;
+                    }
+                }
+
+                if (key === 'maxEnrollments') {
+                    if (value > 0) {
+                        changedValue = value;
+                    } else {
+                        changedValue = null;
                     }
                 }
 
@@ -537,7 +545,7 @@ export class AppointmentService {
             try {
                 potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
 
-                if (!output.some(sAddition => sAddition === potExistingAddition)) {
+                if (!output.some(sAddition => sAddition.name === potExistingAddition.name)) {
                     output.push(potExistingAddition);
                 }
             } catch (e) {

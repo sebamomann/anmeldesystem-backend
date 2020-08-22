@@ -67,6 +67,7 @@ export class EnrollmentUtil {
 
         const trimmedComment = enrollment.comment.trim();
         output.comment = trimmedComment === '' ? null : trimmedComment;
+
         output.additions = EnrollmentUtil.filterValidAdditions(enrollment, appointment);
 
         this._handleDriverAddition(output, enrollment, appointment);
@@ -83,8 +84,8 @@ export class EnrollmentUtil {
             _driver_original = JSON.parse(JSON.stringify(currentDriverObject));
         }
 
-        _driver.seats = driverToBe?.seats;
-        _driver.service = driverToBe?.service;
+        _driver.seats = driverToBe.seats ? driverToBe.seats : _driver_original.seats; // TODO CAN BE UNDEFINED RN -> CNAT BE IRL
+        _driver.service = driverToBe.service ? driverToBe.service : _driver_original.service;
 
         if (JSON.stringify(_driver) !== JSON.stringify(_driver_original)) {
             return _driver;
@@ -102,7 +103,7 @@ export class EnrollmentUtil {
             _passenger_original = JSON.parse(JSON.stringify(currentPassengerObject));
         }
 
-        _passenger.requirement = passengerToBe?.requirement;
+        _passenger.requirement = passengerToBe.requirement;
 
         if (JSON.stringify(_passenger) !== JSON.stringify(_passenger_original)) {
             return _passenger;
@@ -113,9 +114,9 @@ export class EnrollmentUtil {
 
     private static _handleDriverAddition(output: Enrollment, enrollment: Enrollment, appointment: Appointment) {
         if (appointment.driverAddition) { // if (!!_appointment.driverAddition === true) {
-            if (enrollment?.driver) {
+            if (enrollment.driver) {
                 output.driver = EnrollmentUtil.handleDriverRelation(enrollment.driver, undefined);
-            } else if (enrollment?.passenger) {
+            } else if (enrollment.passenger) {
                 output.passenger = EnrollmentUtil.handlePassengerRelation(enrollment.passenger, undefined);
             } else {
                 throw new EmptyFieldsException('EMPTY_FIELDS',

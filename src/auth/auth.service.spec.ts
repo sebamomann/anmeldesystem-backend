@@ -163,7 +163,7 @@ describe('AuthService', () => {
 
                 userRepositoryMock.findOne.mockReturnValueOnce(__existing_user);
                 jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(false); // force password compare to be false
-                jest.spyOn(userService, 'getLastPasswordDate').mockReturnValueOnce(Promise.resolve(_date));
+                jest.spyOn(userService, 'getLastValidityDateOfPassword').mockReturnValueOnce(Promise.resolve(_date));
 
                 authService.login(__given_username, __given_password)
                     .then(() => {
@@ -250,6 +250,8 @@ describe('AuthService', () => {
                     refreshToken: __given_data.refreshToken,
                     token: fakeToken
                 };
+
+                delete __expected.activated;
 
                 const __actual = await authService.generateAccessToken(__given_data);
                 expect(__actual).toEqual(__expected);

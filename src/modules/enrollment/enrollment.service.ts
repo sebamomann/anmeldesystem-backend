@@ -97,7 +97,7 @@ export class EnrollmentService {
     }
 
     /**
-     * Change a existing Enrollment with the given values. <br/>
+     * Change an existing Enrollment with the given values. <br/>
      * The allowedValuesToChange array shows all updatable options.
      *
      * @param enrollment_to_change_values Values to change
@@ -106,6 +106,7 @@ export class EnrollmentService {
      */
     public async update(enrollment_to_change_values: any, enrollment_id: string, user: User) {
         const enrollment_referenced = await this.findById(enrollment_id);
+        const enrollment_updated = {...enrollment_referenced};
 
         if (!EnrollmentUtil.hasPermission(enrollment_referenced, user, enrollment_to_change_values.token)) {
             throw new InsufficientPermissionsException();
@@ -119,28 +120,28 @@ export class EnrollmentService {
                 && allowedValuesToChange.indexOf(key) > -1) {
                 let changedValue: any;
 
-                // check needed for correct catch of actual errors
-                if (typeof this['_update' + StringUtil.capitalizeFirstLetter(key)] === 'function') {
+                const fnName = '_update' + StringUtil.capitalizeFirstLetter(key); // e.g. _updateName || _updateAdditions ...
+                if (typeof this[fnName] === 'function') { // check needed for correct catch of actual errors
                     try {
-                        changedValue = await this['_update' + StringUtil.capitalizeFirstLetter(key)](enrollment_to_change_values, enrollment_referenced);
+                        changedValue = await this[fnName](enrollment_to_change_values, enrollment_updated);
                     } catch (e) {
                         throw e;
                     }
-                }
+                } // do nothing if attribute does not exist
 
                 if (changedValue === undefined) {
                     changedValue = value;
                 }
 
-                enrollment_referenced[key] = changedValue;
+                enrollment_updated[key] = changedValue;
             }
         }
 
-        let savedEnrollment = await this.enrollmentRepository.save(enrollment_referenced);
+        let savedEnrollment = await this.enrollmentRepository.save(enrollment_updated);
 
         savedEnrollment = enrollmentMapper.basic(savedEnrollment);
 
-        this.appointmentGateway.appointmentUpdated(enrollment_referenced.appointment);
+        this.appointmentGateway.appointmentUpdated(enrollment_updated.appointment);
 
         return savedEnrollment;
     }
@@ -298,27 +299,30 @@ export class EnrollmentService {
         }
     }
 
+    // noinspection JSUnusedLocalSymbols // dynamic function call
     private async _updateName(enrollment_to_change_values: any, enrollment_referenced: Enrollment) {
-        if (enrollment_referenced.name !== enrollment_to_change_values.name) {
-            if (await this._existsByName(enrollment_to_change_values.name, enrollment_referenced.appointment)) {
-                throw new DuplicateValueException('DUPLICATE_ENTRY',
-                    'Following values are already taken',
-                    ['name']);
-            }
+        if (await this._existsByName(enrollment_to_change_values.name, enrollment_referenced.appointment)) {
+            throw new DuplicateValueException('DUPLICATE_ENTRY',
+                'Following values are already taken',
+                ['name']);
         }
 
         return enrollment_to_change_values.name;
     }
 
+    // noinspection JSUnusedLocalSymbols // dynamic function call
     private async _updateDriver(enrollment_to_change_values: Enrollment, enrollment_referenced: Enrollment) {
-        await this._updateDriverAndPassenger(enrollment_to_change_values, enrollment_referenced, 'driver');
+        return await this._updateDriverAndPassenger(enrollment_to_change_values, enrollment_referenced, 'driver');
     }
 
+    // noinspection JSUnusedLocalSymbols // dynamic function call
     private async _updatePassenger(enrollment_to_change_values: Enrollment, enrollment_referenced: Enrollment) {
-        await this._updateDriverAndPassenger(enrollment_to_change_values, enrollment_referenced, 'passenger');
+        return await this._updateDriverAndPassenger(enrollment_to_change_values, enrollment_referenced, 'passenger');
     }
 
     private async _updateDriverAndPassenger(enrollment_to_change_values: Enrollment, enrollment_referenced: Enrollment, key: string) {
+        // TODO CHECK DRIVER CHANGE BOTH VALUES GET RETURNED
+
         let changedValue: any;
         const counterKeys = {
             passenger: 'driver',
@@ -351,6 +355,7 @@ export class EnrollmentService {
         return changedValue;
     }
 
+    // noinspection JSUnusedLocalSymbols,JSMethodCanBeStatic // dynamic function call
     private async _updateAdditions(enrollment_to_change_values: any, enrollment_referenced: Enrollment) {
         EnrollmentUtil.filterValidAdditions(enrollment_to_change_values, enrollment_referenced.appointment);
     }

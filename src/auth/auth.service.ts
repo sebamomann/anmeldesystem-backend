@@ -29,7 +29,7 @@ export class AuthService {
 
                 return userMapper.basic(this.userService, user);
             } else {
-                const passwordChangeDate = await this.userService.getLastPasswordDate(user, pass);
+                const passwordChangeDate = await this.userService.getLastValidityDateOfPassword(user, pass);
 
                 if (passwordChangeDate != null) {
                     throw new UnauthorizedException({
@@ -78,7 +78,7 @@ export class AuthService {
         const token = this.addJwtToObject(_user);
 
         return {
-            ...user,
+            ..._user,
             token: token.token,
             refreshToken: data.refreshToken,
         };

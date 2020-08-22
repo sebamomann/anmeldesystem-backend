@@ -30,7 +30,7 @@ export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
                 catchError(
                     exception => {
                         if (exception instanceof EntityNotFoundException) {
-                            throw new NotFoundException();
+                            throw new NotFoundException(exception.parse());
                         } else if (exception instanceof InvalidValuesException
                             || exception instanceof InvalidTokenException
                             || exception instanceof ExpiredTokenException
