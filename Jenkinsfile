@@ -51,7 +51,7 @@ pipeline {
                             '--env SALT_ENROLLMENT=salt ' +
                             '--env DOMAIN=go-join.me ' +
                             '--net newmanNet ' +
-                            'anmeldesystem/anmeldesystem-backend:latest'
+                            'anmeldesystem-backend:latest'
                 }
             }
         }
