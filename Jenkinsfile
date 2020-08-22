@@ -85,19 +85,19 @@ pipeline {
         always {
             script {
                 try {
-                    sh 'docker stop anmeldesystem-backend-newman'
+                    sh 'docker container rm anmeldesystem-backend-newman -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
 
                 try {
-                    sh 'docker stop newmanDB'
+                    sh 'docker container rm newmanDB -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
 
                 try {
-                    sh 'docker stop newman'
+                    sh 'docker container rm stop newman -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
