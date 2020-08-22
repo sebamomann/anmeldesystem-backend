@@ -25,7 +25,12 @@ pipeline {
         stage('Newman prepare') {
             steps {
                 script {
-                    sh 'docker network create newmanNet'
+                    try {
+                        sh 'docker network create newmanNet'
+                    } catch (err) {
+                        echo err.getMessage()
+                    }
+
                     sh 'docker run -d ' +
                             '-p 34299:3306 ' +
                             '--env MYSQL_ROOT_PASSWORD=password ' +
