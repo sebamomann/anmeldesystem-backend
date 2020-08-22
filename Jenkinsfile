@@ -67,18 +67,18 @@ pipeline {
                 }
             }
         }
-        stage('Publish to registry') {
-            steps {
-                script {
-                    docker.withRegistry('http://localhost:34015') {
-                        if (LATEST == 'true') {
-                            image.push("latest")
-                        }
-
-                        image.push("${VERSION}")
-                    }
-                }
-            }
-        }
+//        stage('Publish to registry') {
+//            steps {
+//                script {
+//                    docker.withRegistry('http://localhost:34015') {
+//                        if (LATEST == 'true') {
+//                            image.push("latest")
+//                        }
+//
+//                        image.push("${VERSION}")
+//                    }
+//                }
+//            }
+//        }
     }
 }
