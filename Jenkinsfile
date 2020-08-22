@@ -37,6 +37,8 @@ pipeline {
                             '--env MYSQL_DATABASE=anmeldesystem-api ' +
                             '--name newmanDB ' +
                             '--net newmanNet ' +
+                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
+                            '--health-interval=2s ' +
                             'mysql'
 
                     retry(5){
@@ -65,6 +67,8 @@ pipeline {
                             '--env SALT_ENROLLMENT=salt ' +
                             '--env DOMAIN=go-join.me ' +
                             '--net newmanNet ' +
+                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
+                            '--health-interval=2s ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
 
                     retry(5){
