@@ -38,6 +38,9 @@ pipeline {
                             '--name newmanDB ' +
                             '--net newmanNet ' +
                             'mysql'
+
+                    sh 'while ! newmanDB ping -h0.0.0.0 --silent; do sleep 1; done'
+
                     sh 'docker run -d ' +
                             '--name anmeldesystem-backend-newman ' +
                             '-p 34298:8080 ' +
@@ -51,14 +54,15 @@ pipeline {
                             '--env SALT_ENROLLMENT=salt ' +
                             '--env DOMAIN=go-join.me ' +
                             '--net newmanNet ' +
-                            'anmeldesystem-backend:latest'
+                            'anmeldesystem/anmeldesystem-backend:latest'
+
+                    sh 'while ! anmeldesystem-backend-newman ping -h0.0.0.0 --silent; do sleep 1; done'
                 }
             }
         }
         stage('Newman exec') {
             steps {
                 script {
-                    sh 'docker logs anmeldesystem-backend-newman'
                     sh 'docker run ' +
                             '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
                             '--name newman ' +
