@@ -1,5 +1,9 @@
 def image
 
+options {
+    ansiColor('xterm')
+}
+
 properties([
         parameters([
                 string(name: 'VERSION', defaultValue: '0.0.0'),
