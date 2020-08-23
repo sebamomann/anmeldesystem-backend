@@ -22,14 +22,17 @@ pipeline {
                 }
             }
         }
-        stage('Newman prepare') {
-            steps {
-                script {
-                    try {
-                        sh 'docker network create newmanNet'
-                    } catch (err) {
-                        echo err.getMessage()
-                    }
+        stage('Coverage report') {
+            publishCoverage adapters: [jacocoAdapter('src/coverage/clover.xml')]
+        }
+//        stage('Newman prepare') {
+//            steps {
+//                script {
+//                    try {
+//                        sh 'docker network create newmanNet'
+//                    } catch (err) {
+//                        echo err.getMessage()
+//                    }
 
 //                    sh 'docker run ' +
 //                            '-p 34299:3306 ' + // 0.0.0.0
@@ -55,51 +58,51 @@ pipeline {
 //                            return true
 //                        }
 //                    }
-
-                    sh 'docker run -d ' +
-                            '--name anmeldesystem-backend-newman ' +
-                            '-p 34298:8080 ' +
-                            '--env DB_USERNAME=anmeldesystem-api-testing ' +
-                            '--env DB_PASSWORD="Oa(zGPsbFl&cowu3p&9~" ' +
-                            '--env DB_HOST=localhost  ' +
-                            '--env DB_PORT=3306 ' +
-                            '--env DB_NAME=anmeldesystem-api-testing ' +
-                            '--env SALT_JWT=salt ' +
-                            '--env SALT_MAIL=salt ' +
-                            '--env SALT_ENROLLMENT=salt ' +
-                            '--env DOMAIN=go-join.me ' +
-                            '--net newmanNet ' +
-                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
-                            '--health-interval=2s ' +
-                            'anmeldesystem/anmeldesystem-backend:latest'
-
-                    retry(5){
-                        sleep 10
-                        HEALTH = sh (
-                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
-                                returnStdout: true
-                        ).trim()
-                        echo "${HEALTH}"
-
-                        if(HEALTH == "running"){
-                            return true
-                        }
-                    }
-                }
-            }
-        }
-        stage('Newman exec') {
-            steps {
-                script {
-                    sh 'docker run ' +
-                            '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
-                            '--name newman ' +
-                            '--net newmanNet ' +
-                            '-t postman/newman:alpine ' +
-                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/test/collection.json"'
-                }
-            }
-        }
+//
+//                    sh 'docker run -d ' +
+//                            '--name anmeldesystem-backend-newman ' +
+//                            '-p 34298:8080 ' +
+//                            '--env DB_USERNAME=anmeldesystem-api-testing ' +
+//                            '--env DB_PASSWORD="Oa(zGPsbFl&cowu3p&9~" ' +
+//                            '--env DB_HOST=localhost  ' +
+//                            '--env DB_PORT=3306 ' +
+//                            '--env DB_NAME=anmeldesystem-api-testing ' +
+//                            '--env SALT_JWT=salt ' +
+//                            '--env SALT_MAIL=salt ' +
+//                            '--env SALT_ENROLLMENT=salt ' +
+//                            '--env DOMAIN=go-join.me ' +
+//                            '--net newmanNet ' +
+//                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
+//                            '--health-interval=2s ' +
+//                            'anmeldesystem/anmeldesystem-backend:latest'
+//
+//                    retry(5){
+//                        sleep 10
+//                        HEALTH = sh (
+//                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
+//                                returnStdout: true
+//                        ).trim()
+//                        echo "${HEALTH}"
+//
+//                        if(HEALTH == "running"){
+//                            return true
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        stage('Newman exec') {
+//            steps {
+//                script {
+//                    sh 'docker run ' +
+//                            '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
+//                            '--name newman ' +
+//                            '--net newmanNet ' +
+//                            '-t postman/newman:alpine ' +
+//                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/test/collection.json"'
+//                }
+//            }
+//        }
 //        stage('Publish to registry') {
 //            steps {
 //                script {
