@@ -63,7 +63,7 @@ pipeline {
                             '--env DB_USERNAME=user ' +
                             '--env DB_PASSWORD=password ' +
                             '--env DB_HOST=newman_db  ' +
-                            '--env DB_PORT=3306 ' +
+                            '--env DB_PORT=34299 ' +
                             '--env DB_NAME=anmeldesystem-api ' +
                             '--env SALT_JWT=salt ' +
                             '--env SALT_MAIL=salt ' +
