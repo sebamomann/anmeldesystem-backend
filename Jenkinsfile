@@ -43,18 +43,18 @@ pipeline {
 //                            '-d ' +
 //                            'mysql'
 
-                    retry(5){
-                        sleep 10
-                        HEALTH = sh (
-                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' newmanDB',
-                                returnStdout: true
-                        ).trim()
-                        echo "${HEALTH}"
-
-                        if(HEALTH == "running"){
-                            return true
-                        }
-                    }
+//                    retry(5){
+//                        sleep 10
+//                        HEALTH = sh (
+//                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' newmanDB',
+//                                returnStdout: true
+//                        ).trim()
+//                        echo "${HEALTH}"
+//
+//                        if(HEALTH == "running"){
+//                            return true
+//                        }
+//                    }
 
                     sh 'docker run -d ' +
                             '--name anmeldesystem-backend-newman ' +
