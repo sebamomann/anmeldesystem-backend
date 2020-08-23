@@ -40,10 +40,8 @@ pipeline {
                             '--env MYSQL_PASSWORD=password ' +
                             '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
                             '--health-interval=2s ' +
-                            '--net newmanNet ' +
                             '-d ' +
-                            'mysql ' +
-                            'mysqld --default-authentication-plugin=mysql_native_password'
+                            'mysql '
 
                     retry(10) {
                         sleep 2
@@ -72,7 +70,6 @@ pipeline {
                             '--env DOMAIN=go-join.me ' +
                             '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
                             '--health-interval=2s ' +
-                            '--net newmanNet ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
 
                     retry(10) {
