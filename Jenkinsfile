@@ -60,7 +60,7 @@ pipeline {
                             '--name anmeldesystem-backend-newman ' +
                             '-p 34298:8080 ' +
                             '--env DB_USERNAME=anmeldesystem-api-testing ' +
-                            '--env DB_PASSWORD=Oa(zGPsbFl&cowu3p&9~ ' +
+                            '--env DB_PASSWORD="Oa(zGPsbFl&cowu3p&9~" ' +
                             '--env DB_HOST=localhost  ' +
                             '--env DB_PORT=3306 ' +
                             '--env DB_NAME=anmeldesystem-api-testing ' +
