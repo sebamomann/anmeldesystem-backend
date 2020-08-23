@@ -44,15 +44,15 @@ pipeline {
                             '-d ' +
                             'mysql'
 
-                    retry(5){
+                    retry(5) {
                         sleep 10
-                        HEALTH = sh (
+                        HEALTH = sh(
                                 script: 'docker inspect --format=\'{{json .State.Health.Status}}\' newman_db',
                                 returnStdout: true
                         ).trim()
                         echo "${HEALTH}"
 
-                        if(HEALTH == "running"){
+                        if (HEALTH == "running") {
                             return true
                         }
                     }
@@ -69,20 +69,20 @@ pipeline {
                             '--env SALT_MAIL=salt ' +
                             '--env SALT_ENROLLMENT=salt ' +
                             '--env DOMAIN=go-join.me ' +
-                            '--net newmanNet ' +
                             '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
                             '--health-interval=2s ' +
+                            '--net newmanNet ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
 
-                    retry(5){
+                    retry(5) {
                         sleep 10
-                        HEALTH = sh (
+                        HEALTH = sh(
                                 script: 'docker inspect --format=\'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
                                 returnStdout: true
                         ).trim()
                         echo "${HEALTH}"
 
-                        if(HEALTH == "running"){
+                        if (HEALTH == "running") {
                             return true
                         }
                     }
