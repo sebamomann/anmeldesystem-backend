@@ -31,7 +31,18 @@ pipeline {
                         echo err.getMessage()
                     }
 
-                    sh 'docker-compose -f mysql-newman-compose.yml up -d'
+                    sh 'docker run ' +
+                            '-p 34299:3306 ' + // 0.0.0.0
+                            '--name newman_db ' +
+                            '--env MYSQL_ROOT_PASSWORD=password ' +
+                            '--env MYSQL_DATABASE=anmeldesystem-api ' +
+                            '--env MYSQL_USER=user ' +
+                            '--env MYSQL_PASSWORD=password ' +
+                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
+                            '--health-interval=2s ' +
+                            '--net newmanNet ' +
+                            '-d ' +
+                            'mysql'
 
                     retry(5){
                         sleep 10
