@@ -44,8 +44,8 @@ pipeline {
                             '-d ' +
                             'mysql'
 
-                    retry(5) {
-                        sleep 10
+                    retry(10) {
+                        sleep 2
                         HEALTH = sh(
                                 script: 'docker inspect --format=\'{{json .State.Health.Status}}\' newman_db',
                                 returnStdout: true
@@ -62,7 +62,7 @@ pipeline {
                             '-p 34298:8080 ' +
                             '--env DB_USERNAME=user ' +
                             '--env DB_PASSWORD=password ' +
-                            '--env DB_HOST=newman_db  ' +
+                            '--env DB_HOST=localhost  ' +
                             '--env DB_PORT=34299 ' +
                             '--env DB_NAME=anmeldesystem-api ' +
                             '--env SALT_JWT=salt ' +
@@ -74,8 +74,8 @@ pipeline {
                             '--net newmanNet ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
 
-                    retry(5) {
-                        sleep 10
+                    retry(10) {
+                        sleep 2
                         HEALTH = sh(
                                 script: 'docker inspect --format=\'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
                                 returnStdout: true
