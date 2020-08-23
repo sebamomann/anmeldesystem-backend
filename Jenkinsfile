@@ -38,8 +38,6 @@ pipeline {
                             '--env MYSQL_DATABASE=anmeldesystem-api ' +
                             '--env MYSQL_USER=user ' +
                             '--env MYSQL_PASSWORD=password ' +
-                            '--env MYSQL_ROOT_HOST=% ' +
-                            '--env MYSQL_HOST=% ' +
                             '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
                             '--health-interval=2s ' +
                             '--net newmanNet ' +
