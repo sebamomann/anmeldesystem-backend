@@ -21,85 +21,63 @@ pipeline {
                     image = docker.build("anmeldesystem/anmeldesystem-backend")
                 }
             }
-            post {
-                success {
-                    step([
-                            $class              : 'CloverPublisher',
-                            cloverReportDir     : './src/coverage',
-                            cloverReportFileName: 'clover.xml',
-                            healthyTarget       : [methodCoverage: 70, conditionalCoverage: 70, statementCoverage: 70], // optional, default is: method=70, conditional=80, statement=80
-                            unhealthyTarget     : [methodCoverage: 50, conditionalCoverage: 50, statementCoverage: 50], // optional, default is none
-                            failingTarget       : [methodCoverage: 0, conditionalCoverage: 0, statementCoverage: 0]     // optional, default is none
-                    ])
+        }
+        stage('Newman prepare') {
+            steps {
+                script {
+                    try {
+                        sh 'docker network create newmanNet'
+                    } catch (err) {
+                        echo err.getMessage()
+                    }
+
+                    sh 'docker-compose -f mysql-newman-compose.yml up -d'
+
+                    retry(5){
+                        sleep 10
+                        HEALTH = sh (
+                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' newmanDB',
+                                returnStdout: true
+                        ).trim()
+                        echo "${HEALTH}"
+
+                        if(HEALTH == "running"){
+                            return true
+                        }
+                    }
+
+                    sh 'docker run -d ' +
+                            '--name anmeldesystem-backend-newman ' +
+                            '-p 34298:8080 ' +
+                            '--env DB_USERNAME=user ' +
+                            '--env DB_PASSWORD=password ' +
+                            '--env DB_HOST=newman_db  ' +
+                            '--env DB_PORT=3306 ' +
+                            '--env DB_NAME=anmeldesystem-api ' +
+                            '--env SALT_JWT=salt ' +
+                            '--env SALT_MAIL=salt ' +
+                            '--env SALT_ENROLLMENT=salt ' +
+                            '--env DOMAIN=go-join.me ' +
+                            '--net newmanNet ' +
+                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
+                            '--health-interval=2s ' +
+                            'anmeldesystem/anmeldesystem-backend:latest'
+
+                    retry(5){
+                        sleep 10
+                        HEALTH = sh (
+                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
+                                returnStdout: true
+                        ).trim()
+                        echo "${HEALTH}"
+
+                        if(HEALTH == "running"){
+                            return true
+                        }
+                    }
                 }
             }
         }
-//        stage('Newman prepare') {
-//            steps {
-//                script {
-//                    try {
-//                        sh 'docker network create newmanNet'
-//                    } catch (err) {
-//                        echo err.getMessage()
-//                    }
-
-//                    sh 'docker run ' +
-//                            '-p 34299:3306 ' + // 0.0.0.0
-//                            '--name newmanDB ' +
-//                            '--env MYSQL_ROOT_PASSWORD=password ' +
-//                            '--env MYSQL_DATABASE=anmeldesystem-api ' +
-//                            '--env MYSQL_ROOT_HOST=% ' +
-//                            '--net newmanNet ' +
-//                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
-//                            '--health-interval=2s ' +
-//                            '-d ' +
-//                            'mysql'
-
-//                    retry(5){
-//                        sleep 10
-//                        HEALTH = sh (
-//                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' newmanDB',
-//                                returnStdout: true
-//                        ).trim()
-//                        echo "${HEALTH}"
-//
-//                        if(HEALTH == "running"){
-//                            return true
-//                        }
-//                    }
-//
-//                    sh 'docker run -d ' +
-//                            '--name anmeldesystem-backend-newman ' +
-//                            '-p 34298:8080 ' +
-//                            '--env DB_USERNAME=anmeldesystem-api-testing ' +
-//                            '--env DB_PASSWORD="Oa(zGPsbFl&cowu3p&9~" ' +
-//                            '--env DB_HOST=localhost  ' +
-//                            '--env DB_PORT=3306 ' +
-//                            '--env DB_NAME=anmeldesystem-api-testing ' +
-//                            '--env SALT_JWT=salt ' +
-//                            '--env SALT_MAIL=salt ' +
-//                            '--env SALT_ENROLLMENT=salt ' +
-//                            '--env DOMAIN=go-join.me ' +
-//                            '--net newmanNet ' +
-//                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
-//                            '--health-interval=2s ' +
-//                            'anmeldesystem/anmeldesystem-backend:latest'
-//
-//                    retry(5){
-//                        sleep 10
-//                        HEALTH = sh (
-//                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
-//                                returnStdout: true
-//                        ).trim()
-//                        echo "${HEALTH}"
-//
-//                        if(HEALTH == "running"){
-//                            return true
-//                        }
-//                    }
-//                }
-//            }
-//        }
 //        stage('Newman exec') {
 //            steps {
 //                script {

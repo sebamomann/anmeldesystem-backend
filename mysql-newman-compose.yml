@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  newman_db:
+    image: mysql
+    restart: always
+    container_name: newman_db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: anmeldesystem-api
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - 34299:3306
+    networks:
+      - newmanNet
+
+networks:
+  newmanNet:
