@@ -31,17 +31,17 @@ pipeline {
                         echo err.getMessage()
                     }
 
-                    sh 'docker run ' +
-                            '-p 34299:3306 ' + // 0.0.0.0
-                            '--name newmanDB ' +
-                            '--env MYSQL_ROOT_PASSWORD=password ' +
-                            '--env MYSQL_DATABASE=anmeldesystem-api ' +
-                            '--env MYSQL_ROOT_HOST=% ' +
-                            '--net newmanNet ' +
-                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
-                            '--health-interval=2s ' +
-                            '-d ' +
-                            'mysql'
+//                    sh 'docker run ' +
+//                            '-p 34299:3306 ' + // 0.0.0.0
+//                            '--name newmanDB ' +
+//                            '--env MYSQL_ROOT_PASSWORD=password ' +
+//                            '--env MYSQL_DATABASE=anmeldesystem-api ' +
+//                            '--env MYSQL_ROOT_HOST=% ' +
+//                            '--net newmanNet ' +
+//                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
+//                            '--health-interval=2s ' +
+//                            '-d ' +
+//                            'mysql'
 
                     retry(5){
                         sleep 10
@@ -59,11 +59,11 @@ pipeline {
                     sh 'docker run -d ' +
                             '--name anmeldesystem-backend-newman ' +
                             '-p 34298:8080 ' +
-                            '--env DB_USERNAME=root ' +
-                            '--env DB_PASSWORD=password ' +
-                            '--env DB_HOST=newmanDB  ' +
-                            '--env DB_PORT=34299 ' +
-                            '--env DB_NAME=anmeldesystem-api ' +
+                            '--env DB_USERNAME=anmeldesystem-api-testing ' +
+                            '--env DB_PASSWORD=Oa(zGPsbFl&cowu3p&9~ ' +
+                            '--env DB_HOST=localhost  ' +
+                            '--env DB_PORT=3306 ' +
+                            '--env DB_NAME=anmeldesystem-api-testing ' +
                             '--env SALT_JWT=salt ' +
                             '--env SALT_MAIL=salt ' +
                             '--env SALT_ENROLLMENT=salt ' +
