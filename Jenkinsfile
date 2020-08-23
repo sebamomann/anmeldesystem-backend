@@ -1,5 +1,6 @@
 def image
 def branch_name = "${env.BRANCH_NAME}"
+def github_token = "${env.GITHUB_STATUS_ACCESS_TOKEN}"
 
 properties([
         parameters([
@@ -119,7 +120,7 @@ pipeline {
     post {
         success {
             script {
-                sh 'curl "https://api.GitHub.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=' + $ { env.GITHUB_STATUS_ACCESS_TOKEN } + '" \n' +
+                sh 'curl "https://api.GitHub.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=' + github_token + '" \n' +
                         '  -H "Content-Type: application/json" \n' +
                         '  -X POST \n' +
                         '  -d "{\"state\": \"success\",\"context\": \"continuous-integration/jenkins\", \"description\": \"Jenkins\", \"target_url\": \"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\"}"\n'
@@ -127,7 +128,7 @@ pipeline {
         }
         failure {
             script {
-                sh 'curl "https://api.GitHub.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=' + $ { env.GITHUB_STATUS_ACCESS_TOKEN } + '" \n' +
+                sh 'curl "https://api.GitHub.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=' + github_token + '" \n' +
                         '  -H "Content-Type: application/json" \n' +
                         '  -X POST \n' +
                         '  -d "{\"state\": \"failure\",\"context\": \"continuous-integration/jenkins\", \"description\": \"Jenkins\", \"target_url\": \"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\"}"\n'
