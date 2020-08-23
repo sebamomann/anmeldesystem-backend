@@ -38,6 +38,8 @@ pipeline {
                             '--env MYSQL_DATABASE=anmeldesystem-api ' +
                             '--env MYSQL_USER=user ' +
                             '--env MYSQL_PASSWORD=password ' +
+                            '--env MYSQL_ROOT_HOST=% ' +
+                            '--env MYSQL_HOST=% ' +
                             '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
                             '--health-interval=2s ' +
                             '--net newmanNet ' +
@@ -62,7 +64,7 @@ pipeline {
                             '-p 34298:8080 ' +
                             '--env DB_USERNAME=user ' +
                             '--env DB_PASSWORD=password ' +
-                            '--env DB_HOST=0.0.0.0  ' +
+                            '--env DB_HOST=newman_db ' +
                             '--env DB_PORT=34299 ' +
                             '--env DB_NAME=anmeldesystem-api ' +
                             '--env SALT_JWT=salt ' +
