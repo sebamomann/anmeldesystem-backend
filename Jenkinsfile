@@ -44,7 +44,8 @@ pipeline {
                             '--health-interval=2s ' +
                             '--net newmanNet ' +
                             '-d ' +
-                            'mysql'
+                            'mysql ' +
+                            'mysqld --default-authentication-plugin=mysql_native_password'
 
                     retry(10) {
                         sleep 2
