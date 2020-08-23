@@ -119,18 +119,26 @@ pipeline {
     post {
         success {
             script {
-                sh 'curl "https://api.GitHub.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=${GITHUB_STATUS_ACCESS_TOKEN}" \n' +
-                        '  -H "Content-Type: application/json" \n' +
-                        '  -X POST \n' +
-                        '  -d "{\"state\": \"success\",\"context\": \"continuous-integration/jenkins\", \"description\": \"Jenkins\", \"target_url\": \"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\"}"\n'
+                sh '''
+                    set +x
+                    curl "https://api.GitHub.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=${GITHUB_STATUS_ACCESS_TOKEN}" 
+                         -H "Content-Type: application/json" 
+                         -X POST 
+                         -d "{\"state\": \"success\",\"context\": \"continuous-integration/jenkins\", \"description\": \"Jenkins\", \"target_url\": \"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\"}"
+                    set -x
+                    '''
             }
         }
         failure {
             script {
-                sh 'curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=${GITHUB_STATUS_ACCESS_TOKEN}" \n' +
-                        '  -H "Content-Type: application/json" \n' +
-                        '  -X POST \n' +
-                        '  -d "{\"state\": \"failure\",\"context\": \"continuous-integration/jenkins\", \"description\": \"Jenkins\", \"target_url\": \"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\"}"\n'
+                sh '''
+                    set +x
+                    curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=${GITHUB_STATUS_ACCESS_TOKEN}" 
+                         -H "Content-Type: application/json" 
+                         -X POST 
+                         -d "{\"state\": \"failure\",\"context\": \"continuous-integration/jenkins\", \"description\": \"Jenkins\", \"target_url\": \"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\"}"
+                    set -x
+                '''
             }
         }
     }
@@ -158,4 +166,3 @@ pipeline {
 //        }
 //    }
 }
-
