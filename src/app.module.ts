@@ -20,9 +20,7 @@ import {CommentModule} from './modules/enrollment/comment/comment.module';
 import {Comment} from './modules/enrollment/comment/comment.entity';
 import {PassengerModule} from './modules/enrollment/passenger/passenger.module';
 import {AuthModule} from './auth/auth.module';
-import {Key} from './modules/enrollment/key/key.entity';
 import {TelegramUser} from './modules/user/telegram/telegram-user.entity';
-import {MigrationModule} from './modules/migration/migration.module';
 import {HandlebarsAdapter, MailerModule} from '@nest-modules/mailer';
 import {PasswordReset} from './modules/user/password-reset/password-reset.entity';
 import * as path from 'path';
@@ -46,7 +44,7 @@ const _mail = process.env.MAIL_ECA;
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_DATABASE,
-        entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment, Key,
+        entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment,
             TelegramUser, PasswordReset, Releasenote, EmailChange, Mail, PasswordChange, Session],
         synchronize: true
     }),
@@ -65,14 +63,13 @@ const _mail = process.env.MAIL_ECA;
         }),
         UserModule,
         AppointmentModule,
-        EnrollmentModule,
         AdditionModule,
+        EnrollmentModule,
         FileModule,
         DriverModule,
         PassengerModule,
         CommentModule,
         AuthModule,
-        MigrationModule,
         IcalModule,
         ReleasenoteModule,
     ],

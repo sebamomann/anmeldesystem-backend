@@ -140,6 +140,10 @@ export class UserService {
         return userMapper.basic(this, savedUser);
     }
 
+    public async __save(user: any) {
+        return await this.userRepository.save(user);
+    }
+
     public async update(valuesToUpdate: any, userFromJwt: User) {
         let user;
 

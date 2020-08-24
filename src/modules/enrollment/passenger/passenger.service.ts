@@ -13,6 +13,10 @@ export class PassengerService {
 
     }
 
+    public async __save(passenger: Passenger) {
+        return await this.passengerRepository.save(passenger);
+    }
+
     // public async findById(id: string) {
     //     return await this.passengerRepository.findOne({
     //         where: {
