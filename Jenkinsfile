@@ -57,9 +57,7 @@ pipeline {
                         ).trim()
                         echo "${HEALTH}"
 
-                        if (HEALTH == "running") {
-                            return true
-                        }
+                        return HEALTH == "healthy"
                     }
 
                     sh 'docker run -d ' +
@@ -88,9 +86,7 @@ pipeline {
                         ).trim()
                         echo "${HEALTH}"
 
-                        if (HEALTH == "running") {
-                            return true
-                        }
+                        return HEALTH == "healthy"
                     }
                 }
             }
