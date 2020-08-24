@@ -38,7 +38,7 @@ pipeline {
                         echo err.getMessage()
                     }
 
-                    sh 'docker run -d' +
+                    sh 'docker run -d ' +
                             '-p 34299:3306 ' + // 0.0.0.0
                             '--name newman_db ' +
                             '--env MYSQL_ROOT_PASSWORD=password ' +
