@@ -125,8 +125,8 @@ pipeline {
     }
 
     post {
-        always {
-            script {
+//        always {
+//            script {
 //                try {
 //                    sh 'docker container rm anmeldesystem-backend-newman -f'
 //                } catch (err) {
@@ -150,8 +150,8 @@ pipeline {
 //                } catch (err) {
 //                    echo err.getMessage()
 //                }
-            }
-        }
+//            }
+//        }
         success {
             script {
                 updateStatus("success")
