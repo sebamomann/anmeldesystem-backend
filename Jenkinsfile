@@ -48,7 +48,7 @@ pipeline {
                             '--network newmanNet ' +
                             '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
                             '--health-interval=2s ' +
-                            'mysql '
+                            'mysql mysqld --default-authentication-plugin=mysql_native_password'
 
                     retry(10) {
                         sleep 2
