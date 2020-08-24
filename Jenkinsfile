@@ -17,6 +17,15 @@ pipeline {
     }
 
     stages {
+        stage('Preamble') {
+            script {
+                sh 'curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=$GITHUB_STATUS_ACCESS_TOKEN" \\\n' +
+                        '  -H "Content-Type: application/json" \\\n' +
+                        '  -X POST \\\n' +
+                        '  -d "{\\"state\\": \\"pending\\", \\"description\\": \\"Jenkins\\", \\"context\\": \\"continuous-integration/jenkins\\", \\"target_url\\": \\"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\\"}"'
+            }
+        }
+
         stage('Build Docker image') {
             steps {
                 script {
@@ -120,18 +129,18 @@ pipeline {
     post {
         success {
             script {
-                sh 'curl "https://api.GitHub.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=$GITHUB_STATUS_ACCESS_TOKEN" \n' +
-                        '  -H "Content-Type: application/json" \n' +
-                        '  -X POST \n' +
-                        '  -d "{\"state\": \"success\",\"context\": \"continuous-integration/jenkins\", \"description\": \"Jenkins\", \"target_url\": \"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\"}"\n'
+                sh 'curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=$GITHUB_STATUS_ACCESS_TOKEN" \\\n' +
+                        '  -H "Content-Type: application/json" \\\n' +
+                        '  -X POST \\\n' +
+                        '  -d "{\\"state\\": \\"success\\", \\"description\\": \\"Jenkins\\", \\"context\\": \\"continuous-integration/jenkins\\", \\"target_url\\": \\"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\\"}"'
             }
         }
         failure {
             script {
-                sh 'curl "https://api.GitHub.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=$GITHUB_STATUS_ACCESS_TOKEN" \n' +
-                        '  -H "Content-Type: application/json" \n' +
-                        '  -X POST \n' +
-                        '  -d "{\"state\": \"failure\",\"context\": \"continuous-integration/jenkins\", \"description\": \"Jenkins\", \"target_url\": \"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\"}"\n'
+                sh 'curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT?access_token=$GITHUB_STATUS_ACCESS_TOKEN" \\\n' +
+                        '  -H "Content-Type: application/json" \\\n' +
+                        '  -X POST \\\n' +
+                        '  -d "{\\"state\\": \\"failure\\", \\"description\\": \\"Jenkins\\", \\"context\\": \\"continuous-integration/jenkins\\", \\"target_url\\": \\"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\\"}"'
             }
         }
     }
