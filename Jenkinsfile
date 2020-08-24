@@ -76,7 +76,6 @@ pipeline {
                             '--env DOMAIN=go-join.me ' +
                             '--env NODE_ENV=test_postman ' +
                             '--network newmanNet ' +
-                            '--health-cmd=\'ping localhost:3000 -t 500 -c 1\' ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
 
                     retry(10) {
