@@ -70,7 +70,7 @@ pipeline {
                             '--env DB_PASSWORD="Oa(zGPsbFl&cowu3p&9~" ' +
                             '--env DB_HOST=cp.dankoe.de ' +
                             '--env DB_PORT=3306 ' +
-                            '--env DB_NAME=anmeldesystem-api-testing ' +
+                            '--env DB_DATABASE=anmeldesystem-api-testing ' +
                             '--env SALT_JWT=salt ' +
                             '--env SALT_MAIL=salt ' +
                             '--env SALT_ENROLLMENT=salt ' +
@@ -100,7 +100,6 @@ pipeline {
                     sh 'docker run ' +
                             '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
                             '--name newman ' +
-                            '--net newmanNet ' +
                             '-t postman/newman:alpine ' +
                             'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/test/collection.json"'
                 }
