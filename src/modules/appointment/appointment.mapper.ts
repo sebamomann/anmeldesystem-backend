@@ -1,25 +1,26 @@
-import {AppointmentService} from './appointment.service';
 import {User} from '../user/user.entity';
 import {Appointment} from './appointment.entity';
 import {Enrollment} from '../enrollment/enrollment.entity';
+import {AppointmentUtil} from './appointment.util';
 
-module.exports = {
-    basic: function(appointmentService, appointment) {
+export class AppointmentMapper {
+
+    public static basic(appointment) {
         if (appointment.administrators !== undefined) {
-            appointment.administrators = this.stripAdministrator(appointment.administrators);
+            appointment.administrators = AppointmentMapper.stripAdministrators(appointment.administrators);
         }
 
         if (appointment.enrollments !== undefined) {
-            appointment.enrollments = this.enrolledByUser(appointment.enrollments);
+            appointment.enrollments = AppointmentMapper.enrolledByUser(appointment.enrollments);
         }
 
         return appointment;
-    },
+    }
 
-    permission: function(appointmentService: AppointmentService, _appointment: Appointment, _user: User, permissions: any) {
+    public static permission(_appointment: Appointment, _user: User, permissions: any): any {
         let appointment: {};
         let creatorObject = {};
-        let enrollmentsObject = {};
+        let enrollmentsObject;
 
         appointment = (({
                             reference,
@@ -35,7 +36,7 @@ module.exports = {
                             driverAddition,
                             additions,
                             files,
-                            administrators
+                            administrators,
                         }) => ({
             reference,
             id,
@@ -50,22 +51,23 @@ module.exports = {
             driverAddition,
             additions,
             files,
-            administrators
+            administrators,
         }))
         (_appointment);
 
-        if (AppointmentService.isCreatorOfAppointment(_appointment, _user)) {
+        if (AppointmentUtil.isCreatorOfAppointment(_appointment, _user)) {
             creatorObject = (({
-                                  iat, lud,
+                                  iat,
+                                  lud,
                               }) => ({
-                iat, lud,
+                iat,
+                lud,
             }))
             (_appointment);
         }
 
         if (!_appointment.hidden
-            || (AppointmentService.isCreatorOfAppointment(_appointment, _user)
-                || AppointmentService.isAdministratorOfAppointment(_appointment, _user))) {
+            || AppointmentUtil.isCreatorOrAdministrator(_appointment, _user)) {
             enrollmentsObject = (({
                                       enrollments,
                                   }) => ({
@@ -73,7 +75,7 @@ module.exports = {
             }))
             (_appointment);
         } else {
-            const __enrollments = AppointmentService
+            const __enrollments = AppointmentUtil
                 .filterPermittedEnrollments(permissions, _appointment.enrollments);
             enrollmentsObject = {enrollments: __enrollments};
         }
@@ -91,32 +93,31 @@ module.exports = {
         appointment = Object.assign(appointment, obj);
 
         return appointment;
-    },
+    }
 
-    slim: function(appointmentService: AppointmentService, appointment: Appointment, slim: boolean) {
+    public static slim(appointment: Appointment, slim: boolean) {
         if (slim) {
             delete appointment.files;
             delete appointment.enrollments;
-            delete appointment.files;
         }
 
         return appointment;
-    },
+    }
 
-    stripAdministrator(admins: User[]) {
-        return admins.map(mAdmin => {
-            return (({name, username,}) => ({
-                name, username,
-            }))
-            (mAdmin);
-        });
-    },
-
-    enrolledByUser(enrollments: Enrollment[]) {
+    public static enrolledByUser(enrollments: Enrollment[]) {
         return enrollments.map(mEnrollment => {
             mEnrollment.createdByUser = mEnrollment.creator != null;
             delete mEnrollment.creator;
             return mEnrollment;
         });
     }
-};
+
+    private static stripAdministrators(admins: User[]) {
+        return admins.map(mAdmin => {
+            return (({name, username,}) => ({
+                name, username,
+            }))
+            (mAdmin);
+        });
+    }
+}

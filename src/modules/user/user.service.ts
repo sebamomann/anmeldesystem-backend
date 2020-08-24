@@ -19,6 +19,7 @@ import {InternalErrorException} from '../../exceptions/InternalErrorException';
 import {GeneratorUtil} from '../../util/generator.util';
 import {Session} from './session.entity';
 import {DomainUtil} from '../../util/domain.util';
+import {PasswordUtil} from '../../util/password.util';
 
 var logger = require('../../logger');
 var crypto = require('crypto');
@@ -44,6 +45,10 @@ export class UserService {
         private readonly emailChangeRepository: Repository<EmailChange>,
         private mailerService: MailerService,
     ) {
+    }
+
+    public async __save(user: any) {
+        return await this.userRepository.save(user);
     }
 
     public async findById(id: string): Promise<User> {
@@ -76,7 +81,7 @@ export class UserService {
         return user;
     }
 
-    async findByEmailOrUsername(value: string) {
+    public async findByEmailOrUsername(value: string): Promise<User> {
         const user = await this.userRepository.findOne({where: [{mail: value}, {username: value}]});
 
         if (user === undefined) {
@@ -86,65 +91,67 @@ export class UserService {
         return user;
     }
 
-    public async get(user: User) {
-        let _user;
+    /**
+     * Fetch user based on ID of passed user object.<br/>
+     * Return mapped version.
+     *
+     * @param user_referenced
+     *
+     * @throws See {@link findById} for reference
+     */
+    public async get(user_referenced: User) {
+        let user;
 
         try {
-            _user = await this.findById(user.id);
+            user = await this.findById(user_referenced.id);
         } catch (e) {
             throw e;
         }
 
-        return userMapper.basic(this, _user);
+        return userMapper.basic(this, user);
     }
 
-    public async register(user: User, domain: string) {
-        const userToDb = new User();
-        userToDb.name = user.name;
-        userToDb.username = user.username;
-        userToDb.mail = user.mail;
+    /**
+     * Create a new account based on the passed parameters.<br/>
+     * On success send activation email to specified email address
+     *
+     * @param user_raw User Object with data to be
+     * @param domain String template for activation parameters sent in the verification email
+     *
+     * @throws See {@link _checkForDuplicateValues} for reference
+     */
+    public async register(user_raw: User, domain: string) {
+        const user = new User();
 
-        try {
-            await this._checkForDuplicateValues(user);
-        } catch (e) {
-            throw e;
+        await this._checkForDuplicateValues(user_raw);
+
+        user.name = user_raw.name;
+        user.username = user_raw.username;
+        user.mail = user_raw.mail;
+        user.password = PasswordUtil.cryptPassword(user_raw.password);
+
+        console.log(process.env.NODE_ENV);
+
+        if (process.env.NODE_ENV === 'test_postman') {
+            user.activated = true;
         }
 
-        userToDb.password = bcrypt.hashSync(user.password, 10);
+        const savedUser = await this.userRepository.save(user);
 
-        const savedUser = await this.userRepository.save(userToDb);
-
-        let token = crypto.createHmac('sha256',
-            user.mail + process.env.SALT_MAIL + savedUser.username + savedUser.iat)
-            .digest('hex');
-
-        this.mailerService
-            .sendMail({
-                to: user.mail,
-                from: process.env.MAIL_ECA,
-                subject: 'Neuer Account',
-                template: 'register',
-                context: {
-                    name: user.username,
-                    url: `https://${DomainUtil.replaceDomain(domain, btoa(user.mail), token)}`
-                },
-            })
-            .then(() => {
-            })
-            .catch((err) => {
-                // maybe cleanup registered user ?
-                logger.log('error', `Could not send register mail to "${user.mail}"`);
-                logger.log('error', err);
-            });
+        this._sendRegisterEmail(savedUser, domain);
 
         return userMapper.basic(this, savedUser);
     }
 
-    public async __save(user: any) {
-        return await this.userRepository.save(user);
-    }
-
-    public async update(valuesToUpdate: any, userFromJwt: User) {
+    /**
+     * Change an existing User with the given values. <br />
+     * The allowedValuesToChange array shows all updatable options.
+     *
+     * @param user_to_change_values Values to change
+     * @param userFromJwt User gotten from authentication check
+     * @param domain String template for verification parameters
+     */
+    public async update(user_to_change_values: any, userFromJwt: User, domain: string) {
         let user;
 
         try {
@@ -155,7 +162,7 @@ export class UserService {
 
         const allowedValuesToChange = ['name', 'mail', 'password'];
 
-        for (const [key, value] of Object.entries(valuesToUpdate)) {
+        for (const [key, value] of Object.entries(user_to_change_values)) {
             if (key in user
                 && user[key] !== value
                 && allowedValuesToChange.indexOf(key) > -1) {
@@ -163,8 +170,7 @@ export class UserService {
 
                 if (key === 'mail') {
                     try {
-                        console.log(userFromJwt);
-                        const emailChange = await this.handleEmailChange(userFromJwt, valuesToUpdate);
+                        const emailChange = await this.emailChange_initialize(userFromJwt, user_to_change_values.mail, domain);
                         user.emailChange = [emailChange];
                     } catch (e) {
                         throw e;
@@ -191,7 +197,14 @@ export class UserService {
         return userMapper.basic(this, savedUser);
     }
 
-    public async activate(mail: string, token: string) {
+    /**
+     * Activate created account (set activated attribute to 1).<br/>
+     * Proper error messages on invalid token or already used
+     *
+     * @param mail String email address of account to activate
+     * @param token String token send with mail on account creation
+     */
+    public async activateAccount(mail: string, token: string) {
         let user;
 
         try {
@@ -201,7 +214,7 @@ export class UserService {
         }
 
         const verifyingToken = crypto
-            .createHmac('sha256', user.mail + process.env.SALT_MAIL + user.username + user.iat)
+            .createHmac('sha256', user.mail + process.env.SALT_MAIL + user.username + user.iat.getTime())
             .digest('hex');
 
         const tokenIsValid = verifyingToken === token;
@@ -233,61 +246,25 @@ export class UserService {
      * @throws See {@link findByEmail} for reference
      * @throws EmptyFieldsException if domain was not provided
      */
-    public async resetPasswordInitialization(mail: string, domain: string) {
-        let user;
+    public async passwordReset_initialize(mail: string, domain: string) {
+        const user = await this.findByEmail(mail);
 
-        try {
-            user = await this.findByEmail(mail);
-        } catch (e) {
-            throw e;
-        }
-
-        if (domain === undefined
-            || domain === null
-            || domain === '') {
+        if (!domain) {
             throw new EmptyFieldsException(null,
                 'In order to send the password verification link you need to provide a domain',
                 ['domain']);
         }
 
-        await this.passwordResetRepository.update({
-            used: IsNull(),
-            oldPassword: IsNull(),
-            user: {
-                id: user.id
-            }
-        }, {
-            oldPassword: 'invalid'
-        });
+        await this._invalidatePendingPasswordResets(user);
 
         let token = crypto
             .createHmac('sha256', mail + process.env.SALT_MAIL + Date.now())
             .digest('hex');
 
-        const passwordReset = new PasswordReset();
-        passwordReset.user = user;
-        passwordReset.token = token;
+        await this._storePasswordResetEntity(user, token); // TODO in own service
 
-        await this.passwordResetRepository.save(passwordReset);
-
-        let url = `https://${DomainUtil.replaceDomain(domain, btoa(mail).replace('=', ''), token)}`;
-
-        this.mailerService
-            .sendMail({
-                to: mail,
-                from: process.env.MAIL_ECA,
-                subject: 'Jemand möchte dein Passwort zurücksetzen. Bist das du?',
-                template: 'passwordreset',
-                context: {
-                    name: user.username,
-                    url: url
-                },
-            })
-            .then(() => {
-            })
-            .catch(() => {
-                logger.log('error', 'Could not send register mail to %s', user.mail);
-            });
+        // noinspection UnnecessaryLocalVariableJS
+        let url = await this._sendPasswordResetInitializationEmail(domain, mail, token, user);
 
         return url;
     }
@@ -298,39 +275,28 @@ export class UserService {
      *
      * @param mail mail address of user (from link)
      * @param token verification token (from link)
-     * @param pass new password (from body)
+     * @param newPassword new password (from body)
      *
      * @return true if everything went accordingly
      *
      * @throws EntityNotFoundException when user with given mail does not exist anymore
-     * @throws See {@link resetPasswordTokenVerification} for reference
+     * @throws See {@link passwordReset_tokenVerification} for reference
      */
-    public async updatePassword(mail: string, token: string, pass: string) {
-        console.log(mail);
-        return this.resetPasswordTokenVerification(mail, token)
-            .then(async () => {
-                let user;
+    public async passwordReset_updatePassword(mail: string, token: string, newPassword: string) {
+        await this.passwordReset_tokenVerification(mail, token);
 
-                try {
-                    user = await this.findByEmail(mail);
-                } catch (e) {
-                    throw e;
-                }
+        const user = await this.findByEmail(mail);
 
-                let currentPassword = user.password;
-                user.password = bcrypt.hashSync(pass, 10);
+        let currentPassword = user.password;
+        user.password = PasswordUtil.cryptPassword(newPassword);
 
-                await this.userRepository.save(user);
+        await this.userRepository.save(user);
 
-                try {
-                    await this._updatePasswordResetEntity(token, currentPassword);
-                } catch (e) {
-                    //
-                }
-            })
-            .catch((err) => {
-                throw err;
-            });
+        this._markPasswordResetAsUsed(token, currentPassword)
+            .catch(() => {
+            }); // do nothing on catch because password is actually updated // TODO reset change
+
+        return true;
     }
 
     /**
@@ -352,8 +318,8 @@ export class UserService {
      * @throws AlreadyUsedException if password reset is already done, so the token is used (1 time usage token)
      * @throws ExpiredTokenException if token is not used or replaced, but older than 24 hours
      */
-    public async resetPasswordTokenVerification(mail: string, token: string) {
-        const passwordReset = await this.passwordResetRepository.findOne({where: {token: token}});
+    public async passwordReset_tokenVerification(mail: string, token: string) {
+        const passwordReset = await this.passwordResetRepository.findOne({where: {token: token}}); // TODO in own service
 
         if (passwordReset === undefined) {
             throw new InvalidTokenException();
@@ -376,6 +342,46 @@ export class UserService {
     }
 
     /**
+     * Initializes mail change event. This includes invalidating previous change attempts (pending verification) and
+     * sending a verification mail to the new mail address.
+     *
+     * @param user The user whose mail is going to change
+     * @param mail New mail address
+     * @param domain Domain to build verification link with
+     *
+     * @returns url Email verification link to verify new mail address and execute mail change
+     *
+     * @throws See {@link findByEmail} for reference
+     * @throws DuplicateValueException if new mail is already in use
+     * @throws EmptyFieldsException if domain is missing
+     */
+    public async emailChange_initialize(user: User, mail, domain) {
+        const _user = await this.findById(user.id);
+
+        if (await this._existsByMail(mail) || await this._emailBlocked(mail)) {
+            throw new DuplicateValueException(null, null, ['email']);
+        }
+
+        if (!domain) {
+            throw new EmptyFieldsException(null,
+                'Due to the mail change you need to provide the domain for the activation call',
+                ['domain']);
+        }
+
+        await this._cancelPendingMailChanges(_user);
+
+        let token = crypto
+            .createHmac('sha256', mail + process.env.SALT_MAIL + Date.now())
+            .digest('hex');
+
+        let emailChange = await this.createEmailChangeEntity(_user, token, mail);
+
+        this._sendEmailChangeEmail(domain, mail, token, _user);
+
+        return emailChange;
+    }
+
+    /**
      * Updates the mail address of a user. <br />
      * Check for token validity and update {@link EmailChange} object. <br />
      *
@@ -385,33 +391,23 @@ export class UserService {
      * @return true if everything went accordingly
      *
      * @throws EntityNotFoundException when user with given mail does not exist anymore
-     * @throws See {@link mailChangeTokenVerification} for reference
+     * @throws See {@link emailChange_tokenVerification} for reference
      */
-    public mailChange(mail: string, token: string) {
-        return this.mailChangeTokenVerification(mail, token)
-            .then(async (res) => {
-                let user;
+    public async emailChange_updateEmail(mail: string, token: string) {
+        const emailChange = await this.emailChange_tokenVerification(mail, token);
 
-                try {
-                    user = await this.findByEmail(res.oldMail);
-                } catch (e) {
-                    throw e;
-                }
+        const user = await this.findByEmail(emailChange.oldMail);
 
-                let currentMail = user.mail;
-                user.mail = mail;
+        let currentMail = user.mail;
+        user.mail = mail;
 
-                await this.userRepository.save(user);
+        await this.userRepository.save(user);
 
-                try {
-                    await this._updateEmailChangeEntity(token, currentMail);
-                } catch (e) {
-                    //
-                }
-            })
-            .catch((err) => {
-                throw err;
+        await this._updateEmailChangeEntity(token, currentMail)
+            .catch(() => {
             });
+
+        return true;
     }
 
     /**
@@ -427,13 +423,13 @@ export class UserService {
      * @param mail mail address of user check for
      * @param token token created with mail address and
      *
-     * @returns boolean (true) if token is valid
+     * @returns EmailChange Object
      *
      * @throws ExpiredTokenException if token is already replaced
      * @throws AlreadyUsedException if password reset is already done, so the token is used (1 time usage token)
      * @throws ExpiredTokenException if token is not used or replaced, but older than 24 hours
      */
-    public async mailChangeTokenVerification(mail: string, token: string) {
+    public async emailChange_tokenVerification(mail: string, token: string) {
         let emailChange = await this.emailChangeRepository.findOne({where: {token: token, newMail: mail}});
 
         if (emailChange === undefined) {
@@ -463,12 +459,12 @@ export class UserService {
      * @param user
      * @param domain
      *
-     * @returns url url to execute email change
+     * @returns emaiLChange object
      *
      * @throws InvalidTokenException if the email cant be resend due to no active email change
-     * @throws See {@link handleEmailChange} for reference
+     * @throws See {@link emailChange_initialize} for reference
      */
-    public async mailChangeResendMail(user: User, domain: string) {
+    public async emailChange_resendEmail(user: User, domain: string) {
         let emailChange = await this.emailChangeRepository.findOne({
             where: {
                 oldMail: Not('invalid'),
@@ -479,16 +475,12 @@ export class UserService {
             }
         });
 
-        if (emailChange === undefined) {
+        if (!emailChange) {
             throw new InvalidRequestException(null,
                 'There is no active mail change going on. Email resend is not possible');
         }
 
-        try {
-            return await this.handleEmailChange(user, {mail: emailChange.newMail, domain: domain});
-        } catch (e) {
-            throw e;
-        }
+        return await this.emailChange_initialize(user, emailChange.newMail, domain);
     }
 
     /**
@@ -499,27 +491,22 @@ export class UserService {
      *
      * @returns void
      *
-     * @throws See {@link _resetPreviousMailChanges} for reference
+     * @throws See {@link _cancelPendingMailChanges} for reference
      */
-    public async mailChangeDeactivateToken(user: User) {
-        try {
-            await this._resetPreviousMailChanges(user);
-        } catch (e) {
-            throw e;
-        }
+    public async emailChange_cancelPendingChanges(user: User) {
+        await this._cancelPendingMailChanges(user);
     }
 
     /**
-     * Gives user more information about his password.<br />
-     * Function is used to get the date, when the user changes the provided password to a new one.<br />
-     * Function used upon login to provide information, when the user changes his password.
+     * Gives the User more information about his password.<br />
+     * Function is used to get the date, at which the user changed the provided password to a new one.<br />
      *
      * @param user User to retrieve information for
      * @param password Password to check when it was changed
      *
      * @returns date at which provided password was lastly changed | null if this password was never used
      */
-    public async getLastPasswordDate(user: User, password: string) {
+    public async getLastValidityDateOfPassword(user: User, password: string) {
         let used = null;
 
         const passwordChangeListByReset = await this.passwordResetRepository.find({
@@ -536,7 +523,7 @@ export class UserService {
 
         if (passwordChangeListByReset) {
             for (const _pass of passwordChangeListByReset) {
-                if (await bcrypt.compare(password, _pass.oldPassword)) {
+                if (PasswordUtil.compare(password, _pass.oldPassword)) {
                     used = _pass.used;
                     break;
                 }
@@ -557,7 +544,7 @@ export class UserService {
 
         if (passwordChangeListByChange) {
             for (const _pass of passwordChangeListByChange) {
-                if (await bcrypt.compare(password, _pass.oldPassword)) {
+                if (PasswordUtil.compare(password, _pass.oldPassword)) {
                     if (used < _pass.iat) {
                         used = _pass.iat;
                     }
@@ -570,52 +557,34 @@ export class UserService {
         return used;
     }
 
-    /**
-     * Initializes mail change event. This includes invalidating previous change attempts (pending verification) and
-     * sending a verification mail to the new mail address.
-     *
-     * @param user The user whose mail is going to change
-     * @param mail New mail address
-     * @param domain Domain to build verification link with
-     *
-     * @returns url Email verification link to verify new mail address and execute mail change
-     *
-     * @throws See {@link findByEmail} for reference
-     * @throws DuplicateValueException if new mail is already in use
-     * @throws EmptyFieldsException if domain is missing
-     */
-    public async handleEmailChange(user: User, {mail, domain}) {
-        let _user;
+    public async createSession(user) { // todo own session service
+        const refreshToken = GeneratorUtil.makeid(40);
 
-        try {
-            // TODO
-            // User is already passed
-            _user = await this.findById(user.id);
-        } catch (e) {
-            throw e;
+        const session = new Session();
+        session.refreshToken = refreshToken;
+        session.user = user;
+        session.last_used = new Date();
+
+        await this.sessionRepository.save(session);
+
+        return session;
+    }
+
+    public async sessionExists(refreshToken: string, id: string) {
+        const session = await this.sessionRepository.findOne({where: {refreshToken: refreshToken, user: id}});
+
+        if (session === undefined) {
+            throw new EntityNotFoundException();
         }
 
-        if (await this._existsByMail(mail) || await this._emailBlocked(mail)) {
-            throw new DuplicateValueException(null, null, ['email']);
-        }
+        session.last_used = new Date();
+        session.times_used = session.times_used + 1;
+        await this.sessionRepository.save(session);
 
-        if (domain === undefined
-            || domain === null
-            || domain === '') {
-            throw new EmptyFieldsException(null,
-                'Due to the mail change you need to provide the domain for the activation call');
-        }
+        return session;
+    }
 
-        try {
-            await this._resetPreviousMailChanges(_user);
-        } catch (e) {
-            throw e;
-        }
-
-        let token = crypto
-            .createHmac('sha256', mail + process.env.SALT_MAIL + Date.now())
-            .digest('hex');
-
+    private async createEmailChangeEntity(_user, token: string, mail) {
         let emailChange = new EmailChange();
         emailChange.user = _user;
         emailChange.token = token;
@@ -623,7 +592,10 @@ export class UserService {
         emailChange.oldMail = _user.mail;
 
         emailChange = await this.emailChangeRepository.save(emailChange);
+        return emailChange;
+    }
 
+    private _sendEmailChangeEmail(domain, mail, token: string, _user) {
         const url = `https://${DomainUtil.replaceDomain(domain, btoa(mail).replace('=', ''), token)}`;
 
         this.mailerService
@@ -642,34 +614,76 @@ export class UserService {
             .catch(() => {
                 logger.log('error', 'Could not send mail change mail to %s', mail);
             });
-
-        return emailChange;
     }
 
-    // async addTelegramUser(telegramUser: TelegramUser, user: User) {
-    //     let savedTelegramUser = await this.telegramUserRepository.save(telegramUser);
-    //     let userFromDb = await this.find(user.id);
-    //     userFromDb.telegramUser = savedTelegramUser;
-    //     return this.userRepository.save(userFromDb);
-    // }
+    private async _invalidatePendingPasswordResets(user: User) {
+        await this.passwordResetRepository.update({
+            used: IsNull(),
+            oldPassword: IsNull(),
+            user: {
+                id: user.id
+            }
+        }, {
+            oldPassword: 'invalid'
+        });
+    }
 
-    /**
-     * Fetch the current active mail change from the mailChange list. <br />
-     * Active state is determined by checking the time interval (max 24h old),
-     * plus the used state.
-     *
-     * @param emailChange List of all email changes to filter in
-     * @return EmailChange[] List of all active email  (should just be one item)
-     */
-    public retrieveActiveMailChanges(emailChange: EmailChange[]) {
-        if (emailChange === undefined) {
-            return [];
-        }
+    private _sendPasswordResetInitializationEmail(domain: string, mail: string, token: string, user: User) {
+        let url = `https://${DomainUtil.replaceDomain(domain, btoa(mail).replace('=', ''), token)}`;
 
-        return emailChange.filter(fEmailChange =>
-            (fEmailChange.iat.getTime()) + (24 * 60 * 60 * 1000) > Date.now()
-            && fEmailChange.oldMail != 'invalid'
-            && fEmailChange.used === null);
+        this.mailerService
+            .sendMail({
+                to: mail,
+                from: process.env.MAIL_ECA,
+                subject: 'Jemand möchte dein Passwort zurücksetzen. Bist das du?',
+                template: 'passwordreset',
+                context: {
+                    name: user.username,
+                    url: url
+                },
+            })
+            .then(() => {
+            })
+            .catch(() => {
+                logger.log('error', 'Could not send register mail to %s', user.mail);
+            });
+        return url;
+    }
+
+    private async _storePasswordResetEntity(user: User, token: string) {
+        const passwordReset = new PasswordReset();
+        passwordReset.user = user;
+        passwordReset.token = token;
+
+        await this.passwordResetRepository.save(passwordReset);
+    }
+
+    private _sendRegisterEmail(user: User, domain: string) {
+        let token = crypto.createHmac('sha256',
+            user.mail + process.env.SALT_MAIL + user.username + (new Date(user.iat)).getTime())
+            .digest('hex');
+
+        console.log(user.mail + process.env.SALT_MAIL + user.username + (new Date(user.iat)).getTime());
+        console.log(token);
+
+        this.mailerService
+            .sendMail({
+                to: user.mail,
+                from: process.env.MAIL_ECA,
+                subject: 'Neuer Account',
+                template: 'register',
+                context: {
+                    name: user.username,
+                    url: `https://${DomainUtil.replaceDomain(domain, btoa(user.mail), token)}`
+                },
+            })
+            .then(() => {
+            })
+            .catch((err) => {
+                // maybe cleanup registered user ?
+                logger.log('error', `Could not send register mail to "${user.mail}"`);
+                logger.log('error', err);
+            });
     }
 
     private async _checkForDuplicateValues(user: User) {
@@ -707,7 +721,7 @@ export class UserService {
             });
     }
 
-    private async _updatePasswordResetEntity(token: string, currentPassword: string) {
+    private async _markPasswordResetAsUsed(token: string, currentPassword: string) {
         try {
             await this.passwordResetRepository
                 .update({
@@ -737,7 +751,7 @@ export class UserService {
         }
     }
 
-    private async _resetPreviousMailChanges(user: User) {
+    private async _cancelPendingMailChanges(user: User) {
         try {
             await this.emailChangeRepository
                 .update({
@@ -752,33 +766,6 @@ export class UserService {
             logger.log('error', `Can't execute query to cancel mail change of user ${user.id}`);
             throw new InternalErrorException(null, 'Cannot cancel mail change due to a database error');
         }
-    }
-
-    public async createSession(user) {
-        const refreshToken = GeneratorUtil.makeid(40);
-
-        const session = new Session();
-        session.refreshToken = refreshToken;
-        session.user = user;
-        session.last_used = new Date();
-
-        await this.sessionRepository.save(session);
-
-        return session;
-    }
-
-    async sessionExists(refreshToken: string, id: string) {
-        const session = await this.sessionRepository.findOne({where: {refreshToken: refreshToken, user: id}});
-
-        if (session == undefined) {
-            throw new EntityNotFoundException();
-        }
-
-        session.last_used = new Date();
-        session.times_used = session.times_used + 1;
-        await this.sessionRepository.save(session);
-
-        return session;
     }
 
     private async _emailBlocked(mail: any) {

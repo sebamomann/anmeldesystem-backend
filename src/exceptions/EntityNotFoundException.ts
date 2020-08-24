@@ -34,4 +34,12 @@ export class EntityNotFoundException implements Error {
 
     printStackTrace() {
     }
+
+    parse() {
+        return {
+            code: this.code,
+            message: this.message,
+            data: this.data
+        };
+    }
 }

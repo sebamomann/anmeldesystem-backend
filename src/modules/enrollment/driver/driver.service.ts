@@ -27,9 +27,7 @@ export class DriverService {
     public async findByEnrollment(enrollment: Enrollment) {
         let driver = await this.driverRepository.findOne({
             where: {
-                enrollment: {
-                    id: enrollment.id
-                }
+                enrollment: enrollment
             }
         });
 

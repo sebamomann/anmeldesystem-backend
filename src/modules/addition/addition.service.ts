@@ -15,7 +15,6 @@ export class AdditionService {
         return await this.additionRepository.save(addition);
     }
 
-    /* istanbul ignore next */
     public async findById(id: string) {
         let addition = await this.additionRepository.findOne({
             where: {

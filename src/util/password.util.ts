@@ -1,13 +1,11 @@
 var bcrypt = require('bcryptjs');
 
-exports.cryptPassword = function (password) {
-    bcrypt.genSalt(10, function (err, salt) {
-        if (err)
-            throw Error;
+export class PasswordUtil {
+    public static cryptPassword = function(password) {
+        return bcrypt.hashSync(password, 10);
+    };
 
-        bcrypt.hash(password, salt, function (err, hash) {
-            return hash;
-        });
-    });
-};
-
+    static compare(password: string, hash: string) {
+        return bcrypt.compareSync(password, hash);
+    }
+}

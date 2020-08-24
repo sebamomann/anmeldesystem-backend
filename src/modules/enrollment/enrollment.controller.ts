@@ -32,7 +32,7 @@ export class EnrollmentController {
                 res.status(HttpStatus.CREATED).json(tEnrollment);
             })
             .catch((err) => {
-                console.log(err);
+                console.log(err, 'LOL');
                 throw err;
             });
     }
