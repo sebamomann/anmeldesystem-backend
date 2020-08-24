@@ -19,8 +19,8 @@
 									"script": {
 										"id": "0fa5b7a2-2fed-4324-bce8-b01dea99c54d",
 										"exec": [
-											"pm.test(\"Response time is less than 200ms\", function () {\r",
-											"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+											"pm.test(\"Response time is less than 500ms (first call)\", function () {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
 											"});\r",
 											"pm.test(\"Successful POST request\", function () {\r",
 											"    pm.expect(pm.response.code).to.eql(201);\r",
