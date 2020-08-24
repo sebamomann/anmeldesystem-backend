@@ -69,7 +69,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/users/",
+									"raw": "http://anmeldesystem-backend-newman:34298/users/",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -133,7 +134,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/users/",
+									"raw": "http://anmeldesystem-backend-newman:34298/users/",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -197,7 +199,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/users/",
+									"raw": "http://anmeldesystem-backend-newman:34298/users/",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -260,7 +263,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/users/",
+									"raw": "http://anmeldesystem-backend-newman:34298/users/",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -331,7 +335,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/users/",
+									"raw": "http://anmeldesystem-backend-newman:34298/users/",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -402,7 +407,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/users/",
+									"raw": "http://anmeldesystem-backend-newman:34298/users/",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -473,7 +479,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/users/",
+									"raw": "http://anmeldesystem-backend-newman:34298/users/",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -544,7 +551,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/users/",
+									"raw": "http://anmeldesystem-backend-newman:34298/users/",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -597,7 +605,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/users/verify/{{creator_email_base64}}/{{activation_token}}",
+									"raw": "http://anmeldesystem-backend-newman:34298/users/verify/{{creator_email_base64}}/{{activation_token}}",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -667,7 +675,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/auth/login",
+									"raw": "http://anmeldesystem-backend-newman:34298/auth/login",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -729,7 +738,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/auth/login",
+									"raw": "http://anmeldesystem-backend-newman:34298/auth/login",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -791,7 +801,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/auth/login",
+									"raw": "http://anmeldesystem-backend-newman:34298/auth/login",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -852,7 +863,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/auth/login",
+									"raw": "http://anmeldesystem-backend-newman:34298/auth/login",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -913,7 +925,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/auth/login",
+									"raw": "http://anmeldesystem-backend-newman:34298/auth/login",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -974,7 +987,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/auth/login",
+									"raw": "http://anmeldesystem-backend-newman:34298/auth/login",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1035,7 +1049,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/auth/login",
+									"raw": "http://anmeldesystem-backend-newman:34298/auth/login",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1099,7 +1114,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/auth/token",
+									"raw": "http://anmeldesystem-backend-newman:34298/auth/token",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1151,7 +1167,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/auth/token",
+									"raw": "http://anmeldesystem-backend-newman:34298/auth/token",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1203,7 +1220,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/auth/token",
+									"raw": "http://anmeldesystem-backend-newman:34298/auth/token",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1329,7 +1347,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/appointment",
+									"raw": "http://anmeldesystem-backend-newman:34298/appointment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1439,7 +1458,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/appointment",
+									"raw": "http://anmeldesystem-backend-newman:34298/appointment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1513,7 +1533,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/appointment",
+									"raw": "http://anmeldesystem-backend-newman:34298/appointment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1603,7 +1624,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/appointment",
+									"raw": "http://anmeldesystem-backend-newman:34298/appointment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1676,7 +1698,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/appointment",
+									"raw": "http://anmeldesystem-backend-newman:34298/appointment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1765,7 +1788,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/appointment",
+									"raw": "http://anmeldesystem-backend-newman:34298/appointment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1854,7 +1878,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/appointment",
+									"raw": "http://anmeldesystem-backend-newman:34298/appointment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -1943,7 +1968,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/appointment",
+									"raw": "http://anmeldesystem-backend-newman:34298/appointment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -2033,7 +2059,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/appointment",
+									"raw": "http://anmeldesystem-backend-newman:34298/appointment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -2117,7 +2144,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -2192,7 +2220,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -2267,7 +2296,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -2342,7 +2372,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -2417,7 +2448,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -2489,7 +2521,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -2564,7 +2597,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -2639,7 +2673,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -2722,7 +2757,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -2797,7 +2833,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -2872,7 +2909,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -2956,7 +2994,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -3033,7 +3072,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -3110,7 +3150,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -3198,7 +3239,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -3279,7 +3321,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -3360,7 +3403,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -3441,7 +3485,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -3506,7 +3551,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -3570,7 +3616,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -3629,7 +3676,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator/{{admin_username}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator/{{admin_username}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -3694,7 +3742,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -3791,7 +3840,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -3864,7 +3914,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -3937,7 +3988,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -4011,7 +4063,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -4085,7 +4138,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -4160,7 +4214,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -4237,7 +4292,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -4309,7 +4365,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -4383,7 +4440,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+									"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -4467,7 +4525,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -4548,7 +4607,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -4622,7 +4682,8 @@
 									}
 								},
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+									"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -4707,7 +4768,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -4780,7 +4842,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -4855,7 +4918,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -4939,7 +5003,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5012,7 +5077,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5094,7 +5160,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5172,7 +5239,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-driver_id}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-driver_id}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5250,7 +5318,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-driver_id}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-driver_id}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5327,7 +5396,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-driver_id}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-driver_id}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5402,7 +5472,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5465,7 +5536,8 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -5520,7 +5592,8 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+									"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment_id}}",
+									"protocol": "http",
 									"host": [
 										"anmeldesystem-backend-newman"
 									],
@@ -5609,7 +5682,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5666,7 +5740,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5721,7 +5796,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-creator_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-creator_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5776,7 +5852,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-creator_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-creator_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5831,7 +5908,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-creator_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-creator_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5879,7 +5957,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-creator_id}}/check-permission?token=anytoken",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-creator_id}}/check-permission?token=anytoken",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -5970,7 +6049,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6027,7 +6107,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator",
+											"raw": "http://anmeldesystem-backend-newman:34298/appointment/{{appointment_link}}/administrator",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6082,7 +6163,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-admin_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-admin_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6137,7 +6219,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-admin_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-admin_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6192,7 +6275,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-admin_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-admin_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6247,7 +6331,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-admin_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-admin_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6295,7 +6380,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-creator_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-creator_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6380,7 +6466,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6433,7 +6520,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-user_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-user_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6488,7 +6576,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-user_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-user_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6543,7 +6632,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-user_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-user_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6598,7 +6688,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-user_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-user_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6646,7 +6737,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-user_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-user_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6726,7 +6818,8 @@
 											}
 										},
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6779,7 +6872,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6834,7 +6928,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission?token={{enrollment-na_token}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission?token={{enrollment-na_token}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6895,7 +6990,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6948,7 +7044,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -6996,7 +7093,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission?token={{enrollment-na_token}}",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission?token={{enrollment-na_token}}",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
@@ -7050,7 +7148,8 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission?token=token",
+											"raw": "http://anmeldesystem-backend-newman:34298/enrollment/{{enrollment-na_id}}/check-permission?token=token",
+											"protocol": "http",
 											"host": [
 												"anmeldesystem-backend-newman"
 											],
