@@ -75,7 +75,7 @@ pipeline {
                             '--env SALT_MAIL=salt ' +
                             '--env SALT_ENROLLMENT=salt ' +
                             '--env DOMAIN=go-join.me ' +
-                            '--network newmanNet'
+                            '--network newmanNet ' +
                             '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
                             '--health-interval=2s ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
@@ -102,7 +102,7 @@ pipeline {
                             '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
                             '--name newman ' +
                             '-t postman/newman:alpine ' +
-                            '--network newmanNet'
+                            '--network newmanNet ' +
                             'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/test/collection.json"'
                 }
             }
