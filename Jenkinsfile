@@ -49,15 +49,9 @@ pipeline {
                             '--health-cmd=\'mysqladmin ping --silent\' ' +
                             'mysql mysqld --default-authentication-plugin=mysql_native_password'
 
-                    retry(10) {
-                        sleep 2
-                        HEALTH = sh(
-                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' newman_db',
-                                returnStdout: true
-                        ).trim()
-                        echo "${HEALTH}"
-
-                        return HEALTH == "healthy"
+                    waitUntil {
+                        "healthy" == sh(returnStdout: true,
+                                script: "docker inspect newman_db --format=\"{{ .State.Health.Status }}\"").trim()
                     }
 
                     sh 'docker run -d ' +
@@ -78,15 +72,9 @@ pipeline {
                             '--health-interval=2s ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
 
-                    retry(10) {
-                        sleep 2
-                        HEALTH = sh(
-                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
-                                returnStdout: true
-                        ).trim()
-                        echo "${HEALTH}"
-
-                        return HEALTH == "healthy"
+                    waitUntil {
+                        "healthy" == sh(returnStdout: true,
+                                script: "docker inspect anmeldesystem-backend-newman --format=\"{{ .State.Health.Status }}\"").trim()
                     }
                 }
             }
