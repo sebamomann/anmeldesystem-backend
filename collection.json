@@ -569,61 +569,61 @@
 					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
-				{
-					"name": "Activate",
-					"item": [
-						{
-							"name": "Activate success",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"id": "81a8bc77-1e80-4e3a-903c-5417344849ce",
-										"exec": [
-											"var d = new Date(pm.globals.get('creator_iat'));\r",
-											"var n = d.getTime();\r",
-											"\r",
-											"console.log(n);\r",
-											"\r",
-											"var valToHash = pm.globals.get('creator_email') + 'mySalt' + pm.globals.get('creator_username') + n;\r",
-											"\r",
-											"var hash = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, valToHash).finalize().toString(CryptoJS.enc.Hex);\r",
-											"\r",
-											"console.log(valToHash);\r",
-											"console.log(hash);\r",
-											"\r",
-											"var mailBas64 = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(pm.globals.get('creator_email')));\r",
-											"\r",
-											"pm.globals.set(\"activation_token\", pm.variables.replaceIn(hash));\r",
-											"pm.globals.set(\"creator_email_base64\", pm.variables.replaceIn(mailBas64));"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "http://anmeldesystem-backend-newman:3000/users/verify/{{creator_email_base64}}/{{activation_token}}",
-									"host": [
-										"anmeldesystem-backend-newman"
-									],
-									"port": "3000",
-									"path": [
-										"users",
-										"verify",
-										"{{creator_email_base64}}",
-										"{{activation_token}}"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
-				},
+				//				{
+				//					"name": Activate,"",
+				//					"item": [
+				//						{
+				//							"name": "Activate success",
+				//							"event": [
+				//								{
+				//									"listen": "prerequest",
+				//									"script": {
+				//										"id": "81a8bc77-1e80-4e3a-903c-5417344849ce",
+				//										"exec": [
+				//											"var d = new Date(pm.globals.get('creator_iat'));\r",
+				//											"var n = d.getTime();\r",
+				//											"\r",
+				//											"console.log(n);\r",
+				//											"\r",
+				//											"var valToHash = pm.globals.get('creator_email') + 'mySalt' + pm.globals.get('creator_username') + n;\r",
+				//											"\r",
+				//											"var hash = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, valToHash).finalize().toString(CryptoJS.enc.Hex);\r",
+				//											"\r",
+				//											"console.log(valToHash);\r",
+				//											"console.log(hash);\r",
+				//											"\r",
+				//											"var mailBas64 = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(pm.globals.get('creator_email')));\r",
+				//											"\r",
+				//											"pm.globals.set(\"activation_token\", pm.variables.replaceIn(hash));\r",
+				//											"pm.globals.set(\"creator_email_base64\", pm.variables.replaceIn(mailBas64));"
+				//										],
+				//										"type": "text/javascript"
+				//									}
+				//								}
+				//							],
+				//							"request": {
+				//								"method": "GET",
+				//								"header": [],
+				//								"url": {
+				//									"raw": "http://anmeldesystem-backend-newman:3000/users/verify/{{creator_email_base64}}/{{activation_token}}",
+				//									"host": [
+				//										"anmeldesystem-backend-newman"
+				//									],
+				//									"port": "3000",
+				//									"path": [
+				//										"users",
+				//										"verify",
+				//										"{{creator_email_base64}}",
+				//										"{{activation_token}}"
+				//									]
+				//								}
+				//							},
+				//							"response": []
+				//						}
+				//					],
+				//					"protocolProfileBehavior": {},
+				//					"_postman_isSubFolder": true
+				//				},
 				{
 					"name": "Login",
 					"item": [
