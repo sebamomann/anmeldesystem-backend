@@ -29,9 +29,9 @@ pipeline {
                 }
             }
         }
-//        stage('Newman prepare') {
-//            steps {
-//                script {
+        stage('Newman prepare') {
+            steps {
+                script {
 //                    try {
 //                        sh 'docker network create newmanNet'
 //                    } catch (err) {
@@ -62,50 +62,50 @@ pipeline {
 //                            return true
 //                        }
 //                    }
-//
-//                    sh 'docker run -d ' +
-//                            '--name anmeldesystem-backend-newman ' +
-//                            '-p 34298:8080 ' +
-//                            '--env DB_USERNAME=user ' +
-//                            '--env DB_PASSWORD=password ' +
-//                            '--env DB_HOST=newman_db ' +
-//                            '--env DB_PORT=34299 ' +
-//                            '--env DB_NAME=anmeldesystem-api ' +
-//                            '--env SALT_JWT=salt ' +
-//                            '--env SALT_MAIL=salt ' +
-//                            '--env SALT_ENROLLMENT=salt ' +
-//                            '--env DOMAIN=go-join.me ' +
-//                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
-//                            '--health-interval=2s ' +
-//                            'anmeldesystem/anmeldesystem-backend:latest'
-//
-//                    retry(10) {
-//                        sleep 2
-//                        HEALTH = sh(
-//                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
-//                                returnStdout: true
-//                        ).trim()
-//                        echo "${HEALTH}"
-//
-//                        if (HEALTH == "running") {
-//                            return true
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        stage('Newman exec') {
-//            steps {
-//                script {
-//                    sh 'docker run ' +
-//                            '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
-//                            '--name newman ' +
-//                            '--net newmanNet ' +
-//                            '-t postman/newman:alpine ' +
-//                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/test/collection.json"'
-//                }
-//            }
-//        }
+
+                    sh 'docker run -d ' +
+                            '--name anmeldesystem-backend-newman ' +
+                            '-p 34298:8080 ' +
+                            '--env DB_USERNAME=anmeldesystem-api-testing ' +
+                            '--env DB_PASSWORD="Oa(zGPsbFl&cowu3p&9~" ' +
+                            '--env DB_HOST=cp.dankoe.de ' +
+                            '--env DB_PORT=3306 ' +
+                            '--env DB_NAME=anmeldesystem-api-testing ' +
+                            '--env SALT_JWT=salt ' +
+                            '--env SALT_MAIL=salt ' +
+                            '--env SALT_ENROLLMENT=salt ' +
+                            '--env DOMAIN=go-join.me ' +
+                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
+                            '--health-interval=2s ' +
+                            'anmeldesystem/anmeldesystem-backend:latest'
+
+                    retry(10) {
+                        sleep 2
+                        HEALTH = sh(
+                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' anmeldesystem-backend-newman',
+                                returnStdout: true
+                        ).trim()
+                        echo "${HEALTH}"
+
+                        if (HEALTH == "running") {
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+        stage('Newman exec') {
+            steps {
+                script {
+                    sh 'docker run ' +
+                            '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
+                            '--name newman ' +
+                            '--net newmanNet ' +
+                            '-t postman/newman:alpine ' +
+                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/test/collection.json"'
+                }
+            }
+        }
         stage('Publish to registry') {
             when {
                 expression {
