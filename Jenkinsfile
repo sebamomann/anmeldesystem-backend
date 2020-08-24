@@ -12,6 +12,10 @@ properties([
 pipeline {
     agent any
 
+    environment {
+        GITHUB_STATUS_ACCESS_TOKEN_SEBAMOMANN     = credentials('GITHUB_STATUS_ACCESS_TOKEN_SEBAMOMANN')
+    }
+
     options {
         ansiColor('xterm')
     }
@@ -22,7 +26,7 @@ pipeline {
                 script {
                     sh 'curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT" \\\n' +
                             '  -H "Content-Type: application/json" \\\n' +
-                            '  -H "Authorization: token $GITHUB_STATUS_ACCESS_TOKEN" \\\n' +
+                            '  -H "Authorization: token $GITHUB_STATUS_ACCESS_TOKEN_SEBAMOMANN" \\\n' +
                             '  -X POST \\\n' +
                             '  -d "{\\"state\\": \\"pending\\", \\"description\\": \\"Jenkins\\", \\"context\\": \\"continuous-integration/jenkins\\", \\"target_url\\": \\"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\\"}" \\\n' +
                             '  '
@@ -133,22 +137,22 @@ pipeline {
     post {
         success {
             script {
-                sh 'set +x -s curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT" \\\n' +
+                sh 'curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT" \\\n' +
                         '  -H "Content-Type: application/json" \\\n' +
-                        '  -H "Authorization: token $GITHUB_STATUS_ACCESS_TOKEN" \\\n' +
+                        '  -H "Authorization: token $GITHUB_STATUS_ACCESS_TOKEN_SEBAMOMANN" \\\n' +
                         '  -X POST \\\n' +
                         '  -d "{\\"state\\": \\"success\\", \\"description\\": \\"Jenkins\\", \\"context\\": \\"continuous-integration/jenkins\\", \\"target_url\\": \\"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\\"}" \\\n' +
-                        '  > /dev/null'
+                        '  '
             }
         }
         failure {
             script {
-                sh 'set +x -s curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT" \\\n' +
+                sh 'curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT" \\\n' +
                         '  -H "Content-Type: application/json" \\\n' +
-                        '  -H "Authorization: token $GITHUB_STATUS_ACCESS_TOKEN" \\\n' +
+                        '  -H "Authorization: token $GITHUB_STATUS_ACCESS_TOKEN_SEBAMOMANN" \\\n' +
                         '  -X POST \\\n' +
                         '  -d "{\\"state\\": \\"failure\\", \\"description\\": \\"Jenkins\\", \\"context\\": \\"continuous-integration/jenkins\\", \\"target_url\\": \\"https://jenkins.dankoe.de/job/anmeldesystem-backend-test/$BUILD_NUMBER/console\\"}" \\\n' +
-                        '  > /dev/null'
+                        '  '
             }
         }
     }
