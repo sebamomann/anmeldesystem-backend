@@ -101,8 +101,8 @@ pipeline {
                     sh 'docker run ' +
                             '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
                             '--name newman ' +
-                            '-t postman/newman:alpine ' +
                             '--network newmanNet ' +
+                            '-t postman/newman:alpine ' +
                             'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/test/collection.json"'
                 }
             }
