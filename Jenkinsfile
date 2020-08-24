@@ -138,6 +138,18 @@ pipeline {
                 } catch (err) {
                     echo err.getMessage()
                 }
+
+                try {
+                    sh 'docker container rm newman_db -f'
+                } catch (err) {
+                    echo err.getMessage()
+                }
+
+                try {
+                    sh 'docker network rm newmanNet -f'
+                } catch (err) {
+                    echo err.getMessage()
+                }
             }
         }
         success {
