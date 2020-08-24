@@ -32,11 +32,11 @@ pipeline {
         stage('Newman prepare') {
             steps {
                 script {
-//                    try {
-//                        sh 'docker network create newmanNet'
-//                    } catch (err) {
-//                        echo err.getMessage()
-//                    }
+                    try {
+                        sh 'docker network create newmanNet'
+                    } catch (err) {
+                        echo err.getMessage()
+                    }
 //
 //                    sh 'docker run ' +
 //                            '-p 34299:3306 ' + // 0.0.0.0
@@ -75,6 +75,7 @@ pipeline {
                             '--env SALT_MAIL=salt ' +
                             '--env SALT_ENROLLMENT=salt ' +
                             '--env DOMAIN=go-join.me ' +
+                            '--net newmanNet'
                             '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
                             '--health-interval=2s ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
@@ -101,6 +102,7 @@ pipeline {
                             '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
                             '--name newman ' +
                             '-t postman/newman:alpine ' +
+                            '--net newmanNet'
                             'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/test/collection.json"'
                 }
             }
