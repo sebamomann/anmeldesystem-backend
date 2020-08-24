@@ -24,7 +24,7 @@ pipeline {
         stage('Preamble') {
             steps {
                 script {
-                    sh 'curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT" \\\n' +
+                    sh 'set +x curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT" \\\n' +
                             '  -H "Content-Type: application/json" \\\n' +
                             '  -H "Authorization: token $GITHUB_STATUS_ACCESS_TOKEN_SEBAMOMANN" \\\n' +
                             '  -X POST \\\n' +
@@ -137,7 +137,7 @@ pipeline {
     post {
         success {
             script {
-                sh 'curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT" \\\n' +
+                sh 'set +x curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT" \\\n' +
                         '  -H "Content-Type: application/json" \\\n' +
                         '  -H "Authorization: token $GITHUB_STATUS_ACCESS_TOKEN_SEBAMOMANN" \\\n' +
                         '  -X POST \\\n' +
@@ -147,7 +147,7 @@ pipeline {
         }
         failure {
             script {
-                sh 'curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT" \\\n' +
+                sh 'set +x curl "https://api.github.com/repos/sebamomann/anmeldesystem-backend/statuses/$GIT_COMMIT" \\\n' +
                         '  -H "Content-Type: application/json" \\\n' +
                         '  -H "Authorization: token $GITHUB_STATUS_ACCESS_TOKEN_SEBAMOMANN" \\\n' +
                         '  -X POST \\\n' +
