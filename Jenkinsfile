@@ -2,13 +2,6 @@ def image
 def branch_name = "${env.BRANCH_NAME}"
 def github_token = "${env.GITHUB_STATUS_ACCESS_TOKEN}"
 
-properties([
-        parameters([
-                string(name: 'VERSION', defaultValue: '0.0.0'),
-                booleanParam(name: 'LATEST', defaultValue: 'true'),
-        ])
-])
-
 pipeline {
     agent any
 
