@@ -75,6 +75,7 @@ pipeline {
                             '--env SALT_MAIL=salt ' +
                             '--env SALT_ENROLLMENT=salt ' +
                             '--env DOMAIN=go-join.me ' +
+                            '--env NODE_ENV=test_postman'
                             '--network newmanNet ' +
                             '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
                             '--health-interval=2s ' +
