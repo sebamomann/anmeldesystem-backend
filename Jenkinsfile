@@ -46,8 +46,7 @@ pipeline {
                             '--env MYSQL_USER=user ' +
                             '--env MYSQL_PASSWORD=password ' +
                             '--network newmanNet ' +
-                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
-                            '--health-interval=2s ' +
+                            '--health-cmd=\'mysqladmin ping --silent\' ' +
                             'mysql mysqld --default-authentication-plugin=mysql_native_password'
 
                     retry(10) {
@@ -75,10 +74,9 @@ pipeline {
                             '--env SALT_MAIL=salt ' +
                             '--env SALT_ENROLLMENT=salt ' +
                             '--env DOMAIN=go-join.me ' +
-                            '--env NODE_ENV=test_postman '  +
+                            '--env NODE_ENV=test_postman ' +
                             '--network newmanNet ' +
-                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
-                            '--health-interval=2s ' +
+                            '--health-cmd=\'ping localhost:3000\' ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
 
                     retry(10) {
