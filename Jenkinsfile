@@ -37,40 +37,40 @@ pipeline {
                     } catch (err) {
                         echo err.getMessage()
                     }
-//
-//                    sh 'docker run ' +
-//                            '-p 34299:3306 ' + // 0.0.0.0
-//                            '--name newman_db ' +
-//                            '--env MYSQL_ROOT_PASSWORD=password ' +
-//                            '--env MYSQL_DATABASE=anmeldesystem-api ' +
-//                            '--env MYSQL_USER=user ' +
-//                            '--env MYSQL_PASSWORD=password ' +
-//                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
-//                            '--health-interval=2s ' +
-//                            '-d ' +
-//                            'mysql '
-//
-//                    retry(10) {
-//                        sleep 2
-//                        HEALTH = sh(
-//                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' newman_db',
-//                                returnStdout: true
-//                        ).trim()
-//                        echo "${HEALTH}"
-//
-//                        if (HEALTH == "running") {
-//                            return true
-//                        }
-//                    }
+
+                    sh 'docker run -d' +
+                            '-p 34299:3306 ' + // 0.0.0.0
+                            '--name newman_db ' +
+                            '--env MYSQL_ROOT_PASSWORD=password ' +
+                            '--env MYSQL_DATABASE=anmeldesystem-api ' +
+                            '--env MYSQL_USER=user ' +
+                            '--env MYSQL_PASSWORD=password ' +
+                            '--network newmanNet ' +
+                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
+                            '--health-interval=2s ' +
+                            'mysql '
+
+                    retry(10) {
+                        sleep 2
+                        HEALTH = sh(
+                                script: 'docker inspect --format=\'{{json .State.Health.Status}}\' newman_db',
+                                returnStdout: true
+                        ).trim()
+                        echo "${HEALTH}"
+
+                        if (HEALTH == "running") {
+                            return true
+                        }
+                    }
 
                     sh 'docker run -d ' +
-                            '--name anmeldesystem-backend-newman ' +
                             '-p 34298:3000 ' +
-                            '--env DB_USERNAME=anmeldesystem-api-testing ' +
-                            '--env DB_PASSWORD="Oa(zGPsbFl&cowu3p&9~" ' +
-                            '--env DB_HOST=cp.dankoe.de ' +
+                            '--name anmeldesystem-backend-newman ' +
+                            '--env DB_USERNAME=root ' +
+                            '--env DB_PASSWORD=password ' +
+                            '--env DB_HOST=newman_db ' +
                             '--env DB_PORT=3306 ' +
-                            '--env DB_DATABASE=anmeldesystem-api-testing ' +
+                            '--env DB_DATABASE=anmeldesystem-api ' +
                             '--env SALT_JWT=salt ' +
                             '--env SALT_MAIL=salt ' +
                             '--env SALT_ENROLLMENT=salt ' +
