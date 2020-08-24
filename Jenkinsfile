@@ -172,4 +172,3 @@ void updateStatus(String value) {
             '  -d "{\\"state\\": \\"' + value + '\\", \\"description\\": \\"Jenkins\\", \\"context\\": \\"continuous-integration/jenkins\\", \\"target_url\\": \\"https://jenkins.dankoe.de/job/anmeldesystem-backend/$BRANCH_NAME/$BUILD_NUMBER/console\\"}" \\\n' +
             '  '
 }
-
