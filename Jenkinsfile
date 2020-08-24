@@ -76,6 +76,8 @@ pipeline {
                             '--env DOMAIN=go-join.me ' +
                             '--env NODE_ENV=test_postman ' +
                             '--network newmanNet ' +
+                            '--health-cmd=\'stat /etc/passwd || exit 1 \' ' +
+                            '--health-interval=2s ' +
                             'anmeldesystem/anmeldesystem-backend:latest'
 
                     retry(10) {
