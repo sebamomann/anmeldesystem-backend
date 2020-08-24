@@ -108,33 +108,33 @@ pipeline {
     }
 
     post {
-//        always {
-//            script {
-//                try {
-//                    sh 'docker container rm anmeldesystem-backend-newman -f'
-//                } catch (err) {
-//                    echo err.getMessage()
-//                }
-//
-//                try {
-//                    sh 'docker container rm newman -f'
-//                } catch (err) {
-//                    echo err.getMessage()
-//                }
-//
-//                try {
-//                    sh 'docker container rm newman_db -f'
-//                } catch (err) {
-//                    echo err.getMessage()
-//                }
-//
-//                try {
-//                    sh 'docker network rm newmanNet -f'
-//                } catch (err) {
-//                    echo err.getMessage()
-//                }
-//            }
-//        }
+        always {
+            script {
+                try {
+                    sh 'docker container rm anmeldesystem-backend-newman -f'
+                } catch (err) {
+                    echo err.getMessage()
+                }
+
+                try {
+                    sh 'docker container rm newman -f'
+                } catch (err) {
+                    echo err.getMessage()
+                }
+
+                try {
+                    sh 'docker container rm newman_db -f'
+                } catch (err) {
+                    echo err.getMessage()
+                }
+
+                try {
+                    sh 'docker network rm newmanNet -f'
+                } catch (err) {
+                    echo err.getMessage()
+                }
+            }
+        }
         success {
             script {
                 updateStatus("success")
