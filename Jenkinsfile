@@ -65,7 +65,7 @@ pipeline {
 
                     sh 'docker run -d ' +
                             '--name anmeldesystem-backend-newman ' +
-                            '-p 34298:8080 ' +
+                            '-p 34298:3000 ' +
                             '--env DB_USERNAME=anmeldesystem-api-testing ' +
                             '--env DB_PASSWORD="Oa(zGPsbFl&cowu3p&9~" ' +
                             '--env DB_HOST=cp.dankoe.de ' +
