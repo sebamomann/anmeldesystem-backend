@@ -574,7 +574,6 @@ export class AppointmentService {
 
     /* istanbul ignore next */
     private async getAppointments(user: User, pins, before, limit) {
-        console.log(before);
         if (!before || before === 'undefined' || before === 'null') {
             const currentYear = new Date().getFullYear();
 
