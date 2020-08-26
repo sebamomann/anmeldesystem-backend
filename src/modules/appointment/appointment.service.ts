@@ -553,21 +553,23 @@ export class AppointmentService {
 
             try {
                 potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
-                potExistingAddition.order = i;
-                potExistingAddition = await this.additionService.__save(potExistingAddition);
 
                 if (!output.some(sAddition => sAddition.name === potExistingAddition.name)) {
+                    potExistingAddition.order = i;
+                    potExistingAddition = await this.additionService.__save(potExistingAddition);
                     output.push(potExistingAddition);
+                    i++;
                 }
             } catch (e) {
+
                 potExistingAddition = new Addition();
                 potExistingAddition.name = fAddition.name;
                 potExistingAddition.order = i;
                 potExistingAddition = await this.additionService.__save(potExistingAddition);
                 output.push(potExistingAddition);
-            }
 
-            i++;
+                i++;
+            }
         }
 
         return output;

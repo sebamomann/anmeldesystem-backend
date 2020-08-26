@@ -453,7 +453,7 @@ describe('AppointmentService', () => {
                     additionRepositoryMock.save.mockImplementation((val) => val);
 
                     __given_addition_1.order = 0;
-                    __given_addition_1.order = 1;
+                    __given_addition_2.order = 1;
 
                     const __actual = await appointmentService.create(__given_appointment, __given_user);
                     expect(__actual.additions).toHaveLength(2);
@@ -479,6 +479,8 @@ describe('AppointmentService', () => {
                     appointmentRepositoryMock.save.mockImplementation((val) => val);
 
                     additionRepositoryMock.save.mockImplementation((val) => val);
+
+                    __given_addition_1.order = 0;
 
                     const __actual = await appointmentService.create(__given_appointment, __given_user);
                     expect(__actual.additions).toHaveLength(1);
@@ -569,6 +571,8 @@ describe('AppointmentService', () => {
 
                     const createdAdditionId = '3';
 
+                    additionRepositoryMock.save.mockImplementationOnce((val) => val);
+                    additionRepositoryMock.save.mockImplementationOnce((val) => val);
                     additionRepositoryMock.save.mockImplementation((val) => {
                         val.id = createdAdditionId;
                         return val;
@@ -582,6 +586,10 @@ describe('AppointmentService', () => {
 
                     const __expected_addition_3 = {...__given_appointment_change_addition};
                     __expected_addition_3.id = createdAdditionId;
+
+                    __existing_addition_1.order = 0;
+                    __existing_addition_2.order = 1;
+                    __expected_addition_3.order = 2;
 
                     const __expected = [__existing_addition_1, __existing_addition_2, __expected_addition_3];
 
@@ -621,11 +629,18 @@ describe('AppointmentService', () => {
                     additionRepositoryMock.findOne.mockReturnValueOnce(__existing_addition_2); // addition 2 exists
                     additionRepositoryMock.findOne.mockReturnValueOnce(__existing_addition_2); // addition 3 doesnt exist
 
+                    additionRepositoryMock.save.mockImplementationOnce((val) => val);
+                    additionRepositoryMock.save.mockImplementationOnce((val) => val);
+                    additionRepositoryMock.save.mockImplementationOnce((val) => val);
+
                     appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
                     jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
                         return;
                     });
+
+                    __existing_addition_1.order = 0;
+                    __existing_addition_2.order = 1;
 
                     const __expected = [__existing_addition_1, __existing_addition_2];
 
@@ -658,6 +673,7 @@ describe('AppointmentService', () => {
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
                     additionRepositoryMock.findOne.mockReturnValueOnce(__existing_addition_1); // addition 1 exists
+                    additionRepositoryMock.save.mockImplementationOnce((val) => val);
 
                     appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
