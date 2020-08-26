@@ -57,39 +57,12 @@ export class AppointmentService {
             && _appointment.administrators.some(sAdministrator => sAdministrator.username === _user.username);
     }
 
-    private static async _handleDateValidation(date, deadline) {
-        if (date < deadline) {
-            throw new InvalidValuesException(null, 'The date can not be before the deadline', ['date']);
-        }
-
-        return date;
-    }
-
-    private static async _handleDeadlineValidation(date, deadline) {
-        if (deadline > date) {
-            throw new InvalidValuesException(null, 'The deadline can not be after the date', ['deadline']);
-        }
-
-        return deadline;
-    }
-
-    public async findByLink(link: string): Promise<Appointment> {
-        let appointment = await this.appointmentRepository.findOne({
-            where: {
-                link: link
-            },
-            relations: ['administrators', 'creator']
-        });
-
-        if (appointment === undefined) {
-            throw new EntityNotFoundException(null, null, 'appointment');
-        }
-
-        return appointment;
-    }
-
     public static userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
         appointment.reference = this.parseReferences(user, appointment, []);
+
+        appointment.additions.sort((a, b) => {
+            return a.order < b.order ? -1 : 1;
+        });
 
         appointment = appointmentMapper.permission(this, appointment, user, permissions);
         appointment = appointmentMapper.slim(this, appointment, slim);
@@ -144,6 +117,85 @@ export class AppointmentService {
         }
 
         return reference;
+    }
+
+    /**
+     * Filters out all enrollments, the requester is not allowed to see.<br />
+     * Done by validation the enrollment query parameters (id and token) passed with te request.
+     * If the token is valid and the enrollment id exists in the enrollments array, then return it.<br/>
+     * <br />
+     * The query parameters are determined by the starting sequence `perm` and `token`
+     * <br />
+     * `perm` for the id (e.g. perm1, perm2, perm3) <br />
+     * `token` for the validation token of the id (e.g. token1, token2, token3) <br/>
+     * <br />
+     *
+     * IMPORTANT - The order of the ids with their corresponding token is important!.
+     * The second id passed, will be verified with the second PASSED token (not token number)!
+     *
+     * @param permissions All raw query parameters
+     * @param enrollments Enrollments to filter
+     *
+     * @returns Enrollment[] ALl filtered enrollments
+     */
+    public static filterPermittedEnrollments(permissions: any, enrollments: Enrollment[]) {
+        let extractedIds = [];
+        let extractedTokens = [];
+        for (const queryKey of Object.keys(permissions)) {
+            if (queryKey.startsWith('perm')) {
+                extractedIds.push(permissions[queryKey]);
+            } else if (queryKey.startsWith('token')) {
+                extractedTokens.push(permissions[queryKey]);
+            }
+        }
+
+        let validIds = [];
+        extractedIds.forEach((fId, i) => {
+            const token = crypto.createHash('sha256')
+                .update(fId + process.env.SALT_ENROLLMENT)
+                .digest('hex');
+            if (extractedTokens[i] !== undefined
+                && token === extractedTokens[i].replace(' ', '+')) {
+                validIds.push(fId);
+            }
+        });
+
+        return enrollments.filter(fEnrollment => {
+            if (validIds.includes(fEnrollment.id)) {
+                return fEnrollment;
+            }
+        });
+    }
+
+    private static async _handleDateValidation(date, deadline) {
+        if (date < deadline) {
+            throw new InvalidValuesException(null, 'The date can not be before the deadline', ['date']);
+        }
+
+        return date;
+    }
+
+    private static async _handleDeadlineValidation(date, deadline) {
+        if (deadline > date) {
+            throw new InvalidValuesException(null, 'The deadline can not be after the date', ['deadline']);
+        }
+
+        return deadline;
+    }
+
+    public async findByLink(link: string): Promise<Appointment> {
+        let appointment = await this.appointmentRepository.findOne({
+            where: {
+                link: link
+            },
+            relations: ['administrators', 'creator']
+        });
+
+        if (appointment === undefined) {
+            throw new EntityNotFoundException(null, null, 'appointment');
+        }
+
+        return appointment;
     }
 
     /**
@@ -530,54 +582,6 @@ export class AppointmentService {
     }
 
     /**
-     * Filters out all enrollments, the requester is not allowed to see.<br />
-     * Done by validation the enrollment query parameters (id and token) passed with te request.
-     * If the token is valid and the enrollment id exists in the enrollments array, then return it.<br/>
-     * <br />
-     * The query parameters are determined by the starting sequence `perm` and `token`
-     * <br />
-     * `perm` for the id (e.g. perm1, perm2, perm3) <br />
-     * `token` for the validation token of the id (e.g. token1, token2, token3) <br/>
-     * <br />
-     *
-     * IMPORTANT - The order of the ids with their corresponding token is important!.
-     * The second id passed, will be verified with the second PASSED token (not token number)!
-     *
-     * @param permissions All raw query parameters
-     * @param enrollments Enrollments to filter
-     *
-     * @returns Enrollment[] ALl filtered enrollments
-     */
-    public static filterPermittedEnrollments(permissions: any, enrollments: Enrollment[]) {
-        let extractedIds = [];
-        let extractedTokens = [];
-        for (const queryKey of Object.keys(permissions)) {
-            if (queryKey.startsWith('perm')) {
-                extractedIds.push(permissions[queryKey]);
-            } else if (queryKey.startsWith('token')) {
-                extractedTokens.push(permissions[queryKey]);
-            }
-        }
-
-        let validIds = [];
-        extractedIds.forEach((fId, i) => {
-            const token = crypto.createHash('sha256')
-                .update(fId + process.env.SALT_ENROLLMENT)
-                .digest('hex');
-            if (extractedTokens[i] !== undefined
-                && token === extractedTokens[i].replace(' ', '+')) {
-                validIds.push(fId);
-            }
-        });
-
-        return enrollments.filter(fEnrollment => {
-            if (validIds.includes(fEnrollment.id)) {
-                return fEnrollment;
-            }
-        });
-    }
-
-    /**
      * Fetch all Appointments, the user is allowed to see.
      * This includes being the creator, an administrator or being enrolled into this appoinment.
      * Additionally, pinned appointments get returned. Further an array of links can be passed
@@ -616,73 +620,6 @@ export class AppointmentService {
         });
 
         return appointments;
-    }
-
-    private async handleAppointmentLink(_link: string) {
-        let link = '';
-
-        if (_link === null || _link === undefined || _link === '') {
-            do {
-                link = GeneratorUtil.makeid(5);
-            } while (await this.linkInUse(link));
-        } else {
-            if (await this.linkInUse(_link)) {
-                throw new DuplicateValueException(null, null, ['link']);
-            }
-
-            link = _link;
-        }
-
-        return link;
-    }
-
-    private async linkInUse(link) {
-        try {
-            await this.findByLink(link);
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    private async _createAdditionEntitiesAndFilterDuplicates(_additions) {
-        let output = [];
-
-        if (_additions !== undefined) {
-            for (const fAddition of _additions) {
-                if (!output.some(sAddition => sAddition.name === fAddition.name)) {
-                    let _addition: Addition = new Addition();
-                    _addition.name = fAddition.name;
-                    await this.additionRepository.save(_addition);
-                    output.push(_addition);
-                }
-            }
-        }
-
-        return output;
-    }
-
-    private async _handleAdditionsUpdate(mixedAdditions, appointment: Appointment) {
-        let output = [];
-
-        for (let fAddition of mixedAdditions) {
-            let potExistingAddition;
-
-            try {
-                potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
-
-                if (!output.some(sAddition => sAddition === potExistingAddition)) {
-                    output.push(potExistingAddition);
-                }
-            } catch (e) {
-                potExistingAddition = new Addition();
-                potExistingAddition.name = fAddition.name;
-                potExistingAddition = await this.additionRepository.save(potExistingAddition);
-                output.push(potExistingAddition);
-            }
-        }
-
-        return output;
     }
 
     public async getAppointments(user: User, pins) {
@@ -736,5 +673,81 @@ export class AppointmentService {
         //         },
         //     }
         // );
+    }
+
+    private async handleAppointmentLink(_link: string) {
+        let link = '';
+
+        if (_link === null || _link === undefined || _link === '') {
+            do {
+                link = GeneratorUtil.makeid(5);
+            } while (await this.linkInUse(link));
+        } else {
+            if (await this.linkInUse(_link)) {
+                throw new DuplicateValueException(null, null, ['link']);
+            }
+
+            link = _link;
+        }
+
+        return link;
+    }
+
+    private async linkInUse(link) {
+        try {
+            await this.findByLink(link);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    private async _createAdditionEntitiesAndFilterDuplicates(_additions) {
+        let output = [];
+
+        let i = 0;
+        if (_additions !== undefined) {
+            for (const fAddition of _additions) {
+                if (!output.some(sAddition => sAddition.name === fAddition.name)) {
+                    let _addition: Addition = new Addition();
+                    _addition.name = fAddition.name;
+                    _addition.order = i;
+                    await this.additionRepository.save(_addition);
+                    output.push(_addition);
+                    i++;
+                }
+            }
+        }
+
+        return output;
+    }
+
+    private async _handleAdditionsUpdate(mixedAdditions, appointment: Appointment) {
+        let output = [];
+
+        let i = 0;
+        for (let fAddition of mixedAdditions) {
+            let potExistingAddition;
+
+            try {
+                potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
+                potExistingAddition.order = i;
+                potExistingAddition = await this.additionRepository.save(potExistingAddition);
+
+                if (!output.some(sAddition => sAddition === potExistingAddition)) { // wenn nicht existiert, dann push
+                    output.push(potExistingAddition);
+                }
+            } catch (e) {
+                potExistingAddition = new Addition();
+                potExistingAddition.name = fAddition.name;
+                potExistingAddition.order = i;
+                potExistingAddition = await this.additionRepository.save(potExistingAddition);
+                output.push(potExistingAddition);
+            }
+
+            i++;
+        }
+
+        return output;
     }
 }
