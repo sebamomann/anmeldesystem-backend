@@ -574,14 +574,13 @@ export class AppointmentService {
 
     /* istanbul ignore next */
     private async getAppointments(user: User, pins, before, limit) {
-        if (!before) {
+        console.log(before);
+        if (!before || before === 'undefined' || before === 'null') {
             const currentYear = new Date().getFullYear();
 
             const d = new Date();
             before = d.setFullYear(d.getFullYear() + (2037 - currentYear)); // undefined get from 100 years in future MAX 2038 DUE TO UNIX OVERFLOW
         }
-
-        console.log(new Date(before));
 
         // add value, cuz SQL cant process empty list
         if (pins.length === 0) {
