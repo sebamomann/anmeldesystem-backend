@@ -111,6 +111,8 @@ export class AppointmentService {
      * @param user Requester (if existing)
      * @param params All query parameters to parse pinned links
      * @param slim Delete information overhead. See {@link AppointmentMapper.slim} for more information.
+     * @param before
+     * @param limit
      *
      * @returns Appointment[]
      */
@@ -581,7 +583,7 @@ export class AppointmentService {
         if (pins.length === 0) {
             pins.push('_');
         }
-        return await getRepository(Appointment)
+        const output = await getRepository(Appointment)
             .createQueryBuilder('appointment')
             .leftJoinAndSelect('appointment.creator', 'creator')
             .leftJoinAndSelect('appointment.additions', 'additions')
@@ -606,6 +608,8 @@ export class AppointmentService {
             .orderBy('appointment.date', 'DESC')
             .limit(limit)
             .getMany();
+
+        return output.splice(0, limit); // needed because .limit or .take break the joins
 
         // return await this.appointmentRepository.find(
         //     {
