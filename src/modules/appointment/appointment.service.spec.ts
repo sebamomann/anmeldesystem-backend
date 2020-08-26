@@ -1516,6 +1516,8 @@ describe('AppointmentService', () => {
         });
     });
 
+    // TODO CHECK SLIM
+    // TODO CHECK PAGINATION
     describe('* get Appointments', () => { // cases like creator, admin enrollment ... not needed to test, because they are recieved by database
         describe('* successful should return array of entities', () => {
             it('* normal', async () => {
@@ -1532,7 +1534,7 @@ describe('AppointmentService', () => {
                 jest.spyOn(appointmentService as any, 'getAppointments')
                     .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
 
-                const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim);
+                const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim, null, null);
                 expect(actual).toHaveLength(1);
             });
 
@@ -1549,7 +1551,7 @@ describe('AppointmentService', () => {
                 jest.spyOn(appointmentService as any, 'getAppointments')
                     .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
 
-                const actual = await appointmentService.getAll(__given_user, __given_permissions);
+                const actual = await appointmentService.getAll(__given_user, __given_permissions, false, null, null);
                 expect(actual).toHaveLength(1);
             });
 
@@ -1569,7 +1571,7 @@ describe('AppointmentService', () => {
                     jest.spyOn(appointmentService as any, 'getAppointments')
                         .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
 
-                    const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim);
+                    const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim, null, null);
                     expect(actual).toHaveLength(1);
                 });
 
@@ -1588,7 +1590,7 @@ describe('AppointmentService', () => {
                     jest.spyOn(appointmentService as any, 'getAppointments')
                         .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
 
-                    const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim);
+                    const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim, null, null);
                     expect(actual).toHaveLength(1);
                 });
             });

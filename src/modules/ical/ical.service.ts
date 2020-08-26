@@ -30,7 +30,7 @@ export class IcalService {
 
             if (hash === token) {
                 console.log("hash valid");
-                const appointments = await this.appointmentService.getAll(user, true);
+                const appointments = await this.appointmentService.getAll(user, {}, true, null, null);
 
                 appointments.forEach(fAppointment => {
                     cal.createEvent({
