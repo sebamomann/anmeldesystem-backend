@@ -114,7 +114,7 @@ export class AppointmentService {
      *
      * @returns Appointment[]
      */
-    public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
+    public async getAll(user: User, params: any, slim, since, limit): Promise<Appointment[]> {
 
         let pins = [];
         for (const queryKey of Object.keys(params)) {
@@ -124,12 +124,7 @@ export class AppointmentService {
         }
 
         let appointments = await this.getAppointments(user, pins);
-
-        appointments.map(fAppointment => {
-            fAppointment.reference = AppointmentUtil.parseReferences(user, fAppointment, pins);
-        });
-
-        appointments.map(appointment => AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, slim));
+        appointments = appointments.map(appointment => AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, slim));
 
         return appointments;
     }
