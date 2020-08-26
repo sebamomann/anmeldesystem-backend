@@ -87,7 +87,7 @@ pipeline {
                             '--name newman ' +
                             '--network newmanNet ' +
                             '-t postman/newman:alpine ' +
-                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/test/collection.json"'
+                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + branch_name+ '/collection.json"'
                 }
             }
         }
@@ -101,6 +101,21 @@ pipeline {
                 script {
                     docker.withRegistry('http://localhost:34015') {
                         image.push(branch_name)
+                        image.push('latest')
+                    }
+                }
+            }
+        }
+        stage('Publish to registry - master') {
+            when {
+                expression {
+                    return branch_name =~ "master"
+                }
+            }
+            steps {
+                script {
+                    docker.withRegistry('http://localhost:34015') {
+                        image.push('latest')
                     }
                 }
             }
