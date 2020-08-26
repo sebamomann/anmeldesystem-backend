@@ -587,9 +587,6 @@ export class AppointmentService {
             pins.push('_');
         }
 
-        console.log(subYears(new Date(before), 100));
-        console.log(new Date(before));
-
         const output = await getRepository(Appointment)
             .createQueryBuilder('appointment')
             .leftJoinAndSelect('appointment.creator', 'creator')
@@ -616,9 +613,6 @@ export class AppointmentService {
             .andWhere('UNIX_TIMESTAMP(appointment.date) < UNIX_TIMESTAMP(:date2)', {date2: (new Date(before))})
             .orderBy('appointment.date', 'DESC')
             .getMany();
-
-        console.log(output[0].date);
-        console.log(output.length);
 
         if (!limit) {
             limit = output.length;
