@@ -1,6 +1,6 @@
 import {Injectable} from '@nestjs/common';
 import {Appointment} from './appointment.entity';
-import {getRepository, Repository} from 'typeorm';
+import {Between, Brackets, getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Addition} from '../addition/addition.entity';
 import {File} from '../file/file.entity';
@@ -16,6 +16,7 @@ import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
 import {AppointmentUtil} from './appointment.util';
 import {AppointmentMapper} from './appointment.mapper';
+import {subYears} from 'date-fns';
 
 const logger = require('../../logger');
 
@@ -576,13 +577,19 @@ export class AppointmentService {
     private async getAppointments(user: User, pins, before, limit) {
         if (!before) {
             const d = new Date();
-            before = d.setFullYear(d.getFullYear() + 100); // inf undefined get from 100 years in future
+            before = d.setFullYear(d.getFullYear() + 100); // undefined get from 100 years in future
         }
+
+        const BeforeDate = (date: Date) => Between(subYears(date, 100), date);
 
         // add value, cuz SQL cant process empty list
         if (pins.length === 0) {
             pins.push('_');
         }
+
+        console.log(subYears(new Date(before), 100));
+        console.log(new Date(before));
+
         const output = await getRepository(Appointment)
             .createQueryBuilder('appointment')
             .leftJoinAndSelect('appointment.creator', 'creator')
@@ -599,14 +606,19 @@ export class AppointmentService {
                 'enrollment_passenger', 'enrollment_driver', 'enrollment_creator',
                 'creator.username', 'creator.name', 'files', 'administrators.username', 'administrators.name',
                 'enrollment_additions', 'pinners'])
-            .where('creator.id = :creatorId', {creatorId: user.id})
-            .orWhere('administrators.id = :admin', {admin: user.id})
-            .orWhere('enrollments.creatorId = :user', {user: user.id})
-            .orWhere('pinners.id = :user', {user: user.id})
-            .orWhere('appointment.link IN (:...links)', {links: pins})
-            .andWhere('appointment.date < :date', {date: new Date(before)})
+            .where(new Brackets(br => {
+                br.where('creator.id = :creatorId', {creatorId: user.id})
+                    .orWhere('administrators.id = :admin', {admin: user.id})
+                    .orWhere('enrollments.creatorId = :user', {user: user.id})
+                    .orWhere('pinners.id = :user', {user: user.id})
+                    .orWhere('appointment.link IN (:...links)', {links: pins});
+            }))
+            .andWhere('UNIX_TIMESTAMP(appointment.date) < UNIX_TIMESTAMP(:date2)', {date2: (new Date(before))})
             .orderBy('appointment.date', 'DESC')
             .getMany();
+
+        console.log(output[0].date);
+        console.log(output.length);
 
         if (!limit) {
             limit = output.length;
