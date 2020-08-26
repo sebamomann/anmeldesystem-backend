@@ -5,12 +5,8 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Appointment} from '../appointment/appointment.entity';
 import {AppointmentService} from '../appointment/appointment.service';
 import {AdditionService} from '../addition/addition.service';
-import {Driver} from './driver/driver.entity';
-import {Passenger} from './passenger/passenger.entity';
-import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {User} from '../user/user.entity';
-import {Key} from './key/key.entity';
 import {PassengerService} from './passenger/passenger.service';
 import {DriverService} from './driver/driver.service';
 import {Mail} from './mail/mail.entity';
@@ -20,6 +16,9 @@ import {InsufficientPermissionsException} from '../../exceptions/InsufficientPer
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {AppointmentGateway} from '../appointment/appointment.gateway';
 import {DomainUtil} from '../../util/domain.util';
+import {EnrollmentUtil} from './enrollment.util';
+import {MissingAuthenticationException} from '../../exceptions/MissingAuthenticationException';
+import {StringUtil} from '../../util/string.util';
 
 const crypto = require('crypto');
 const logger = require('../../logger');
@@ -29,12 +28,6 @@ const enrollmentMapper = require('./enrollment.mapper');
 export class EnrollmentService {
     constructor(@InjectRepository(Enrollment)
                 private readonly enrollmentRepository: Repository<Enrollment>,
-                @InjectRepository(Driver)
-                private readonly driverRepository: Repository<Driver>,
-                @InjectRepository(Passenger)
-                private readonly passengerRepository: Repository<Passenger>,
-                @InjectRepository(Key)
-                private readonly keyRepository: Repository<Key>,
                 @InjectRepository(Mail)
                 private readonly mailRepository: Repository<Mail>,
                 private readonly appointmentService: AppointmentService,
@@ -43,37 +36,6 @@ export class EnrollmentService {
                 private readonly driverService: DriverService,
                 private readonly mailerService: MailerService,
                 private readonly appointmentGateway: AppointmentGateway) {
-
-    }
-
-    public static allowEditByToken(enrollment: Enrollment, token: string) {
-        const check = crypto.createHash('sha256')
-            .update(enrollment.id + process.env.SALT_ENROLLMENT)
-            .digest('hex');
-
-        return token !== null
-            && token !== undefined
-            && (token.replace(' ', '+') === check);
-    }
-
-    private static _handleAdditions(_enrollment: Enrollment, _appointment: Appointment) {
-        let output = [];
-
-        if (Array.isArray(_enrollment.additions)) {
-            for (const fAddition of _enrollment.additions) {
-                const additions = _appointment.additions.filter(filterAddition => filterAddition.id === fAddition.id);
-
-                if (additions.length > 0) {
-                    output.push(additions[0]);
-                } else {
-                    throw new EntityNotFoundException(null,
-                        'The following addition can not be found in the appointment',
-                        JSON.stringify(fAddition));
-                }
-            }
-        }
-
-        return output;
     }
 
     public async findById(id: string) {
@@ -93,10 +55,10 @@ export class EnrollmentService {
 
     /**
      * Create a new enrollment. <br />
-     * The enrollment can either be created by a logged in user, or by providing an email adress.
+     * The Enrollment can either be created by a logged in User, or by providing an email address.
      * When providing an email address, then a mail with the edit token gets send to it.
      *
-     * @param _enrollment Enrollment data to save into database
+     * @param enrollment_raw Enrollment data to save into database
      * @param user optional logged in user
      * @param domain Domain to build link for edit/delete with
      *
@@ -104,143 +66,82 @@ export class EnrollmentService {
      *
      * @throws See {@link findByLink} for reference
      * @throws DuplicateValueException if name is already in use
-     * @throws See {@link _parseEnrollmentObject} for reference
+     * @throws See {@link parseEnrollmentObject} for reference
      */
-    public async create(_enrollment: Enrollment, user: User, domain: string) {
-        let appointment;
+    public async create(enrollment_raw: Enrollment, user: User, domain: string) {
+        const appointment_referenced = await this.appointmentService
+            .findByLink(enrollment_raw.appointment.link);
 
-        try {
-            appointment = await this.appointmentService.findByLink(_enrollment.appointment.link);
-        } catch (e) {
-            throw e;
-        }
-
-        if (await this.existsByName(_enrollment.name, appointment)) {
+        if (await this._existsByName(enrollment_raw.name, appointment_referenced)) {
             throw new DuplicateValueException(null, null, ['name']);
         }
 
-        let enrollment = await this._parseEnrollmentObject(_enrollment, appointment)
-            .catch((err => {
-                throw err;
-            }));
+        const enrollment_output = await EnrollmentUtil.parseEnrollmentObject(enrollment_raw, appointment_referenced);
 
-        if (_enrollment.editMail != null &&
-            _enrollment.editMail != '') {
-            const mail = new Mail();
-            mail.mail = _enrollment.editMail;
-            enrollment.mail = await this.mailRepository.save(mail);
-        } else {
-            enrollment.creator = user;
+        enrollment_output.appointment = appointment_referenced;
+
+        await this._handleEnrollmentAuthentication(enrollment_raw, enrollment_output, user);
+        await this._storeDriverAndPassengerObjects(enrollment_output, appointment_referenced);
+
+        let savedEnrollment = await this.enrollmentRepository.save(enrollment_output);
+
+        if (enrollment_output.creator === undefined) {
+            await this._sendEmailToEnrollmentCreator(savedEnrollment, domain, appointment_referenced);
         }
 
-        enrollment.appointment = appointment;
+        this.appointmentGateway.appointmentUpdated(enrollment_raw.appointment);
+        // noinspection UnnecessaryLocalVariableJS
+        const output = enrollmentMapper.basic(savedEnrollment);
 
-        let savedEnrollment = await this.enrollmentRepository.save(enrollment);
-
-        if (savedEnrollment.creator === null ||
-            savedEnrollment.creator === undefined) {
-            savedEnrollment.token = crypto.createHash('sha256')
-                .update(savedEnrollment.id + process.env.SALT_ENROLLMENT)
-                .digest('hex');
-
-            let url = `https://${DomainUtil.replaceDomain(domain, savedEnrollment.id, savedEnrollment.token)}`;
-
-            await this.mailerService
-                .sendMail({
-                    to: savedEnrollment.mail.mail,
-                    from: process.env.MAIL_ECA,
-                    subject: 'Deine Anmeldung zu ' + appointment.title,
-                    template: 'enroll', // The `.pug` or `.hbs` extension is appended automatically.
-                    context: {  // Data to be sent to template engine.
-                        title: appointment.title,
-                        name: savedEnrollment.name,
-                        url: url
-                    },
-                })
-                .then(() => {
-                })
-                .catch(() => {
-                    logger.log('error', 'Could not send enrollment mail to %s', savedEnrollment.mail.mail);
-                });
-        }
-
-        savedEnrollment = enrollmentMapper.basic(this, savedEnrollment);
-
-        this.appointmentGateway.appointmentUpdated(_enrollment.appointment);
-
-        return savedEnrollment;
+        return output;
     }
 
     /**
-     * Change a existing Enrollment with the given values. <br/>
+     * Change an existing Enrollment with the given values. <br/>
      * The allowedValuesToChange array shows all updatable options.
      *
-     * @param toChange Values to change
-     * @param id Id of Enrollment to change Values for
+     * @param enrollment_to_change_values Values to change
+     * @param enrollment_id Id of Enrollment to change Values for
      * @param user Optional user
      */
-    public async update(toChange: any, id: string, user: User) {
-        let enrollment;
+    public async update(enrollment_to_change_values: any, enrollment_id: string, user: User) {
+        const enrollment_referenced = await this.findById(enrollment_id);
+        const enrollment_updated = {...enrollment_referenced};
 
-        try {
-            enrollment = await this.findById(id);
-        } catch (e) {
-            throw e;
-        }
-
-        const appointment = enrollment.appointment;
-
-        if (!(await this._hasPermission(enrollment, user, toChange.token))) {
+        if (!EnrollmentUtil.hasPermission(enrollment_referenced, user, enrollment_to_change_values.token)) {
             throw new InsufficientPermissionsException();
         }
 
         const allowedValuesToChange = ['name', 'comment', 'driver', 'passenger', 'additions'];
 
-        for (const [key, value] of Object.entries(toChange)) {
-            if (key in enrollment
-                && enrollment[key] !== value
+        for (const [key, value] of Object.entries(enrollment_to_change_values)) {
+            if (key in enrollment_referenced
+                && enrollment_referenced[key] !== value
                 && allowedValuesToChange.indexOf(key) > -1) {
-                let changedValue = value;
+                let changedValue: any;
 
-                if (key === 'name'
-                    && enrollment.name !== toChange.name) {
-                    console.log('updateName');
-                    if (await this.existsByName(toChange.name, appointment)) {
-                        throw new DuplicateValueException('DUPLICATE_ENTRY',
-                            'Following values are already taken',
-                            ['name']);
-                    }
-                }
-
-                if (key === 'driver'
-                    && appointment.driverAddition) {
-                    changedValue = await this._handleDriverRelation(toChange);
-                    enrollment.passenger = null;
-                }
-
-                if (key === 'passenger'
-                    && appointment.driverAddition) {
-                    changedValue = await this._handlePassengerRelation(toChange);
-                    enrollment.driver = null;
-                }
-
-                if (key === 'additions') {
+                const fnName = '_update' + StringUtil.capitalizeFirstLetter(key); // e.g. _updateName || _updateAdditions ...
+                if (typeof this[fnName] === 'function') { // check needed for correct catch of actual errors
                     try {
-                        changedValue = EnrollmentService._handleAdditions(toChange, appointment);
+                        changedValue = await this[fnName](enrollment_to_change_values, enrollment_updated);
                     } catch (e) {
                         throw e;
                     }
+                } // do nothing if attribute does not exist
+
+                if (changedValue === undefined) {
+                    changedValue = value;
                 }
 
-                enrollment[key] = changedValue;
+                enrollment_updated[key] = changedValue;
             }
         }
 
-        let savedEnrollment = await this.enrollmentRepository.save(enrollment);
+        let savedEnrollment = await this.enrollmentRepository.save(enrollment_updated);
 
-        savedEnrollment = enrollmentMapper.basic(this, savedEnrollment);
+        savedEnrollment = enrollmentMapper.basic(savedEnrollment);
 
-        this.appointmentGateway.appointmentUpdated(appointment);
+        this.appointmentGateway.appointmentUpdated(enrollment_updated.appointment);
 
         return savedEnrollment;
     }
@@ -264,7 +165,7 @@ export class EnrollmentService {
             throw new EntityGoneException(null, null, 'enrollment');
         }
 
-        if (!(await this._hasPermission(enrollment, user, token))) {
+        if (!(await EnrollmentUtil.hasPermission(enrollment, user, token))) {
             throw new InsufficientPermissionsException();
         }
 
@@ -272,20 +173,6 @@ export class EnrollmentService {
 
         this.appointmentGateway.appointmentUpdated(enrollment.appointment);
     }
-
-    // public async get(id: string) {
-    //     let enrollment;
-    //
-    //     try {
-    //         enrollment = await this.findById(id);
-    //     } catch (e) {
-    //         throw e;
-    //     }
-    //
-    //     enrollment = enrollmentMapper.basic(this, enrollment);
-    //
-    //     return enrollment;
-    // }
 
     /**
      * Check if user is allowed to edit/delete an Enrollment
@@ -309,11 +196,11 @@ export class EnrollmentService {
 
         let allowances = [];
 
-        if (await this._allowEditByUserId(enrollment, user)) {
+        if (await EnrollmentUtil.permissionByUser(enrollment, user)) {
             allowances.push('user');
         }
 
-        if (EnrollmentService.allowEditByToken(enrollment, token)) {
+        if (EnrollmentUtil.permissionByToken(enrollment, token)) {
             allowances.push('token');
         }
 
@@ -324,7 +211,24 @@ export class EnrollmentService {
         return allowances;
     }
 
-    private async findByNameAndAppointment(name: string, appointment: Appointment) {
+    private async _setMailAttribute(enrollment_raw: Enrollment, enrollment_output: Enrollment) {
+        const mail = new Mail();
+        mail.mail = enrollment_raw.editMail;
+
+        enrollment_output.mail = await this.mailRepository.save(mail);
+    }
+
+    private async _existsByName(name: string, appointment: Appointment) {
+        return this._findByEnrollmentNameAndAppointment(name, appointment)
+            .then(() => {
+                return true;
+            })
+            .catch(() => {
+                return false;
+            });
+    }
+
+    private async _findByEnrollmentNameAndAppointment(name: string, appointment: Appointment) {
         let enrollment = await this.enrollmentRepository.findOne({
             where: {
                 name: name,
@@ -341,126 +245,119 @@ export class EnrollmentService {
         return enrollment;
     }
 
-    private async existsByName(name: string, appointment: Appointment) {
-        return this.findByNameAndAppointment(name, appointment)
-            .then(() => {
-                return true;
-            })
-            .catch(() => {
-                return false;
-            });
-    }
-
-    private async _parseEnrollmentObject(_enrollment: Enrollment, _appointment: Appointment) {
-        let output = new Enrollment();
-
-        output.name = _enrollment.name;
-        const trimmed = _enrollment.comment.trim();
-        output.comment = trimmed === '' ? null : trimmed;
-
-        try {
-            output.additions = EnrollmentService._handleAdditions(_enrollment, _appointment);
-        } catch (e) {
-            throw e;
-        }
-
+    private async _storeDriverAndPassengerObjects(enrollment: any, appointment: Appointment) {
         /* Needed due to malicious comparison fo tinyint to boolean */
-        if (!!_appointment.driverAddition === true) {
-            if (_enrollment.driver !== null && _enrollment.driver !== undefined) {
-                output.driver = await this._handleDriverRelation(_enrollment);
-                output.passenger = null;
-            } else if (_enrollment.passenger !== null && _enrollment.passenger !== undefined) {
-                output.passenger = await this._handlePassengerRelation(_enrollment);
-                output.driver = null;
+        if (!!appointment.driverAddition === true) {
+            let string;
+            if (enrollment.driver !== undefined) { // check for none of both not needed, because error would be thrown beforehand
+                string = 'driver';
             } else {
-                throw new EmptyFieldsException('EMPTY_FIELDS',
-                    'Please specify one of the following values',
-                    ['driver', 'passenger']);
+                string = 'passenger';
             }
+
+            await this[string + 'Service'].__save(enrollment[string]);
         }
-
-        return output;
     }
 
-    private async _hasPermission(enrollment: Enrollment, user: User, token: string) {
-        let allowEditByUserId = await this._allowEditByUserId(enrollment, user);
-        let isAllowedByKey = EnrollmentService.allowEditByToken(enrollment, token);
+    private async _sendEmailToEnrollmentCreator(savedEnrollment: Enrollment, domain: string, appointment) {
+        savedEnrollment.token = crypto.createHash('sha256')
+            .update(savedEnrollment.id + process.env.SALT_ENROLLMENT + '')
+            .digest('hex');
 
-        return (allowEditByUserId
-            || isAllowedByKey);
-    }
+        let url = `https://${DomainUtil.replaceDomain(domain, savedEnrollment.id, savedEnrollment.token)}`;
 
-    private async _allowEditByUserId(enrollment: Enrollment, user: User) {
-        let isCreatorOrAdministrator = await this.appointmentService.isCreatorOrAdministrator(user, enrollment.appointment);
-        let isEnrollmentCreator = (enrollment.creator !== undefined
-            && enrollment.creator !== null
-            && enrollment.creator.id === user.id);
-
-        return isCreatorOrAdministrator || isEnrollmentCreator;
-    }
-
-    private async _handlePassengerRelation(_enrollment: Enrollment) {
-        let output = new Passenger();
-        let output_orig = new Passenger();
-
-        await this.passengerService.findByEnrollment(_enrollment)
-            .then((res) => {
-                output = JSON.parse(JSON.stringify(res));
-                output_orig = JSON.parse(JSON.stringify(res));
+        await this.mailerService
+            .sendMail({
+                to: savedEnrollment.mail.mail,
+                from: process.env.MAIL_ECA,
+                subject: 'Deine Anmeldung zu ' + appointment.title,
+                template: 'enroll', // The `.pug` or `.hbs` extension is appended automatically.
+                context: {  // Data to be sent to template engine.
+                    title: appointment.title,
+                    name: savedEnrollment.name,
+                    url: url
+                },
+            })
+            .then(() => {
             })
             .catch(() => {
+                /* istanbul ignore next */
+                logger.log('error', 'Could not send enrollment mail to %s', savedEnrollment.mail.mail);
             });
-
-        // if (_enrollment.passenger.requirement === undefined) {
-        //     throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', ['passenger_requirement']);
-        // }
-
-        output.requirement = _enrollment.passenger?.requirement;
-
-        if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
-            console.log('passenger values changed');
-            return await this.passengerRepository.save(output);
-        }
-
-        return output;
     }
 
-    private async _handleDriverRelation(_enrollment: Enrollment) {
-        let output = new Driver();
-        let output_orig = new Driver();
+    private async _handleEnrollmentAuthentication(enrollment_raw: Enrollment, enrollment_output: Enrollment, user: User) {
+        if (enrollment_raw.editMail != null &&
+            enrollment_raw.editMail != '') {
+            await this._setMailAttribute(enrollment_raw, enrollment_output);
+        } else if (user !== undefined) {
+            enrollment_output.creator = user;
+        } else {
+            throw new MissingAuthenticationException(null,
+                'Valid authentication by email or authentication header needed',
+                null);
+        }
+    }
 
-        await this.driverService.findByEnrollment(_enrollment)
-            .then((res) => {
-                output = JSON.parse(JSON.stringify(res));
-                output_orig = JSON.parse(JSON.stringify(res));
-            })
-            .catch(() => {
-            });
-
-        // let emptyFields = [];
-        // if (_enrollment.driver.seats === undefined) {
-        //     emptyFields.push('driver_seats');
-        // }
-        // if (_enrollment.driver.service === undefined) {
-        //     emptyFields.push('driver_service');
-        // }
-        //
-        // if (emptyFields.length > 0) {
-        //     throw new EmptyFieldsException('EMPTY_FIELDS', 'Please specify following values', emptyFields);
-        // }
-        //
-        // if (_enrollment.driver.seats <= 0) {
-        //     throw new InvalidValuesException('INVALID_VALUE', 'Minimum of 1 needed', ['driver_seats']);
-        // }
-
-        output.seats = _enrollment.driver?.seats;
-        output.service = _enrollment.driver?.service;
-
-        if (JSON.stringify(output) !== JSON.stringify(output_orig)) {
-            console.log('driver values changed');
-            return await this.driverRepository.save(output);
+    // noinspection JSUnusedLocalSymbols // dynamic function call
+    private async _updateName(enrollment_to_change_values: any, enrollment_referenced: Enrollment) {
+        if (await this._existsByName(enrollment_to_change_values.name, enrollment_referenced.appointment)) {
+            throw new DuplicateValueException('DUPLICATE_ENTRY',
+                'Following values are already taken',
+                ['name']);
         }
 
-        return output;
+        return enrollment_to_change_values.name;
+    }
+
+    // noinspection JSUnusedLocalSymbols // dynamic function call
+    private async _updateDriver(enrollment_to_change_values: Enrollment, enrollment_referenced: Enrollment) {
+        return await this._updateDriverAndPassenger(enrollment_to_change_values, enrollment_referenced, 'driver');
+    }
+
+    // noinspection JSUnusedLocalSymbols // dynamic function call
+    private async _updatePassenger(enrollment_to_change_values: Enrollment, enrollment_referenced: Enrollment) {
+        return await this._updateDriverAndPassenger(enrollment_to_change_values, enrollment_referenced, 'passenger');
+    }
+
+    private async _updateDriverAndPassenger(enrollment_to_change_values: Enrollment, enrollment_referenced: Enrollment, key: string) {
+        // TODO CHECK DRIVER CHANGE BOTH VALUES GET RETURNED
+
+        let changedValue: any;
+        const counterKeys = {
+            passenger: 'driver',
+            driver: 'passenger',
+        };
+
+        if (enrollment_referenced.appointment.driverAddition) {
+            let current_value = undefined;
+
+            await this[key + 'Service']
+                .findByEnrollment(enrollment_referenced)
+                .then((res) => {
+                    current_value = res;
+                })
+                .catch(() => {
+                });
+
+            changedValue = await EnrollmentUtil['handle' + StringUtil.capitalizeFirstLetter(key) + 'Relation'](enrollment_to_change_values[key], current_value);
+
+            if (changedValue !== undefined) {
+                this[key + 'Service'].__save(changedValue);
+                enrollment_referenced[key] = changedValue;
+            } else {
+                changedValue = enrollment_to_change_values[key];
+            }
+
+            enrollment_referenced[counterKeys[key]] = null;
+        }
+
+        return changedValue;
+    }
+
+    // noinspection JSUnusedLocalSymbols,JSMethodCanBeStatic // dynamic function call
+    private async _updateAdditions(enrollment_to_change_values: any, enrollment_referenced: Enrollment) {
+        EnrollmentUtil.filterValidAdditions(enrollment_to_change_values, enrollment_referenced.appointment);
     }
 }
+

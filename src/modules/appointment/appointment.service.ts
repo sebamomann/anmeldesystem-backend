@@ -11,15 +11,12 @@ import {UserService} from '../user/user.service';
 import {FileService} from '../file/file.service';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
-import {EntityGoneException} from '../../exceptions/EntityGoneException';
-import {Enrollment} from '../enrollment/enrollment.entity';
-import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {GeneratorUtil} from '../../util/generator.util';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
+import {AppointmentUtil} from './appointment.util';
+import {AppointmentMapper} from './appointment.mapper';
 
-const crypto = require('crypto');
-const appointmentMapper = require('./appointment.mapper');
 const logger = require('../../logger');
 
 @Injectable()
@@ -27,168 +24,40 @@ export class AppointmentService {
     constructor(
         @InjectRepository(Appointment)
         private readonly appointmentRepository: Repository<Appointment>,
-        @InjectRepository(Addition)
-        private readonly additionRepository: Repository<Addition>,
-        @InjectRepository(File)
-        private readonly fileRepository: Repository<File>,
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
         private additionService: AdditionService,
-        private userService: UserService,
         private fileService: FileService,
+        private userService: UserService,
         private appointmentGateway: AppointmentGateway
     ) {
     }
 
-    public static isCreatorOfAppointment(_appointment: Appointment, _user: User) {
-        if (_user === undefined || _user === null || !_user) {
-            return false;
-        }
+    private static userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
+        appointment.reference = AppointmentUtil.parseReferences(user, appointment, []); // empty pins because fnc is only called on single appointment get request
 
-        return _appointment.creator?.username === _user.username;
-    }
-
-    public static isAdministratorOfAppointment(_appointment: Appointment, _user: User) {
-        if (_user === undefined || _user === null || !_user) {
-            return false;
-        }
-
-        return _appointment.administrators !== undefined
-            && _appointment.administrators.some(sAdministrator => sAdministrator.username === _user.username);
-    }
-
-    public static userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
-        appointment.reference = this.parseReferences(user, appointment, []);
-
-        appointment.additions.sort((a, b) => {
-            return a.order < b.order ? -1 : 1;
-        });
-
-        appointment = appointmentMapper.permission(this, appointment, user, permissions);
-        appointment = appointmentMapper.slim(this, appointment, slim);
-        appointment = appointmentMapper.basic(this, appointment);
+        appointment = AppointmentMapper.permission(appointment, user, permissions);
+        appointment = AppointmentMapper.slim(appointment, slim);
+        appointment = AppointmentMapper.basic(appointment);
 
         return appointment;
     }
 
-    /**
-     * Check the users correlation to the appointment. <br />
-     * Following correlations (references) are possible
-     * <ol>
-     *     <li>CREATOR</li>
-     *     <li>ADMIN</li>
-     *     <li>ENROLLED</li>
-     *     <li>PINNED</li>
-     * </ol>
-     * Note that a permission granted via passing a link, the correlation is also marked as "PINNED".<br/>
-     * Multiple correlations are possible without any restrictions.
-     *
-     * @param user Requester (if existing) to correlate
-     * @param appointment Appointment to correlate user with
-     * @param pins Links of pinned Appointments (passed via query parameter)
-     *
-     * @returns string[] Array of all correlations regarding User and Appointment
-     */
-    public static parseReferences(user: User, appointment: Appointment, pins: string[]) {
-        const reference = [];
+    /** MAIN FUNCTIONS  **/
 
-        if (user != null) {
-            if (AppointmentService.isAdministratorOfAppointment(appointment, user)) {
-                reference.push('ADMIN');
-            }
-
-            if (AppointmentService.isCreatorOfAppointment(appointment, user)) {
-                reference.push('CREATOR');
-            }
-
-            if (appointment.enrollments !== undefined
-                && appointment.enrollments.some(sEnrollment => {
-                    return sEnrollment.creator != null
-                        && sEnrollment.creator.id === user.id;
-                })) {
-                reference.push('ENROLLED');
-            }
-
-            if ((appointment.pinners !== undefined
-                && appointment.pinners.some(sPinner => sPinner.id === user.id))
-                || pins.includes(appointment.link)) {
-                reference.push('PINNED');
-            }
-        }
-
-        return reference;
-    }
+    /** MAIN FUNCTIONS  **/
 
     /**
-     * Filters out all enrollments, the requester is not allowed to see.<br />
-     * Done by validation the enrollment query parameters (id and token) passed with te request.
-     * If the token is valid and the enrollment id exists in the enrollments array, then return it.<br/>
-     * <br />
-     * The query parameters are determined by the starting sequence `perm` and `token`
-     * <br />
-     * `perm` for the id (e.g. perm1, perm2, perm3) <br />
-     * `token` for the validation token of the id (e.g. token1, token2, token3) <br/>
-     * <br />
+     * Find Appointment with its relations by its link.
      *
-     * IMPORTANT - The order of the ids with their corresponding token is important!.
-     * The second id passed, will be verified with the second PASSED token (not token number)!
+     * @param link String link of Appointment
      *
-     * @param permissions All raw query parameters
-     * @param enrollments Enrollments to filter
-     *
-     * @returns Enrollment[] ALl filtered enrollments
+     * @throws EntityNotFoundException if given link does not match any appointment
      */
-    public static filterPermittedEnrollments(permissions: any, enrollments: Enrollment[]) {
-        let extractedIds = [];
-        let extractedTokens = [];
-        for (const queryKey of Object.keys(permissions)) {
-            if (queryKey.startsWith('perm')) {
-                extractedIds.push(permissions[queryKey]);
-            } else if (queryKey.startsWith('token')) {
-                extractedTokens.push(permissions[queryKey]);
-            }
-        }
-
-        let validIds = [];
-        extractedIds.forEach((fId, i) => {
-            const token = crypto.createHash('sha256')
-                .update(fId + process.env.SALT_ENROLLMENT)
-                .digest('hex');
-            if (extractedTokens[i] !== undefined
-                && token === extractedTokens[i].replace(' ', '+')) {
-                validIds.push(fId);
-            }
-        });
-
-        return enrollments.filter(fEnrollment => {
-            if (validIds.includes(fEnrollment.id)) {
-                return fEnrollment;
-            }
-        });
-    }
-
-    private static async _handleDateValidation(date, deadline) {
-        if (date < deadline) {
-            throw new InvalidValuesException(null, 'The date can not be before the deadline', ['date']);
-        }
-
-        return date;
-    }
-
-    private static async _handleDeadlineValidation(date, deadline) {
-        if (deadline > date) {
-            throw new InvalidValuesException(null, 'The deadline can not be after the date', ['deadline']);
-        }
-
-        return deadline;
-    }
-
     public async findByLink(link: string): Promise<Appointment> {
         let appointment = await this.appointmentRepository.findOne({
             where: {
                 link: link
             },
-            relations: ['administrators', 'creator']
+            relations: ['administrators', 'creator'] // might not be needed anymore
         });
 
         if (appointment === undefined) {
@@ -199,7 +68,7 @@ export class AppointmentService {
     }
 
     /**
-     * Get a appointment by its link. Checking for permissions by query parameter,
+     * Get an Appointment by its link. Checking for permissions by analysing query parameter,
      * being creator or being administrator.
      *
      * @param user Requester
@@ -226,60 +95,90 @@ export class AppointmentService {
     }
 
     /**
+     * Fetch all Appointments, the user is allowed to see.
+     * This includes being the creator, an administrator or being enrolled into this appoinment.
+     * Additionally, pinned appointments get returned. Further an array of links can be passed
+     * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
+     * <br />
+     * When passing a link with this request, the corresponding Appointment gets marked as "PINNED" <br />
+     * <br />
+     * All appointments include a reference. See {@link parseReferences} for more information
+     *
+     * @param user Requester (if existing)
+     * @param params All query parameters to parse pinned links
+     * @param slim Delete information overhead. See {@link AppointmentMapper.slim} for more information.
+     *
+     * @returns Appointment[]
+     */
+    public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
+
+        let pins = [];
+        for (const queryKey of Object.keys(params)) {
+            if (queryKey.startsWith('pin')) {
+                pins.push(params[queryKey]);
+            }
+        }
+
+        let appointments = await this.getAppointments(user, pins);
+
+        appointments.map(fAppointment => {
+            fAppointment.reference = AppointmentUtil.parseReferences(user, fAppointment, pins);
+        });
+
+        appointments.map(appointment => AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, slim));
+
+        return appointments;
+    }
+
+    /**
      * Create appointment. <br/>
      * Not all options are passed here. Only the core information gets processed.
      * All other information are getting set via the specific options
      *
-     * @param rawData Appointment data to create appointment with
+     * @param appointmentData Appointment data to create appointment with
      * @param user Requester
      *
      * @returns Created appointment after applying filters
      *
      * @throws DuplicateValueException if link is already in use
      */
-    public async create(rawData: Appointment, user: User) {
-        let appointment = new Appointment();
+    public async create(appointmentData: Appointment, user: User): Promise<Appointment> {
+        let appointmentToDB = new Appointment();
 
-        appointment.title = rawData.title;
-        appointment.description = rawData.description;
+        appointmentToDB.title = appointmentData.title;
+        appointmentToDB.description = appointmentData.description;
 
         try {
-            appointment.link = await this.handleAppointmentLink(rawData.link);
+            appointmentToDB.link = await this.handleAppointmentLink(appointmentData.link);
         } catch (e) {
             throw e;
         }
 
-        appointment.location = rawData.location;
+        appointmentToDB.location = appointmentData.location;
 
-        // Only date validation needed
-        // date < deadline === deadline > date
         try {
-            appointment.date = await AppointmentService._handleDateValidation(rawData.date, rawData.deadline);
+            appointmentToDB.date = await AppointmentUtil.handleDateValidation(appointmentData.date, appointmentData.deadline);
         } catch (e) {
             throw e;
         }
 
-        appointment.deadline = rawData.deadline;
+        appointmentToDB.deadline = appointmentData.deadline;
 
-        if (rawData.maxEnrollments > 0) {
-            appointment.maxEnrollments = rawData.maxEnrollments;
+        if (appointmentData.maxEnrollments > 0) {
+            appointmentToDB.maxEnrollments = appointmentData.maxEnrollments;
         } else {
-            appointment.maxEnrollments = null;
+            appointmentToDB.maxEnrollments = null;
         }
 
-        appointment.driverAddition = rawData.driverAddition;
-        appointment.creator = user;
-        appointment.additions = await this._createAdditionEntitiesAndFilterDuplicates(rawData.additions);
+        appointmentToDB.driverAddition = appointmentData.driverAddition;
+        appointmentToDB.creator = user;
+        appointmentToDB.additions = await this._createAdditionEntitiesAndFilterDuplicates(appointmentData.additions);
 
-        appointment = await this.appointmentRepository.save(appointment);
+        appointmentToDB = await this.appointmentRepository.save(appointmentToDB);
 
-        appointment.reference = AppointmentService.parseReferences(user, appointment, []);
+        appointmentToDB = AppointmentService.userBasedAppointmentPreparation(appointmentToDB, user, {}, false);
 
-        appointment = appointmentMapper.permission(this, appointment, user, {});
-        appointment = appointmentMapper.slim(this, appointment, false);
-        appointment = appointmentMapper.basic(this, appointment);
-
-        return appointment;
+        return appointmentToDB;
     }
 
     /**
@@ -302,7 +201,7 @@ export class AppointmentService {
 
         try {
             if (!(await this.isCreatorOrAdministrator(user, appointment))) {
-                throw new InsufficientPermissionsException();
+                throw  new InsufficientPermissionsException();
             }
         } catch (e) {
             throw new InsufficientPermissionsException();
@@ -312,15 +211,11 @@ export class AppointmentService {
             'location', 'date', 'deadline', 'maxEnrollments', 'hidden', 'additions',
             'driverAddition'];
 
-        for (const [key, value] of Object.entries(toChange)) {
+        for (const [key, value] of Object.entries(toChange)) { // TODO REFACTOR LIKE AT USER AND ENROLLMENT
             if (key in appointment
                 && appointment[key] !== value
                 && allowedValuesToChange.indexOf(key) > -1) {
                 let changedValue = value;
-
-                if (key === 'additions') {
-                    changedValue = await this._handleAdditionsUpdate(value, appointment);
-                }
 
                 if (key === 'link') {
                     if (await this.linkInUse(value)) {
@@ -330,9 +225,13 @@ export class AppointmentService {
                     changedValue = value;
                 }
 
+                if (key === 'additions') {
+                    changedValue = await this._handleAdditionUpdate(value, appointment);
+                }
+
                 if (key === 'date') {
                     try {
-                        changedValue = await AppointmentService._handleDateValidation(value, appointment.deadline);
+                        changedValue = await AppointmentUtil.handleDateValidation(value, appointment.deadline);
                     } catch (e) {
                         throw e;
                     }
@@ -340,9 +239,17 @@ export class AppointmentService {
 
                 if (key === 'deadline') {
                     try {
-                        changedValue = await AppointmentService._handleDeadlineValidation(appointment.date, value);
+                        changedValue = await AppointmentUtil.handleDeadlineValidation(appointment.date, value);
                     } catch (e) {
                         throw e;
+                    }
+                }
+
+                if (key === 'maxEnrollments') {
+                    if (value > 0) {
+                        changedValue = value;
+                    } else {
+                        changedValue = null;
                     }
                 }
 
@@ -354,11 +261,7 @@ export class AppointmentService {
 
         appointment = await this.appointmentRepository.save(appointment);
 
-        appointment.reference = AppointmentService.parseReferences(user, appointment, []);
-
-        appointment = appointmentMapper.permission(this, appointment, user, {});
-        appointment = appointmentMapper.slim(this, appointment, false);
-        appointment = appointmentMapper.basic(this, appointment);
+        appointment = AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, false);
 
         this.appointmentGateway.appointmentUpdated(appointment);
 
@@ -388,7 +291,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -399,12 +302,12 @@ export class AppointmentService {
 
         } catch (e) {
             throw new UnknownUserException('NOT_FOUND',
-                `User not found by username`);
+                `User not found by username`, username);
         }
 
         appointment.administrators.push(admin);
 
-        await this.appointmentRepository.save(appointment);
+        return await this.appointmentRepository.save(appointment);
     }
 
     /**
@@ -429,7 +332,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -463,7 +366,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -471,17 +374,18 @@ export class AppointmentService {
         file.name = data.name;
         file.data = data.data;
 
-        const savedFile = await this.fileRepository.save(file);
+        const savedFile = await this.fileService.__save(file);
         appointment.files.push(savedFile);
 
-        await this.appointmentRepository.save(appointment);
-
         this.appointmentGateway.appointmentUpdated(appointment);
+
+        return await this.appointmentRepository.save(appointment);
     }
 
     /**
      * Remove an file of a specific appointment. <br />
-     * Operation can only be executed by the owner of the Appointment.
+     * Operation can only be executed by the owner of the Appointment. <br/>
+     * In contrast to removing administrators, here the entire database entry can be removed since a file is not used in multiple appointments.
      *
      * @param _user Requester  (should be owner of appointment)
      * @param link Link of appointment
@@ -501,7 +405,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentService.isCreatorOfAppointment(appointment, _user)) {
+        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -509,17 +413,22 @@ export class AppointmentService {
 
         try {
             file = await this.fileService.findById(id);
+            await this.fileService.__remove(file);
+
+            const index = appointment.files.indexOf(file);
+            appointment.files.splice(index, 1);
+
+            this.appointmentGateway.appointmentUpdated(appointment);
         } catch (e) {
-            throw new EntityGoneException(null, null, 'file');
+            //
         }
 
-        await this.fileRepository.remove(file);
-
-        this.appointmentGateway.appointmentUpdated(appointment);
+        return appointment;
     }
 
     /**
-     * Toggle the pinning state of an appointment in relation to the user.
+     * Toggle the pinning state of an appointment in relation to the user. <br/>
+     * Update user entity instead of appointment entity
      *
      * @param user Requester, wanting to pin the appointment
      * @param link Link of appointment to pin
@@ -536,7 +445,7 @@ export class AppointmentService {
         let _user;
 
         try {
-            _user = await this.userService.findById(user.id);
+            _user = await this.userService.findById(user.id); // check if user even exists anymore or not
         } catch (e) {
             throw e;
         }
@@ -548,23 +457,24 @@ export class AppointmentService {
             _user.pinned.push(appointment);
         }
 
-        _user = await this.userRepository.save(_user);
+        _user = await this.userService.__save(_user);
 
-        return _user.pinned;
+        return _user;
     }
 
     /**
-     * Checks if a user is administrator orCreator of an Appointment
+     * Checks if a user is administrator or creator of an Appointment.<br/>
+     * Appointment can be passed as reference or just the link of the appointment
      *
      * @param user to check permissions for
-     * @param ref (1) link of appointment
-     *            (2) appointment itself
+     * @param ref (1) link of Appointment
+     *            (2) Appointment itself
      *
      * @returns boolean true if creator or admin - false if not
      *
      * @throws See {@link findByLink} for reference
      */
-    public async isCreatorOrAdministrator(user: User, ref: string | Appointment,): Promise<boolean> {
+    public async isCreatorOrAdministrator(user: User, ref: string | Appointment): Promise<boolean> {
         let appointment;
 
         if (typeof ref === 'string') {
@@ -577,52 +487,80 @@ export class AppointmentService {
             appointment = ref;
         }
 
-        return AppointmentService.isCreatorOfAppointment(appointment, user)
-            || AppointmentService.isAdministratorOfAppointment(appointment, user);
+        return AppointmentUtil.isCreatorOrAdministrator(appointment, user);
     }
 
-    /**
-     * Fetch all Appointments, the user is allowed to see.
-     * This includes being the creator, an administrator or being enrolled into this appoinment.
-     * Additionally, pinned appointments get returned. Further an array of links can be passed
-     * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
-     * <br />
-     * When passing a link with this request, the corresponding Appointment gets marked as "PINNED" <br />
-     * <br />
-     * All appointments include a reference. See {@link parseReferences} for more information
-     *
-     * @param user Requester (if existing)
-     * @param params All query parameters to parse pinned links
-     * @param slim Delete information overhead. See {@link appointmentMapper.slim} for more information.
-     *
-     * @returns Appointment[]
-     */
-    public async getAll(user: User, params: any, slim = false): Promise<Appointment[]> {
+    private async handleAppointmentLink(_link: string) {
+        let link = '';
 
-        let pins = [];
-        for (const queryKey of Object.keys(params)) {
-            if (queryKey.startsWith('pin')) {
-                pins.push(params[queryKey]);
+        if (_link === undefined || _link === '') {
+            do {
+                link = GeneratorUtil.makeid(5);
+            } while (await this.linkInUse(link));
+        } else {
+            if (await this.linkInUse(_link)) {
+                throw new DuplicateValueException(null, null, ['link']);
+            }
+
+            link = _link;
+        }
+
+        return link;
+    }
+
+    private async linkInUse(link) {
+        try {
+            await this.findByLink(link);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    private async _createAdditionEntitiesAndFilterDuplicates(additions: Addition[]) {
+        let output = [];
+
+        if (additions !== undefined) {
+            for (const fAddition of additions) {
+                if (!output.some(sAddition => sAddition.name === fAddition.name)) {
+                    let addition: Addition = new Addition();
+                    addition.name = fAddition.name;
+
+                    await this.additionService.__save(addition);
+
+                    output.push(addition);
+                }
             }
         }
 
-        let appointments = await this.getAppointments(user, pins);
-
-        appointments.map(fAppointment => {
-            fAppointment.reference = AppointmentService.parseReferences(user, fAppointment, pins);
-        });
-
-        appointments.map(appointment => {
-            appointment = appointmentMapper.permission(this, appointment, user, {});
-            appointment = appointmentMapper.slim(this, appointment, slim);
-            appointment = appointmentMapper.basic(this, appointment);
-            return appointment;
-        });
-
-        return appointments;
+        return output;
     }
 
-    public async getAppointments(user: User, pins) {
+    private async _handleAdditionUpdate(mixedAdditions, appointment: Appointment) {
+        let output = [];
+
+        for (let fAddition of mixedAdditions) {
+            let potExistingAddition;
+
+            try {
+                potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
+
+                if (!output.some(sAddition => sAddition.name === potExistingAddition.name)) {
+                    output.push(potExistingAddition);
+                }
+            } catch (e) {
+                potExistingAddition = new Addition();
+                potExistingAddition.name = fAddition.name;
+                potExistingAddition = await this.additionService.__save(potExistingAddition);
+                output.push(potExistingAddition);
+            }
+        }
+
+        return output;
+    }
+
+    /* istanbul ignore next */
+    private async getAppointments(user: User, pins) {
         // add value, cuz SQL cant process empty list
         if (pins.length === 0) {
             pins.push('_');
@@ -673,81 +611,5 @@ export class AppointmentService {
         //         },
         //     }
         // );
-    }
-
-    private async handleAppointmentLink(_link: string) {
-        let link = '';
-
-        if (_link === null || _link === undefined || _link === '') {
-            do {
-                link = GeneratorUtil.makeid(5);
-            } while (await this.linkInUse(link));
-        } else {
-            if (await this.linkInUse(_link)) {
-                throw new DuplicateValueException(null, null, ['link']);
-            }
-
-            link = _link;
-        }
-
-        return link;
-    }
-
-    private async linkInUse(link) {
-        try {
-            await this.findByLink(link);
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    private async _createAdditionEntitiesAndFilterDuplicates(_additions) {
-        let output = [];
-
-        let i = 0;
-        if (_additions !== undefined) {
-            for (const fAddition of _additions) {
-                if (!output.some(sAddition => sAddition.name === fAddition.name)) {
-                    let _addition: Addition = new Addition();
-                    _addition.name = fAddition.name;
-                    _addition.order = i;
-                    await this.additionRepository.save(_addition);
-                    output.push(_addition);
-                    i++;
-                }
-            }
-        }
-
-        return output;
-    }
-
-    private async _handleAdditionsUpdate(mixedAdditions, appointment: Appointment) {
-        let output = [];
-
-        let i = 0;
-        for (let fAddition of mixedAdditions) {
-            let potExistingAddition;
-
-            try {
-                potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
-                potExistingAddition.order = i;
-                potExistingAddition = await this.additionRepository.save(potExistingAddition);
-
-                if (!output.some(sAddition => sAddition === potExistingAddition)) { // wenn nicht existiert, dann push
-                    output.push(potExistingAddition);
-                }
-            } catch (e) {
-                potExistingAddition = new Addition();
-                potExistingAddition.name = fAddition.name;
-                potExistingAddition.order = i;
-                potExistingAddition = await this.additionRepository.save(potExistingAddition);
-                output.push(potExistingAddition);
-            }
-
-            i++;
-        }
-
-        return output;
     }
 }

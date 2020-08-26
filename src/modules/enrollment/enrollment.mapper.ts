@@ -2,7 +2,7 @@ const passengerMapper = require('./passenger/passenger.mapper');
 const driverMapper = require('./driver/driver.mapper');
 
 module.exports = {
-    basic: function(enrollmentService, _enrollment) {
+    basic: function(_enrollment) {
         let enrollment;
 
         enrollment = (({

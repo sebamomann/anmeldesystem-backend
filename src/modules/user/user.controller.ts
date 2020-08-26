@@ -45,6 +45,7 @@ export class UserController {
                 res.status(HttpStatus.CREATED).json(result);
             })
             .catch(err => {
+                console.log(err);
                 throw err;
             });
     }
@@ -54,7 +55,7 @@ export class UserController {
              @Param('token') token: string,
              @Res() res: Response) {
         return this.userService
-            .activate(atob(mail), token)
+            .activateAccount(atob(mail), token)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
@@ -67,9 +68,10 @@ export class UserController {
     @UseGuards(AuthGuard('jwt'))
     update(@Usr() user: User,
            @Body() toChange: any,
+           @Body('domain') domain: string,
            @Res() res: Response,) {
         return this.userService
-            .update(toChange, user)
+            .update(toChange, user, domain)
             .then(async result => {
                 result = this.authService.addJwtToObject(result);
                 res.status(HttpStatus.OK).json(result);
@@ -84,7 +86,7 @@ export class UserController {
                                 @Body('domain') domain: string,
                                 @Res() res: Response) {
         return this.userService
-            .resetPasswordInitialization(mail, domain)
+            .passwordReset_initialize(mail, domain)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
@@ -98,7 +100,7 @@ export class UserController {
                                    @Param('token') token: string,
                                    @Res() res: Response) {
         return this.userService
-            .resetPasswordTokenVerification(atob(mail), token)
+            .passwordReset_tokenVerification(atob(mail), token)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
@@ -113,7 +115,7 @@ export class UserController {
                   @Body('password') pass: string,
                   @Res() res: Response) {
         return this.userService
-            .updatePassword(atob(mail), token, pass)
+            .passwordReset_updatePassword(atob(mail), token, pass)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
@@ -127,7 +129,7 @@ export class UserController {
                                           @Param('token') token: string,
                                           @Res() res: Response) {
         return this.userService
-            .mailChange(atob(mail), token)
+            .emailChange_updateEmail(atob(mail), token)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
@@ -142,7 +144,7 @@ export class UserController {
                          @Body('domain') domain: string,
                          @Res() res: Response) {
         return this.userService
-            .mailChangeResendMail(user, domain)
+            .emailChange_resendEmail(user, domain)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
@@ -157,7 +159,7 @@ export class UserController {
     mailChangeDeactivateToken(@Usr() user: User,
                               @Res() res: Response) {
         return this.userService
-            .mailChangeDeactivateToken(user)
+            .emailChange_cancelPendingChanges(user)
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             })

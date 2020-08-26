@@ -18,6 +18,7 @@ export interface GatewayMetadataExtended extends GatewayMetadata {
     handlePreflightRequest: (req, res) => void;
 }
 
+/* istanbul ignore next */
 const options = {
     handlePreflightRequest: (req, res) => {
         const headers = {
@@ -33,6 +34,7 @@ const options = {
     namespace: 'appointment',
 } as GatewayMetadataExtended;
 
+/* istanbul ignore next */
 @WebSocketGateway(options)
 export class AppointmentGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 

@@ -1,5 +1,5 @@
 import {Test, TestingModule} from '@nestjs/testing';
-import {FileService} from './File.service';
+import {FileService} from './file.service';
 import {Repository} from 'typeorm';
 import {getRepositoryToken} from '@nestjs/typeorm';
 import {File} from './file.entity';

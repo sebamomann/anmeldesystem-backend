@@ -1,4 +1,4 @@
-import {Body, Controller, HttpStatus, Post, Request, Res, UnauthorizedException, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, HttpStatus, Post, Request, Res, UnauthorizedException, UseGuards} from '@nestjs/common';
 import {AuthGuard} from '@nestjs/passport';
 import {AuthService} from './auth/auth.service';
 import {EntityNotFoundException} from './exceptions/EntityNotFoundException';
@@ -6,6 +6,12 @@ import {EntityNotFoundException} from './exceptions/EntityNotFoundException';
 @Controller()
 export class AppController {
     constructor(private readonly authService: AuthService) {
+    }
+
+    @Get('healthcheck')
+    async health(@Request() req,
+                 @Res() res) {
+        return res.status(HttpStatus.OK).json();
     }
 
     @Post('auth/login')

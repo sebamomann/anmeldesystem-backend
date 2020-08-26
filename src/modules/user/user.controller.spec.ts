@@ -201,9 +201,10 @@ describe('User Controller', () => {
 
                 const mockUpdatedUserSatisfyParameters = new User();
                 const mockUserToSatisfyParameters = new User();
+                const mockDomainToSatisfyParameters = 'example.com';
                 const res = mockResponse();
 
-                await userController.update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res);
+                await userController.update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, mockDomainToSatisfyParameters, res);
                 expect(res.status).toHaveBeenCalledWith(200);
                 expect(res.status).toBeCalledTimes(1);
                 expect(res.json).toHaveBeenCalledWith(resultWithToken);
@@ -222,10 +223,11 @@ describe('User Controller', () => {
 
                     const mockUpdatedUserSatisfyParameters = new User();
                     const mockUserToSatisfyParameters = new User();
+                    const mockDomainToSatisfyParameters = 'example.com';
                     const res = mockResponse();
 
                     await userController
-                        .update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res)
+                        .update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, mockDomainToSatisfyParameters, res)
                         .then(() => {
                             throw new Error('I have failed you, Anakin.');
                         }).catch(err => {
@@ -244,10 +246,11 @@ describe('User Controller', () => {
 
                     const mockUpdatedUserSatisfyParameters = new User();
                     const mockUserToSatisfyParameters = new User();
+                    const mockDomainToSatisfyParameters = 'example.com';
                     const res = mockResponse();
 
                     await userController
-                        .update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res)
+                        .update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, mockDomainToSatisfyParameters, res)
                         .then(() => {
                             throw new Error('I have failed you, Anakin.');
                         }).catch(err => {
@@ -264,10 +267,11 @@ describe('User Controller', () => {
 
                 const mockUpdatedUserSatisfyParameters = new User();
                 const mockUserToSatisfyParameters = new User();
+                const mockDomainToSatisfyParameters = 'example.com';
                 const res = mockResponse();
 
                 await userController
-                    .update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, res)
+                    .update(mockUserToSatisfyParameters, mockUpdatedUserSatisfyParameters, mockDomainToSatisfyParameters, res)
                     .then(() => {
                         throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
@@ -280,7 +284,7 @@ describe('User Controller', () => {
     describe('* verify account (by link from mail)', () => {
         describe('* successful should return nothing with 200 status code', () => {
             it('successful request', async () => {
-                jest.spyOn(userService, 'activate')
+                jest.spyOn(userService, 'activateAccount')
                     .mockImplementation(async (): Promise<void> => Promise.resolve());
 
                 const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -299,7 +303,7 @@ describe('User Controller', () => {
                     const result = new InvalidTokenException('INVALID',
                         'Provided token is not valid');
 
-                    jest.spyOn(userService, 'activate')
+                    jest.spyOn(userService, 'activateAccount')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -319,7 +323,7 @@ describe('User Controller', () => {
                     const result = new InvalidTokenException('USED',
                         'User is already verified');
 
-                    jest.spyOn(userService, 'activate')
+                    jest.spyOn(userService, 'activateAccount')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -340,7 +344,7 @@ describe('User Controller', () => {
                 it('user gone', async () => {
                     const result = new EntityGoneException();
 
-                    jest.spyOn(userService, 'activate')
+                    jest.spyOn(userService, 'activateAccount')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -360,7 +364,7 @@ describe('User Controller', () => {
             it('undefined error has occurred', async () => {
                 const result = new Error();
 
-                jest.spyOn(userService, 'activate')
+                jest.spyOn(userService, 'activateAccount')
                     .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                 const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -382,7 +386,7 @@ describe('User Controller', () => {
         describe('* initialization', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
-                    jest.spyOn(userService, 'resetPasswordInitialization')
+                    jest.spyOn(userService, 'passwordReset_initialize')
                         .mockImplementation(async (): Promise<string> => Promise.resolve(''));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -399,7 +403,7 @@ describe('User Controller', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
-                    jest.spyOn(userService, 'resetPasswordInitialization')
+                    jest.spyOn(userService, 'passwordReset_initialize')
                         .mockImplementation(async (): Promise<string> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -420,7 +424,7 @@ describe('User Controller', () => {
         describe('* link verification', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
-                    jest.spyOn(userService, 'resetPasswordTokenVerification')
+                    jest.spyOn(userService, 'passwordReset_tokenVerification')
                         .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -439,7 +443,7 @@ describe('User Controller', () => {
                         const result = new InvalidTokenException('INVALID',
                             'Provided token is not valid');
 
-                        jest.spyOn(userService, 'resetPasswordTokenVerification')
+                        jest.spyOn(userService, 'passwordReset_tokenVerification')
                             .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                         const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -459,7 +463,7 @@ describe('User Controller', () => {
                         const result = new InvalidTokenException('EXPIRED',
                             'Provided token expired');
 
-                        jest.spyOn(userService, 'resetPasswordTokenVerification')
+                        jest.spyOn(userService, 'passwordReset_tokenVerification')
                             .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                         const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -482,7 +486,7 @@ describe('User Controller', () => {
                             'Provided token was already used at the following date',
                             date);
 
-                        jest.spyOn(userService, 'resetPasswordTokenVerification')
+                        jest.spyOn(userService, 'passwordReset_tokenVerification')
                             .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                         const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -502,7 +506,7 @@ describe('User Controller', () => {
                         const result = new AlreadyUsedException('OUTDATED',
                             'Provided token was already replaced by a new one');
 
-                        jest.spyOn(userService, 'resetPasswordTokenVerification')
+                        jest.spyOn(userService, 'passwordReset_tokenVerification')
                             .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                         const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -522,7 +526,7 @@ describe('User Controller', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
-                    jest.spyOn(userService, 'resetPasswordTokenVerification')
+                    jest.spyOn(userService, 'passwordReset_tokenVerification')
                         .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
@@ -543,8 +547,8 @@ describe('User Controller', () => {
         describe('* set new password', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
-                    jest.spyOn(userService, 'updatePassword')
-                        .mockImplementation(async (): Promise<void> => Promise.resolve());
+                    jest.spyOn(userService, 'passwordReset_updatePassword')
+                        .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -562,8 +566,8 @@ describe('User Controller', () => {
                 it('token invalid', async () => {
                     const result = new InsufficientPermissionsException();
 
-                    jest.spyOn(userService, 'updatePassword')
-                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
+                    jest.spyOn(userService, 'passwordReset_updatePassword')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -582,8 +586,8 @@ describe('User Controller', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
-                    jest.spyOn(userService, 'updatePassword')
-                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
+                    jest.spyOn(userService, 'passwordReset_updatePassword')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -606,8 +610,8 @@ describe('User Controller', () => {
         describe('* verify and execute', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
-                    jest.spyOn(userService, 'mailChange')
-                        .mockImplementation(async (): Promise<void> => Promise.resolve());
+                    jest.spyOn(userService, 'emailChange_updateEmail')
+                        .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -623,8 +627,8 @@ describe('User Controller', () => {
                 it('token invalid', async () => {
                     const result = new UnauthorizedException();
 
-                    jest.spyOn(userService, 'mailChange')
-                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
+                    jest.spyOn(userService, 'emailChange_updateEmail')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -645,8 +649,8 @@ describe('User Controller', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
-                    jest.spyOn(userService, 'mailChange')
-                        .mockImplementation(async (): Promise<void> => Promise.reject(result));
+                    jest.spyOn(userService, 'emailChange_updateEmail')
+                        .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
                     const mockMailToSatisfyParameters = 'mocked@mail.de';
                     const mockTokenToSatisfyParameters = 'token';
@@ -666,7 +670,7 @@ describe('User Controller', () => {
         describe('* resend verification mail', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
-                    jest.spyOn(userService, 'mailChangeResendMail')
+                    jest.spyOn(userService, 'emailChange_resendEmail')
                         .mockImplementation(async (): Promise<EmailChange> => Promise.resolve(new EmailChange()));
 
                     const mockUserToSatisfyParameter = new User();
@@ -684,7 +688,7 @@ describe('User Controller', () => {
                     const result = new InvalidRequestException('INVALID',
                         'There is no active mail change going on. Email resend is not possible');
 
-                    jest.spyOn(userService, 'mailChangeResendMail')
+                    jest.spyOn(userService, 'emailChange_resendEmail')
                         .mockImplementation(async (): Promise<EmailChange> => Promise.reject(result));
 
                     const mockUserToSatisfyParameter = new User();
@@ -703,7 +707,7 @@ describe('User Controller', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
-                    jest.spyOn(userService, 'mailChangeResendMail')
+                    jest.spyOn(userService, 'emailChange_resendEmail')
                         .mockImplementation(async (): Promise<EmailChange> => Promise.reject(result));
 
                     const mockUserToSatisfyParameter = new User();
@@ -724,7 +728,7 @@ describe('User Controller', () => {
         describe('* deactivate existing token', () => {
             describe('* successful should return 204 status code', () => {
                 it('successful request', async () => {
-                    jest.spyOn(userService, 'mailChangeDeactivateToken')
+                    jest.spyOn(userService, 'emailChange_cancelPendingChanges')
                         .mockImplementation(async (): Promise<void> => Promise.resolve());
 
                     const mockUserToSatisfyParameter = new User();
@@ -740,7 +744,7 @@ describe('User Controller', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
-                    jest.spyOn(userService, 'mailChangeDeactivateToken')
+                    jest.spyOn(userService, 'emailChange_cancelPendingChanges')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockUserToSatisfyParameter = new User();
