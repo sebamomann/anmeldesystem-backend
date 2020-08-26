@@ -602,7 +602,7 @@ export class AppointmentService {
             .orWhere('enrollments.creatorId = :user', {user: user.id})
             .orWhere('pinners.id = :user', {user: user.id})
             .orWhere('appointment.link IN (:...links)', {links: pins})
-            .where('appointment.date < :date', {date: new Date(before)})
+            .andWhere('appointment.date < :date', {date: new Date(before)})
             .orderBy('appointment.date', 'DESC')
             .limit(limit)
             .getMany();
