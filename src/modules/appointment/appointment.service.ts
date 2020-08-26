@@ -606,8 +606,11 @@ export class AppointmentService {
             .orWhere('appointment.link IN (:...links)', {links: pins})
             .andWhere('appointment.date < :date', {date: new Date(before)})
             .orderBy('appointment.date', 'DESC')
-            .limit(limit)
             .getMany();
+
+        if (!limit) {
+            limit = output.length;
+        }
 
         return output.splice(0, limit); // needed because .limit or .take break the joins
 
