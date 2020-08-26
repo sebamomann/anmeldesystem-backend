@@ -114,7 +114,7 @@ export class AppointmentService {
      *
      * @returns Appointment[]
      */
-    public async getAll(user: User, params: any, slim, since, limit): Promise<Appointment[]> {
+    public async getAll(user: User, params: any, slim, before, limit): Promise<Appointment[]> {
 
         let pins = [];
         for (const queryKey of Object.keys(params)) {
@@ -123,7 +123,7 @@ export class AppointmentService {
             }
         }
 
-        let appointments = await this.getAppointments(user, pins);
+        let appointments = await this.getAppointments(user, pins, before, limit);
         appointments = appointments.map(appointment => AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, slim));
 
         return appointments;
@@ -571,7 +571,12 @@ export class AppointmentService {
     }
 
     /* istanbul ignore next */
-    private async getAppointments(user: User, pins) {
+    private async getAppointments(user: User, pins, before, limit) {
+        if (!before) {
+            const d = new Date();
+            before = d.setFullYear(d.getFullYear() + 100); // inf undefined get from 100 years in future
+        }
+
         // add value, cuz SQL cant process empty list
         if (pins.length === 0) {
             pins.push('_');
@@ -597,7 +602,9 @@ export class AppointmentService {
             .orWhere('enrollments.creatorId = :user', {user: user.id})
             .orWhere('pinners.id = :user', {user: user.id})
             .orWhere('appointment.link IN (:...links)', {links: pins})
+            .where('appointment.date < :date', {date: new Date(before)})
             .orderBy('appointment.date', 'DESC')
+            .limit(limit)
             .getMany();
 
         // return await this.appointmentRepository.find(

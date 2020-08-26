@@ -65,14 +65,13 @@ export class AppointmentController {
     getAll(@Usr() user: User,
            @Query() params: any,
            @Query('slim') slim: string,
-           @Query('since') since: string,
+           @Query('before') before: string,
            @Query('limit') limit: string,
            @Res() res: Response,) {
         let _slim = slim === 'true';
         return this.appointmentService
-            .getAll(user, params, _slim, since, limit)
+            .getAll(user, params, _slim, before, limit)
             .then(result => {
-                console.log(result);
                 res.status(HttpStatus.OK).json(result);
             })
             .catch(err => {
