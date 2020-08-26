@@ -524,15 +524,19 @@ export class AppointmentService {
     private async _createAdditionEntitiesAndFilterDuplicates(additions: Addition[]) {
         let output = [];
 
+        let i = 0;
         if (additions !== undefined) {
             for (const fAddition of additions) {
                 if (!output.some(sAddition => sAddition.name === fAddition.name)) {
                     let addition: Addition = new Addition();
                     addition.name = fAddition.name;
+                    addition.order = i;
 
                     await this.additionService.__save(addition);
 
                     output.push(addition);
+
+                    i++;
                 }
             }
         }
@@ -543,11 +547,14 @@ export class AppointmentService {
     private async _handleAdditionUpdate(mixedAdditions, appointment: Appointment) {
         let output = [];
 
+        let i = 0;
         for (let fAddition of mixedAdditions) {
             let potExistingAddition;
 
             try {
                 potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
+                potExistingAddition.order = i;
+                potExistingAddition = await this.additionService.__save(potExistingAddition);
 
                 if (!output.some(sAddition => sAddition.name === potExistingAddition.name)) {
                     output.push(potExistingAddition);
@@ -555,9 +562,12 @@ export class AppointmentService {
             } catch (e) {
                 potExistingAddition = new Addition();
                 potExistingAddition.name = fAddition.name;
+                potExistingAddition.order = i;
                 potExistingAddition = await this.additionService.__save(potExistingAddition);
                 output.push(potExistingAddition);
             }
+
+            i++;
         }
 
         return output;

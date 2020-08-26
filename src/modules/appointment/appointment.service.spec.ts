@@ -452,6 +452,9 @@ describe('AppointmentService', () => {
 
                     additionRepositoryMock.save.mockImplementation((val) => val);
 
+                    __given_addition_1.order = 0;
+                    __given_addition_1.order = 1;
+
                     const __actual = await appointmentService.create(__given_appointment, __given_user);
                     expect(__actual.additions).toHaveLength(2);
                     expect(__actual.additions.sort()).toEqual([__given_addition_1, __given_addition_2].sort());
