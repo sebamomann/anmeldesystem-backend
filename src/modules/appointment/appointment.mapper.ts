@@ -18,7 +18,7 @@ export class AppointmentMapper {
     }
 
     public static permission(_appointment: Appointment, _user: User, permissions: any): any {
-        let appointment: {};
+        let appointment: any;
         let creatorObject = {};
         let enrollmentsObject;
 
@@ -83,6 +83,8 @@ export class AppointmentMapper {
         appointment = Object.assign(appointment, creatorObject);
         appointment = Object.assign(appointment, enrollmentsObject);
 
+        appointment.files = appointment.files.map(mFile => delete mFile.data);
+
         const obj = {
             creator: {
                 name: _appointment.creator.name,
@@ -97,7 +99,6 @@ export class AppointmentMapper {
 
     public static slim(appointment: Appointment, slim: boolean) {
         if (slim) {
-            delete appointment.files;
             delete appointment.enrollments;
         }
 
