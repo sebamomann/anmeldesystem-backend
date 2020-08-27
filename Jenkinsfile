@@ -87,7 +87,7 @@ pipeline {
                             '--name newman ' +
                             '--network newmanNet ' +
                             '-t postman/newman:alpine ' +
-                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + branch_name+ '/collection.json"'
+                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + branch_name+ '/collection.json" --delay-request 100 -n 1 --bail'
                 }
             }
         }

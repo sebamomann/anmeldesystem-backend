@@ -347,7 +347,7 @@ describe('AppointmentService', () => {
     });
 
     describe('* slim', () => {
-        it('* slim should remove files and enrollments', async () => {
+        it('* slim should remove enrollments', async () => {
             const __given_user = new User();
             __given_user.username = 'username';
             const __given_slim = true;
@@ -364,13 +364,12 @@ describe('AppointmentService', () => {
 
             const __expected = {...__given_appointment};
             delete __expected.enrollments;
-            delete __expected.files;
 
             const __actual = AppointmentMapper.slim(__given_appointment, __given_slim);
             expect(__actual).toEqual(__expected);
         });
 
-        it('* !slim should !remove files and enrollments', async () => {
+        it('* !slim should !remove enrollments', async () => {
             const __given_user = new User();
             __given_user.username = 'username';
             const __given_slim = false;
@@ -431,6 +430,37 @@ describe('AppointmentService', () => {
 
             const __actual = (AppointmentMapper as any).basic(__given_appointment);
             expect(__actual).toEqual(__expected);
+        });
+
+        describe('* delete file data', () => {
+            it('* files exist', async () => {
+                const __given_appointment = new Appointment();
+                __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                __given_appointment.hidden = false;
+                __given_appointment.enrollments = [new Enrollment(), new Enrollment()];
+                const file = new File();
+                file.name = 'filename.txt';
+                file.data = 'data';
+                __given_appointment.files = [file];
+
+                const __expected = {...__given_appointment};
+                delete __expected.files[0].data;
+
+                const __actual = (AppointmentMapper as any).basic(__given_appointment);
+                expect(__actual).toEqual(__expected);
+            });
+
+            it('* files undefined', async () => {
+                const __given_appointment = new Appointment();
+                __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                __given_appointment.hidden = false;
+                __given_appointment.enrollments = [new Enrollment(), new Enrollment()];
+
+                const __expected = {...__given_appointment};
+
+                const __actual = (AppointmentMapper as any).basic(__given_appointment);
+                expect(__actual).toEqual(__expected);
+            });
         });
     });
 
@@ -497,6 +527,31 @@ describe('AppointmentService', () => {
             expect(__actual).toEqual(__expected);
         });
 
+    });
+
+    it('* sort additions by order', () => {
+        const __existing_addition_1 = new Addition();
+        __existing_addition_1.id = '56fa2227-e93c-49fb-a834-fd07e82d64df';
+        __existing_addition_1.name = 'addition1';
+        __existing_addition_1.order = 0;
+
+        const __existing_addition_2 = new Addition();
+        __existing_addition_2.id = 'dc18989b-08bb-4d94-9b61-4b73af17aa51';
+        __existing_addition_2.name = 'addition2';
+        __existing_addition_2.order = 1;
+
+        const __existing_addition_3 = new Addition();
+        __existing_addition_3.id = 'cb51d10f-91aa-4bd0-96d0-6b26bd6a66e2';
+        __existing_addition_3.name = 'addition3';
+        __existing_addition_3.order = 2;
+
+        const __given_appointment = new Appointment();
+        __given_appointment.additions = [__existing_addition_2, __existing_addition_3, __existing_addition_1];
+
+        const __expected = [__existing_addition_1, __existing_addition_2, __existing_addition_3];
+
+        const __actual = (AppointmentMapper as any).sortAdditions(__given_appointment);
+        expect(__actual.additions).toEqual(__expected);
     });
 
     afterEach(() => {

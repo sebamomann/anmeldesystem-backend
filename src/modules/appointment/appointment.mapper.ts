@@ -14,11 +14,13 @@ export class AppointmentMapper {
             appointment.enrollments = AppointmentMapper.enrolledByUser(appointment.enrollments);
         }
 
+        appointment.files?.map(mFile => delete mFile.data);
+
         return appointment;
     }
 
     public static permission(_appointment: Appointment, _user: User, permissions: any): any {
-        let appointment: {};
+        let appointment: any;
         let creatorObject = {};
         let enrollmentsObject;
 
@@ -97,7 +99,6 @@ export class AppointmentMapper {
 
     public static slim(appointment: Appointment, slim: boolean) {
         if (slim) {
-            delete appointment.files;
             delete appointment.enrollments;
         }
 
@@ -110,6 +111,14 @@ export class AppointmentMapper {
             delete mEnrollment.creator;
             return mEnrollment;
         });
+    }
+
+    public static sortAdditions(appointment: Appointment) {
+        appointment.additions?.sort((a, b) => {
+            return a.order < b.order ? -1 : 1;
+        });
+
+        return appointment;
     }
 
     private static stripAdministrators(admins: User[]) {
