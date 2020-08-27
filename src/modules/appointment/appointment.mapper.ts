@@ -83,7 +83,7 @@ export class AppointmentMapper {
         appointment = Object.assign(appointment, creatorObject);
         appointment = Object.assign(appointment, enrollmentsObject);
 
-        appointment.files = appointment.files.map(mFile => delete mFile.data);
+        appointment.files.map(mFile => delete mFile.data);
 
         const obj = {
             creator: {
