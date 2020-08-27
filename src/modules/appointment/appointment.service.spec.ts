@@ -902,8 +902,61 @@ describe('AppointmentService', () => {
                     expect(__actual.driverAddition).toEqual(__expected);
                 });
 
-                // TODO
-                // max enrollments -1 -> null
+                describe('* update maxEnrollments', () => {
+                    it('* normal', async () => {
+                        const __given_user = new User();
+
+                        const __existing_appointment = new Appointment();
+                        __existing_appointment.driverAddition = false;
+                        __existing_appointment.link = 'link';
+                        __existing_appointment.creator = __given_user;
+                        __existing_appointment.maxEnrollments = 5;
+
+                        const __given_appointment_change_data = {
+                            maxEnrollments: 10
+                        };
+
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                        appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                        jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                            return;
+                        });
+
+                        const __expected = __given_appointment_change_data.maxEnrollments;
+
+                        const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                        expect(__actual.maxEnrollments).toEqual(__expected);
+                    });
+
+                    it('* < 0 -> null', async () => {
+                        const __given_user = new User();
+
+                        const __existing_appointment = new Appointment();
+                        __existing_appointment.driverAddition = false;
+                        __existing_appointment.link = 'link';
+                        __existing_appointment.creator = __given_user;
+                        __existing_appointment.maxEnrollments = 5;
+
+                        const __given_appointment_change_data = {
+                            maxEnrollments: -1
+                        };
+
+                        appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
+
+                        appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                        jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                            return;
+                        });
+
+                        const __expected = null;
+
+                        const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                        expect(__actual.maxEnrollments).toEqual(__expected);
+                    });
+                });
             });
 
             it('* update non existing attribute', async () => {
@@ -1516,7 +1569,6 @@ describe('AppointmentService', () => {
         });
     });
 
-    // TODO CHECK SLIM
     // TODO CHECK PAGINATION
     describe('* get Appointments', () => { // cases like creator, admin enrollment ... not needed to test, because they are recieved by database
         describe('* successful should return array of entities', () => {

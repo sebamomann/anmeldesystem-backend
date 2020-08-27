@@ -14,6 +14,8 @@ export class AppointmentMapper {
             appointment.enrollments = AppointmentMapper.enrolledByUser(appointment.enrollments);
         }
 
+        appointment.files?.map(mFile => delete mFile.data);
+
         return appointment;
     }
 
@@ -83,8 +85,6 @@ export class AppointmentMapper {
         appointment = Object.assign(appointment, creatorObject);
         appointment = Object.assign(appointment, enrollmentsObject);
 
-        appointment.files.map(mFile => delete mFile.data);
-
         const obj = {
             creator: {
                 name: _appointment.creator.name,
@@ -111,6 +111,14 @@ export class AppointmentMapper {
             delete mEnrollment.creator;
             return mEnrollment;
         });
+    }
+
+    public static sortAdditions(appointment: Appointment) {
+        appointment.additions?.sort((a, b) => {
+            return a.order < b.order ? -1 : 1;
+        });
+
+        return appointment;
     }
 
     private static stripAdministrators(admins: User[]) {
