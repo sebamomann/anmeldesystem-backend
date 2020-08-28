@@ -89,11 +89,19 @@ export class AppointmentUtil {
      * @param user Requester (if existing) to correlate
      * @param appointment Appointment to correlate user with
      * @param pins Links of pinned Appointments (passed via query parameter)
+     * @param permissions Object containing attributes in the form of `perm` and `token` (perm token for enrollment)
      *
      * @returns string[] Array of all correlations regarding User and Appointment
      */
-    public static parseReferences(user: User, appointment: Appointment, pins: string[]) {
+    public static parseReferences(user: User, appointment: Appointment, pins: string[], permissions = {}) {
         const references = [];
+
+        let extractedIds = [];
+        for (const queryKey of Object.keys(permissions)) {
+            if (queryKey.startsWith('perm')) {
+                extractedIds.push(permissions[queryKey]);
+            }
+        }
 
         if (user === null) {
             return [];
@@ -107,16 +115,21 @@ export class AppointmentUtil {
             references.push('CREATOR');
         }
 
-        if (appointment.enrollments !== undefined
-            && appointment.enrollments.some(sEnrollment => {
-                return sEnrollment.creator != null
-                    && sEnrollment.creator.id === user.id;
-            })) {
+        const hasPermissionForAtLeastOneEnrollment = appointment.enrollments?.some(sEnrollment => {
+            return extractedIds.includes(sEnrollment.id);
+        });
+
+        const isCreatorOfAnyAppointment = appointment.enrollments?.some(sEnrollment => {
+            return sEnrollment.creator != null
+                && sEnrollment.creator.id === user.id;
+        });
+
+        if (appointment.enrollments
+            && (isCreatorOfAnyAppointment || hasPermissionForAtLeastOneEnrollment)) {
             references.push('ENROLLED');
         }
 
-        if ((appointment.pinners !== undefined
-            && appointment.pinners.some(sPinner => sPinner.id === user.id))
+        if ((appointment.pinners && appointment.pinners.some(sPinner => sPinner.id === user.id))
             || pins.includes(appointment.link)) {
             references.push('PINNED');
         }
