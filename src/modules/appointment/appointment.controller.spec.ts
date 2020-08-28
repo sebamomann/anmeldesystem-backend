@@ -6,7 +6,7 @@ import {AppointmentController} from './appointment.controller';
 
 import {User} from '../user/user.entity';
 
-import {ForbiddenException, HttpStatus, NotFoundException} from '@nestjs/common';
+import {HttpStatus, NotFoundException} from '@nestjs/common';
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
@@ -624,7 +624,7 @@ describe('Appointment Controller', () => {
                     .then(() => {
                         throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
-                        expect(err).toBeInstanceOf(ForbiddenException);
+                        expect(err).toBeInstanceOf(InsufficientPermissionsException);
                     });
             });
 
