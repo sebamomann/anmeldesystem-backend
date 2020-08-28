@@ -9,14 +9,16 @@ module.exports = {
                            id,
                            name,
                            comment,
-                           additions,
+                           additions, // TODO REMOVE NAMES OF ADDITIONS
                            comments,
+                           iat
                        }) => ({
             id,
             name,
             comment,
             additions,
             comments,
+            iat
         }))
         (_enrollment);
 
