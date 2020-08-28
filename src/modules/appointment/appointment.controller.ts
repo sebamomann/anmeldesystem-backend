@@ -3,7 +3,6 @@ import {
     ClassSerializerInterceptor,
     Controller,
     Delete,
-    ForbiddenException,
     Get,
     HttpStatus,
     Param,
@@ -27,6 +26,7 @@ import {AuthGuard} from '@nestjs/passport';
 import {JwtOptStrategy} from '../../auth/jwt-opt.strategy';
 import {Response} from 'express';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
+import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 
 @Controller('appointment')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
@@ -154,7 +154,7 @@ export class AppointmentController {
                     return;
                 }
 
-                throw new ForbiddenException();
+                throw new InsufficientPermissionsException();
             })
             .catch((err) => {
                 throw err;
