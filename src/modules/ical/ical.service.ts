@@ -13,15 +13,15 @@ export class IcalService {
     async get(mail: string, token: string) {
         const ical = require('ical-generator');
         const cal = ical({
-            domain: process.env.domain + "/ical",
+            domain: process.env.domain + '/ical',
             name: 'Anmeldesystem',
-            url: process.env.domain + "/ical"
+            url: process.env.domain + '/ical'
         });
 
         const user = await this.userService.findByEmail(mail);
 
         if (user != undefined) {
-            console.log("user exists");
+            console.log('user exists');
             const hash = crypto
                 .createHash('sha256')
                 .update(mail)
@@ -29,8 +29,8 @@ export class IcalService {
                 .substr(0, 27);
 
             if (hash === token) {
-                console.log("hash valid");
-                const appointments = await this.appointmentService.getAll(user, {}, true, null, null);
+                console.log('hash valid');
+                const appointments = await this.appointmentService.getAll(user, {}, true);
 
                 appointments.forEach(fAppointment => {
                     cal.createEvent({
@@ -39,16 +39,16 @@ export class IcalService {
                         summary: fAppointment.title,
                         description: fAppointment.date,
                         location: fAppointment.location,
-                        url: process.env.DOMAIN + "/" + fAppointment.link
+                        url: process.env.DOMAIN + '/' + fAppointment.link
                     });
                 });
 
                 return cal.toString();
             }
 
-            return "";
+            return '';
         } else {
-            return "";
+            return '';
         }
     }
 }

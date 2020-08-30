@@ -108,22 +108,31 @@ export class AppointmentService {
      * @param user Requester (if existing)
      * @param params All query parameters to parse pinned links
      * @param slim Delete information overhead. See {@link AppointmentMapper.slim} for more information.
-     * @param before
-     * @param limit
      *
      * @returns Appointment[]
      */
-    public async getAll(user: User, params: any, slim, before, limit): Promise<Appointment[]> {
+    public async getAll(user: User, params: any, slim): Promise<Appointment[]> {
+        let pins = AppointmentUtil.parsePins(params);
 
-        let pins = [];
-        for (const queryKey of Object.keys(params)) {
-            if (queryKey.startsWith('pin')) {
-                pins.push(params[queryKey]);
-            }
+        let appointments = await this.getAppointments(user, pins, undefined, null);
+        appointments = appointments.map(appointment => AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, slim));
+
+        return appointments;
+    }
+
+    public async getAllArchive(user: User, params: any, _slim: boolean, before: string, limit: string): Promise<Appointment[]> {
+        let pins = AppointmentUtil.parsePins(params);
+
+        let _before;
+        const date = new Date(before);
+        if (isNaN(date.getTime())) {
+            _before = new Date();
+        } else {
+            _before = date;
         }
 
-        let appointments = await this.getAppointments(user, pins, before, limit);
-        appointments = appointments.map(appointment => AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, slim));
+        let appointments = await this.getAppointments(user, pins, _before, limit);
+        appointments = appointments.map(appointment => AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, _slim));
 
         return appointments;
     }
@@ -570,14 +579,7 @@ export class AppointmentService {
     }
 
     /* istanbul ignore next */
-    private async getAppointments(user: User, pins, before, limit) {
-        if (!before || before === 'undefined' || before === 'null') {
-            const currentYear = new Date().getFullYear();
-
-            const d = new Date();
-            before = d.setFullYear(d.getFullYear() + (2037 - currentYear)); // undefined get from 100 years in future MAX 2038 DUE TO UNIX OVERFLOW
-        }
-
+    private async getAppointments(user: User, pins, before: Date, limit) {
         // add value, cuz SQL cant process empty list
         if (pins.length === 0) {
             pins.push('_');
@@ -606,7 +608,10 @@ export class AppointmentService {
                     .orWhere('pinners.id = :user', {user: user.id})
                     .orWhere('appointment.link IN (:...links)', {links: pins});
             }))
-            .andWhere('UNIX_TIMESTAMP(appointment.date) < UNIX_TIMESTAMP(:date2)', {date2: (new Date(before))})
+            .andWhere(before ? 'UNIX_TIMESTAMP(appointment.date) < UNIX_TIMESTAMP(:date)' : 'UNIX_TIMESTAMP(appointment.date) > UNIX_TIMESTAMP(:date2)', {
+                date: before,
+                date2: new Date()
+            })
             .orderBy('appointment.date', 'DESC')
             .getMany();
 

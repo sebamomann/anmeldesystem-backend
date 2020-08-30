@@ -34,6 +34,46 @@ export class AppointmentController {
     constructor(private appointmentService: AppointmentService) {
     }
 
+    @Get()
+    @UseGuards(JwtOptStrategy)
+    @UseInterceptors(ClassSerializerInterceptor)
+    getAll(@Usr() user: User,
+           @Query() params: any,
+           @Query('slim') slim: string,
+           @Res() res: Response,) {
+        let _slim = slim === 'true';
+        return this.appointmentService
+            .getAll(user, params, _slim)
+            .then(result => {
+                res.status(HttpStatus.OK).json(result);
+            })
+            .catch(err => {
+                console.log(err);
+                throw err;
+            });
+    }
+
+    @Get('archive')
+    @UseGuards(JwtOptStrategy)
+    @UseInterceptors(ClassSerializerInterceptor)
+    getAllArchive(@Usr() user: User,
+                  @Query() params: any,
+                  @Query('slim') slim: string,
+                  @Query('before') before: string,
+                  @Query('limit') limit: string,
+                  @Res() res: Response,) {
+        let _slim = slim === 'true';
+        return this.appointmentService
+            .getAllArchive(user, params, _slim, before, limit)
+            .then(result => {
+                res.status(HttpStatus.OK).json(result);
+            })
+            .catch(err => {
+                console.log(err);
+                throw err;
+            });
+    }
+
     @Get(':link')
     @UseGuards(JwtOptStrategy)
     findByLink(@Usr() user: User,
@@ -55,27 +95,6 @@ export class AppointmentController {
                 res.status(HttpStatus.OK).json(tAppointment);
             })
             .catch((err) => {
-                throw err;
-            });
-    }
-
-    @Get()
-    @UseGuards(JwtOptStrategy)
-    @UseInterceptors(ClassSerializerInterceptor)
-    getAll(@Usr() user: User,
-           @Query() params: any,
-           @Query('slim') slim: string,
-           @Query('before') before: string,
-           @Query('limit') limit: string,
-           @Res() res: Response,) {
-        let _slim = slim === 'true';
-        return this.appointmentService
-            .getAll(user, params, _slim, before, limit)
-            .then(result => {
-                res.status(HttpStatus.OK).json(result);
-            })
-            .catch(err => {
-                console.log(err);
                 throw err;
             });
     }

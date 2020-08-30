@@ -184,4 +184,14 @@ export class AppointmentUtil {
             }
         });
     }
+
+    public static parsePins(params: any) {
+        let pins = [];
+        for (const queryKey of Object.keys(params)) {
+            if (queryKey.startsWith('pin')) {
+                pins.push(params[queryKey]);
+            }
+        }
+        return pins;
+    }
 }
