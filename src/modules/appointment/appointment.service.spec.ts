@@ -1586,7 +1586,7 @@ describe('AppointmentService', () => {
                 jest.spyOn(appointmentService as any, 'getAppointments')
                     .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
 
-                const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim, null, null);
+                const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim);
                 expect(actual).toHaveLength(1);
             });
 
@@ -1603,7 +1603,7 @@ describe('AppointmentService', () => {
                 jest.spyOn(appointmentService as any, 'getAppointments')
                     .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
 
-                const actual = await appointmentService.getAll(__given_user, __given_permissions, false, null, null);
+                const actual = await appointmentService.getAll(__given_user, __given_permissions, false);
                 expect(actual).toHaveLength(1);
             });
 
@@ -1623,7 +1623,7 @@ describe('AppointmentService', () => {
                     jest.spyOn(appointmentService as any, 'getAppointments')
                         .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
 
-                    const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim, null, null);
+                    const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim);
                     expect(actual).toHaveLength(1);
                 });
 
@@ -1642,7 +1642,7 @@ describe('AppointmentService', () => {
                     jest.spyOn(appointmentService as any, 'getAppointments')
                         .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
 
-                    const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim, null, null);
+                    const actual = await appointmentService.getAll(__given_user, __given_permissions, __given_slim);
                     expect(actual).toHaveLength(1);
                 });
             });
