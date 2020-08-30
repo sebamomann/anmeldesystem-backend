@@ -168,7 +168,7 @@ describe('Appointment Controller', () => {
                 const mockIsSlimToSatisfyParameter = 'true';
 
                 await appointmentController.getAll(mockUserToSatisfyParameter,
-                    mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, null, null, res);
+                    mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, res);
 
                 expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
                 expect(res.status).toBeCalledTimes(1);
@@ -191,7 +191,7 @@ describe('Appointment Controller', () => {
 
                 await appointmentController
                     .getAll(mockUserToSatisfyParameter,
-                        mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, null, null, res)
+                        mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, res)
                     .then(() => {
                         throw new Error('I have failed you, Anakin.');
                     }).catch(err => {
