@@ -9,10 +9,9 @@ import {
     WebSocketServer,
     WsResponse
 } from '@nestjs/websockets';
-import {Logger, UseGuards} from '@nestjs/common';
+import {Logger} from '@nestjs/common';
 import {Server, Socket} from 'socket.io';
 import {Appointment} from './appointment.entity';
-import {WsJwtGuard} from '../../auth/jwt-ws-strategy';
 
 export interface GatewayMetadataExtended extends GatewayMetadata {
     handlePreflightRequest: (req, res) => void;
@@ -46,7 +45,6 @@ export class AppointmentGateway implements OnGatewayInit, OnGatewayConnection, O
         this.logger.log('Initialized');
     }
 
-    @UseGuards(WsJwtGuard)
     handleConnection(@ConnectedSocket() client: Socket, ...args: any[]): any {
         this.logger.log(`Client connected: ${client.id}`);
     }
@@ -55,7 +53,6 @@ export class AppointmentGateway implements OnGatewayInit, OnGatewayConnection, O
         this.logger.log('Client disconnected: %s', client.id);
     }
 
-    @UseGuards(WsJwtGuard)
     @SubscribeMessage('subscribe-appointment')
     handleSubscription(client: Socket, data: any): WsResponse<string> {
         client.leaveAll();
