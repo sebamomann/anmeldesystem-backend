@@ -1,4 +1,5 @@
 import {EmailChange} from '../modules/user/email-change/email-change.entity';
+import {User} from '../modules/user/user.entity';
 
 export class UserUtil {
     /**
@@ -18,5 +19,12 @@ export class UserUtil {
             (fEmailChange.iat.getTime()) + (24 * 60 * 60 * 1000) > Date.now()
             && fEmailChange.oldMail != 'invalid'
             && !fEmailChange.used);
+    }
+
+    public static stripUserMin(user: User) {
+        return (({name, username}) => ({
+            name, username,
+        }))
+        (user);
     }
 }

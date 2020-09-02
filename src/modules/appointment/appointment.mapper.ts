@@ -2,6 +2,7 @@ import {User} from '../user/user.entity';
 import {Appointment} from './appointment.entity';
 import {Enrollment} from '../enrollment/enrollment.entity';
 import {AppointmentUtil} from './appointment.util';
+import {UserUtil} from '../../util/user.util';
 
 export class AppointmentMapper {
 
@@ -108,7 +109,11 @@ export class AppointmentMapper {
     public static enrolledByUser(enrollments: Enrollment[]) {
         return enrollments.map(mEnrollment => {
             mEnrollment.createdByUser = mEnrollment.creator != null;
-            delete mEnrollment.creator;
+            if (mEnrollment.createdByUser) {
+                const mUser: any = UserUtil.stripUserMin(mEnrollment.creator); // no inline due to type conversion
+                mEnrollment.creator = mUser;
+                delete mEnrollment.name;
+            }
             return mEnrollment;
         });
     }
@@ -123,10 +128,7 @@ export class AppointmentMapper {
 
     private static stripAdministrators(admins: User[]) {
         return admins.map(mAdmin => {
-            return (({name, username,}) => ({
-                name, username,
-            }))
-            (mAdmin);
+            return UserUtil.stripUserMin(mAdmin);
         });
     }
 }

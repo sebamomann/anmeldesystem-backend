@@ -58,7 +58,6 @@ export class AppointmentService {
             where: {
                 link: link
             },
-            relations: ['administrators', 'creator'] // might not be needed anymore
         });
 
         if (appointment === undefined) {

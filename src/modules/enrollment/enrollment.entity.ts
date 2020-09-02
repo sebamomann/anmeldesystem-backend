@@ -22,12 +22,12 @@ import {Exclude} from 'class-transformer';
 import {Mail} from './mail/mail.entity';
 
 @Entity()
-@Index('index_unique_name_appointment', ['name', 'appointment'], {unique: true}) // first style
+@Index('index_unique_name_appointment', ['name', 'appointment', 'creator'], {unique: true}) // first style
 export class Enrollment {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({nullable: false})
+    @Column({nullable: true})
     name: string;
 
     @Column({nullable: true})
@@ -68,7 +68,10 @@ export class Enrollment {
 
     @ManyToOne(type => User,
         user => user.enrollments,
-        {onDelete: 'CASCADE'})
+        {
+            onDelete: 'CASCADE',
+            eager: true
+        })
     @JoinColumn()
     creator: User;
 

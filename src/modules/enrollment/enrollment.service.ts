@@ -72,8 +72,14 @@ export class EnrollmentService {
         const appointment_referenced = await this.appointmentService
             .findByLink(enrollment_raw.appointment.link);
 
-        if (await this._existsByName(enrollment_raw.name, appointment_referenced)) {
-            throw new DuplicateValueException(null, null, ['name']);
+        // TODO
+        // VALIDATE IF IS VALID MAIL
+        if (enrollment_raw.editMail) {
+            if (await this._existsByName(enrollment_raw.name, appointment_referenced)) {
+                throw new DuplicateValueException(null, null, ['name']);
+            }
+        } else {
+            enrollment_raw.name = null;
         }
 
         const enrollment_output = await EnrollmentUtil.parseEnrollmentObject(enrollment_raw, appointment_referenced);
