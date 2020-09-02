@@ -79,6 +79,10 @@ export class EnrollmentService {
                 throw new DuplicateValueException(null, null, ['name']);
             }
         } else {
+            if (await this._existsByCreator(user, appointment_referenced)) {
+                throw new DuplicateValueException(null, null, ['creator']);
+            }
+
             enrollment_raw.name = null;
         }
 
@@ -251,6 +255,23 @@ export class EnrollmentService {
         return enrollment;
     }
 
+    private async _findByCreatorAndAppointment(creator: User, appointment: Appointment) {
+        let enrollment = await this.enrollmentRepository.findOne({
+            where: {
+                creator: creator,
+                appointment: {
+                    id: appointment.id
+                }
+            }
+        });
+
+        if (enrollment === undefined) {
+            throw new EntityNotFoundException(null, null, 'enrollment');
+        }
+
+        return enrollment;
+    }
+
     private async _storeDriverAndPassengerObjects(enrollment: any, appointment: Appointment) {
         /* Needed due to malicious comparison fo tinyint to boolean */
         if (!!appointment.driverAddition === true) {
@@ -364,6 +385,16 @@ export class EnrollmentService {
     // noinspection JSUnusedLocalSymbols,JSMethodCanBeStatic // dynamic function call
     private async _updateAdditions(enrollment_to_change_values: any, enrollment_referenced: Enrollment) {
         EnrollmentUtil.filterValidAdditions(enrollment_to_change_values, enrollment_referenced.appointment);
+    }
+
+    private _existsByCreator(user: User, appointment: Appointment) {
+        return this._findByCreatorAndAppointment(user, appointment)
+            .then(() => {
+                return true;
+            })
+            .catch(() => {
+                return false;
+            });
     }
 }
 
