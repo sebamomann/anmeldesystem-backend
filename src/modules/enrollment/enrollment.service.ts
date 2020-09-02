@@ -328,10 +328,12 @@ export class EnrollmentService {
 
     // noinspection JSUnusedLocalSymbols // dynamic function call
     private async _updateName(enrollment_to_change_values: any, enrollment_referenced: Enrollment) {
-        if (await this._existsByName(enrollment_to_change_values.name, enrollment_referenced.appointment)) {
-            throw new DuplicateValueException('DUPLICATE_ENTRY',
-                'Following values are already taken',
-                ['name']);
+        if (!enrollment_referenced.creator) {
+            if (await this._existsByName(enrollment_to_change_values.name, enrollment_referenced.appointment)) {
+                throw new DuplicateValueException('DUPLICATE_ENTRY',
+                    'Following values are already taken',
+                    ['name']);
+            }
         }
 
         return enrollment_to_change_values.name;
