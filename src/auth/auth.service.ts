@@ -51,7 +51,7 @@ export class AuthService {
     }
 
     public addJwtToObject(user: User) {
-        /* change here for more data */
+        /* change here for more data | and in jwt strategy */
         const payload = {sub: user.id, mail: user.mail, username: user.username, name: user.name};
         user.token = this.jwtService.sign(payload);
 
