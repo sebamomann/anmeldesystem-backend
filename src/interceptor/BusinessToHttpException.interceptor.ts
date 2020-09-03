@@ -7,7 +7,8 @@ import {
     Injectable,
     InternalServerErrorException,
     NestInterceptor,
-    NotFoundException
+    NotFoundException,
+    UnprocessableEntityException
 } from '@nestjs/common';
 import {Observable} from 'rxjs';
 import {catchError} from 'rxjs/operators';
@@ -21,6 +22,7 @@ import {EntityGoneException} from '../exceptions/EntityGoneException';
 import {InvalidTokenException} from '../exceptions/InvalidTokenException';
 import {ExpiredTokenException} from '../exceptions/ExpiredTokenException';
 import {AlreadyUsedException} from '../exceptions/AlreadyUsedException';
+import {InvalidAttributesException} from '../exceptions/InvalidAttributesException';
 
 @Injectable()
 export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
@@ -42,6 +44,8 @@ export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
                             throw new ForbiddenException(exception.parse());
                         } else if (exception instanceof EntityGoneException) {
                             throw new GoneException(exception.parse());
+                        } else if (exception instanceof InvalidAttributesException) {
+                            throw new UnprocessableEntityException(exception.parse());
                         } else {
                             let error: any = {};
 

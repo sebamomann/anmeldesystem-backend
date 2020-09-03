@@ -19,10 +19,11 @@ import {DomainUtil} from '../../util/domain.util';
 import {EnrollmentUtil} from './enrollment.util';
 import {MissingAuthenticationException} from '../../exceptions/MissingAuthenticationException';
 import {StringUtil} from '../../util/string.util';
+import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
+import {EnrollmentMapper} from './enrollment.mapper';
 
 const crypto = require('crypto');
 const logger = require('../../logger');
-const enrollmentMapper = require('./enrollment.mapper');
 
 @Injectable()
 export class EnrollmentService {
@@ -101,7 +102,7 @@ export class EnrollmentService {
 
         this.appointmentGateway.appointmentUpdated(enrollment_raw.appointment);
         // noinspection UnnecessaryLocalVariableJS
-        const output = enrollmentMapper.basic(savedEnrollment);
+        const output = EnrollmentMapper.basic(savedEnrollment);
 
         return output;
     }
@@ -149,7 +150,7 @@ export class EnrollmentService {
 
         let savedEnrollment = await this.enrollmentRepository.save(enrollment_updated);
 
-        savedEnrollment = enrollmentMapper.basic(savedEnrollment);
+        savedEnrollment = EnrollmentMapper.basic(savedEnrollment);
 
         this.appointmentGateway.appointmentUpdated(enrollment_updated.appointment);
 
@@ -314,8 +315,7 @@ export class EnrollmentService {
     }
 
     private async _handleEnrollmentAuthentication(enrollment_raw: Enrollment, enrollment_output: Enrollment, user: User) {
-        if (enrollment_raw.editMail != null &&
-            enrollment_raw.editMail != '') {
+        if (enrollment_raw.editMail) {
             await this._setMailAttribute(enrollment_raw, enrollment_output);
         } else if (user !== undefined) {
             enrollment_output.creator = user;
@@ -334,9 +334,13 @@ export class EnrollmentService {
                     'Following values are already taken',
                     ['name']);
             }
-        }
 
-        return enrollment_to_change_values.name;
+            return enrollment_to_change_values.name;
+        } else {
+            throw new InvalidAttributesException('INVALID_ATTRIBUTE',
+                'Following attributes are not allowed to be updated',
+                ['name']);
+        }
     }
 
     // noinspection JSUnusedLocalSymbols // dynamic function call

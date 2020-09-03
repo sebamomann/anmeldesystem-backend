@@ -1,8 +1,12 @@
+import {UserUtil} from '../../util/user.util';
+import {Enrollment} from './enrollment.entity';
+
 const passengerMapper = require('./passenger/passenger.mapper');
 const driverMapper = require('./driver/driver.mapper');
 
-module.exports = {
-    basic: function(_enrollment) {
+export class EnrollmentMapper {
+
+    public static basic(_enrollment) {
         let enrollment;
 
         enrollment = (({
@@ -11,6 +15,7 @@ module.exports = {
                            comment,
                            additions, // TODO REMOVE NAMES OF ADDITIONS
                            comments,
+                           creator,
                            iat
                        }) => ({
             id,
@@ -18,6 +23,7 @@ module.exports = {
             comment,
             additions,
             comments,
+            creator,
             iat
         }))
         (_enrollment);
@@ -39,6 +45,20 @@ module.exports = {
             enrollment.passenger = passengerMapper.basic(_enrollment.passenger);
         }
 
+        enrollment = this.stripCreator(enrollment);
+
         return enrollment;
-    },
-};
+    }
+
+    public static stripCreator(enrollment: Enrollment): Enrollment {
+        enrollment.createdByUser = enrollment.creator != null;
+        if (enrollment.createdByUser) {
+            // noinspection UnnecessaryLocalVariableJS
+            const mUser: any = UserUtil.stripUserMin(enrollment.creator); // no inline due to type conversion
+            enrollment.creator = mUser;
+            delete enrollment.name;
+        }
+
+        return enrollment;
+    }
+}

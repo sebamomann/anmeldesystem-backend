@@ -30,6 +30,7 @@ import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {AppointmentGateway} from '../appointment/appointment.gateway';
 import {Session} from '../user/session.entity';
 import {MissingAuthenticationException} from '../../exceptions/MissingAuthenticationException';
+import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
 
 const crypto = require('crypto');
 
@@ -448,6 +449,32 @@ describe('EnrollmentService', () => {
                 __given_enrollment.name = 'existingName';
                 __given_enrollment.appointment = new Appointment();
                 __given_enrollment.appointment.link = 'link';
+                __given_enrollment.editMail = 'mail@example.com';
+                const __given_user = undefined;
+                const __given_domain = 'example.com/{{0}}/{{1}}';
+
+                const __existing_appointment = __given_enrollment.appointment;
+                const __existing_enrollment = new Enrollment();
+                __existing_enrollment.name = __given_enrollment.name;
+
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment); // cant find appointment with specific link
+
+                try {
+                    await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+                    done.fail(new Error('I have failed you, Anakin. Should have gotten an DuplicateValueException'));
+                } catch (e) {
+                    expect(e).toBeInstanceOf(DuplicateValueException);
+                    expect(e.data).toEqual(['name']);
+                    done();
+                }
+            });
+
+            it('* already enrolled (logged in)', async (done) => {
+                const __given_enrollment = new Enrollment();
+                __given_enrollment.name = 'existingName';
+                __given_enrollment.appointment = new Appointment();
+                __given_enrollment.appointment.link = 'link';
                 const __given_user = new User();
                 __given_user.username = 'username';
                 const __given_domain = 'example.com/{{0}}/{{1}}';
@@ -464,7 +491,7 @@ describe('EnrollmentService', () => {
                     done.fail(new Error('I have failed you, Anakin. Should have gotten an DuplicateValueException'));
                 } catch (e) {
                     expect(e).toBeInstanceOf(DuplicateValueException);
-                    expect(e.data).toEqual(['name']);
+                    expect(e.data).toEqual(['creator']);
                     done();
                 }
             });
@@ -557,7 +584,7 @@ describe('EnrollmentService', () => {
 
     describe('* update enrollment', () => {
         describe('* successful should return updated entity', () => {
-            it('* update name', async () => {
+            it('* update name (normal enrollment, permission via appointment creator)', async () => {
                 const __given_enrollment_change_data = {
                     name: 'newName'
                 };
@@ -568,9 +595,8 @@ describe('EnrollmentService', () => {
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
                 __existing_enrollment.name = 'name';
-                __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.creator = new User();
+                __existing_enrollment.appointment.creator = __given_user;
                 __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
@@ -587,7 +613,6 @@ describe('EnrollmentService', () => {
                 expect(__actual.name).toBe(__expected);
 
             });
-
 
             it('* update comment', async () => {
                 const __given_enrollment_change_data = {
@@ -1047,41 +1072,79 @@ describe('EnrollmentService', () => {
                 }
             });
 
-            it('* duplicate name', async (done) => {
-                const __given_enrollment_change_data = {
-                    name: 'existing_name'
-                };
-                const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-                const __given_user = new User();
-                __given_user.username = 'username';
+            describe('* duplicate name', () => {
+                it('* normal enrollment (permission via appointment creator)', async (done) => {
+                    const __given_enrollment_change_data = {
+                        name: 'existing_name'
+                    };
+                    const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
+                    const __given_user = new User();
+                    __given_user.username = 'username';
 
-                const __existing_enrollment = new Enrollment();
-                __existing_enrollment.id = __given_enrollment_id;
-                __existing_enrollment.name = 'name';
-                __existing_enrollment.creator = __given_user;
-                __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                    const __existing_enrollment = new Enrollment();
+                    __existing_enrollment.id = __given_enrollment_id;
+                    __existing_enrollment.name = 'name';
+                    __existing_enrollment.appointment = new Appointment();
+                    __existing_enrollment.appointment.creator = __given_user;
+                    __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
-                const __existing_enrollment_by_name = new Enrollment();
+                    const __existing_enrollment_by_name = new Enrollment();
 
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment_by_name);
-                enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
+                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment_by_name);
+                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
-                jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
-                    return;
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                        return;
+                    });
+
+                    try {
+                        await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
+                        done.fail(new Error('I have failed you, Anakin. Should have gotten an DuplicateValueException'));
+                    } catch (e) {
+                        expect(e).toBeInstanceOf(DuplicateValueException);
+                        expect(e.data).toEqual(['name']);
+                        done();
+                    }
+
                 });
 
-                try {
-                    await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
-                    done.fail(new Error('I have failed you, Anakin. Should have gotten an DuplicateValueException'));
-                } catch (e) {
-                    expect(e).toBeInstanceOf(DuplicateValueException);
-                    expect(e.data).toEqual(['name']);
-                    done();
-                }
+                it('* creator enrollment - name update not allowed / possible', async (done) => {
+                    const __given_enrollment_change_data = {
+                        name: 'existing_name'
+                    };
+                    const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
+                    const __given_user = new User();
+                    __given_user.username = 'username';
 
+                    const __existing_enrollment = new Enrollment();
+                    __existing_enrollment.id = __given_enrollment_id;
+                    __existing_enrollment.name = 'name';
+                    __existing_enrollment.creator = __given_user;
+                    __existing_enrollment.appointment = new Appointment();
+                    __existing_enrollment.appointment.creator = new User();
+                    __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+
+                    const __existing_enrollment_by_name = new Enrollment();
+
+                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
+                    enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment_by_name);
+                    enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
+
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                        return;
+                    });
+
+                    try {
+                        await enrollmentService.update(__given_enrollment_change_data, __given_enrollment_id, __given_user);
+                        done.fail(new Error('I have failed you, Anakin. Should have gotten an InvalidAttributesException'));
+                    } catch (e) {
+                        expect(e).toBeInstanceOf(InvalidAttributesException);
+                        expect(e.data).toEqual(['name']);
+                        done();
+                    }
+
+                });
             });
 
             it('* invalid addition provided', async (done) => {
