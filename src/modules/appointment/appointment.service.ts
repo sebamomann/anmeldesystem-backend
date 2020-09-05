@@ -95,18 +95,19 @@ export class AppointmentService {
     }
 
     /**
-     * Fetch all Appointments, the user is allowed to see.
-     * This includes being the creator, an administrator or being enrolled into this appoinment.
+     * Fetch all !!active!! Appointments, the user is allowed to see.
+     * This includes being the creator, an administrator or being enrolled into this Appointment.
      * Additionally, pinned appointments get returned. Further an array of links can be passed
      * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
      * <br />
-     * When passing a link with this request, the corresponding Appointment gets marked as "PINNED" <br />
+     * When passing a link with this request, the corresponding Appointment gets marked as "PINNED"
+     * <br />
      * <br />
      * All appointments include a reference. See {@link parseReferences} for more information
      *
-     * @param user Requester (if existing)
-     * @param params All query parameters to parse pinned links
-     * @param slim Delete information overhead. See {@link AppointmentMapper.slim} for more information.
+     * @param user      Requester (if existing)
+     * @param params    All query parameters to parse pinned links
+     * @param slim      Delete information overhead. See {@link AppointmentMapper.slim} for more information.
      *
      * @returns Appointment[]
      */
@@ -119,15 +120,35 @@ export class AppointmentService {
         return appointments;
     }
 
+    /**
+     * Fetch all Appointments from the past, the user is allowed to see.
+     * This includes being the creator, an administrator or being enrolled into this Appointment.
+     * Additionally, pinned appointments get returned. Further an array of links can be passed
+     * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
+     * <br />
+     * When passing a link with this request, the corresponding Appointment gets marked as "PINNED"
+     * <br />
+     * <br />
+     * All appointments include a reference. See {@link parseReferences} for more information
+     *
+     * @param user      Requester (if existing)
+     * @param params    All query parameters to parse pinned links
+     * @param _slim     Delete information overhead. See {@link AppointmentMapper.slim} for more information.
+     * @param before    Date (string) for pagination. Return elements that took place before this particular date
+     * @param limit     Number of elements to return
+     *
+     * @returns Appointment[]
+     */
     public async getAllArchive(user: User, params: any, _slim: boolean, before: string, limit: string): Promise<Appointment[]> {
-        let pins = AppointmentUtil.parsePins(params);
+        let pins: any[] = AppointmentUtil.parsePins(params);
 
         let _before;
         const date = new Date(before);
-        if (isNaN(date.getTime())) {
-            _before = new Date();
-        } else {
+        try {
+            date.getTime();
             _before = date;
+        } catch (e) {
+            _before = new Date();
         }
 
         let appointments = await this.getAppointments(user, pins, _before, limit);

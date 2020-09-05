@@ -1647,7 +1647,61 @@ describe('AppointmentService', () => {
                 });
             });
         });
-    });// cases like creator, admin enrollment ... not needed to test, because they are recieved by database
+    });// cases like creator, admin enrollment ... not needed to test, because they are received by database
+
+    describe('* get Appointments Archive', () => { // only test parsing of additional parameters // acutally same as getAppointments
+        describe('* successful should return array of entities', () => {
+            it('* normal', async () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_permissions = {};
+                const __given_slim = false;
+                const __given_before = '01/09/2020 01:24:26';
+                const __given_limit = '1';
+
+                const __existing_appointment = new Appointment();
+                __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';
+                __existing_appointment.creator = __given_user;
+                __existing_appointment.enrollments = [];
+
+                jest.spyOn(appointmentService as any, 'getAppointments')
+                    .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
+
+                const actual = await appointmentService.getAllArchive(__given_user, __given_permissions, __given_slim, __given_before, __given_limit);
+                expect(actual).toHaveLength(1);
+
+                expect((appointmentService as any).getAppointments)
+                    .toHaveBeenCalledWith(__given_user, [], new Date(__given_before), __given_limit);
+            });
+
+            it('* invalid date -> convert to current', async () => {
+                const __given_user = new User();
+                __given_user.username = 'username';
+                const __given_permissions = {};
+                const __given_slim = false;
+                const __given_before = '';
+                const __given_limit = '1';
+
+                const __existing_appointment = new Appointment();
+                __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';
+                __existing_appointment.creator = __given_user;
+                __existing_appointment.enrollments = [];
+
+                const date = new Date();
+                jest.spyOn(global, 'Date').mockImplementationOnce(() => undefined);
+                jest.spyOn(global, 'Date').mockImplementationOnce(() => date as any);
+
+                jest.spyOn(appointmentService as any, 'getAppointments')
+                    .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
+
+                const actual = await appointmentService.getAllArchive(__given_user, __given_permissions, __given_slim, __given_before, __given_limit);
+                expect(actual).toHaveLength(1);
+
+                expect((appointmentService as any).getAppointments)
+                    .toHaveBeenCalledWith(__given_user, [], date, __given_limit);
+            });
+        });
+    });
 
     afterEach(() => {
         jest.restoreAllMocks();
