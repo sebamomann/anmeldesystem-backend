@@ -154,49 +154,104 @@ describe('Appointment Controller', () => {
     });
 
     describe('* find appointments in relation to user', () => {
-        describe('* successful should return array of appointment entities with 200 status code', () => {
-            it('successful request', async () => {
-                const result = [new Appointment()];
+        describe('* active appointments', () => {
+            describe('* successful should return array of appointment entities with 200 status code', () => {
+                it('successful request', async () => {
+                    const result = [new Appointment()];
 
-                jest.spyOn(appointmentService, 'getAll')
-                    .mockImplementation(async (): Promise<Appointment[]> => Promise.resolve(result));
+                    jest.spyOn(appointmentService, 'getAll')
+                        .mockImplementation(async (): Promise<Appointment[]> => Promise.resolve(result));
 
-                const res = mockResponse();
+                    const res = mockResponse();
 
-                const mockUserToSatisfyParameter = new User();
-                const mockQueryParameterToSatisfyParameter = {};
-                const mockIsSlimToSatisfyParameter = 'true';
+                    const mockUserToSatisfyParameter = new User();
+                    const mockQueryParameterToSatisfyParameter = {};
+                    const mockIsSlimToSatisfyParameter = 'true';
 
-                await appointmentController.getAll(mockUserToSatisfyParameter,
-                    mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, res);
+                    await appointmentController.getAll(mockUserToSatisfyParameter,
+                        mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, res);
 
-                expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
-                expect(res.status).toBeCalledTimes(1);
-                expect(res.json).toHaveBeenCalledWith(result);
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+                    expect(res.status).toBeCalledTimes(1);
+                    expect(res.json).toHaveBeenCalledWith(result);
+                });
+            });
+
+            describe('* failure should return error', () => {
+                it('undefined error has occurred', async () => {
+                    const result = new Error();
+
+                    jest.spyOn(appointmentService, 'getAll')
+                        .mockImplementation(async (): Promise<Appointment[]> => Promise.reject(result));
+
+                    const res = mockResponse();
+
+                    const mockUserToSatisfyParameter = new User();
+                    const mockQueryParameterToSatisfyParameter = {};
+                    const mockIsSlimToSatisfyParameter = 'true';
+
+                    await appointmentController
+                        .getAll(mockUserToSatisfyParameter,
+                            mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
+                });
             });
         });
 
-        describe('* failure should return error', () => {
-            it('undefined error has occurred', async () => {
-                const result = new Error();
+        describe('* archive appointments', () => {
+            describe('* successful should return array of appointment entities with 200 status code', () => {
+                it('successful request', async () => {
+                    const result = [new Appointment()];
 
-                jest.spyOn(appointmentService, 'getAll')
-                    .mockImplementation(async (): Promise<Appointment[]> => Promise.reject(result));
+                    jest.spyOn(appointmentService, 'getAllArchive')
+                        .mockImplementation(async (): Promise<Appointment[]> => Promise.resolve(result));
 
-                const res = mockResponse();
+                    const res = mockResponse();
 
-                const mockUserToSatisfyParameter = new User();
-                const mockQueryParameterToSatisfyParameter = {};
-                const mockIsSlimToSatisfyParameter = 'true';
+                    const mockUserToSatisfyParameter = new User();
+                    const mockQueryParameterToSatisfyParameter = {};
+                    const mockIsSlimToSatisfyParameter = 'true';
+                    const mockBeforeToSatisfyParameter = '01/09/2020 01:24:26';
+                    const mockLimitToSatisfyParameter = 1;
 
-                await appointmentController
-                    .getAll(mockUserToSatisfyParameter,
-                        mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, res)
-                    .then(() => {
-                        throw new Error('I have failed you, Anakin.');
-                    }).catch(err => {
-                        expect(err).toBe(result);
-                    });
+                    await appointmentController.getAllArchive(mockUserToSatisfyParameter,
+                        mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, mockBeforeToSatisfyParameter, mockLimitToSatisfyParameter,
+                        res);
+
+                    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+                    expect(res.status).toBeCalledTimes(1);
+                    expect(res.json).toHaveBeenCalledWith(result);
+                });
+            });
+
+            describe('* failure should return error', () => {
+                it('undefined error has occurred', async () => {
+                    const result = new Error();
+
+                    jest.spyOn(appointmentService, 'getAllArchive')
+                        .mockImplementation(async (): Promise<Appointment[]> => Promise.reject(result));
+
+                    const res = mockResponse();
+
+                    const mockUserToSatisfyParameter = new User();
+                    const mockQueryParameterToSatisfyParameter = {};
+                    const mockIsSlimToSatisfyParameter = 'true';
+                    const mockBeforeToSatisfyParameter = '01/09/2020 01:24:26';
+                    const mockLimitToSatisfyParameter = 1;
+
+                    await appointmentController.getAllArchive(mockUserToSatisfyParameter,
+                        mockQueryParameterToSatisfyParameter, mockIsSlimToSatisfyParameter, mockBeforeToSatisfyParameter, mockLimitToSatisfyParameter,
+                        res)
+                        .then(() => {
+                            throw new Error('I have failed you, Anakin.');
+                        }).catch(err => {
+                            expect(err).toBe(result);
+                        });
+                });
             });
         });
     });

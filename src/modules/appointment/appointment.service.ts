@@ -139,7 +139,7 @@ export class AppointmentService {
      *
      * @returns Appointment[]
      */
-    public async getAllArchive(user: User, params: any, _slim: boolean, before: string, limit: string): Promise<Appointment[]> {
+    public async getAllArchive(user: User, params: any, _slim: boolean, before: string, limit: number): Promise<Appointment[]> {
         let pins: any[] = AppointmentUtil.parsePins(params);
 
         let _before;

@@ -42,13 +42,13 @@ export class AppointmentController {
            @Query('slim') slim: string,
            @Res() res: Response,) {
         let _slim = slim === 'true';
+
         return this.appointmentService
             .getAll(user, params, _slim)
             .then(result => {
                 res.status(HttpStatus.OK).json(result);
             })
             .catch(err => {
-                console.log(err);
                 throw err;
             });
     }
@@ -60,16 +60,16 @@ export class AppointmentController {
                   @Query() params: any,
                   @Query('slim') slim: string,
                   @Query('before') before: string,
-                  @Query('limit') limit: string,
+                  @Query('limit') limit: number,
                   @Res() res: Response,) {
         let _slim = slim === 'true';
+
         return this.appointmentService
             .getAllArchive(user, params, _slim, before, limit)
             .then(result => {
                 res.status(HttpStatus.OK).json(result);
             })
             .catch(err => {
-                console.log(err);
                 throw err;
             });
     }
