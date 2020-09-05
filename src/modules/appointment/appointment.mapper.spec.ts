@@ -22,7 +22,7 @@ import {AppointmentMapper} from './appointment.mapper';
 
 const crypto = require('crypto');
 
-describe('AppointmentService', () => {
+describe('AppointmentMapper', () => {
     let module: TestingModule;
 
     let appointmentService: AppointmentService;

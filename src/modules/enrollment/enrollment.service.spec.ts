@@ -962,7 +962,6 @@ describe('EnrollmentService', () => {
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
-                __existing_enrollment.name = 'name';
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.additions = [__existing_addition];
                 __existing_enrollment.appointment = new Appointment();
@@ -991,6 +990,7 @@ describe('EnrollmentService', () => {
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_user = new User();
                 __given_user.username = 'username';
+                __given_user.name = 'name';
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
@@ -1010,7 +1010,10 @@ describe('EnrollmentService', () => {
 
                 const __expected = {
                     id: __existing_enrollment.id,
-                    name: __existing_enrollment.name,
+                    creator: {
+                        username: __given_user.username,
+                        name: __given_user.name
+                    },
                     createdByUser: true
                 };
 

@@ -6,7 +6,6 @@ import {UserUtil} from '../../util/user.util';
 import {EnrollmentMapper} from '../enrollment/enrollment.mapper';
 
 export class AppointmentMapper {
-
     public static basic(appointment) {
         if (appointment.administrators !== undefined) {
             appointment.administrators = AppointmentMapper.stripAdministrators(appointment.administrators);
@@ -109,7 +108,7 @@ export class AppointmentMapper {
 
     public static enrolledByUser(enrollments: Enrollment[]) {
         return enrollments.map(mEnrollment => {
-            EnrollmentMapper.stripCreator(mEnrollment);
+            return EnrollmentMapper.stripCreator(mEnrollment);
         });
     }
 
