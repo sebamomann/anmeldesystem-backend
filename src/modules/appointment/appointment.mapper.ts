@@ -107,9 +107,7 @@ export class AppointmentMapper {
     }
 
     public static enrolledByUser(enrollments: Enrollment[]) {
-        return enrollments.map(mEnrollment => {
-            return EnrollmentMapper.stripCreator(mEnrollment);
-        });
+        return enrollments.map(mEnrollment => EnrollmentMapper.stripCreator(mEnrollment));
     }
 
     public static sortAdditions(appointment: Appointment) {
@@ -121,8 +119,6 @@ export class AppointmentMapper {
     }
 
     private static stripAdministrators(admins: User[]) {
-        return admins.map(mAdmin => {
-            return UserUtil.stripUserMin(mAdmin);
-        });
+        return admins.map(mAdmin => UserUtil.stripUserMin(mAdmin));
     }
 }

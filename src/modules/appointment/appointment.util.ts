@@ -84,7 +84,8 @@ export class AppointmentUtil {
      *     <li>PINNED</li>
      * </ol>
      * Note that a permission granted via passing a link is also marked as "PINNED".<br/>
-     * Multiple correlations are possible. Two references of the same type are not possible
+     * Multiple correlations are possible. Two references of the same type are not possible.<br/>
+     * For the "Enrolled" reference to happen, only the ID is needed. No token validation happening.
      *
      * @param user Requester (if existing) to correlate
      * @param appointment Appointment to correlate user with

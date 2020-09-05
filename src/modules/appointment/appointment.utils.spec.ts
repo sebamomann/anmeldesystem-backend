@@ -272,27 +272,79 @@ describe('AppointmentUtil', () => {
                 expect(__actual).toEqual(__expected);
             });
 
-            it('* is enrolled', async () => {
-                const __given_user = new User();
-                __given_user.username = 'username';
+            describe('* is enrolled', () => {
+                it('* by account', async () => {
+                    const __given_user = new User();
+                    __given_user.username = 'username';
 
-                const __given_pins = [];
+                    const __given_pins = [];
 
-                const __existing_enrollment = new Enrollment();
-                __existing_enrollment.creator = __given_user;
+                    const __existing_enrollment = new Enrollment();
+                    __existing_enrollment.creator = __given_user;
 
-                const __existing_creator = new User();
-                __existing_creator.username = 'creator';
+                    const __existing_creator = new User();
+                    __existing_creator.username = 'creator';
 
-                const __given_appointment = new Appointment();
-                __given_appointment.id = '1';
-                __given_appointment.creator = __existing_creator;
-                __given_appointment.enrollments = [__existing_enrollment];
+                    const __given_appointment = new Appointment();
+                    __given_appointment.id = '1';
+                    __given_appointment.creator = __existing_creator;
+                    __given_appointment.enrollments = [__existing_enrollment];
 
-                const __expected = ['ENROLLED'];
+                    const __expected = ['ENROLLED'];
 
-                const actual = AppointmentUtil.parseReferences(__given_user, __given_appointment, __given_pins);
-                expect(actual).toEqual(__expected);
+                    const actual = AppointmentUtil.parseReferences(__given_user, __given_appointment, __given_pins);
+                    expect(actual).toEqual(__expected);
+                });
+
+                describe('* by parameter', () => {
+                    it('* normal parameter', async () => {
+                        const __given_user = new User();
+                        __given_user.username = 'username';
+
+                        const __given_pins = [];
+                        const __given_permissions = {perm1: '996fe741-1142-4899-96fd-767a577f5268'};
+
+                        const __existing_enrollment = new Enrollment();
+                        __existing_enrollment.id = '996fe741-1142-4899-96fd-767a577f5268';
+
+                        const __existing_creator = new User();
+                        __existing_creator.username = 'creator';
+
+                        const __given_appointment = new Appointment();
+                        __given_appointment.id = '1';
+                        __given_appointment.creator = __existing_creator;
+                        __given_appointment.enrollments = [__existing_enrollment];
+
+                        const __expected = ['ENROLLED'];
+
+                        const actual = AppointmentUtil.parseReferences(__given_user, __given_appointment, __given_pins, __given_permissions);
+                        expect(actual).toEqual(__expected);
+                    });
+
+                    it('* including invalid attribute', async () => {
+                        const __given_user = new User();
+                        __given_user.username = 'username';
+
+                        const __given_pins = [];
+                        const __given_permissions = {perm1: '996fe741-1142-4899-96fd-767a577f5268', invalid: 'attribute'};
+
+                        const __existing_enrollment = new Enrollment();
+                        __existing_enrollment.id = '996fe741-1142-4899-96fd-767a577f5268';
+
+                        const __existing_creator = new User();
+                        __existing_creator.username = 'creator';
+
+                        const __given_appointment = new Appointment();
+                        __given_appointment.id = '1';
+                        __given_appointment.creator = __existing_creator;
+                        __given_appointment.enrollments = [__existing_enrollment];
+
+                        const __expected = ['ENROLLED'];
+
+                        const actual = AppointmentUtil.parseReferences(__given_user, __given_appointment, __given_pins, __given_permissions);
+                        expect(actual).toEqual(__expected);
+                    });
+                });
             });
 
             describe('* is pinned', () => {
@@ -357,7 +409,7 @@ describe('AppointmentUtil', () => {
             });
 
             describe('* is creator and pinned', () => {
-                it('* as account', async () => {
+                it('* pinned by account', async () => {
                     const __given_user = new User();
                     __given_user.username = 'username';
 
@@ -373,7 +425,7 @@ describe('AppointmentUtil', () => {
                     expect(__actual).toEqual(__expected);
                 });
 
-                it('* by parameter', async () => {
+                it('* pinned by parameter', async () => {
                     const __given_user = new User();
                     __given_user.username = 'username';
 
