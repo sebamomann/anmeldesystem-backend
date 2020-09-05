@@ -369,6 +369,42 @@ describe('AppointmentUtil', () => {
             expect(__actual).toEqual(__expected);
         });
 
+        it('* return object if changes apply - only change seats', async () => {
+            const __given_driver_to_be = new Driver();
+            __given_driver_to_be.seats = 2;
+
+            const __given_driver_existing = new Driver();
+            __given_driver_existing.service = 5;
+            __given_driver_existing.seats = 1;
+
+            const __expected = {
+                ...__given_driver_to_be,
+                service: __given_driver_existing.service
+            };
+
+            const __actual = EnrollmentUtil.handleDriverRelation(__given_driver_to_be, __given_driver_existing);
+
+            expect(__actual).toEqual(__expected);
+        });
+
+        it('* return object if changes apply - only change service', async () => {
+            const __given_driver_to_be = new Driver();
+            __given_driver_to_be.service = 4;
+
+            const __given_driver_existing = new Driver();
+            __given_driver_existing.service = 5;
+            __given_driver_existing.seats = 1;
+
+            const __expected = {
+                ...__given_driver_to_be,
+                seats: __given_driver_existing.seats
+            };
+
+            const __actual = EnrollmentUtil.handleDriverRelation(__given_driver_to_be, __given_driver_existing);
+
+            expect(__actual).toEqual(__expected);
+        });
+
         it('* current object undefined', async () => {
             const __given_driver_to_be = new Driver();
             __given_driver_to_be.service = 4;

@@ -84,7 +84,13 @@ export class EnrollmentUtil {
             _driver_original = JSON.parse(JSON.stringify(currentDriverObject));
         }
 
-        _driver.seats = driverToBe.seats ? driverToBe.seats : _driver_original.seats; // TODO CAN BE UNDEFINED RN -> CNAT BE IRL
+        // TODO
+        // When change from passenger to driver
+        // then only providing seats or service
+        // the counter part WILL be undefined
+        // thats bad
+
+        _driver.seats = driverToBe.seats ? driverToBe.seats : _driver_original.seats; // happens if user just updated the seats or service
         _driver.service = driverToBe.service ? driverToBe.service : _driver_original.service;
 
         if (JSON.stringify(_driver) !== JSON.stringify(_driver_original)) {
