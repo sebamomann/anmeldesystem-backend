@@ -14,7 +14,7 @@ export class FileController {
     getFile(@Param('id') id: string,
             @Res() res: Response) {
         return this.fileService
-            .findById(id)
+            .findById(id, true)
             .then(tFile => {
                 if (tFile != null) {
                     var img = Buffer.from(tFile.data.toString().split(',')[1], 'base64');

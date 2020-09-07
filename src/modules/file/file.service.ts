@@ -18,12 +18,18 @@ export class FileService {
         return await this.fileRepository.remove(file);
     }
 
-    async findById(id: string) {
-        const file = await this.fileRepository.findOne({
+    async findById(id: string, includeData = false) {
+        let obj: any = {
             where: {
                 id: id
             }
-        });
+        };
+
+        if (includeData) {
+            obj.select = ['data', 'id', 'name'];
+        }
+
+        const file = await this.fileRepository.findOne(obj);
 
         if (file === undefined) {
             throw new EntityNotFoundException(null, null, 'file');
