@@ -1,5 +1,5 @@
 import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
-import {Appointment} from "../appointment/appointment.entity";
+import {Appointment} from '../appointment/appointment.entity';
 
 @Entity()
 export class File {
@@ -7,13 +7,13 @@ export class File {
     id: string;
 
     @ManyToOne(type => Appointment,
-        appointment => appointment.files,
+        appointment => appointment.files
     )
     appointment: Appointment;
 
     @Column({nullable: false})
     name: string;
 
-    @Column({type: "longblob", nullable: false})
+    @Column({type: 'longblob', nullable: false, select: false})
     data: string;
 }

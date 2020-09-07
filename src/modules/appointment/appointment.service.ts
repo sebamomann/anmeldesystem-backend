@@ -57,7 +57,7 @@ export class AppointmentService {
         let appointment = await this.appointmentRepository.findOne({
             where: {
                 link: link
-            },
+            }
         });
 
         if (appointment === undefined) {
