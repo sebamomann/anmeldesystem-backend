@@ -807,7 +807,7 @@
                       "\r",
                       "pm.test(\"Correct error code\", function () {\r",
                       "    var jsonData = pm.response.json();\r",
-                      "    pm.expect(jsonData.message).to.eql(\"Unauthorized\");\r",
+                      "    pm.expect(jsonData.message).to.eql(\"Invalid password ot username\");\r",
                       "});\r",
                       "\r",
                       ""
@@ -870,7 +870,7 @@
                       "\r",
                       "pm.test(\"Correct error code\", function () {\r",
                       "    var jsonData = pm.response.json();\r",
-                      "    pm.expect(jsonData.message).to.eql(\"Unauthorized\");\r",
+                      "    pm.expect(jsonData.message).to.eql(\"Invalid password ot username\");\r",
                       "});\r",
                       "\r",
                       ""
