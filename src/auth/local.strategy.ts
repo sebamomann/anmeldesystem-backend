@@ -15,7 +15,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         try {
             res = await this.authService.login(mail, password);
         } catch (e) {
-            console.log(e);
             throw e;
         }
 

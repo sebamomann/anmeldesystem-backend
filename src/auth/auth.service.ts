@@ -18,7 +18,10 @@ export class AuthService {
         try {
             user = await this.userService.findByEmailOrUsername(value);
         } catch (e) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException({
+                code: 'INVALID_PASSWORD',
+                message: 'Invalid password or username',
+            });
         }
 
         if (user.activated) {
@@ -38,7 +41,10 @@ export class AuthService {
                         data: new Date(passwordChangeDate)
                     });
                 } else {
-                    throw new UnauthorizedException();
+                    throw new UnauthorizedException({
+                        code: 'INVALID_PASSWORD',
+                        message: 'Invalid password or username',
+                    });
                 }
             }
         } else {
