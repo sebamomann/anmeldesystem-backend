@@ -89,6 +89,8 @@ export class AppointmentService {
             throw e;
         }
 
+        console.log(appointment);
+
         appointment = AppointmentService.userBasedAppointmentPreparation(appointment, user, permissions, slim);
 
         return appointment;

@@ -309,7 +309,6 @@ export class EnrollmentService {
             .then(() => {
             })
             .catch(() => {
-                /* istanbul ignore next */
                 logger.log('error', 'Could not send enrollment mail to %s', savedEnrollment.mail.mail);
             });
     }

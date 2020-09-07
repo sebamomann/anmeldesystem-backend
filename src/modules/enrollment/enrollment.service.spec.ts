@@ -356,6 +356,42 @@ describe('EnrollmentService', () => {
                     expect(mailRepositoryMock.save).toHaveBeenCalledWith(__expected_mail);
                 });
 
+                it('* as not logged in user maill send fails', async () => {
+                    const __given_enrollment = new Enrollment();
+                    const __given_user = undefined;
+                    const __given_domain = 'example.com/{{0}}/{{1}}';
+
+                    __given_enrollment.comment = 'comment';
+                    __given_enrollment.editMail = 'mail@example.com';
+
+                    const __existing_appointment = new Appointment();
+                    __existing_appointment.link = 'link';
+
+                    __given_enrollment.appointment = __existing_appointment;
+
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+
+                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
+
+                    mailRepositoryMock.save.mockImplementation((val) => val);
+
+                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
+
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
+                        return;
+                    });
+
+                    jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.reject({}));
+
+                    const __expected_mail = new Mail();
+                    __expected_mail.mail = __given_enrollment.editMail;
+
+                    await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
+
+                    expect(mailRepositoryMock.save).toHaveBeenCalledTimes(1);
+                    expect(mailRepositoryMock.save).toHaveBeenCalledWith(__expected_mail);
+                });
+
                 it('* as logged in user', async () => {
                     const __given_enrollment = new Enrollment();
                     const __given_user = new User();

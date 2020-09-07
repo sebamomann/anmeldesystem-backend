@@ -4,12 +4,12 @@ import {User} from './user.entity';
 import {Usr} from './user.decorator';
 
 import {UserService} from './user.service';
-import {AuthService} from '../../auth/auth.service';
 
 import {AuthGuard} from '@nestjs/passport';
 
 import {Response} from 'express';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
+import {AuthService} from '../../auth/auth.service';
 
 const atob = require('atob');
 const btoa = require('btoa');

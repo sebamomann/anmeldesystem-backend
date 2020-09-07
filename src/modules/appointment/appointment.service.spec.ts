@@ -1657,7 +1657,7 @@ describe('AppointmentService', () => {
                 const __given_permissions = {};
                 const __given_slim = false;
                 const __given_before = '01/09/2020 01:24:26';
-                const __given_limit = '1';
+                const __given_limit = 1;
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';
@@ -1680,7 +1680,7 @@ describe('AppointmentService', () => {
                 const __given_permissions = {};
                 const __given_slim = false;
                 const __given_before = '';
-                const __given_limit = '1';
+                const __given_limit = 1;
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';

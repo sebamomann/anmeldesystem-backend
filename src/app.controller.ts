@@ -1,7 +1,7 @@
 import {Body, Controller, Get, HttpStatus, Post, Request, Res, UnauthorizedException, UseGuards} from '@nestjs/common';
 import {AuthGuard} from '@nestjs/passport';
-import {AuthService} from './auth/auth.service';
 import {EntityNotFoundException} from './exceptions/EntityNotFoundException';
+import {AuthService} from './auth/auth.service';
 
 @Controller()
 export class AppController {

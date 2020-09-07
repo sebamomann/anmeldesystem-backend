@@ -31,6 +31,7 @@ import {EmailChange} from './modules/user/email-change/email-change.entity';
 import {Mail} from './modules/enrollment/mail/mail.entity';
 import {PasswordChange} from './modules/user/password-change/password-change.entity';
 import {Session} from './modules/user/session.entity';
+import {loadFixtures} from '../test/protractor/loadFixtures';
 
 require('dotenv').config();
 const password = process.env.MAIL_ECA_PASSWORD;
@@ -78,5 +79,8 @@ const _mail = process.env.MAIL_ECA;
 })
 export class AppModule {
     constructor(private readonly connection: Connection) {
+        if (process.env.NODE_ENV === 'protractor') {
+            loadFixtures(connection);
+        }
     }
 }

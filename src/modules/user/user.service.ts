@@ -132,6 +132,7 @@ export class UserService {
 
         console.log(process.env.NODE_ENV);
 
+        /* istanbul ignore next */
         if (process.env.NODE_ENV === 'test_postman') {
             user.activated = true;
         }
