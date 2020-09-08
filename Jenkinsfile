@@ -81,6 +81,16 @@ pipeline {
                 }
             }
         }
+        stage('Get collection') {
+            steps {
+                script {
+                    def response = httpRequest "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + branch_name + '/collection.json"
+                    def content = response.content
+                    content.replace('localhost', "anmeldesystem-backend-newman_build_" + build_number)
+                    sh '${content} >> collection.json'
+                }
+            }
+        }
         stage('Newman exec') {
             steps {
                 script {
@@ -89,7 +99,7 @@ pipeline {
                             '--name newman_build_' + build_number + ' ' +
                             '--network newmanNet_build_' + build_number + ' ' +
                             '-t postman/newman:alpine ' +
-                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + branch_name + '/collection.json" --delay-request 100 -n 1 --bail --delay-request 100'
+                            'run collection.json --delay-request 100 -n 1 --bail --delay-request 100'
                 }
             }
         }
