@@ -86,7 +86,7 @@ pipeline {
                 script {
                     def text = readFile file: "${pwd}/collection/collection.json"
                     text = text.replaceAll("localhost", "anmeldesystem-backend-newman_build_" + build_number)
-                    writeFile file: "${pwd}/collection/collection.json", text: text
+                    writeFile file: "./collection/collection.json", text: text
 
                     sh 'docker run ' +
                             '-v ${pwd}/collection:/etc/newman ' +
