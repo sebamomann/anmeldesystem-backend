@@ -84,16 +84,16 @@ pipeline {
         stage('Newman exec') {
             steps {
                 script {
-//                    def text = readFile file: "./collection/collection.json"
+//                    def text = readFile file: "./collection/gjm-test.postman_collection.json"
 //                    text = text.replaceAll("localhost", "anmeldesystem-backend-newman_build_" + build_number)
-//                    writeFile file: "./collection/collection.json", text: text
+//                    writeFile file: "./collection/gjm-test.postman_collection.json", text: text
                     sh 'ls -la collection'
                     sh 'docker run ' +
-                            '-v ${pwd}/collection:/etc/newman ' +
+                            '-v $(pwd)/collection/partyplayer.postman_collection.json:/etc/newman/collection.json ' +
                             '--name newman_build_' + build_number + ' ' +
                             '--network newmanNet_build_' + build_number + ' ' +
                             '-t postman/newman:ubuntu ' +
-                            'run collection.json --delay-request 100 -n 1 --bail --delay-request 100'
+                            'run "collection.json" --delay-request 100 -n 1 --bail --delay-request 100'
                 }
             }
         }
