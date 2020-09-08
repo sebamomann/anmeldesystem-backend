@@ -137,11 +137,11 @@ pipeline {
                     echo err.getMessage()
                 }
 
-                try {
-                    sh 'docker container rm newman_build_' + build_number + ' -f'
-                } catch (err) {
-                    echo err.getMessage()
-                }
+//                try {
+//                    sh 'docker container rm newman_build_' + build_number + ' -f'
+//                } catch (err) {
+//                    echo err.getMessage()
+//                }
 
                 try {
                     sh 'docker container rm newman_db_build_' + build_number + ' -f'
