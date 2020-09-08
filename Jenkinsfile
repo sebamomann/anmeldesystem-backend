@@ -89,7 +89,7 @@ pipeline {
 //                    writeFile file: "./collection/collection.json", text: text
                     sh 'ls collection'
                     sh 'docker run ' +
-                            '-v /collection/collection.json:/etc/newman/collection.json ' +
+                            '-v ${pwd}/collection/collection.json:/etc/newman/collection.json ' +
                             '--name newman_build_' + build_number + ' ' +
                             '--network newmanNet_build_' + build_number + ' ' +
                             '-t postman/newman:alpine ' +
