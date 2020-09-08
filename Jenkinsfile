@@ -92,7 +92,7 @@ pipeline {
                             '-v ${pwd}/collection:/etc/newman ' +
                             '--name newman_build_' + build_number + ' ' +
                             '--network newmanNet_build_' + build_number + ' ' +
-                            '-t postman/newman:alpine'
+                            '-t postman/newman:ubuntu'
                 }
             }
         }
