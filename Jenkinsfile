@@ -89,8 +89,7 @@ pipeline {
 //                    writeFile file: "./collection/gjm-test.postman_collection.json", text: text
                     sh 'ls -la $(pwd)'
                     sh 'chmod 777 gjm-test.postman_collection.json'
-                    sh 'cat gjm-test.postman_collection.json'
-                    sh 'ls -la collection'
+                    sh 'ls -la $(pwd)'
                     sh 'docker run ' +
                             '-v $(pwd)/gjm-test.postman_collection.json:/etc/newman/collection.json ' +
                             '--name newman_build_' + build_number + ' ' +
