@@ -1,6 +1,7 @@
 def image
 def branch_name = "${env.BRANCH_NAME}"
 def github_token = "${env.GITHUB_STATUS_ACCESS_TOKEN}"
+def build_number = "${env.BUILD_NUMBER}"
 
 pipeline {
     agent any
@@ -25,7 +26,7 @@ pipeline {
         stage('Build Docker image') {
             steps {
                 script {
-                    image = docker.build("anmeldesystem/anmeldesystem-backend")
+                    image = docker.build("anmeldesystem/anmeldesystem-backend:build_" + build_number)
                 }
             }
         }
@@ -33,33 +34,34 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh 'docker network create newmanNet'
+                        sh 'docker network create newmanNet_build_' + build_number
                     } catch (err) {
                         echo err.getMessage()
                     }
 
                     sh 'docker run -d ' +
                             '-p 34299:3306 ' + // 0.0.0.0
-                            '--name newman_db ' +
+                            '--name newman_db_build_' + build_number + ' ' +
                             '--env MYSQL_ROOT_PASSWORD=password ' +
                             '--env MYSQL_DATABASE=anmeldesystem-api ' +
                             '--env MYSQL_USER=user ' +
                             '--env MYSQL_PASSWORD=password ' +
                             '--network newmanNet ' +
                             '--health-cmd=\'mysqladmin ping --silent\' ' +
-                            'mysql mysqld --default-authentication-plugin=mysql_native_password'
+                            'mysql ' +
+                            'mysqld --default-authentication-plugin=mysql_native_password'
 
                     waitUntil {
                         "healthy" == sh(returnStdout: true,
-                                script: "docker inspect newman_db --format=\"{{ .State.Health.Status }}\"").trim()
+                                script: "docker inspect newman_db_build_" + build_number + " --format=\"{{ .State.Health.Status }}\"").trim()
                     }
 
                     sh 'docker run -d ' +
                             '-p 34298:3000 ' +
-                            '--name anmeldesystem-backend-newman ' +
+                            '--name anmeldesystem-backend-newman_build_' + build_number + ' ' +
                             '--env DB_USERNAME=root ' +
                             '--env DB_PASSWORD=password ' +
-                            '--env DB_HOST=newman_db ' +
+                            '--env DB_HOST=newman_db_build_' + build_number + ' ' +
                             '--env DB_PORT=3306 ' +
                             '--env DB_DATABASE=anmeldesystem-api ' +
                             '--env SALT_JWT=salt ' +
@@ -67,14 +69,14 @@ pipeline {
                             '--env SALT_ENROLLMENT=salt ' +
                             '--env DOMAIN=go-join.me ' +
                             '--env NODE_ENV=test_postman ' +
-                            '--network newmanNet ' +
+                            '--network newmanNet_build_' + build_number + ' '
                             '--health-cmd=\'curl localhost:3000/healthcheck || exit 1 \' ' +
                             '--health-interval=2s ' +
-                            'anmeldesystem/anmeldesystem-backend:latest'
+                            'anmeldesystem/anmeldesystem-backend:build_' + build_number
 
                     waitUntil {
                         "healthy" == sh(returnStdout: true,
-                                script: "docker inspect anmeldesystem-backend-newman --format=\"{{ .State.Health.Status }}\"").trim()
+                                script: "docker inspect anmeldesystem-backend-newman_build_" + build_number + " --format=\"{{ .State.Health.Status }}\"").trim()
                     }
                 }
             }
@@ -84,10 +86,10 @@ pipeline {
                 script {
                     sh 'docker run ' +
                             '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
-                            '--name newman ' +
-                            '--network newmanNet ' +
+                            '--name newman_build_' + build_number + ' ' +
+                            '--network newmanNet_build_' + build_number + ' ' +
                             '-t postman/newman:alpine ' +
-                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + branch_name+ '/collection.json" --delay-request 100 -n 1 --bail --delay-request 100'
+                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + branch_name + '/collection.json" --delay-request 100 -n 1 --bail --delay-request 100'
                 }
             }
         }
@@ -126,25 +128,25 @@ pipeline {
         always {
             script {
                 try {
-                    sh 'docker container rm anmeldesystem-backend-newman -f'
+                    sh 'docker container rm anmeldesystem-backend-newman_build_' + build_number + ' -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
 
                 try {
-                    sh 'docker container rm newman -f'
+                    sh 'docker container rm newman_build_' + build_number + ' -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
 
                 try {
-                    sh 'docker container rm newman_db -f'
+                    sh 'docker container rm newman_db_build_' + build_number + ' -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
 
                 try {
-                    sh 'docker network rm newmanNet -f'
+                    sh 'docker network rm newmanNet_build_' + build_number + ' -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
