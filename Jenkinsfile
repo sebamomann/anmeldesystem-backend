@@ -84,7 +84,7 @@ pipeline {
         stage('Get collection') {
             steps {
                 script {
-                    new File("collection.json") << new URL ("https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/" + branch_name + "/collection.json").getText().replace('localhost', "anmeldesystem-backend-newman_build_" + build_number)
+                    "collection.json" << new URL ("https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/" + branch_name + "/collection.json").getText().replace('localhost', "anmeldesystem-backend-newman_build_" + build_number)
                 }
             }
         }
