@@ -84,7 +84,7 @@ pipeline {
         stage('Newman exec') {
             steps {
                 script {
-                    def text = readFile file: "${pwd}/collection/collection.json"
+                    def text = readFile file: "./collection/collection.json"
                     text = text.replaceAll("localhost", "anmeldesystem-backend-newman_build_" + build_number)
                     writeFile file: "./collection/collection.json", text: text
 
