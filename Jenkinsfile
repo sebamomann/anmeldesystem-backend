@@ -92,8 +92,7 @@ pipeline {
                             '-v ${pwd}/collection:/etc/newman ' +
                             '--name newman_build_' + build_number + ' ' +
                             '--network newmanNet_build_' + build_number + ' ' +
-                            '-t postman/newman:alpine ' +
-                            'run "HTTPBinNewmanTest.json.postman_collection" --delay-request 100 -n 1 --bail --delay-request 100'
+                            '-t postman/newman:alpine'
                 }
             }
         }
@@ -137,11 +136,11 @@ pipeline {
                     echo err.getMessage()
                 }
 
-                try {
-                    sh 'docker container rm newman_build_' + build_number + ' -f'
-                } catch (err) {
-                    echo err.getMessage()
-                }
+//                try {
+//                    sh 'docker container rm newman_build_' + build_number + ' -f'
+//                } catch (err) {
+//                    echo err.getMessage()
+//                }
 
                 try {
                     sh 'docker container rm newman_db_build_' + build_number + ' -f'
