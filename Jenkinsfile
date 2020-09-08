@@ -92,11 +92,11 @@ pipeline {
                     sh 'chmod 777 collection/gjm-test.postman_collection.json'
                     sh 'ls -la collection'
                     sh 'docker run ' +
-                            '-v $(pwd)/collection:/etc/newman ' +
+                            '-v $(pwd)/collection/gjm-test.postman_collection.json:/etc/newman/collection.json ' +
                             '--name newman_build_' + build_number + ' ' +
-                            '--network newmanNet_build_' + build_number + ' ' +
-                            '-t postman/newman:ubuntu ' +
-                            'run "gjm-test.postman_collection.json" --delay-request 100 -n 1 --bail --delay-request 100'
+                            '--net newmanNet_build_' + build_number + ' ' +
+                            '-t postman/newman:alpine ' +
+                            'run "collection.json"'
                 }
             }
         }
