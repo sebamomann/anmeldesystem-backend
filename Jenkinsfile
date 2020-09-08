@@ -69,7 +69,7 @@ pipeline {
                             '--env SALT_ENROLLMENT=salt ' +
                             '--env DOMAIN=go-join.me ' +
                             '--env NODE_ENV=test_postman ' +
-                            '--network newmanNet_build_' + build_number + ' '
+                            '--network newmanNet_build_' + build_number + ' ' +
                             '--health-cmd=\'curl localhost:3000/healthcheck || exit 1 \' ' +
                             '--health-interval=2s ' +
                             'anmeldesystem/anmeldesystem-backend:build_' + build_number
