@@ -84,7 +84,7 @@ pipeline {
         stage('Newman exec') {
             steps {
                 script {
-                    ant.replace(file: "${workspace}@script/../collection.json", token: "localhost", value: "anmeldesystem-backend-newman_build_" + build_number)
+                    sh 'ant.replace(file: "${workspace}@script/../collection.json", token: "localhost", value: "anmeldesystem-backend-newman_build_" + build_number)'
                     sh 'docker run ' +
                             '-v ${workspace}@script/../collection.json:/etc/newman/collection.json ' +
                             '--name newman_build_' + build_number + ' ' +
