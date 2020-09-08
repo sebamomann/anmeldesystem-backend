@@ -88,6 +88,9 @@ pipeline {
 //                    text = text.replaceAll("localhost", "anmeldesystem-backend-newman_build_" + build_number)
 //                    writeFile file: "./collection/gjm-test.postman_collection.json", text: text
                     sh 'ls -la collection'
+                    sh 'chmod 777 collection'
+                    sh 'chmod 777 collection/gjm-test.postman_collection.json'
+                    sh 'ls -la collection'
                     sh 'docker run ' +
                             '-v $(pwd)/collection/gjm-test.postman_collection.json:/etc/newman/collection.json ' +
                             '--name newman_build_' + build_number + ' ' +
