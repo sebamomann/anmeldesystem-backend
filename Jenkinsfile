@@ -87,12 +87,13 @@ pipeline {
 //                    def text = readFile file: "./collection/collection.json"
 //                    text = text.replaceAll("localhost", "anmeldesystem-backend-newman_build_" + build_number)
 //                    writeFile file: "./collection/collection.json", text: text
+                    sh 'ls collection'
                     sh 'docker run ' +
                             '-v collection:/etc/newman ' +
                             '--name newman_build_' + build_number + ' ' +
                             '--network newmanNet_build_' + build_number + ' ' +
                             '-t postman/newman:alpine ' +
-                            'run collection.json --delay-request 100 -n 1 --bail --delay-request 100'
+                            'run etc/newman/collection.json --delay-request 100 -n 1 --bail --delay-request 100'
                 }
             }
         }
