@@ -89,11 +89,11 @@ pipeline {
 //                    writeFile file: "./collection/collection.json", text: text
                     sh 'ls -la collection'
                     sh 'docker run ' +
-                            '-v ${pwd}/collection/collection.json:/etc/newman/collection.json ' +
+                            '-v ${pwd}/collection:/etc/newman ' +
                             '--name newman_build_' + build_number + ' ' +
                             '--network newmanNet_build_' + build_number + ' ' +
                             '-t postman/newman:alpine ' +
-                            'run "/etc/newman/collection.json" --delay-request 100 -n 1 --bail --delay-request 100'
+                            'run "HTTPBinNewmanTest.json.postman_collection" --delay-request 100 -n 1 --bail --delay-request 100'
                 }
             }
         }
