@@ -69,10 +69,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/users/",
+                  "raw": "http://localhost:3000/users/",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -134,10 +134,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/users/",
+                  "raw": "http://localhost:3000/users/",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -199,10 +199,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/users/",
+                  "raw": "http://localhost:3000/users/",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -263,10 +263,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/users/",
+                  "raw": "http://localhost:3000/users/",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -335,10 +335,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/users/",
+                  "raw": "http://localhost:3000/users/",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -407,10 +407,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/users/",
+                  "raw": "http://localhost:3000/users/",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -479,10 +479,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/users/",
+                  "raw": "http://localhost:3000/users/",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -551,10 +551,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/users/",
+                  "raw": "http://localhost:3000/users/",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -624,10 +624,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/users/",
+                  "raw": "http://localhost:3000/users/",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -697,10 +697,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/users/",
+                  "raw": "http://localhost:3000/users/",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -751,9 +751,9 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "anmeldesystem-backend-newman:3000/users/verify/{{creator_email_base64}}/{{activation_token}}",
+                  "raw": "localhost:3000/users/verify/{{creator_email_base64}}/{{activation_token}}",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -821,10 +821,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/login",
+                  "raw": "http://localhost:3000/auth/login",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -884,10 +884,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/login",
+                  "raw": "http://localhost:3000/auth/login",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -947,10 +947,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/login",
+                  "raw": "http://localhost:3000/auth/login",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1009,10 +1009,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/login",
+                  "raw": "http://localhost:3000/auth/login",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1071,10 +1071,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/login",
+                  "raw": "http://localhost:3000/auth/login",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1133,10 +1133,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/login",
+                  "raw": "http://localhost:3000/auth/login",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1195,10 +1195,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/login",
+                  "raw": "http://localhost:3000/auth/login",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1257,10 +1257,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/login",
+                  "raw": "http://localhost:3000/auth/login",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1319,10 +1319,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/login",
+                  "raw": "http://localhost:3000/auth/login",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1384,10 +1384,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/token",
+                  "raw": "http://localhost:3000/auth/token",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1437,10 +1437,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/token",
+                  "raw": "http://localhost:3000/auth/token",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1490,10 +1490,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/auth/token",
+                  "raw": "http://localhost:3000/auth/token",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1617,10 +1617,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/appointment",
+                  "raw": "http://localhost:3000/appointment",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1728,10 +1728,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/appointment",
+                  "raw": "http://localhost:3000/appointment",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1803,10 +1803,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/appointment",
+                  "raw": "http://localhost:3000/appointment",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1894,10 +1894,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/appointment",
+                  "raw": "http://localhost:3000/appointment",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -1968,10 +1968,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/appointment",
+                  "raw": "http://localhost:3000/appointment",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -2058,10 +2058,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/appointment",
+                  "raw": "http://localhost:3000/appointment",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -2148,10 +2148,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/appointment",
+                  "raw": "http://localhost:3000/appointment",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -2238,10 +2238,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/appointment",
+                  "raw": "http://localhost:3000/appointment",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -2329,10 +2329,10 @@
                   }
                 },
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/appointment",
+                  "raw": "http://localhost:3000/appointment",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -2414,10 +2414,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -2490,10 +2490,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -2566,10 +2566,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -2642,10 +2642,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -2718,10 +2718,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -2791,10 +2791,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -2867,10 +2867,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -2943,10 +2943,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3027,10 +3027,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3103,10 +3103,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3179,10 +3179,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3264,10 +3264,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3342,10 +3342,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3420,10 +3420,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3509,10 +3509,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3591,10 +3591,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3673,10 +3673,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3755,10 +3755,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3821,10 +3821,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}/administrator",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}/administrator",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3886,10 +3886,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}/administrator",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}/administrator",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -3946,10 +3946,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}/administrator/{{admin_username}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}/administrator/{{admin_username}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4012,10 +4012,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}/administrator",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}/administrator",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4112,10 +4112,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4186,10 +4186,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4261,10 +4261,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4347,10 +4347,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4430,10 +4430,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4505,10 +4505,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4585,10 +4585,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4656,10 +4656,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4727,10 +4727,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4804,10 +4804,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4879,10 +4879,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -4945,10 +4945,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -5020,10 +5020,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -5100,10 +5100,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -5177,10 +5177,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -5252,10 +5252,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -5337,10 +5337,10 @@
                           }
                         },
                         "url": {
-                          "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}",
+                          "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}",
                           "protocol": "http",
                           "host": [
-                            "anmeldesystem-backend-newman"
+                            "localhost"
                           ],
                           "port": "3000",
                           "path": [
@@ -5404,10 +5404,10 @@
                           }
                         },
                         "url": {
-                          "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}",
+                          "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}",
                           "protocol": "http",
                           "host": [
-                            "anmeldesystem-backend-newman"
+                            "localhost"
                           ],
                           "port": "3000",
                           "path": [
@@ -5472,10 +5472,10 @@
                           }
                         },
                         "url": {
-                          "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}",
+                          "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}",
                           "protocol": "http",
                           "host": [
-                            "anmeldesystem-backend-newman"
+                            "localhost"
                           ],
                           "port": "3000",
                           "path": [
@@ -5553,10 +5553,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -5620,10 +5620,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -5703,10 +5703,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -5774,10 +5774,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown-driver_id}}",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-unknown-driver_id}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -5845,10 +5845,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown-driver_id}}",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-unknown-driver_id}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -5922,10 +5922,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown-passenger_id}}",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-unknown-passenger_id}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -5998,10 +5998,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6062,10 +6062,10 @@
                 "method": "DELETE",
                 "header": [],
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment_id}}",
+                  "raw": "http://localhost:3000/enrollment/{{enrollment_id}}",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -6117,10 +6117,10 @@
                 "method": "DELETE",
                 "header": [],
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment_id}}",
+                  "raw": "http://localhost:3000/enrollment/{{enrollment_id}}",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -6161,10 +6161,10 @@
                 "method": "DELETE",
                 "header": [],
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}",
+                  "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -6210,10 +6210,10 @@
                 "method": "DELETE",
                 "header": [],
                 "url": {
-                  "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}",
+                  "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}",
                   "protocol": "http",
                   "host": [
-                    "anmeldesystem-backend-newman"
+                    "localhost"
                   ],
                   "port": "3000",
                   "path": [
@@ -6300,10 +6300,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6358,10 +6358,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}/administrator",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}/administrator",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6413,10 +6413,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6467,10 +6467,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6521,10 +6521,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6570,10 +6570,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6617,10 +6617,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment_id}}/check-permission?token=anytoken",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment_id}}/check-permission?token=anytoken",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6710,10 +6710,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6766,10 +6766,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/appointment/{{appointment_link}}/administrator",
+                      "raw": "http://localhost:3000/appointment/{{appointment_link}}/administrator",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6822,10 +6822,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-admin_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-admin_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6878,10 +6878,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-admin_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-admin_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6934,10 +6934,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-admin_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-admin_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -6990,10 +6990,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-admin_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-admin_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7039,10 +7039,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-creator_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-creator_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7088,10 +7088,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-creator_id}}/check-permission?token=anytoken",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-creator_id}}/check-permission?token=anytoken",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7181,10 +7181,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7235,10 +7235,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-user_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-user_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7291,10 +7291,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-user_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-user_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7347,10 +7347,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-user_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-user_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7403,10 +7403,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-user_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-user_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7452,10 +7452,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-user_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-user_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7501,10 +7501,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-user_id}}/check-permission?token=anytoken",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-user_id}}/check-permission?token=anytoken",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7588,10 +7588,10 @@
                       }
                     },
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment",
+                      "raw": "http://localhost:3000/enrollment",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7641,10 +7641,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7696,10 +7696,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}/check-permission?token={{enrollment-unknown_token}}",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}/check-permission?token={{enrollment-unknown_token}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7758,10 +7758,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7812,10 +7812,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7861,10 +7861,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-unknown_id}}/check-permission?token={{enrollment-unknown_token}}",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-unknown_id}}/check-permission?token={{enrollment-unknown_token}}",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7916,10 +7916,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-na_id}}/check-permission",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-na_id}}/check-permission",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
@@ -7965,10 +7965,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://anmeldesystem-backend-newman:3000/enrollment/{{enrollment-na_id}}/check-permission?token=anytoken",
+                      "raw": "http://localhost:3000/enrollment/{{enrollment-na_id}}/check-permission?token=anytoken",
                       "protocol": "http",
                       "host": [
-                        "anmeldesystem-backend-newman"
+                        "localhost"
                       ],
                       "port": "3000",
                       "path": [
