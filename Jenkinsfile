@@ -81,18 +81,12 @@ pipeline {
                 }
             }
         }
-        stage('Get collection') {
-            steps {
-                script {
-                    "collection.json" << new URL ("https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/" + branch_name + "/collection.json").getText().replace('localhost', "anmeldesystem-backend-newman_build_" + build_number)
-                }
-            }
-        }
         stage('Newman exec') {
             steps {
                 script {
+                    ant.replace(file: "${workspace}@script/../collection.json", token: "localhost", value: "anmeldesystem-backend-newman_build_" + build_number)
                     sh 'docker run ' +
-                            '-v $(pwd)/collection.json:/etc/newman/collection.json ' +
+                            '-v ${workspace}@script/../collection.json:/etc/newman/collection.json ' +
                             '--name newman_build_' + build_number + ' ' +
                             '--network newmanNet_build_' + build_number + ' ' +
                             '-t postman/newman:alpine ' +
