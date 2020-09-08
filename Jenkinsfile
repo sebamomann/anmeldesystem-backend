@@ -90,7 +90,7 @@ pipeline {
                             '--name newman_build_' + build_number + ' ' +
                             '--network newmanNet_build_' + build_number + ' ' +
                             '-t postman/newman:alpine ' +
-                            'run collection.json --delay-request 100 -n 1 --bail --delay-request 100'
+                            'run "collection.json" --delay-request 100 -n 1 --bail --delay-request 100'
                 }
             }
         }
