@@ -92,8 +92,8 @@ pipeline {
                             '-v ${pwd}/collection.json:/etc/newman/collection.json ' +
                             '--name newman_build_' + build_number + ' ' +
                             '--network newmanNet_build_' + build_number + ' ' +
-                            '-t postman/newman:alpine HTTPBinNewmanTest.json.postman_collection ' +
-                            'run --delay-request 100 -n 1 --bail --delay-request 100'
+                            '-t postman/newman:alpine ' +
+                            'run /etc/newman/collection.json --delay-request 100 -n 1 --bail --delay-request 100'
                 }
             }
         }
