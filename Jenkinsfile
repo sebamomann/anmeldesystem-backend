@@ -84,16 +84,16 @@ pipeline {
         stage('Newman exec') {
             steps {
                 script {
-                    def text = readFile file: "./collection/collection.json"
-                    text = text.replaceAll("localhost", "anmeldesystem-backend-newman_build_" + build_number)
-                    writeFile file: "./collection/collection.json", text: text
+//                    def text = readFile file: "./collection/collection.json"
+//                    text = text.replaceAll("localhost", "anmeldesystem-backend-newman_build_" + build_number)
+//                    writeFile file: "./collection/collection.json", text: text
 
                     sh 'docker run ' +
                             '-v ${pwd}/collection:/etc/newman ' +
                             '--name newman_build_' + build_number + ' ' +
                             '--network newmanNet_build_' + build_number + ' ' +
                             '-t postman/newman:alpine ' +
-                            'run "etc/newman/collection.json" --delay-request 100 -n 1 --bail --delay-request 100'
+                            'run collection.json --delay-request 100 -n 1 --bail --delay-request 100'
                 }
             }
         }
