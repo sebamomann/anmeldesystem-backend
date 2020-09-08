@@ -70,7 +70,7 @@ pipeline {
                             '--network newmanNet ' +
                             '--health-cmd=\'curl localhost:3000/healthcheck || exit 1 \' ' +
                             '--health-interval=2s ' +
-                            'anmeldesystem/anmeldesystem-backend:latest'
+                            'anmeldesystem/anmeldesystem-backend'
 
                     waitUntil {
                         "healthy" == sh(returnStdout: true,
