@@ -46,7 +46,7 @@ pipeline {
                             '--env MYSQL_DATABASE=anmeldesystem-api ' +
                             '--env MYSQL_USER=user ' +
                             '--env MYSQL_PASSWORD=password ' +
-                            '--network newmanNet ' +
+                            '--network newmanNet_build_' + build_number + ' '
                             '--health-cmd=\'mysqladmin ping --silent\' ' +
                             'mysql ' +
                             'mysqld --default-authentication-plugin=mysql_native_password'
