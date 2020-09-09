@@ -31,7 +31,6 @@ export async function loadFixtures(connection: Connection): Promise<any> {
     items.forEach(async (item: any) => {
         const entityName = Object.keys(item)[0];
         const data = item[entityName];
-        console.log(data);
         await connection.createQueryBuilder().insert().into(entityName).values(data).execute();
     });
 }

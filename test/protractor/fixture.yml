@@ -29,10 +29,17 @@ fixtures:
           activated: 1
     - User:
           id: "c51f4e34-6152-4778-9b9c-48cf47ec5b80"
-          name: "User 2"
-          username: "user_2"
+          name: "User Enroll"
+          username: "user_enroll"
           password: "$2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe"
-          mail: "user_2@example.com"
+          mail: "user_enroll@example.com"
+          activated: 1
+    - User:
+          id: "3ed5ec48-afca-450a-8e55-b40769414bc6"
+          name: "User Foreign"
+          username: "user_foreign"
+          password: "$2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe"
+          mail: "user_foreign@example.com"
           activated: 1
     - Appointment:
           id: "cc1a91c9-ff03-4da0-a528-89bd9db1d438"
