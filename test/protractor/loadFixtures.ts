@@ -1,6 +1,6 @@
-import * as yaml from 'js-yaml';
 import * as fs from 'fs';
 import {Connection} from 'typeorm';
+import * as yaml from 'js-yaml';
 
 export async function loadFixtures(connection: Connection): Promise<any> {
     let items: any[] = [];
@@ -17,20 +17,22 @@ export async function loadFixtures(connection: Connection): Promise<any> {
 
     }, 5000);
 
-    try {
-        const file: any = yaml.safeLoad(fs.readFileSync(`./test/protractor/fixture.yml`, 'utf8'));
-        items = file['fixtures'];
-    } catch (e) {
-        console.log('fixtures error', e);
-    }
+    fs.readdirSync('./test/protractor/fixtures').forEach(fileName => {
+        const file: any = yaml.safeLoad(fs.readFileSync(`./test/protractor/fixtures/${fileName}`, 'utf8'));
+        try {
+            items = file['fixtures'];
+        } catch (e) {
+            console.log('fixtures error', e);
+        }
 
-    if (!items) {
-        return;
-    }
+        if (!items) {
+            return;
+        }
 
-    items.forEach(async (item: any) => {
-        const entityName = Object.keys(item)[0];
-        const data = item[entityName];
-        await connection.createQueryBuilder().insert().into(entityName).values(data).execute();
+        items.forEach(async (item: any) => {
+            const entityName = Object.keys(item)[0];
+            const data = item[entityName];
+            await connection.createQueryBuilder().insert().into(entityName).values(data).execute();
+        });
     });
 }
