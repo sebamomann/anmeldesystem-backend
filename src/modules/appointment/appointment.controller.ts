@@ -82,6 +82,7 @@ export class AppointmentController {
                @Param('link') link: string,
                @Request() req: Request,
                @Res() res: Response) {
+        console.log('Called: ' + link);
         let _slim = slim === 'true';
 
         return this.appointmentService
