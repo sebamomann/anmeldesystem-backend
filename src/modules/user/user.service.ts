@@ -664,8 +664,8 @@ export class UserService {
             user.mail + process.env.SALT_MAIL + user.username + (new Date(user.iat)).getTime())
             .digest('hex');
 
-        console.log(user.mail + process.env.SALT_MAIL + user.username + (new Date(user.iat)).getTime());
-        console.log(token);
+        user.accountActivationEmail = btoa(user.mail);
+        user.accountActivationToken = token;
 
         this.mailerService
             .sendMail({

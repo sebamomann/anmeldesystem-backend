@@ -14,7 +14,9 @@ module.exports = {
                               mail,
                               emailChange,
                               iat,
-                              refreshToken
+                              refreshToken,
+                              accountActivationToken,
+                              accountActivationEmail
                           }) =>
             ({
                 id,
@@ -24,6 +26,8 @@ module.exports = {
                 emailChange: UserUtil.filterActiveEmailChanges(emailChange), // shouldn't be like that, dont pass service
                 iat,
                 refreshToken,
+                accountActivationToken,
+                accountActivationEmail
             }))
         (_user);
 

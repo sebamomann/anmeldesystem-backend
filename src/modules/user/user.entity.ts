@@ -79,4 +79,7 @@ export class User {
 
     token: string;
     refreshToken: string;
+
+    accountActivationToken?: string;
+    accountActivationEmail?: string;
 }
