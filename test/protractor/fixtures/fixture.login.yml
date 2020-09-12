@@ -1,8 +1,21 @@
 fixtures:
-      - User:
-              id: "f5022a15-eeff-4318-a7ba-f7bbebed5240"
-              name: "User Login"
-              username: "user_login"
-              password: "$2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe"
-              mail: "user_login@example.com"
-              activated: 1
+  - User:
+      id: "f5022a15-eeff-4318-a7ba-f7bbebed5240"
+      name: "User Login"
+      username: "user_login"
+      password: "$2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe"
+      mail: "user_login@example.com"
+      activated: 1
+  - User:
+      id: "d37e17c9-b7d1-4b17-8edf-16e7cb39e5a0"
+      name: "User Login Lock"
+      username: "user_login_lock"
+      password: "$2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe"
+      mail: "user_login_lock@example.com"
+      activated: 0
+  - user_password_change:
+      id: "7db7c864-7375-49b1-ba33-807083f2e939"
+      oldPassword: "$2a$10$CHppmrt20UBsZJZ6/.QwEev0RuVK0KNZ/O1UlTbk7r9IZflwvdet6"
+      iat: "2020-11-18 12:23:14.000000"
+      user:
+        id: "f5022a15-eeff-4318-a7ba-f7bbebed5240" # user login
