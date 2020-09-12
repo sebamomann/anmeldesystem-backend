@@ -125,6 +125,7 @@ describe('AuthService', () => {
                     })
                     .catch((err) => {
                         expect(err).toBeInstanceOf(UnauthorizedException);
+                        expect(err.response.code).toEqual('INVALID_CREDENTIALS');
                     });
             });
 
@@ -146,6 +147,7 @@ describe('AuthService', () => {
                     })
                     .catch((err) => {
                         expect(err).toBeInstanceOf(UnauthorizedException);
+                        expect(err.response.code).toEqual('INVALID_CREDENTIALS');
                     });
             });
 
