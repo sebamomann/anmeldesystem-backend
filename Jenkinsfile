@@ -27,6 +27,7 @@ pipeline {
             steps {
                 script {
                     image = docker.build("anmeldesystem/anmeldesystem-backend:build_" + build_number)
+                    image = docker.build("anmeldesystem/anmeldesystem-backend")
                 }
             }
         }
