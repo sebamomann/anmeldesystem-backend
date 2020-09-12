@@ -109,7 +109,6 @@ pipeline {
                 script {
                     docker.withRegistry('http://localhost:34015') {
                         image.push(branch_name)
-                        image.push('latest')
                     }
                 }
             }
