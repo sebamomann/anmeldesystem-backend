@@ -19,7 +19,7 @@ export class AuthService {
             user = await this.userService.findByEmailOrUsername(value);
         } catch (e) {
             throw new UnauthorizedException({
-                code: 'INVALID_PASSWORD',
+                code: 'INVALID_CREDENTIALS',
                 message: 'Invalid password or username',
             });
         }
@@ -42,7 +42,7 @@ export class AuthService {
                     });
                 } else {
                     throw new UnauthorizedException({
-                        code: 'INVALID_PASSWORD',
+                        code: 'INVALID_CREDENTIALS',
                         message: 'Invalid password or username',
                     });
                 }
