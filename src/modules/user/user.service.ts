@@ -132,11 +132,6 @@ export class UserService {
 
         console.log(process.env.NODE_ENV);
 
-        /* istanbul ignore next */
-        if (process.env.NODE_ENV === 'test_postman') {
-            user.activated = true;
-        }
-
         const savedUser = await this.userRepository.save(user);
 
         this._sendRegisterEmail(savedUser, domain);
@@ -664,8 +659,10 @@ export class UserService {
             user.mail + process.env.SALT_MAIL + user.username + (new Date(user.iat)).getTime())
             .digest('hex');
 
-        user.accountActivationEmail = btoa(user.mail);
-        user.accountActivationToken = token;
+        if (process.env.NODE_ENV === 'test_postman') {
+            user.accountActivationEmail = btoa(user.mail);
+            user.accountActivationToken = token;
+        }
 
         this.mailerService
             .sendMail({
