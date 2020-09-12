@@ -40,7 +40,6 @@ pipeline {
                     }
 
                     sh 'docker run -d ' +
-                            '-p 34299:3306 ' + // 0.0.0.0
                             '--name newman_db_build_' + build_number + ' ' +
                             '--env MYSQL_ROOT_PASSWORD=password ' +
                             '--env MYSQL_DATABASE=anmeldesystem-api ' +
@@ -57,7 +56,6 @@ pipeline {
                     }
 
                     sh 'docker run -d ' +
-                            '-p 34298:3000 ' +
                             '--name anmeldesystem-backend-newman_build_' + build_number + ' ' +
                             '--env DB_USERNAME=root ' +
                             '--env DB_PASSWORD=password ' +
