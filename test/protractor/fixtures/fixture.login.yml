@@ -18,4 +18,4 @@ fixtures:
       oldPassword: "$2a$10$CHppmrt20UBsZJZ6/.QwEev0RuVK0KNZ/O1UlTbk7r9IZflwvdet6"
       iat: "2020-11-18 12:23:14.000000"
       user:
-        id: "f5022a15-eeff-4318-a7ba-f7bbebed5240" # user login
+          id: "f5022a15-eeff-4318-a7ba-f7bbebed5240" # user login
