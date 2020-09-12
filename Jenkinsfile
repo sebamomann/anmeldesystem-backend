@@ -84,9 +84,9 @@ pipeline {
         stage('Newman exec') {
             steps {
                 script {
-//                    def text = readFile file: "./collection/gjm-test.postman_collection.json"
-//                    text = text.replaceAll("localhost", "anmeldesystem-backend-newman_build_" + build_number)
-//                    writeFile file: "./collection/gjm-test.postman_collection.json", text: text
+                    def text = readFile file: "./gjm-test.postman_collection.json"
+                    text = text.replaceAll("localhost", "anmeldesystem-backend-newman_build_" + build_number)
+                    writeFile file: "./gjm-test.postman_collection.json", text: text
                     sh 'ls -la $(pwd)'
                     sh 'chmod 777 gjm-test.postman_collection.json'
                     sh 'ls -la $(pwd)'
