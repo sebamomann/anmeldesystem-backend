@@ -659,7 +659,7 @@ export class UserService {
             user.mail + process.env.SALT_MAIL + user.username + (new Date(user.iat)).getTime())
             .digest('hex');
 
-        if (process.env.NODE_ENV === 'test_postman') {
+        if (process.env.NODE_ENV === 'postman') {
             user.accountActivationEmail = btoa(user.mail);
             user.accountActivationToken = token;
         }

@@ -72,7 +72,7 @@ pipeline {
                             '--env SALT_MAIL=salt ' +
                             '--env SALT_ENROLLMENT=salt ' +
                             '--env DOMAIN=go-join.me ' +
-                            '--env NODE_ENV=test_postman ' +
+                            '--env NODE_ENV=postman ' +
                             '--network ' + netName + ' ' +
                             '--health-cmd=\'curl localhost:3000/healthcheck || exit 1 \' ' +
                             '--health-interval=2s ' +
