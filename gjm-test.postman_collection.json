@@ -7543,7 +7543,7 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-creator_id}}/check-permission",
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission",
                       "protocol": "http",
                       "host": [
                         "newman_backend"
@@ -7551,7 +7551,7 @@
                       "port": "3000",
                       "path": [
                         "enrollment",
-                        "{{enrollment-creator_id}}",
+                        "{{enrollment-admin_id}}",
                         "check-permission"
                       ]
                     }
@@ -7592,7 +7592,7 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-creator_id}}/check-permission?token=anytoken",
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission?token=anytoken",
                       "protocol": "http",
                       "host": [
                         "newman_backend"
@@ -7600,7 +7600,7 @@
                       "port": "3000",
                       "path": [
                         "enrollment",
-                        "{{enrollment-creator_id}}",
+                        "{{enrollment-admin_id}}",
                         "check-permission"
                       ],
                       "query": [
