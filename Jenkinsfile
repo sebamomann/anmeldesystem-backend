@@ -155,7 +155,7 @@ pipeline {
                 }
 
                 try {
-                    sh 'docker network rm ' netName
+                    sh 'docker network rm ' + netName
                 } catch (err) {
                     echo err.getMessage()
                 }
