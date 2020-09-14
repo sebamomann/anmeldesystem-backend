@@ -35,6 +35,7 @@ pipeline {
                 }
             }
         }
+
         stage('Newman prepare') {
             steps {
                 script {
@@ -136,7 +137,7 @@ pipeline {
         always {
             script {
                 try {
-                    sh 'docker container rm ' + dbName + ' -f'
+                    sh 'docker container rm ' + apiName + ' -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
