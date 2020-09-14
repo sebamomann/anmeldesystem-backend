@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "b44b6b6f-496b-4089-b654-f3d0be21e33b",
     "name": "gjm-tests",
-    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
@@ -70,7 +70,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/users/"
+                "url": {
+                  "raw": "http://newman_backend:3000/users/",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
               },
               "response": []
             },
@@ -124,7 +135,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/users/"
+                "url": {
+                  "raw": "http://newman_backend:3000/users/",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
               },
               "response": []
             },
@@ -178,7 +200,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/users/"
+                "url": {
+                  "raw": "http://newman_backend:3000/users/",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
               },
               "response": []
             },
@@ -231,7 +264,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/users/"
+                "url": {
+                  "raw": "http://newman_backend:3000/users/",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
               },
               "response": []
             },
@@ -294,7 +338,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/users/"
+                "url": {
+                  "raw": "http://newman_backend:3000/users/",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
               },
               "response": []
             },
@@ -357,7 +412,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/users/"
+                "url": {
+                  "raw": "http://newman_backend:3000/users/",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
               },
               "response": []
             },
@@ -420,7 +486,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/users/"
+                "url": {
+                  "raw": "http://newman_backend:3000/users/",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
               },
               "response": []
             },
@@ -483,7 +560,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/users/"
+                "url": {
+                  "raw": "http://newman_backend:3000/users/",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
               },
               "response": []
             },
@@ -547,7 +635,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/users/"
+                "url": {
+                  "raw": "http://newman_backend:3000/users/",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
               },
               "response": []
             },
@@ -611,7 +710,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/users/"
+                "url": {
+                  "raw": "http://newman_backend:3000/users/",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
               },
               "response": []
             }
@@ -656,7 +766,19 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman_backend:3000/users/verify/{{creator_activationEmail}}/{{creator_activationToken}}"
+                "url": {
+                  "raw": "newman_backend:3000/users/verify/{{creator_activationEmail}}/{{creator_activationToken}}",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    "verify",
+                    "{{creator_activationEmail}}",
+                    "{{creator_activationToken}}"
+                  ]
+                }
               },
               "response": []
             },
@@ -701,7 +823,19 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman_backend:3000/users/verify/{{creator_activationEmail}}/{{creator_activationToken}}"
+                "url": {
+                  "raw": "newman_backend:3000/users/verify/{{creator_activationEmail}}/{{creator_activationToken}}",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    "verify",
+                    "{{creator_activationEmail}}",
+                    "{{creator_activationToken}}"
+                  ]
+                }
               },
               "response": []
             },
@@ -746,7 +880,19 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman_backend:3000/users/verify/unknown/{{creator_activationToken}}"
+                "url": {
+                  "raw": "newman_backend:3000/users/verify/unknown/{{creator_activationToken}}",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    "verify",
+                    "unknown",
+                    "{{creator_activationToken}}"
+                  ]
+                }
               },
               "response": []
             },
@@ -791,7 +937,19 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman_backend:3000/users/verify/{{creator_activationEmail}}/invalidToken"
+                "url": {
+                  "raw": "newman_backend:3000/users/verify/{{creator_activationEmail}}/invalidToken",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    "verify",
+                    "{{creator_activationEmail}}",
+                    "invalidToken"
+                  ]
+                }
               },
               "response": []
             },
@@ -829,7 +987,19 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman_backend:3000/users/verify/{{admin_activationEmail}}/{{admin_activationToken}}"
+                "url": {
+                  "raw": "newman_backend:3000/users/verify/{{admin_activationEmail}}/{{admin_activationToken}}",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    "verify",
+                    "{{admin_activationEmail}}",
+                    "{{admin_activationToken}}"
+                  ]
+                }
               },
               "response": []
             },
@@ -867,7 +1037,19 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman_backend:3000/users/verify/{{admin_2_activationEmail}}/{{admin_2_activationToken}}"
+                "url": {
+                  "raw": "newman_backend:3000/users/verify/{{admin_2_activationEmail}}/{{admin_2_activationToken}}",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    "verify",
+                    "{{admin_2_activationEmail}}",
+                    "{{admin_2_activationToken}}"
+                  ]
+                }
               },
               "response": []
             },
@@ -905,7 +1087,19 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman_backend:3000/users/verify/{{user_activationEmail}}/{{user_activationToken}}"
+                "url": {
+                  "raw": "newman_backend:3000/users/verify/{{user_activationEmail}}/{{user_activationToken}}",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    "verify",
+                    "{{user_activationEmail}}",
+                    "{{user_activationToken}}"
+                  ]
+                }
               },
               "response": []
             },
@@ -943,7 +1137,19 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman_backend:3000/users/verify/{{user_2_activationEmail}}/{{user_2_activationToken}}"
+                "url": {
+                  "raw": "newman_backend:3000/users/verify/{{user_2_activationEmail}}/{{user_2_activationToken}}",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    "verify",
+                    "{{user_2_activationEmail}}",
+                    "{{user_2_activationToken}}"
+                  ]
+                }
               },
               "response": []
             },
@@ -981,7 +1187,19 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman_backend:3000/users/verify/{{driver_activationEmail}}/{{driver_activationToken}}"
+                "url": {
+                  "raw": "newman_backend:3000/users/verify/{{driver_activationEmail}}/{{driver_activationToken}}",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    "verify",
+                    "{{driver_activationEmail}}",
+                    "{{driver_activationToken}}"
+                  ]
+                }
               },
               "response": []
             },
@@ -1019,7 +1237,19 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman_backend:3000/users/verify/{{passenger_activationEmail}}/{{passenger_activationToken}}"
+                "url": {
+                  "raw": "newman_backend:3000/users/verify/{{passenger_activationEmail}}/{{passenger_activationToken}}",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "users",
+                    "verify",
+                    "{{passenger_activationEmail}}",
+                    "{{passenger_activationToken}}"
+                  ]
+                }
               },
               "response": []
             }
@@ -1077,7 +1307,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/login"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               },
               "response": []
             },
@@ -1130,7 +1371,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/login"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               },
               "response": []
             },
@@ -1183,7 +1435,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/login"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               },
               "response": []
             },
@@ -1234,7 +1497,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/login"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               },
               "response": []
             },
@@ -1285,7 +1559,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/login"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               },
               "response": []
             },
@@ -1336,7 +1621,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/login"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               },
               "response": []
             },
@@ -1387,7 +1683,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/login"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               },
               "response": []
             },
@@ -1438,7 +1745,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/login"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               },
               "response": []
             },
@@ -1489,7 +1807,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/login"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               },
               "response": []
             }
@@ -1543,7 +1872,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/token"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/token",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "token"
+                  ]
+                }
               },
               "response": []
             },
@@ -1585,7 +1925,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/token"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/token",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "token"
+                  ]
+                }
               },
               "response": []
             },
@@ -1627,7 +1978,18 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/auth/token"
+                "url": {
+                  "raw": "http://newman_backend:3000/auth/token",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "auth",
+                    "token"
+                  ]
+                }
               },
               "response": []
             }
@@ -1656,11 +2018,11 @@
                       "\r",
                       "var date = pm.globals.replaceIn('{{$randomDateFuture}}');\r",
                       "var date_unix = Date.parse(date);\r",
-                      "var date_final = moment(date_unix).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+                      "var date_final = moment(date_unix).format(\"YYYY-MM-DDThh:mmZ\");\r",
                       "\r",
                       "var deadline = pm.globals.replaceIn('{{$randomDatePast}}');\r",
                       "var deadline_unix = Date.parse(deadline);\r",
-                      "var deadline_final = moment(deadline_unix).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+                      "var deadline_final = moment(deadline_unix).format(\"YYYY-MM-DDThh:mmZ\");\r",
                       "\r",
                       "pm.globals.set(\"appointment_title\", pm.globals.replaceIn('{{$randomJobTitle}}'));\r",
                       "pm.globals.set(\"appointment_description\", pm.globals.replaceIn('{{$randomLoremSentence}}'));\r",
@@ -1703,11 +2065,11 @@
                       "\r",
                       "    var date = pm.globals.replaceIn(jsonData.date);\r",
                       "    var date_unix = Date.parse(date);\r",
-                      "    var date_final = moment(date_unix).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+                      "    var date_final = moment(date_unix).format(\"YYYY-MM-DDThh:mmZ\");\r",
                       "\r",
                       "    var deadline = pm.globals.replaceIn(jsonData.deadline);\r",
                       "    var deadline_unix = Date.parse(deadline);\r",
-                      "    var deadline_final = moment(deadline_unix).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+                      "    var deadline_final = moment(deadline_unix).format(\"YYYY-MM-DDThh:mmZ\");\r",
                       "    \r",
                       "    console.log(date_final + '_' + pm.globals.get(\"appointment_date\"));\r",
                       "    pm.expect(date_final).to.eql(pm.globals.get(\"appointment_date\"));\r",
@@ -1732,9 +2094,13 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": {
-                    "token": "{{creator_token}}"
-                  }
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{creator_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "POST",
                 "header": [],
@@ -1747,7 +2113,17 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/appointment"
+                "url": {
+                  "raw": "http://newman_backend:3000/appointment",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "appointment"
+                  ]
+                }
               },
               "response": []
             },
@@ -1763,11 +2139,11 @@
                       "\r",
                       "var date = pm.globals.replaceIn('{{$randomDateFuture}}');\r",
                       "var date_unix = Date.parse(date);\r",
-                      "var date_final = moment(date_unix).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+                      "var date_final = moment(date_unix).format(\"YYYY-MM-DDThh:mmZ\");\r",
                       "\r",
                       "var deadline = pm.globals.replaceIn('{{$randomDatePast}}');\r",
                       "var deadline_unix = Date.parse(deadline);\r",
-                      "var deadline_final = moment(deadline_unix).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+                      "var deadline_final = moment(deadline_unix).format(\"YYYY-MM-DDThh:mmZ\");\r",
                       "\r",
                       "pm.globals.set(\"appointment_test_title\", pm.globals.replaceIn('{{$randomJobTitle}}'));\r",
                       "pm.globals.set(\"appointment_test_description\", pm.globals.replaceIn('{{$randomLoremSentence}}'));\r",
@@ -1807,11 +2183,11 @@
                       "\r",
                       "    var date = pm.globals.replaceIn(jsonData.date);\r",
                       "    var date_unix = Date.parse(date);\r",
-                      "    var date_final = moment(date_unix).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+                      "    var date_final = moment(date_unix).format(\"YYYY-MM-DDThh:mmZ\");\r",
                       "\r",
                       "    var deadline = pm.globals.replaceIn(jsonData.deadline);\r",
                       "    var deadline_unix = Date.parse(deadline);\r",
-                      "    var deadine_final = moment(deadline_unix).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+                      "    var deadline_final = moment(deadline_unix).format(\"YYYY-MM-DDThh:mmZ\");\r",
                       "    \r",
                       "    console.log(date_final + '_' + pm.globals.get(\"appointment_test_date\"));\r",
                       "    pm.expect(date_final).to.eql(pm.globals.get(\"appointment_test_date\"));\r",
@@ -1836,9 +2212,13 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": {
-                    "token": "{{creator_token}}"
-                  }
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{creator_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "POST",
                 "header": [],
@@ -1851,7 +2231,17 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/appointment",
+                "url": {
+                  "raw": "http://newman_backend:3000/appointment",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "appointment"
+                  ]
+                },
                 "description": "Appointment needed for link in use update"
               },
               "response": []
@@ -1897,9 +2287,13 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": {
-                    "token": "{{creator_token}}"
-                  }
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{creator_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "POST",
                 "header": [],
@@ -1912,7 +2306,17 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/appointment"
+                "url": {
+                  "raw": "http://newman_backend:3000/appointment",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "appointment"
+                  ]
+                }
               },
               "response": []
             },
@@ -1974,9 +2378,13 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": {
-                    "token": "{{creator_token}}"
-                  }
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{creator_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "POST",
                 "header": [],
@@ -1989,7 +2397,17 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/appointment"
+                "url": {
+                  "raw": "http://newman_backend:3000/appointment",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "appointment"
+                  ]
+                }
               },
               "response": []
             },
@@ -2034,9 +2452,13 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": {
-                    "token": "{{creator_token}}"
-                  }
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{creator_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "POST",
                 "header": [],
@@ -2049,7 +2471,17 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/appointment"
+                "url": {
+                  "raw": "http://newman_backend:3000/appointment",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "appointment"
+                  ]
+                }
               },
               "response": []
             },
@@ -2110,9 +2542,13 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": {
-                    "token": "{{creator_token}}"
-                  }
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{creator_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "POST",
                 "header": [],
@@ -2125,7 +2561,17 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/appointment"
+                "url": {
+                  "raw": "http://newman_backend:3000/appointment",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "appointment"
+                  ]
+                }
               },
               "response": []
             },
@@ -2186,9 +2632,13 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": {
-                    "token": "{{creator_token}}"
-                  }
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{creator_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "POST",
                 "header": [],
@@ -2201,7 +2651,17 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/appointment"
+                "url": {
+                  "raw": "http://newman_backend:3000/appointment",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "appointment"
+                  ]
+                }
               },
               "response": []
             },
@@ -2262,9 +2722,13 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": {
-                    "token": "{{creator_token}}"
-                  }
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{creator_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "POST",
                 "header": [],
@@ -2277,7 +2741,17 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/appointment"
+                "url": {
+                  "raw": "http://newman_backend:3000/appointment",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "appointment"
+                  ]
+                }
               },
               "response": []
             },
@@ -2339,9 +2813,13 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": {
-                    "token": "{{creator_token}}"
-                  }
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{creator_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "POST",
                 "header": [],
@@ -2354,7 +2832,17 @@
                     }
                   }
                 },
-                "url": "http://newman_backend:3000/appointment"
+                "url": {
+                  "raw": "http://newman_backend:3000/appointment",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "appointment"
+                  ]
+                }
               },
               "response": []
             }
@@ -2410,9 +2898,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -2425,7 +2917,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -2471,9 +2974,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -2486,7 +2993,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -2532,9 +3050,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -2547,7 +3069,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -2593,9 +3126,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -2608,7 +3145,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -2654,9 +3202,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -2669,7 +3221,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -2712,9 +3275,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -2727,7 +3294,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -2773,9 +3351,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -2788,7 +3370,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -2834,9 +3427,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -2849,7 +3446,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 }
@@ -2903,9 +3511,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -2918,7 +3530,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -2964,9 +3587,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -2979,7 +3606,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3025,9 +3663,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -3040,7 +3682,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 }
@@ -3095,9 +3748,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -3110,7 +3767,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3158,9 +3826,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -3173,7 +3845,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3221,9 +3904,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -3236,7 +3923,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 }
@@ -3295,9 +3993,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -3310,7 +4012,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3362,9 +4075,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -3377,7 +4094,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3429,9 +4157,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -3444,7 +4176,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3496,9 +4239,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -3511,7 +4258,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 }
@@ -3547,9 +4305,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -3562,7 +4324,19 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}",
+                        "administrator"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3596,9 +4370,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{admin_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{admin_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -3611,7 +4389,19 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}",
+                        "administrator"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3640,9 +4430,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "DELETE",
                     "header": [],
@@ -3655,7 +4449,20 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator/{{admin_username}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator/{{admin_username}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}",
+                        "administrator",
+                        "{{admin_username}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3689,9 +4496,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{admin_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{admin_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -3704,7 +4515,19 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}",
+                        "administrator"
+                      ]
+                    }
                   },
                   "response": []
                 }
@@ -3773,9 +4596,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -3788,7 +4615,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3833,9 +4670,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -3848,7 +4689,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3894,9 +4745,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -3909,7 +4764,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -3965,9 +4831,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{driver_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{driver_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -3980,7 +4850,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -4034,9 +4914,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{passenger_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{passenger_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -4049,7 +4933,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -4095,9 +4989,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -4110,7 +5008,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 }
@@ -4179,7 +5088,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -4240,7 +5159,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -4301,7 +5230,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -4368,7 +5307,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -4433,7 +5382,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -4489,7 +5448,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -4535,9 +5504,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -4550,7 +5523,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -4619,7 +5603,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -4686,7 +5680,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -4732,9 +5736,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -4747,7 +5755,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 }
@@ -4821,7 +5840,18 @@
                             }
                           }
                         },
-                        "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}"
+                        "url": {
+                          "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}",
+                          "protocol": "http",
+                          "host": [
+                            "newman_backend"
+                          ],
+                          "port": "3000",
+                          "path": [
+                            "enrollment",
+                            "{{enrollment-unknown_id}}"
+                          ]
+                        }
                       },
                       "response": []
                     },
@@ -4877,7 +5907,18 @@
                             }
                           }
                         },
-                        "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}"
+                        "url": {
+                          "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}",
+                          "protocol": "http",
+                          "host": [
+                            "newman_backend"
+                          ],
+                          "port": "3000",
+                          "path": [
+                            "enrollment",
+                            "{{enrollment-unknown_id}}"
+                          ]
+                        }
                       },
                       "response": []
                     },
@@ -4934,7 +5975,18 @@
                             }
                           }
                         },
-                        "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}"
+                        "url": {
+                          "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}",
+                          "protocol": "http",
+                          "host": [
+                            "newman_backend"
+                          ],
+                          "port": "3000",
+                          "path": [
+                            "enrollment",
+                            "{{enrollment-unknown_id}}"
+                          ]
+                        }
                       },
                       "response": []
                     }
@@ -5004,7 +6056,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-unknown_id}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5060,7 +6123,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-unknown_id}}"
+                      ]
+                    }
                   },
                   "response": []
                 }
@@ -5113,9 +6187,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -5128,7 +6206,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5188,7 +6277,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown-driver_id}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown-driver_id}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-unknown-driver_id}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5248,7 +6348,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown-driver_id}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown-driver_id}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-unknown-driver_id}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5295,9 +6406,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -5310,7 +6425,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown-passenger_id}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown-passenger_id}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-unknown-passenger_id}}"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5356,9 +6482,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "PUT",
                     "header": [],
@@ -5371,7 +6501,18 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}"
+                      ]
+                    }
                   },
                   "response": []
                 }
@@ -5414,13 +6555,28 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": {
-                    "token": "{{creator_token}}"
-                  }
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{creator_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "DELETE",
                 "header": [],
-                "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}"
+                "url": {
+                  "raw": "http://newman_backend:3000/enrollment/{{enrollment_id}}",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "enrollment",
+                    "{{enrollment_id}}"
+                  ]
+                }
               },
               "response": []
             },
@@ -5454,13 +6610,28 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": {
-                    "token": "{{creator_token}}"
-                  }
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{creator_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "DELETE",
                 "header": [],
-                "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}"
+                "url": {
+                  "raw": "http://newman_backend:3000/enrollment/{{enrollment_id}}",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "enrollment",
+                    "{{enrollment_id}}"
+                  ]
+                }
               },
               "response": []
             },
@@ -5493,7 +6664,19 @@
                 },
                 "method": "DELETE",
                 "header": [],
-                "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}"
+                "url": {
+                  "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "enrollment",
+                    "{{enrollment-unknown_id}}",
+                    "{{enrollment-unknown_token}}"
+                  ]
+                }
               },
               "response": []
             },
@@ -5530,7 +6713,19 @@
                 },
                 "method": "DELETE",
                 "header": [],
-                "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}"
+                "url": {
+                  "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}",
+                  "protocol": "http",
+                  "host": [
+                    "newman_backend"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "enrollment",
+                    "{{enrollment-unknown_id}}",
+                    "{{enrollment-unknown_token}}"
+                  ]
+                }
               },
               "response": []
             }
@@ -5589,9 +6784,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -5604,7 +6803,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5633,9 +6842,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -5648,7 +6861,19 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}",
+                        "administrator"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5681,13 +6906,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5719,13 +6960,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{admin_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{admin_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5757,13 +7014,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{user_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{user_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5800,7 +7073,19 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5909,9 +7194,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{admin_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{admin_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -5924,7 +7213,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -5951,9 +7250,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -5966,7 +7269,19 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator"
+                    "url": {
+                      "raw": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "appointment",
+                        "{{appointment_link}}",
+                        "administrator"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6000,13 +7315,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-admin_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6040,13 +7371,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{admin_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{admin_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-admin_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6080,13 +7427,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{admin_2_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{admin_2_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-admin_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6120,13 +7483,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{user_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{user_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-admin_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6163,7 +7542,19 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-creator_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-creator_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-creator_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6274,9 +7665,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{user_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{user_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "POST",
                     "header": [],
@@ -6289,7 +7684,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6323,13 +7728,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-user_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6363,13 +7784,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{admin_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{admin_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-user_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6403,13 +7840,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{user_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{user_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-user_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6443,13 +7896,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{user_2_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{user_2_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-user_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6486,7 +7955,19 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-user_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6610,7 +8091,17 @@
                         }
                       }
                     },
-                    "url": "http://newman_backend:3000/enrollment"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6643,13 +8134,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-unknown_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6682,9 +8189,13 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{creator_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{creator_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
@@ -6740,13 +8251,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{admin_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{admin_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-unknown_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6778,13 +8305,29 @@
                   "request": {
                     "auth": {
                       "type": "bearer",
-                      "bearer": {
-                        "token": "{{user_token}}"
-                      }
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{user_token}}",
+                          "type": "string"
+                        }
+                      ]
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-unknown_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
@@ -6876,7 +8419,19 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman_backend:3000/enrollment/{{enrollment-na_id}}/check-permission"
+                    "url": {
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-na_id}}/check-permission",
+                      "protocol": "http",
+                      "host": [
+                        "newman_backend"
+                      ],
+                      "port": "3000",
+                      "path": [
+                        "enrollment",
+                        "{{enrollment-na_id}}",
+                        "check-permission"
+                      ]
+                    }
                   },
                   "response": []
                 },
