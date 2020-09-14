@@ -57,7 +57,7 @@ pipeline {
 
                     waitUntil {
                         "healthy" == sh(returnStdout: true,
-                                script: "docker inspect" + dbName + " --format=\"{{ .State.Health.Status }}\"").trim()
+                                script: "docker inspect " + dbName + " --format=\"{{ .State.Health.Status }}\"").trim()
                     }
 
                     sh 'docker run -d ' +
