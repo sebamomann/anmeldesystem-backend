@@ -145,7 +145,9 @@ export class AppointmentService {
         let _before;
         const date = new Date(before);
         try {
-            date.getTime();
+            if (!date.getTime()) {
+                throw new Error();
+            }
             _before = date;
         } catch (e) {
             _before = new Date();
