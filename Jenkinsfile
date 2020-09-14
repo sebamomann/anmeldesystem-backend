@@ -6,7 +6,7 @@ def build_number = "${env.BUILD_NUMBER}"
 def dbName = 'newman_db_jb' + build_number
 def newmanName = 'newman_jb' + build_number
 def netName = 'newman_net_jb' + build_number
-def apiName = 'newman_backend_jb' + build_number
+def apiName = 'newman_backend'
 
 pipeline {
     agent any

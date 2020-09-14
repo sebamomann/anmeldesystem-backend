@@ -70,7 +70,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/users/"
+                "url": "http://newman_backend:3000/users/"
               },
               "response": []
             },
@@ -124,7 +124,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/users/"
+                "url": "http://newman_backend:3000/users/"
               },
               "response": []
             },
@@ -178,7 +178,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/users/"
+                "url": "http://newman_backend:3000/users/"
               },
               "response": []
             },
@@ -231,7 +231,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/users/"
+                "url": "http://newman_backend:3000/users/"
               },
               "response": []
             },
@@ -294,7 +294,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/users/"
+                "url": "http://newman_backend:3000/users/"
               },
               "response": []
             },
@@ -357,7 +357,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/users/"
+                "url": "http://newman_backend:3000/users/"
               },
               "response": []
             },
@@ -420,7 +420,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/users/"
+                "url": "http://newman_backend:3000/users/"
               },
               "response": []
             },
@@ -483,7 +483,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/users/"
+                "url": "http://newman_backend:3000/users/"
               },
               "response": []
             },
@@ -547,7 +547,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/users/"
+                "url": "http://newman_backend:3000/users/"
               },
               "response": []
             },
@@ -611,7 +611,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/users/"
+                "url": "http://newman_backend:3000/users/"
               },
               "response": []
             }
@@ -656,7 +656,7 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman-backend:3000/users/verify/{{creator_activationEmail}}/{{creator_activationToken}}"
+                "url": "newman_backend:3000/users/verify/{{creator_activationEmail}}/{{creator_activationToken}}"
               },
               "response": []
             },
@@ -701,7 +701,7 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman-backend:3000/users/verify/{{creator_activationEmail}}/{{creator_activationToken}}"
+                "url": "newman_backend:3000/users/verify/{{creator_activationEmail}}/{{creator_activationToken}}"
               },
               "response": []
             },
@@ -746,7 +746,7 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman-backend:3000/users/verify/unknown/{{creator_activationToken}}"
+                "url": "newman_backend:3000/users/verify/unknown/{{creator_activationToken}}"
               },
               "response": []
             },
@@ -791,7 +791,7 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman-backend:3000/users/verify/{{creator_activationEmail}}/invalidToken"
+                "url": "newman_backend:3000/users/verify/{{creator_activationEmail}}/invalidToken"
               },
               "response": []
             },
@@ -829,7 +829,7 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman-backend:3000/users/verify/{{admin_activationEmail}}/{{admin_activationToken}}"
+                "url": "newman_backend:3000/users/verify/{{admin_activationEmail}}/{{admin_activationToken}}"
               },
               "response": []
             },
@@ -867,7 +867,7 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman-backend:3000/users/verify/{{admin_2_activationEmail}}/{{admin_2_activationToken}}"
+                "url": "newman_backend:3000/users/verify/{{admin_2_activationEmail}}/{{admin_2_activationToken}}"
               },
               "response": []
             },
@@ -905,7 +905,7 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman-backend:3000/users/verify/{{user_activationEmail}}/{{user_activationToken}}"
+                "url": "newman_backend:3000/users/verify/{{user_activationEmail}}/{{user_activationToken}}"
               },
               "response": []
             },
@@ -943,7 +943,7 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman-backend:3000/users/verify/{{user_2_activationEmail}}/{{user_2_activationToken}}"
+                "url": "newman_backend:3000/users/verify/{{user_2_activationEmail}}/{{user_2_activationToken}}"
               },
               "response": []
             },
@@ -981,7 +981,7 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman-backend:3000/users/verify/{{driver_activationEmail}}/{{driver_activationToken}}"
+                "url": "newman_backend:3000/users/verify/{{driver_activationEmail}}/{{driver_activationToken}}"
               },
               "response": []
             },
@@ -1019,7 +1019,7 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "newman-backend:3000/users/verify/{{passenger_activationEmail}}/{{passenger_activationToken}}"
+                "url": "newman_backend:3000/users/verify/{{passenger_activationEmail}}/{{passenger_activationToken}}"
               },
               "response": []
             }
@@ -1077,7 +1077,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/login"
+                "url": "http://newman_backend:3000/auth/login"
               },
               "response": []
             },
@@ -1130,7 +1130,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/login"
+                "url": "http://newman_backend:3000/auth/login"
               },
               "response": []
             },
@@ -1183,7 +1183,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/login"
+                "url": "http://newman_backend:3000/auth/login"
               },
               "response": []
             },
@@ -1234,7 +1234,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/login"
+                "url": "http://newman_backend:3000/auth/login"
               },
               "response": []
             },
@@ -1285,7 +1285,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/login"
+                "url": "http://newman_backend:3000/auth/login"
               },
               "response": []
             },
@@ -1336,7 +1336,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/login"
+                "url": "http://newman_backend:3000/auth/login"
               },
               "response": []
             },
@@ -1387,7 +1387,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/login"
+                "url": "http://newman_backend:3000/auth/login"
               },
               "response": []
             },
@@ -1438,7 +1438,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/login"
+                "url": "http://newman_backend:3000/auth/login"
               },
               "response": []
             },
@@ -1489,7 +1489,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/login"
+                "url": "http://newman_backend:3000/auth/login"
               },
               "response": []
             }
@@ -1543,7 +1543,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/token"
+                "url": "http://newman_backend:3000/auth/token"
               },
               "response": []
             },
@@ -1585,7 +1585,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/token"
+                "url": "http://newman_backend:3000/auth/token"
               },
               "response": []
             },
@@ -1627,7 +1627,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/auth/token"
+                "url": "http://newman_backend:3000/auth/token"
               },
               "response": []
             }
@@ -1739,7 +1739,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/appointment"
+                "url": "http://newman_backend:3000/appointment"
               },
               "response": []
             },
@@ -1836,7 +1836,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/appointment",
+                "url": "http://newman_backend:3000/appointment",
                 "description": "Appointment needed for link in use update"
               },
               "response": []
@@ -1897,7 +1897,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/appointment"
+                "url": "http://newman_backend:3000/appointment"
               },
               "response": []
             },
@@ -1974,7 +1974,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/appointment"
+                "url": "http://newman_backend:3000/appointment"
               },
               "response": []
             },
@@ -2034,7 +2034,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/appointment"
+                "url": "http://newman_backend:3000/appointment"
               },
               "response": []
             },
@@ -2110,7 +2110,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/appointment"
+                "url": "http://newman_backend:3000/appointment"
               },
               "response": []
             },
@@ -2186,7 +2186,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/appointment"
+                "url": "http://newman_backend:3000/appointment"
               },
               "response": []
             },
@@ -2262,7 +2262,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/appointment"
+                "url": "http://newman_backend:3000/appointment"
               },
               "response": []
             },
@@ -2339,7 +2339,7 @@
                     }
                   }
                 },
-                "url": "http://newman-backend:3000/appointment"
+                "url": "http://newman_backend:3000/appointment"
               },
               "response": []
             }
@@ -2410,7 +2410,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -2471,7 +2471,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -2532,7 +2532,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -2593,7 +2593,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -2654,7 +2654,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -2712,7 +2712,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -2773,7 +2773,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -2834,7 +2834,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 }
@@ -2903,7 +2903,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -2964,7 +2964,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -3025,7 +3025,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 }
@@ -3095,7 +3095,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -3158,7 +3158,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -3221,7 +3221,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 }
@@ -3295,7 +3295,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -3362,7 +3362,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -3429,7 +3429,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -3496,7 +3496,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 }
@@ -3547,7 +3547,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}/administrator"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator"
                   },
                   "response": []
                 },
@@ -3596,7 +3596,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}/administrator"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator"
                   },
                   "response": []
                 },
@@ -3640,7 +3640,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}/administrator/{{admin_username}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator/{{admin_username}}"
                   },
                   "response": []
                 },
@@ -3689,7 +3689,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}/administrator"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator"
                   },
                   "response": []
                 }
@@ -3773,7 +3773,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -3833,7 +3833,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -3894,7 +3894,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -3965,7 +3965,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -4034,7 +4034,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -4095,7 +4095,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 }
@@ -4164,7 +4164,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -4225,7 +4225,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -4286,7 +4286,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -4353,7 +4353,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -4418,7 +4418,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -4474,7 +4474,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -4535,7 +4535,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -4604,7 +4604,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -4671,7 +4671,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -4732,7 +4732,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 }
@@ -4806,7 +4806,7 @@
                             }
                           }
                         },
-                        "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}"
+                        "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}"
                       },
                       "response": []
                     },
@@ -4862,7 +4862,7 @@
                             }
                           }
                         },
-                        "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}"
+                        "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}"
                       },
                       "response": []
                     },
@@ -4919,7 +4919,7 @@
                             }
                           }
                         },
-                        "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}"
+                        "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}"
                       },
                       "response": []
                     }
@@ -4989,7 +4989,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}"
                   },
                   "response": []
                 },
@@ -5045,7 +5045,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}"
                   },
                   "response": []
                 }
@@ -5113,7 +5113,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 },
@@ -5173,7 +5173,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown-driver_id}}"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown-driver_id}}"
                   },
                   "response": []
                 },
@@ -5233,7 +5233,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown-driver_id}}"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown-driver_id}}"
                   },
                   "response": []
                 },
@@ -5295,7 +5295,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown-passenger_id}}"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown-passenger_id}}"
                   },
                   "response": []
                 },
@@ -5356,7 +5356,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}"
                   },
                   "response": []
                 }
@@ -5405,7 +5405,7 @@
                 },
                 "method": "DELETE",
                 "header": [],
-                "url": "http://newman-backend:3000/enrollment/{{enrollment_id}}"
+                "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}"
               },
               "response": []
             },
@@ -5445,7 +5445,7 @@
                 },
                 "method": "DELETE",
                 "header": [],
-                "url": "http://newman-backend:3000/enrollment/{{enrollment_id}}"
+                "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}"
               },
               "response": []
             },
@@ -5478,7 +5478,7 @@
                 },
                 "method": "DELETE",
                 "header": [],
-                "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}"
+                "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}"
               },
               "response": []
             },
@@ -5515,7 +5515,7 @@
                 },
                 "method": "DELETE",
                 "header": [],
-                "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}"
+                "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/{{enrollment-unknown_token}}"
               },
               "response": []
             }
@@ -5589,7 +5589,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -5633,7 +5633,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}/administrator"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator"
                   },
                   "response": []
                 },
@@ -5672,7 +5672,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -5710,7 +5710,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -5748,7 +5748,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -5785,7 +5785,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -5821,10 +5821,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://newman-backend:3000/enrollment/{{enrollment_id}}/check-permission?token=anytoken",
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment_id}}/check-permission?token=anytoken",
                       "protocol": "http",
                       "host": [
-                        "newman-backend"
+                        "newman_backend"
                       ],
                       "port": "3000",
                       "path": [
@@ -5909,7 +5909,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -5951,7 +5951,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/appointment/{{appointment_link}}/administrator"
+                    "url": "http://newman_backend:3000/appointment/{{appointment_link}}/administrator"
                   },
                   "response": []
                 },
@@ -5991,7 +5991,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6031,7 +6031,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6071,7 +6071,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6111,7 +6111,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-admin_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6148,7 +6148,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-creator_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-creator_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6186,10 +6186,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://newman-backend:3000/enrollment/{{enrollment-creator_id}}/check-permission?token=anytoken",
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-creator_id}}/check-permission?token=anytoken",
                       "protocol": "http",
                       "host": [
-                        "newman-backend"
+                        "newman_backend"
                       ],
                       "port": "3000",
                       "path": [
@@ -6274,7 +6274,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -6314,7 +6314,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6354,7 +6354,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6394,7 +6394,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6434,7 +6434,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6471,7 +6471,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6509,10 +6509,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://newman-backend:3000/enrollment/{{enrollment-user_id}}/check-permission?token=anytoken",
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-user_id}}/check-permission?token=anytoken",
                       "protocol": "http",
                       "host": [
-                        "newman-backend"
+                        "newman_backend"
                       ],
                       "port": "3000",
                       "path": [
@@ -6595,7 +6595,7 @@
                         }
                       }
                     },
-                    "url": "http://newman-backend:3000/enrollment"
+                    "url": "http://newman_backend:3000/enrollment"
                   },
                   "response": []
                 },
@@ -6634,7 +6634,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6674,10 +6674,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission?token={{enrollment-unknown_token}}",
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission?token={{enrollment-unknown_token}}",
                       "protocol": "http",
                       "host": [
-                        "newman-backend"
+                        "newman_backend"
                       ],
                       "port": "3000",
                       "path": [
@@ -6731,7 +6731,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6769,7 +6769,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6807,10 +6807,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://newman-backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission?token={{enrollment-unknown_token}}",
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-unknown_id}}/check-permission?token={{enrollment-unknown_token}}",
                       "protocol": "http",
                       "host": [
-                        "newman-backend"
+                        "newman_backend"
                       ],
                       "port": "3000",
                       "path": [
@@ -6861,7 +6861,7 @@
                     },
                     "method": "GET",
                     "header": [],
-                    "url": "http://newman-backend:3000/enrollment/{{enrollment-na_id}}/check-permission"
+                    "url": "http://newman_backend:3000/enrollment/{{enrollment-na_id}}/check-permission"
                   },
                   "response": []
                 },
@@ -6899,10 +6899,10 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "http://newman-backend:3000/enrollment/{{enrollment-na_id}}/check-permission?token=anytoken",
+                      "raw": "http://newman_backend:3000/enrollment/{{enrollment-na_id}}/check-permission?token=anytoken",
                       "protocol": "http",
                       "host": [
-                        "newman-backend"
+                        "newman_backend"
                       ],
                       "port": "3000",
                       "path": [
