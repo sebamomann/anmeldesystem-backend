@@ -67,3 +67,11 @@ fixtures:
                     lud: '2020-11-18 12:23:14'
                     appointment:
                             id: 71987871-6aa9-47a3-af7a-a986fd79801c
+        -   Enrollment:
+                    id: eda3f874-1a1f-4e12-9abf-70493778dade
+                    name: Unknown Enroll Edit 2
+                    comment: my comment
+                    iat: '2020-11-18 12:23:14'
+                    lud: '2020-11-18 12:23:14'
+                    appointment:
+                            id: 71987871-6aa9-47a3-af7a-a986fd79801c
