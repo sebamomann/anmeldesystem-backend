@@ -3,9 +3,10 @@ def branch_name = "${env.BRANCH_NAME}"
 def github_token = "${env.GITHUB_STATUS_ACCESS_TOKEN}"
 def build_number = "${env.BUILD_NUMBER}"
 
-def dbName = 'newman_db_jb' + build_number
-def newmanName = 'newman_jb' + build_number
-def netName = 'newman_net_jb' + build_number
+def tagName = 'jb_' + branch_name + "_" + build_number
+def dbName = 'newman_db_' + tagName
+def newmanName = 'newman_' + tagName
+def netName = 'newman_net_' + tagName
 def apiName = 'newman_backend'
 
 pipeline {
@@ -31,7 +32,7 @@ pipeline {
         stage('Build Docker image') {
             steps {
                 script {
-                    image = docker.build("anmeldesystem/anmeldesystem-backend:jb" + build_number)
+                    image = docker.build("anmeldesystem/anmeldesystem-backend:" + tagName)
                 }
             }
         }
@@ -76,7 +77,7 @@ pipeline {
                             '--network ' + netName + ' ' +
                             '--health-cmd=\'curl localhost:3000/healthcheck || exit 1 \' ' +
                             '--health-interval=2s ' +
-                            'anmeldesystem/anmeldesystem-backend:jb' + build_number
+                            'anmeldesystem/anmeldesystem-backend:' + tagName
 
                     waitUntil {
                         "healthy" == sh(returnStdout: true,
@@ -161,7 +162,7 @@ pipeline {
                 }
 
                 try {
-                    sh 'docker image rm anmeldesystem/anmeldesystem-backend:jb' + build_number + ' -f'
+                    sh 'docker image rm anmeldesystem/anmeldesystem-backend:' + tagName + ' -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
