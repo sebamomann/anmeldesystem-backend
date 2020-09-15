@@ -1,41 +1,41 @@
 fixtures:
-        -   User:
-                    id: 62fee891-015a-4393-9d53-522e5dc935a6
-                    name: Creator
-                    username: creator
-                    password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
-                    mail: creator@example.com
-                    activated: 1
-        -   User:
-                    id: c51f4e34-6152-4778-9b9c-48cf47ec5b80
-                    name: User Enroll
-                    username: user_enroll
-                    password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
-                    mail: user_enroll@example.com
-                    activated: 1
-        -   User:
-                    id: 3ed5ec48-afca-450a-8e55-b40769414bc6
-                    name: User Enroll Foreign
-                    username: user_enroll_foreign
-                    password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
-                    mail: user_enroll_foreign@example.com
-                    activated: 1
-        -   Appointment:
-                    id: cc1a91c9-ff03-4da0-a528-89bd9db1d438
-                    title: Protractor Enroll
-                    description: Protractor enroll test appointment
-                    link: protractorEnroll
-                    location: Here
-                    date: '2020-11-18 12:23:14'
-                    deadline: '2020-11-18 12:23:14'
-                    maxEnrollments: null
-                    hidden: false
-                    driverAddition: false
-                    iat: '2020-11-18 12:23:14'
-                    lud: '2020-11-18 12:23:14'
-                    creator:
-                            id: 62fee891-015a-4393-9d53-522e5dc935a6
-                    enrollments: []
-                    additions: []
-                    pinners: []
-                    files: []
+    -   User:
+            id: 62fee891-015a-4393-9d53-522e5dc935a6
+            name: Creator
+            username: creator
+            password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
+            mail: creator@example.com
+            activated: 1
+    -   User:
+            id: c51f4e34-6152-4778-9b9c-48cf47ec5b80
+            name: User Enroll
+            username: user_enroll
+            password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
+            mail: user_enroll@example.com
+            activated: 1
+    -   User:
+            id: 3ed5ec48-afca-450a-8e55-b40769414bc6
+            name: User Enroll Foreign
+            username: user_enroll_foreign
+            password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
+            mail: user_enroll_foreign@example.com
+            activated: 1
+    -   Appointment:
+            id: cc1a91c9-ff03-4da0-a528-89bd9db1d438
+            title: Protractor Enroll
+            description: Protractor enroll test appointment
+            link: protractorEnroll
+            location: Here
+            date: '2020-11-18 12:23:14'
+            deadline: '2020-11-18 12:23:14'
+            maxEnrollments: null
+            hidden: false
+            driverAddition: false
+            iat: '2020-11-18 12:23:14'
+            lud: '2020-11-18 12:23:14'
+            creator:
+                id: 62fee891-015a-4393-9d53-522e5dc935a6
+            enrollments: []
+            additions: []
+            pinners: []
+            files: []
