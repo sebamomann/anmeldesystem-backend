@@ -107,7 +107,7 @@ pipeline {
         stage('Publish to registry') {
             when {
                 expression {
-                    return branch_name =~ /^\d\.\d\.\d/
+                    return branch_name =~ /^\d\.\d\.\d(-\d+)?/
                 }
             }
             steps {
