@@ -1,0 +1,77 @@
+fixtures:
+        -   User:
+                    id: 1ad38997-64b8-4050-b682-ccaed0ab938c
+                    name: Creator Enroll Edit
+                    username: creator_enroll_edit
+                    password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
+                    mail: creator_enroll_edit@example.com
+                    activated: 1
+        -   User:
+                    id: 985c3e00-51be-4950-8adc-8dcb78024bef
+                    name: User Enroll Edit
+                    username: user_enroll_edit
+                    password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
+                    mail: user_enroll_edit@example.com
+                    activated: 1
+        -   User:
+                    id: 5474517b-fa62-4fc9-b42c-d97b7a367a6d
+                    name: User Enroll Edit 2
+                    username: user_enroll_edit_2
+                    password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
+                    mail: user_enroll_edit_2@example.com
+                    activated: 1
+        -   Appointment:
+                    id: 71987871-6aa9-47a3-af7a-a986fd79801c
+                    title: Protractor Enroll Edit
+                    description: Protractor enroll edit test appointment
+                    link: protractorEnrollEdit
+                    location: Here
+                    date: '2020-11-18 12:23:14'
+                    deadline: '2020-11-18 12:23:14'
+                    maxEnrollments: null
+                    hidden: false
+                    driverAddition: false
+                    iat: '2020-11-18 12:23:14'
+                    lud: '2020-11-18 12:23:14'
+                    creator:
+                            id: 1ad38997-64b8-4050-b682-ccaed0ab938c
+                    enrollments: []
+                    additions: []
+                    pinners: []
+                    files: []
+        -   Enrollment:
+                    id: bfd95241-8b2e-4b43-b3b4-bd1e39f925c1
+                    name: null
+                    comment: my comment
+                    iat: '2020-11-18 12:23:14'
+                    lud: '2020-11-18 12:23:14'
+                    appointment:
+                            id: 71987871-6aa9-47a3-af7a-a986fd79801c
+                    creator:
+                            id: 985c3e00-51be-4950-8adc-8dcb78024bef # user enroll edit
+        -   Enrollment:
+                    id: 3554e58f-5a31-47b7-aa52-378ccdc68537
+                    name: null
+                    comment: my comment
+                    iat: '2020-11-18 12:23:14'
+                    lud: '2020-11-18 12:23:14'
+                    appointment:
+                            id: 71987871-6aa9-47a3-af7a-a986fd79801c
+                    creator:
+                            id: 5474517b-fa62-4fc9-b42c-d97b7a367a6d # user enroll edit 2
+        -   Enrollment:
+                    id: 4099f68b-4b0e-4682-8295-d78373cc0669
+                    name: Unknown Enroll Edit
+                    comment: my comment
+                    iat: '2020-11-18 12:23:14'
+                    lud: '2020-11-18 12:23:14'
+                    appointment:
+                            id: 71987871-6aa9-47a3-af7a-a986fd79801c
+        -   Enrollment:
+                    id: eda3f874-1a1f-4e12-9abf-70493778dade
+                    name: Unknown Enroll Edit 2
+                    comment: my comment
+                    iat: '2020-11-18 12:23:14'
+                    lud: '2020-11-18 12:23:14'
+                    appointment:
+                            id: 71987871-6aa9-47a3-af7a-a986fd79801c
