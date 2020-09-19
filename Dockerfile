@@ -34,8 +34,8 @@ FROM node:12-alpine
 
 WORKDIR /app
 
-COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
 
 RUN apk --no-cache add curl
 
