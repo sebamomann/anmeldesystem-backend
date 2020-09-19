@@ -9,7 +9,7 @@ RUN apk update && apk add yarn curl bash python g++ make && rm -rf /var/cache/ap
 RUN curl -sfL https://install.goreleaser.com/github.com/tj/node-prune.sh | bash -s -- -b /usr/local/bin
 
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY ./package.json ./
 
@@ -36,5 +36,7 @@ WORKDIR /app
 
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
+
+RUN apk --no-cache add curl
 
 CMD ["node", "./dist/src/main.js"]
