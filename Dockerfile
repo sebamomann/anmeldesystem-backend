@@ -18,8 +18,9 @@ RUN npm install
 COPY . .
 
 # testing
-RUN npm run test:cov
+# RUN npm run test:cov
 # build
+RUN npm run prebuild
 RUN npm run build
 RUN npm prune --production
 
@@ -31,9 +32,9 @@ RUN /usr/local/bin/node-prune
 # ACTUAL IMAGE
 FROM node:12-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "./dist/src/main.js"]
