@@ -1,5 +1,6 @@
 # BUILDER
 FROM node:12-alpine as builder
+LABEL stage=intermediate
 
 # couchbase sdk requirements
 RUN apk update && apk add yarn curl bash python g++ make && rm -rf /var/cache/apk/*

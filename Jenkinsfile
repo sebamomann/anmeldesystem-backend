@@ -138,6 +138,12 @@ pipeline {
         always {
             script {
                 try {
+                    sh 'docker image prune --filter label=stage_intermediate -f'
+                } catch (err) {
+                    echo err.getMessage()
+                }
+
+                try {
                     sh 'docker container rm ' + apiName + ' -f'
                 } catch (err) {
                     echo err.getMessage()
