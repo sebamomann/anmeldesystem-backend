@@ -1,6 +1,13 @@
 # BUILDER
 FROM node:12-alpine as builder
 
+# couchbase sdk requirements
+RUN apk update && apk add yarn curl bash python g++ make && rm -rf /var/cache/apk/*
+
+# install node-prune (https://github.com/tj/node-prune)
+RUN curl -sfL https://install.goreleaser.com/github.com/tj/node-prune.sh | bash -s -- -b /usr/local/bin
+
+
 WORKDIR /usr/src/app
 
 COPY ./package.json ./
@@ -10,16 +17,22 @@ RUN npm install
 COPY . .
 
 # testing
-RUN npm run test:cov
+# RUN npm run test:cov
 # build
 RUN npm run build
+RUN npm prune --production
 
+# run node prune
+RUN /usr/local/bin/node-prune
 
+# ACTUAL IMAGE
+# ACTUAL IMAGE
 # ACTUAL IMAGE
 FROM node:12-alpine
 
 WORKDIR /usr/src/app
 
-COPY --from=builder /app ./
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/node_modules ./node_modules
 
 CMD ["npm", "run", "start:prod"]
