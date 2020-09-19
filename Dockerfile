@@ -17,7 +17,7 @@ RUN npm install
 COPY . .
 
 # testing
-# RUN npm run test:cov
+RUN npm run test:cov
 # build
 RUN npm run build
 RUN npm prune --production
