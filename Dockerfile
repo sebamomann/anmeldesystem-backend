@@ -1,14 +1,25 @@
-FROM node:10 as builder
-WORKDIR /app
+# BUILDER
+FROM node:12-alpine as builder
+
+WORKDIR /usr/src/app
+
 COPY ./package.json ./
+
 RUN npm install
+
 COPY . .
+
+# testing
 RUN npm run test:cov
-RUN npm run prebuild
+# build
 RUN npm run build
 
-FROM node:10-alpine
-WORKDIR /app
+
+# ACTUAL IMAGE
+FROM node:12-alpine
+
+WORKDIR /usr/src/app
+
 COPY --from=builder /app ./
-RUN apk --no-cache add curl
+
 CMD ["npm", "run", "start:prod"]
