@@ -138,7 +138,7 @@ pipeline {
         always {
             script {
                 try {
-                    sh 'docker image prune --filter label=stage_intermediate -f'
+                    sh 'docker image prune --filter label=stage=intermediate -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
