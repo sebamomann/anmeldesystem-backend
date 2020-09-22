@@ -57,9 +57,11 @@ pipeline {
                             'mysql ' +
                             'mysqld --default-authentication-plugin=mysql_native_password'
 
-                    waitUntil {
-                        "healthy" == sh(returnStdout: true,
-                                script: "docker inspect " + dbName + " --format=\"{{ .State.Health.Status }}\"").trim()
+                    timeout(60) {
+                        waitUntil {
+                            "healthy" == sh(returnStdout: true,
+                                    script: "docker inspect " + dbName + " --format=\"{{ .State.Health.Status }}\"").trim()
+                        }
                     }
 
                     sh 'docker run -d ' +
@@ -79,9 +81,11 @@ pipeline {
                             '--health-interval=2s ' +
                             'anmeldesystem/anmeldesystem-backend:' + tagName
 
-                    waitUntil {
-                        "healthy" == sh(returnStdout: true,
-                                script: "docker inspect " + apiName + " --format=\"{{ .State.Health.Status }}\"").trim()
+                    timeout(60) {
+                        waitUntil {
+                            "healthy" == sh(returnStdout: true,
+                                    script: "docker inspect " + apiName + " --format=\"{{ .State.Health.Status }}\"").trim()
+                        }
                     }
                 }
             }
