@@ -18,14 +18,14 @@ RUN npm install
 COPY . .
 
 # testing
-# RUN npm run test:cov
+RUN npm run test:cov
 # build
 RUN npm run prebuild
 RUN npm run build
-# RUN npm prune --production
+RUN npm prune --production
 
 # run node prune
-# RUN /usr/local/bin/node-prune
+RUN /usr/local/bin/node-prune
 
 # ACTUAL IMAGE
 # ACTUAL IMAGE
