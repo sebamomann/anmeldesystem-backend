@@ -79,7 +79,7 @@ const _mail = process.env.MAIL_ECA;
 })
 export class AppModule {
     constructor(private readonly connection: Connection) {
-        if (process.env.NODE_ENV === 'protractor') {
+        if (process.env.NODE_ENV === 'protractor' && process.env.DB_DATABASE.includes('protractor')) {
             loadFixtures(connection);
         }
     }

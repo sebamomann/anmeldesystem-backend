@@ -18,8 +18,8 @@ export async function loadFixtures(connection: Connection): Promise<any> {
 
     }, 5000);
 
-    fs.readdirSync('./test/protractor/fixtures').forEach(fileName => {
-        const file: any = yaml.safeLoad(fs.readFileSync(`./test/protractor/fixtures/${fileName}`, 'utf8'));
+    fs.readdirSync(__dirname + '/fixtures').forEach(fileName => {
+        const file: any = yaml.safeLoad(fs.readFileSync(`${__dirname}/fixtures/${fileName}`, 'utf8'));
         try {
             items = file['fixtures'];
         } catch (e) {
