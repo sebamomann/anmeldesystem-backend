@@ -1,24 +1,24 @@
 fixtures:
     -   User:
             id: 62fee891-015a-4393-9d53-522e5dc935a6
-            name: Creator
-            username: creator
+            name: Creator Enroll
+            username: creator_enroll
             password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
-            mail: creator@example.com
+            mail: creator_enroll@example.com
             activated: 1
     -   User:
             id: c51f4e34-6152-4778-9b9c-48cf47ec5b80
-            name: User Enroll
-            username: user_enroll
+            name: User Enroll Mid Login
+            username: user_enroll_mid_login
             password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
-            mail: user_enroll@example.com
+            mail: user_enroll_mid_login@example.com
             activated: 1
     -   User:
-            id: 3ed5ec48-afca-450a-8e55-b40769414bc6
-            name: User Enroll Foreign
-            username: user_enroll_foreign
+            id: 093ccd67-9078-4f5e-b63d-5d2179753eda
+            name: User Enroll Existing Enrollment
+            username: user_enroll_existing_enrollment
             password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
-            mail: user_enroll_foreign@example.com
+            mail: user_enroll_existing_enrollment@example.com
             activated: 1
     -   Appointment:
             id: cc1a91c9-ff03-4da0-a528-89bd9db1d438
@@ -39,3 +39,21 @@ fixtures:
             additions: []
             pinners: []
             files: []
+    -   Enrollment:
+            id: 28142c1a-bef0-4999-8657-35bf28666e4b
+            name: Unknown Enroll Existing
+            comment: my comment
+            iat: '2020-11-18 12:23:14'
+            lud: '2020-11-18 12:23:14'
+            appointment:
+                id: cc1a91c9-ff03-4da0-a528-89bd9db1d438
+    -   Enrollment:
+            id: e1646b45-1d54-4489-af1e-8282b91493c7
+            name: null
+            comment: my comment
+            iat: '2020-11-18 12:23:14'
+            lud: '2020-11-18 12:23:14'
+            appointment:
+                id: cc1a91c9-ff03-4da0-a528-89bd9db1d438
+            creator:
+                id: 093ccd67-9078-4f5e-b63d-5d2179753eda # User Enroll Existing Enrollment
