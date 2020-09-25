@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import {Connection} from 'typeorm';
 import * as yaml from 'js-yaml';
+import {delay} from 'rxjs/operators';
 
 export async function loadFixtures(connection: Connection): Promise<any> {
     let items: any[] = [];
@@ -18,7 +19,7 @@ export async function loadFixtures(connection: Connection): Promise<any> {
 
     }, 5000);
 
-    fs.readdirSync(__dirname + '/fixtures').forEach(fileName => {
+    for (const fileName of fs.readdirSync(__dirname + '/fixtures')) {
         const file: any = yaml.safeLoad(fs.readFileSync(`${__dirname}/fixtures/${fileName}`, 'utf8'));
         try {
             items = file['fixtures'];
@@ -27,13 +28,17 @@ export async function loadFixtures(connection: Connection): Promise<any> {
         }
 
         if (!items) {
-            return;
+            continue;
         }
 
-        items.forEach(async (item: any) => {
+        let count = 0;
+
+        for (const item of items) {
             const entityName = Object.keys(item)[0];
             const data = item[entityName];
             await connection.createQueryBuilder().insert().into(entityName).values(data).execute();
-        });
-    });
+            delay(1000);
+            console.log('insert #' + count++);
+        }
+    }
 }
