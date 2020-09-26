@@ -31,7 +31,6 @@ describe('AppController', () => {
                     name: JWT_MODULE_OPTIONS,
                     provide: JWT_MODULE_OPTIONS,
                     useValue: {
-
                         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
                         ignoreExpiration: false,
                         secretOrKey: jwtConstants.secret,
