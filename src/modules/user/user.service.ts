@@ -592,7 +592,7 @@ export class UserService {
     }
 
     private _sendEmailChangeEmail(domain, mail, token: string, _user) {
-        const url = `https://${DomainUtil.replaceDomain(domain, btoa(mail).replaceAll('=', ''), token)}`;
+        const url = `https://${DomainUtil.replaceDomain(domain, btoa(mail).replace('/\=/g', ''), token)}`;
 
         this.mailerService
             .sendMail({
@@ -625,7 +625,7 @@ export class UserService {
     }
 
     private _sendPasswordResetInitializationEmail(domain: string, mail: string, token: string, user: User) {
-        let url = `https://${DomainUtil.replaceDomain(domain, btoa(mail).replaceAll('=', ''), token)}`;
+        let url = `https://${DomainUtil.replaceDomain(domain, btoa(mail).replace('/\=/g', ''), token)}`;
 
         this.mailerService
             .sendMail({
@@ -660,7 +660,7 @@ export class UserService {
             .digest('hex');
 
         if (process.env.NODE_ENV === 'postman') {
-            user.accountActivationEmail = btoa(user.mail).replaceAll('=', '');
+            user.accountActivationEmail = btoa(user.mail).replace('/\=/g', '');
             user.accountActivationToken = token;
         }
 
@@ -672,7 +672,7 @@ export class UserService {
                 template: 'register',
                 context: {
                     name: user.username,
-                    url: `https://${DomainUtil.replaceDomain(domain, btoa(user.mail).replaceAll('=', ''), token)}`
+                    url: `https://${DomainUtil.replaceDomain(domain, btoa(user.mail).replace('/\=/g', ''), token)}`
                 },
             })
             .then(() => {

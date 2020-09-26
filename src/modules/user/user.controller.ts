@@ -91,6 +91,7 @@ export class UserController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch((err) => {
+                console.log(err);
                 throw err;
             });
     }
