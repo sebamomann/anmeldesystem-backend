@@ -679,7 +679,7 @@ describe('UserService', () => {
                     jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.resolve({}));
 
                     const __actual = await userService.passwordReset_initialize(__given_mail, __given_domain);
-                    const __expected_regex = new RegExp('https:\/\/' + __given_domain.split('/')[0] + '\/' + (btoa(__given_mail).replace('=', '')) + '\/.{64}', 'g');
+                    const __expected_regex = new RegExp('https:\/\/' + __given_domain.split('/')[0] + '\/' + (btoa(__given_mail).replaceAll('=', '')) + '\/.{64}', 'g');
                     expect(__actual).toMatch(__expected_regex);
                 });
 
@@ -698,7 +698,7 @@ describe('UserService', () => {
                     jest.spyOn(mailerService, 'sendMail').mockImplementation((): Promise<any> => Promise.reject({}));
 
                     const __actual = await userService.passwordReset_initialize(__given_mail, __given_domain);
-                    const __expected_regex = new RegExp('https:\/\/' + __given_domain.split('/')[0] + '\/' + (btoa(__given_mail).replace('=', '')) + '\/.{64}', 'g');
+                    const __expected_regex = new RegExp('https:\/\/' + __given_domain.split('/')[0] + '\/' + (btoa(__given_mail).replaceAll('=', '')) + '\/.{64}', 'g');
                     expect(__actual).toMatch(__expected_regex);
                 });
             });
