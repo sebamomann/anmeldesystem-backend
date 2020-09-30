@@ -30,6 +30,12 @@ pipeline {
         }
 
         stage('Install') {
+            agent {
+                docker {
+                    image 'node:12.13.0'
+                }
+            }
+
             steps {
                 script {
                     sh 'npm install'
@@ -38,6 +44,12 @@ pipeline {
         }
 
         stage('Test') {
+            agent {
+                docker {
+                    image 'node:12.13.0'
+                }
+            }
+
             steps {
                 script {
                     sh 'npm run test:cov'
