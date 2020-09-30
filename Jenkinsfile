@@ -40,7 +40,6 @@ pipeline {
         stage('Test') {
             steps {
                 nodejs(nodeJSInstallationName: 'node_12') {
-                    sh 'mkdir /logs'
                     sh 'npm run test:cov'
                 }
             }
