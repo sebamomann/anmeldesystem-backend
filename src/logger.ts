@@ -1,5 +1,9 @@
 const winston = require('winston');
 
+const fs = require('fs');
+
+fs.mkdirSync('/logs');
+
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.json(),
