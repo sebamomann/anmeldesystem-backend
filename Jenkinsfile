@@ -40,9 +40,7 @@ pipeline {
         stage('Test') {
             steps {
                 nodejs(nodeJSInstallationName: 'node_12') {
-                    sh 'ls -la'
                     dir('/logs')
-                    sh 'ls -la'
                     sh 'chmod 777 /logs'
                     sh 'npm run test:cov'
                 }
