@@ -30,30 +30,16 @@ pipeline {
         }
 
         stage('Install') {
-            agent {
-                docker {
-                    image 'node:12.13.0'
-                }
-            }
-
             steps {
-                script {
+                nodejs(nodeJSInstallationName: 'Node 12.x', configId: '<config-file-provider-id>') {
                     sh 'npm install'
                 }
             }
         }
 
         stage('Test') {
-            agent {
-                docker {
-                    image 'node:12.13.0'
-                }
-            }
-
-            steps {
-                script {
-                    sh 'npm run test:cov'
-                }
+            nodejs(nodeJSInstallationName: 'Node 12.x', configId: '<config-file-provider-id>') {
+                sh 'npm test:cov'
             }
 
             post {
