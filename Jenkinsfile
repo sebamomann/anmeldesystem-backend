@@ -38,8 +38,10 @@ pipeline {
         }
 
         stage('Test') {
-            nodejs(nodeJSInstallationName: 'Node 12.x', configId: '<config-file-provider-id>') {
-                sh 'npm test:cov'
+            steps {
+                nodejs(nodeJSInstallationName: 'Node 12.x', configId: '<config-file-provider-id>') {
+                    sh 'npm run test:cov'
+                }
             }
 
             post {
