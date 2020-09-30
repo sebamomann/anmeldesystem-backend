@@ -2,9 +2,7 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
   
- [![Jenkins](https://jenkins.dankoe.de/job/anmeldesystem-backend/job/master/badge/icon?style=flat-square)](https://jenkins.dankoe.de/job/anmeldesystem-backend/job/master/badge/icon?style=flat-square)
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+[![Jenkins Build](https://jenkins.dankoe.de/buildStatus/icon?job=anmeldesystem-backend%2Fmaster)](https://jenkins.dankoe.de/job/anmeldesystem-backend/job/master/)
 
 ## Description
 
