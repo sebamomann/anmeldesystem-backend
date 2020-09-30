@@ -9,7 +9,6 @@
     "url": "git://github.com/sebamomann/anmeldesystem-backend.git"
   },
   "scripts": {
-    "prebuild": "rimraf dist",
     "build": "nest build && cpx \"./src/templates/**/*\" \"./dist/src/templates\" && cpx \"./test/protractor/fixtures/**/*\" \"./dist/test/protractor/fixtures\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
