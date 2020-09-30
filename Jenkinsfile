@@ -31,7 +31,7 @@ pipeline {
 
         stage('Install') {
             steps {
-                nodejs(nodeJSInstallationName: 'Node 12.x', configId: '<config-file-provider-id>') {
+                nodejs(nodeJSInstallationName: 'node_12') {
                     sh 'npm install'
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                nodejs(nodeJSInstallationName: 'Node 12.x', configId: '<config-file-provider-id>') {
+                nodejs(nodeJSInstallationName: 'node_12') {
                     sh 'npm run test:cov'
                 }
             }
