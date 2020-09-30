@@ -61,7 +61,7 @@ pipeline {
         stage('Build Docker image') {
             steps {
                 script {
-                    sh 'docker build -t anmeldesystem/anmeldesystem-backend:' + tagName
+                    sh 'docker build -t anmeldesystem/anmeldesystem-backend:' + tagName + ' .'
                 }
             }
         }
