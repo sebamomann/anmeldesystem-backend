@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import {Connection} from 'typeorm';
 import * as yaml from 'js-yaml';
-import {delay} from 'rxjs/operators';
 
 export async function loadFixtures(connection: Connection): Promise<any> {
     let items: any[] = [];
@@ -37,7 +36,6 @@ export async function loadFixtures(connection: Connection): Promise<any> {
             const entityName = Object.keys(item)[0];
             const data = item[entityName];
             await connection.createQueryBuilder().insert().into(entityName).values(data).execute();
-            delay(1000);
             console.log('insert #' + count++);
         }
     }
