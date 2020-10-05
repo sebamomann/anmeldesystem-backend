@@ -76,6 +76,10 @@ export class EnrollmentUtil {
     }
 
     public static handleDriverRelation(driverToBe: Driver, currentDriverObject: Driver): Driver | undefined {
+        if(!driverToBe) {
+            return undefined;
+        }
+
         let _driver = new Driver();
         let _driver_original = new Driver();
 
@@ -101,6 +105,10 @@ export class EnrollmentUtil {
     }
 
     public static handlePassengerRelation(passengerToBe: Passenger, currentPassengerObject: Passenger): Passenger | undefined {
+        if (!passengerToBe) {
+            return undefined;
+        }
+
         let _passenger = new Passenger();
         let _passenger_original = new Passenger();
 

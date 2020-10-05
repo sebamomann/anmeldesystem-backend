@@ -361,6 +361,10 @@ export class EnrollmentService {
             driver: 'passenger',
         };
 
+        if (!enrollment_to_change_values[key]) {
+            return;
+        }
+
         if (enrollment_referenced.appointment.driverAddition) {
             let current_value = undefined;
 

@@ -45,6 +45,7 @@ const _mail = process.env.MAIL_ECA;
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_DATABASE,
+        timezone: '+02:00',
         entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment,
             TelegramUser, PasswordReset, Releasenote, EmailChange, Mail, PasswordChange, Session],
         synchronize: true

@@ -1,10 +1,9 @@
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
-  
-[![Jenkins Build](https://jenkins.dankoe.de/buildStatus/icon?job=anmeldesystem-backend%2Fmaster)](https://jenkins.dankoe.de/job/anmeldesystem-backend/job/master/)
 
-## Description
+[![Jenkins](https://jenkins.dankoe.de/buildStatus/icon?job=anmeldesystem-backend%2Fmaster)](https://jenkins.dankoe.de/job/anmeldesystem-backend/job/master/)
+
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 

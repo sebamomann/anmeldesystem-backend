@@ -23,6 +23,7 @@ import {InvalidTokenException} from '../exceptions/InvalidTokenException';
 import {ExpiredTokenException} from '../exceptions/ExpiredTokenException';
 import {AlreadyUsedException} from '../exceptions/AlreadyUsedException';
 import {InvalidAttributesException} from '../exceptions/InvalidAttributesException';
+import {UnknownUserException} from '../exceptions/UnknownUserException';
 
 @Injectable()
 export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
@@ -31,7 +32,8 @@ export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
             .pipe(
                 catchError(
                     exception => {
-                        if (exception instanceof EntityNotFoundException) {
+                        if (exception instanceof EntityNotFoundException
+                            || exception instanceof UnknownUserException) {
                             throw new NotFoundException(exception.parse());
                         } else if (exception instanceof InvalidValuesException
                             || exception instanceof InvalidTokenException
@@ -47,10 +49,10 @@ export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
                         } else if (exception instanceof InvalidAttributesException) {
                             throw new UnprocessableEntityException(exception.parse());
                         } else {
-                            let error: any = {};
-
                             let id = GeneratorUtil.makeid(10);
-                            console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(error)}`);
+                            console.log(`[${(new Date()).toDateString()} ${(new Date()).toTimeString()}] Code: ${id} - ${JSON.stringify(exception)}`);
+
+                            let error: any = {};
 
                             error.code = 'UNDEFINED';
                             error.message = 'Some error occurred. Please try again later or contact the support with the appended error Code';

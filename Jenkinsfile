@@ -29,39 +29,11 @@ pipeline {
             }
         }
 
-        stage('Install') {
-            steps {
-                nodejs(nodeJSInstallationName: 'node_12') {
-                    sh 'npm install'
-                }
-            }
-        }
-
-        stage('Test') {
-            steps {
-                nodejs(nodeJSInstallationName: 'node_12') {
-                    sh 'npm run test:cov'
-                }
-            }
-
-            post {
-                always {
-                    step([
-                            $class              : 'CloverPublisher',
-                            cloverReportDir     : '/var/jenkins_home/workspace/anmeldesystem-backend_' + branch_name + '/src/coverage',
-                            cloverReportFileName: 'clover.xml',
-                            healthyTarget       : [methodCoverage: 70, conditionalCoverage: 80, statementCoverage: 80],
-                            unhealthyTarget     : [methodCoverage: 50, conditionalCoverage: 50, statementCoverage: 50],
-                            failingTarget       : [methodCoverage: 0, conditionalCoverage: 0, statementCoverage: 0]
-                    ])
-                }
-            }
-        }
 
         stage('Build Docker image') {
             steps {
                 script {
-                    sh 'docker build -t anmeldesystem/anmeldesystem-backend:' + tagName + ' .'
+                    image = docker.build("anmeldesystem/anmeldesystem-backend:" + tagName)
                 }
             }
         }
