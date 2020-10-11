@@ -1,7 +1,7 @@
 import {forwardRef, Inject, Injectable} from '@nestjs/common';
 import {User} from '../user/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
-import {Repository} from 'typeorm';
+import {getRepository, Repository} from 'typeorm';
 import {PushSubscription} from './pushSubscription.entity';
 import {AppointmentService} from '../appointment/appointment.service';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
@@ -18,7 +18,7 @@ const vapidKeys = {
 export class PushService {
     constructor(
         @InjectRepository(PushSubscription)
-        private readonly pusSubscriptionRepository: Repository<PushSubscription>,
+        private readonly pushSubscriptionRepository: Repository<PushSubscription>,
         @Inject(forwardRef(() => AppointmentService))
         private appointmentService: AppointmentService
     ) {
@@ -32,7 +32,7 @@ export class PushService {
     async create(obj: any, user: User) {
         const pushSubscription = new PushSubscription();
 
-        let existing_sub: PushSubscription = await this.pusSubscriptionRepository.findOne({
+        let existing_sub: PushSubscription = await this.pushSubscriptionRepository.findOne({
             where: {
                 p256dhp256dh: obj.keys.p256dh,
                 endpoint: obj.endpoint
@@ -49,7 +49,7 @@ export class PushService {
                 pushSubscription.user = user;
             }
 
-            existing_sub = await this.pusSubscriptionRepository.save(pushSubscription);
+            existing_sub = await this.pushSubscriptionRepository.save(pushSubscription);
         }
 
         return existing_sub;
@@ -66,13 +66,29 @@ export class PushService {
 
         const subscription = await this.create(obj.subscription, user);
 
+        if (!subscription.appointments) {
+            subscription.appointments = [];
+        }
+
         subscription.appointments.push(appointment);
 
-        return this.pusSubscriptionRepository.save(subscription);
+        if (user) {
+            const subscriptions = await this.pushSubscriptionRepository.find({where: {user: {id: user.id}}});
+            subscriptions.forEach((fSubscription) => {
+                if (!fSubscription.appointments) {
+                    fSubscription.appointments = [];
+                }
+                fSubscription.appointments.push(appointment);
+            });
+
+            await this.pushSubscriptionRepository.save(subscriptions);
+        }
+
+        return await this.pushSubscriptionRepository.save(subscription);
     }
 
     async sendToAll() {
-        const subscriptions = await this.pusSubscriptionRepository.find();
+        const subscriptions = await this.pushSubscriptionRepository.find();
 
         const notificationPayload = {
             'notification': {
@@ -103,7 +119,7 @@ export class PushService {
     }
 
     async appointmentChanged(appointment: Appointment) {
-        const subscriptions = await this.pusSubscriptionRepository.find({
+        const subscriptions = await this.pushSubscriptionRepository.find({
             where: {
                 appointment
             }
@@ -135,5 +151,70 @@ export class PushService {
             webpush.sendNotification(
                 subbb, JSON.stringify(notificationPayload));
         }));
+    }
+
+    async isSubscribed(endpoint: string, link: string, user: User) {
+        let appointment;
+
+        try {
+            appointment = await this.appointmentService.findByLink(link);
+        } catch (e) {
+            throw e;
+        }
+
+        const directSubscription = await getRepository(PushSubscription)
+            .createQueryBuilder('subscription')
+            .leftJoinAndSelect('subscription.appointments', 'appointments')
+            .select(['subscription', 'appointments'])
+            .where('subscription.endpoint = :endpoint', {endpoint: endpoint})
+            .andWhere('appointments.id = :appointmentId', {appointmentId: appointment.id})
+            .getOne();
+
+        let subscriptionAsUser;
+
+        if (user) {
+            subscriptionAsUser = await getRepository(PushSubscription)
+                .createQueryBuilder('subscription')
+                .leftJoinAndSelect('subscription.appointments', 'appointments')
+                .leftJoinAndSelect('subscription.user', 'user')
+                .select(['subscription', 'appointments', 'user'])
+                .where('user.id = :userId', {userId: user.id})
+                .andWhere('appointments.id = :appointmentId', {appointmentId: appointment.id})
+                .getOne();
+        }
+
+        if (!directSubscription && !subscriptionAsUser) {
+            throw new EntityNotFoundException();
+        }
+
+        return true;
+    }
+
+    async unsubscribeFromAppointment(obj: any, user: User) {
+        let appointment;
+
+        try {
+            appointment = await this.appointmentService.findByLink(obj.appointment.link);
+        } catch {
+            throw new EntityNotFoundException(null, null, 'appointment');
+        }
+
+        const sub = await this.pushSubscriptionRepository.findOne({
+            where: {
+                endpoint: obj.subscription.endpoint
+            }
+        });
+
+        if (sub) {
+            const index = sub.appointments.findIndex((app) => app.id = appointment.id);
+            sub.appointments.splice(index, 1);
+            await this.pushSubscriptionRepository.save(sub);
+        }
+
+        if (user) {
+            await this.appointmentService.removeSubscriptionsByUser(appointment, user);
+        }
+
+        return Promise.resolve();
     }
 }

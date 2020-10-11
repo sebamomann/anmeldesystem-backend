@@ -104,7 +104,7 @@ export class Appointment {
 
     @ManyToMany(type => PushSubscription,
         pushSubscription => pushSubscription.appointments)
-    subscriptions: PushSubscription;
+    subscriptions: PushSubscription[];
 
     reference?: string[] = [];
     numberOfEnrollments?: number;

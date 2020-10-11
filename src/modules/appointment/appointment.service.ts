@@ -295,7 +295,11 @@ export class AppointmentService {
         appointment = AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, false);
 
         this.appointmentGateway.appointmentUpdated(appointment);
-        this.pushService.appointmentChanged(appointment);
+        this.pushService
+            .appointmentChanged(appointment)
+            .catch((err) => {
+                logger.error(' Push notifications could not be send', err);
+            });
 
         return appointment;
     }
@@ -520,6 +524,26 @@ export class AppointmentService {
         }
 
         return AppointmentUtil.isCreatorOrAdministrator(appointment, user);
+    }
+
+    public async removeSubscriptionsByUser(appointment: any, user: User) {
+        let app = await this.appointmentRepository.findOne({
+            where: {
+                link: appointment.link
+            },
+            loadEagerRelations: false,
+            relations: ['subscriptions', 'subscriptions.user']
+        });
+
+        if (!app) {
+            throw new EntityNotFoundException(null, null, 'appointment');
+        }
+
+        if (app.subscriptions) {
+            app.subscriptions = app.subscriptions.filter((fSub) => fSub.user.id !== user.id);
+        }
+
+        return this.appointmentRepository.save(app);
     }
 
     private async handleAppointmentLink(_link: string) {
