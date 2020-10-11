@@ -11,10 +11,19 @@ require('dotenv').config();
 
 const webpush = require('web-push');
 
-const vapidKeys = {
-    'publicKey': process.env.VAPID_PUBLIC_KEY || 'BMqkFS2ITWunnQCLC8nmJVdhSeJDmw1paOe7XK99dHsSxsCqPp-s1AnQm8ByltY1JFEtW2eZqac6PaXB103Ov2k',
-    'privateKey': process.env.VAPID_PRIVATE_KEY || 'zSxHCfCXWtd-6N8ugsDccv8pCQj_j3I4cPuT1XsjBYA'
-};
+let vapidKeys;
+
+if (process.env.NODE_ENV === 'production') {
+    vapidKeys = {
+        'publicKey': process.env.VAPID_PUBLIC_KEY,
+        'privateKey': process.env.VAPID_PRIVATE_KEY
+    };
+} else {
+    vapidKeys = {
+        'publicKey': 'BMqkFS2ITWunnQCLC8nmJVdhSeJDmw1paOe7XK99dHsSxsCqPp-s1AnQm8ByltY1JFEtW2eZqac6PaXB103Ov2k',
+        'privateKey': 'zSxHCfCXWtd-6N8ugsDccv8pCQj_j3I4cPuT1XsjBYA'
+    };
+}
 
 @Injectable()
 export class PushService {
