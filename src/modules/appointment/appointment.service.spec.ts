@@ -22,6 +22,8 @@ import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
 import {Session} from '../user/session.entity';
+import {PushService} from '../push/push.service';
+import {PushSubscription} from '../push/pushSubscription.entity';
 
 describe('AppointmentService', () => {
     let module: TestingModule;
@@ -30,6 +32,7 @@ describe('AppointmentService', () => {
     let appointmentGateway: AppointmentGateway;
 
     let appointmentRepositoryMock: MockType<Repository<Appointment>>;
+    let pushSubscriptionRepositoryMock: MockType<Repository<PushSubscription>>;
     let userRepositoryMock: MockType<Repository<User>>;
     let fileRepositoryMock: MockType<Repository<File>>;
     let additionRepositoryMock: MockType<Repository<Addition>>;
@@ -41,8 +44,10 @@ describe('AppointmentService', () => {
                 AdditionService,
                 FileService,
                 MailerService,
+                PushService,
                 AppointmentGateway,
                 {provide: getRepositoryToken(Appointment), useFactory: repositoryMockFactory},
+                {provide: getRepositoryToken(PushSubscription), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Session), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(File), useFactory: repositoryMockFactory},
@@ -75,6 +80,7 @@ describe('AppointmentService', () => {
         userRepositoryMock = module.get(getRepositoryToken(User));
         fileRepositoryMock = module.get(getRepositoryToken(File));
         additionRepositoryMock = module.get(getRepositoryToken(Addition));
+        pushSubscriptionRepositoryMock = module.get(getRepositoryToken(PushSubscription));
     });
 
     it('should be defined', () => {
