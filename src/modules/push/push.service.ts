@@ -12,8 +12,8 @@ require('dotenv').config();
 const webpush = require('web-push');
 
 const vapidKeys = {
-    'publicKey': process.env.VAPID_PUBLIC_KEY,
-    'privateKey': process.env.VAPID_PRIVATE_KEY
+    'publicKey': process.env.VAPID_PUBLIC_KEY || '123',
+    'privateKey': process.env.VAPID_PRIVATE_KEY || '123'
 };
 
 @Injectable()
