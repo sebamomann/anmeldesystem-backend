@@ -7,9 +7,10 @@ import {AdditionModule} from '../addition/addition.module';
 import {FileModule} from '../file/file.module';
 import {UserModule} from '../user/user.module';
 import {AppointmentGateway} from './appointment.gateway';
+import {PushModule} from '../push/push.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Appointment]), AdditionModule, FileModule, UserModule],
+    imports: [TypeOrmModule.forFeature([Appointment]), AdditionModule, FileModule, UserModule, PushModule],
     providers: [AppointmentService, AppointmentGateway],
     exports: [AppointmentService, AppointmentGateway],
     controllers: [AppointmentController],

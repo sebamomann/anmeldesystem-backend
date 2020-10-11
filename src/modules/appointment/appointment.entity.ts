@@ -15,6 +15,7 @@ import {Addition} from '../addition/addition.entity';
 import {File} from '../file/file.entity';
 import {User} from '../user/user.entity';
 import {Exclude} from 'class-transformer';
+import {PushSubscription} from '../push/pushSubscription.entity';
 
 @Entity()
 export class Appointment {
@@ -100,6 +101,10 @@ export class Appointment {
     @UpdateDateColumn({name: 'lud', nullable: true})
     @Exclude({toPlainOnly: true})
     lud: Date;
+
+    @ManyToMany(type => PushSubscription,
+        pushSubscription => pushSubscription.appointments)
+    subscriptions: PushSubscription[];
 
     reference?: string[] = [];
     numberOfEnrollments?: number;

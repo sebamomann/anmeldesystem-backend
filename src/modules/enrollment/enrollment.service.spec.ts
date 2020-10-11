@@ -31,12 +31,15 @@ import {AppointmentGateway} from '../appointment/appointment.gateway';
 import {Session} from '../user/session.entity';
 import {MissingAuthenticationException} from '../../exceptions/MissingAuthenticationException';
 import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
+import {PushSubscription} from '../push/pushSubscription.entity';
+import {PushService} from '../push/push.service';
 
 const crypto = require('crypto');
 
 describe('EnrollmentService', () => {
     let enrollmentService: EnrollmentService;
     let userService: UserService;
+    let pushService: PushService;
     let appointmentService: AppointmentService;
     let fileService: FileService;
     let additionService: AdditionService;
@@ -55,11 +58,13 @@ describe('EnrollmentService', () => {
     let driverRepositoryMock: MockType<Repository<Driver>>;
     let passengerRepositoryMock: MockType<Repository<Passenger>>;
     let mailRepositoryMock: MockType<Repository<Mail>>;
+    let pushSubscriptionRepositoryMock: MockType<Repository<PushSubscription>>;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [EnrollmentService,
                 UserService,
+                PushService,
                 MailerService,
                 AppointmentService,
                 AdditionService,
@@ -86,6 +91,7 @@ describe('EnrollmentService', () => {
                 {provide: getRepositoryToken(PasswordReset), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(PasswordChange), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(EmailChange), useFactory: repositoryMockFactory},
+                {provide: getRepositoryToken(PushSubscription), useFactory: repositoryMockFactory},
                 {
                     name: MAILER_OPTIONS,
                     provide: MAILER_OPTIONS,
@@ -109,6 +115,7 @@ describe('EnrollmentService', () => {
         appointmentService = module.get<AppointmentService>(AppointmentService);
         fileService = module.get<FileService>(FileService);
         additionService = module.get<AdditionService>(AdditionService);
+        pushService = module.get<PushService>(PushService);
         appointmentGateway = module.get<AppointmentGateway>(AppointmentGateway);
 
         enrollmentRepositoryMock = module.get(getRepositoryToken(Enrollment));
@@ -123,6 +130,7 @@ describe('EnrollmentService', () => {
         driverRepositoryMock = module.get(getRepositoryToken(Driver));
         passengerRepositoryMock = module.get(getRepositoryToken(Passenger));
         mailRepositoryMock = module.get(getRepositoryToken(Mail));
+        pushSubscriptionRepositoryMock = module.get(getRepositoryToken(PushSubscription));
     });
 
     it('should be defined', () => {

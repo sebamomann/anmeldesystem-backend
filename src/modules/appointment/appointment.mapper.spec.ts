@@ -19,6 +19,8 @@ import {AppointmentGateway} from './appointment.gateway';
 import {Session} from '../user/session.entity';
 import {Enrollment} from '../enrollment/enrollment.entity';
 import {AppointmentMapper} from './appointment.mapper';
+import {PushService} from '../push/push.service';
+import {PushSubscription} from '../push/pushSubscription.entity';
 
 const crypto = require('crypto');
 
@@ -36,6 +38,7 @@ describe('AppointmentMapper', () => {
                 FileService,
                 MailerService,
                 AppointmentGateway,
+                PushService,
                 {provide: getRepositoryToken(Appointment), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Session), useFactory: repositoryMockFactory},
@@ -45,6 +48,7 @@ describe('AppointmentMapper', () => {
                 {provide: getRepositoryToken(PasswordReset), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(PasswordChange), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(EmailChange), useFactory: repositoryMockFactory},
+                {provide: getRepositoryToken(PushSubscription), useFactory: repositoryMockFactory},
                 {
                     name: MAILER_OPTIONS,
                     provide: MAILER_OPTIONS,

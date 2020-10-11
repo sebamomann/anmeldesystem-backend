@@ -14,7 +14,7 @@ async function bootstrap() {
             res.setHeader('Access-Control-Allow-Origin', origin);
         }
         res.setHeader('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Methods', 'GET, OPTIONS, POST, PUT, DELETE');
+        res.header('Access-Control-Allow-Methods', 'GET, OPTIONS, POST, PUT, DELETE, HEAD');
         res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, If-None-Match');
         res.header('Access-Control-Allow-Credentials', true);
         res.header('access-control-expose-headers', 'etag');
