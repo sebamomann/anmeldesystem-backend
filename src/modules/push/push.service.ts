@@ -1,10 +1,11 @@
-import {Injectable} from '@nestjs/common';
+import {forwardRef, Inject, Injectable} from '@nestjs/common';
 import {User} from '../user/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {PushSubscription} from './pushSubscription.entity';
 import {AppointmentService} from '../appointment/appointment.service';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
+import {Appointment} from '../appointment/appointment.entity';
 
 const webpush = require('web-push');
 
@@ -18,6 +19,7 @@ export class PushService {
     constructor(
         @InjectRepository(PushSubscription)
         private readonly pusSubscriptionRepository: Repository<PushSubscription>,
+        @Inject(forwardRef(() => AppointmentService))
         private appointmentService: AppointmentService
     ) {
         webpush.setVapidDetails(
@@ -84,6 +86,41 @@ export class PushService {
                 'actions': [{
                     'action': 'explore',
                     'title': 'Go to the site'
+                }]
+            }
+        };
+
+        return Promise.all(subscriptions.map(sub => {
+            let subbb: any = {...sub};
+            subbb.keys = {p256dh: sub.p256dh, auth: sub.auth};
+
+            delete sub.p256dh;
+            delete sub.auth;
+
+            webpush.sendNotification(
+                subbb, JSON.stringify(notificationPayload));
+        }));
+    }
+
+    async appointmentChanged(appointment: Appointment) {
+        const subscriptions = await this.pusSubscriptionRepository.find({
+            where: {
+                appointment
+            }
+        });
+
+        const notificationPayload = {
+            'notification': {
+                'title': appointment.title,
+                'body': 'Es gibt Änderungen zu diesem Termin!',
+                'vibrate': [50, 50, 50, 100, 200, 200],
+                'data': {
+                    'link': appointment.link,
+                    'primaryKey': 1
+                },
+                'actions': [{
+                    'action': 'openAppointment',
+                    'title': 'Ansehen'
                 }]
             }
         };

@@ -16,6 +16,7 @@ import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
 import {AppointmentUtil} from './appointment.util';
 import {AppointmentMapper} from './appointment.mapper';
+import {PushService} from '../push/push.service';
 
 const logger = require('../../logger');
 
@@ -27,7 +28,8 @@ export class AppointmentService {
         private additionService: AdditionService,
         private fileService: FileService,
         private userService: UserService,
-        private appointmentGateway: AppointmentGateway
+        private appointmentGateway: AppointmentGateway,
+        private pushService: PushService
     ) {
     }
 
@@ -293,6 +295,7 @@ export class AppointmentService {
         appointment = AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, false);
 
         this.appointmentGateway.appointmentUpdated(appointment);
+        this.pushService.appointmentChanged(appointment);
 
         return appointment;
     }
