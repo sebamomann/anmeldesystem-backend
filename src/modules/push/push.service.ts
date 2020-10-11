@@ -7,11 +7,13 @@ import {AppointmentService} from '../appointment/appointment.service';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {Appointment} from '../appointment/appointment.entity';
 
+require('dotenv').config();
+
 const webpush = require('web-push');
 
 const vapidKeys = {
-    'publicKey': 'BOKAo9wpa_19qQdQVAUp-6OdrEKyYbQPxrFs2laArGq40LWd3louhtiMplbBsSRjzEDITUHrBdPlt9iVfbViUfE',
-    'privateKey': 't9aBVe0bWR-Uk_NI0umvBkEoFBCjPxGPJQQ2b6LAnYs'
+    'publicKey': process.env.VAPID_PUBLIC_KEY,
+    'privateKey': process.env.VAPID_PRIVATE_KEY
 };
 
 @Injectable()
@@ -148,8 +150,12 @@ export class PushService {
             delete sub.p256dh;
             delete sub.auth;
 
-            webpush.sendNotification(
-                subbb, JSON.stringify(notificationPayload));
+            try {
+                webpush.sendNotification(
+                    subbb, JSON.stringify(notificationPayload));
+            } catch (e) {
+                console.log(e);
+            }
         }));
     }
 
