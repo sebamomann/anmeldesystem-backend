@@ -133,13 +133,12 @@ export class PushService {
     }
 
     async appointmentChanged(appointment: Appointment) {
-        const subscriptions = await this.pushSubscriptionRepository.find({
-            where: {
-                appointment: {
-                    id: appointment.id
-                }
-            }
-        });
+        const subscriptions = await getRepository(PushSubscription)
+            .createQueryBuilder('subscription')
+            .leftJoinAndSelect('subscription.appointments', 'appointments')
+            .select(['subscription', 'appointments'])
+            .where('appointments.id = :appointmentId', {appointmentId: appointment.id})
+            .getMany();
 
         const notificationPayload = {
             'notification': {
