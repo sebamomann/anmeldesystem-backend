@@ -33,6 +33,8 @@ export class PushService {
         @Inject(forwardRef(() => AppointmentService))
         private appointmentService: AppointmentService
     ) {
+        console.log(vapidKeys);
+
         webpush.setVapidDetails(
             'mailto:info@go-join.me',
             vapidKeys.publicKey,
