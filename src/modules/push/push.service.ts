@@ -34,6 +34,7 @@ export class PushService {
         private appointmentService: AppointmentService
     ) {
         console.log(vapidKeys);
+        console.log(JSON.stringify(vapidKeys));
 
         webpush.setVapidDetails(
             'mailto:info@go-join.me',
@@ -134,7 +135,9 @@ export class PushService {
     async appointmentChanged(appointment: Appointment) {
         const subscriptions = await this.pushSubscriptionRepository.find({
             where: {
-                appointment
+                appointment: {
+                    id: appointment.id
+                }
             }
         });
 
