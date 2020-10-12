@@ -540,7 +540,7 @@ export class AppointmentService {
         }
 
         if (app.subscriptions) {
-            app.subscriptions = app.subscriptions.filter((fSub) => fSub.user.id !== user.id);
+            app.subscriptions = app.subscriptions.filter((fSub) => fSub.user?.id !== user.id);
         }
 
         return this.appointmentRepository.save(app);
