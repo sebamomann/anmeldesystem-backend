@@ -32,6 +32,9 @@ import {Mail} from './modules/enrollment/mail/mail.entity';
 import {PasswordChange} from './modules/user/password-change/password-change.entity';
 import {Session} from './modules/user/session.entity';
 import {loadFixtures} from '../test/protractor/loadFixtures';
+import {PushController} from './modules/push/push.controller';
+import {PushModule} from './modules/push/push.module';
+import {PushSubscription} from './modules/push/pushSubscription.entity';
 
 require('dotenv').config();
 const password = process.env.MAIL_ECA_PASSWORD;
@@ -47,7 +50,8 @@ const _mail = process.env.MAIL_ECA;
         database: process.env.DB_DATABASE,
         timezone: '+02:00',
         entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment,
-            TelegramUser, PasswordReset, Releasenote, EmailChange, Mail, PasswordChange, Session],
+            TelegramUser, PasswordReset, Releasenote, EmailChange, Mail, PasswordChange, Session,
+            PushSubscription],
         synchronize: true
     }),
         MailerModule.forRoot({
@@ -74,8 +78,9 @@ const _mail = process.env.MAIL_ECA;
         AuthModule,
         IcalModule,
         ReleasenoteModule,
+        PushModule,
     ],
-    controllers: [AppController],
+    controllers: [AppController, PushController],
     providers: [AppService],
 })
 export class AppModule {
