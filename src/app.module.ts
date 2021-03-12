@@ -18,11 +18,13 @@ import {PushController} from './modules/push/push.controller';
 import {PushModule} from './modules/push/push.module';
 
 require('dotenv').config();
-const password = process.env.MAIL_ECA_PASSWORD;
-const _mail = process.env.MAIL_ECA;
+
+const password = process.env.MAIL_GJM_PASSWORD;
+const _mail = process.env.MAIL_GJM;
 
 @Module({
-    imports: [TypeOrmModule.forRoot(),
+    imports: [
+        TypeOrmModule.forRoot(),
         MailerModule.forRoot({
             transport: 'smtps://' + _mail + ':' + password + '@cp.dankoe.de',
             defaults: {

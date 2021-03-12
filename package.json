@@ -10,10 +10,10 @@
   },
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build && cpx \"./src/templates/**/*\" \"./dist/src/templates\" && cpx \"./test/protractor/fixtures/**/*\" \"./dist/test/protractor/fixtures\"",
+    "build": "nest build && cpx \"./src/templates/**/*\" \"./dist/src/templates\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "cpx \"./src/templates/**/*\" \"./dist/src/templates\" && cpx \"./test/protractor/fixtures/**/*\" \"./dist/test/protractor/fixtures\" && nest start --watch ",
+    "start:dev": "cpx \"./src/templates/**/*\" \"./dist/src/templates\" && nest start --watch ",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
     "lint": "tslint -p tsconfig.json -c tslint.json",
@@ -21,7 +21,10 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "migrations:generate": "ts-node ./node_modules/typeorm/cli.js migration:generate -d src/migrations -n",
+    "migrations:run": "ts-node ./node_modules/typeorm/cli.js migration:run",
+    "migrations:revert": "ts-node ./node_modules/typeorm/cli.js migration:revert"
   },
   "dependencies": {
     "@nest-modules/mailer": "^1.3.22",
