@@ -3,7 +3,6 @@ import {
     CreateDateColumn,
     Entity,
     Index,
-    JoinColumn,
     JoinTable,
     ManyToMany,
     ManyToOne,
@@ -17,7 +16,6 @@ import {Addition} from '../addition/addition.entity';
 import {Driver} from './driver/driver.entity';
 import {Passenger} from './passenger/passenger.entity';
 import {Comment} from './comment/comment.entity';
-import {User} from '../user/user.entity';
 import {Exclude} from 'class-transformer';
 import {Mail} from './mail/mail.entity';
 
@@ -66,14 +64,8 @@ export class Enrollment {
         })
     comments: Comment[];
 
-    @ManyToOne(type => User,
-        user => user.enrollments,
-        {
-            onDelete: 'CASCADE',
-            eager: true
-        })
-    @JoinColumn()
-    creator: User;
+    @Column({nullable: true, type: 'uuid'})
+    creatorId: string;
 
     @OneToOne(type => Mail,
         mail => mail.enrollment,

@@ -1,15 +1,4 @@
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    JoinColumn,
-    JoinTable,
-    ManyToMany,
-    ManyToOne,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn
-} from 'typeorm';
+import {Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn} from 'typeorm';
 import {Enrollment} from '../enrollment/enrollment.entity';
 import {Addition} from '../addition/addition.entity';
 import {File} from '../file/file.entity';
@@ -86,13 +75,8 @@ export class Appointment {
         })
     files: File[];
 
-    @ManyToOne(type => User,
-        user => user.appointments,
-        {
-            eager: true
-        })
-    @JoinColumn()
-    creator: User;
+    @Column({nullable: true, type: "uuid"})
+    creatorId: string;
 
     @CreateDateColumn()
     @Exclude({toPlainOnly: true})
