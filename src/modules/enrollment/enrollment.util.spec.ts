@@ -31,7 +31,7 @@ describe('AppointmentUtil', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.id = '3f091325-1fb1-4dde-bd89-3298236a730b';
-                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.creatorId = __existing_creator.id;
 
                     const __given_enrollment = new Enrollment();
                     __given_enrollment.id = '3eb442bd-9708-451f-a55b-902cab48c2f8';
@@ -58,7 +58,7 @@ describe('AppointmentUtil', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.id = '3f091325-1fb1-4dde-bd89-3298236a730b';
-                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.creatorId = __existing_creator.id;
 
                     const __given_enrollment = new Enrollment();
                     __given_enrollment.id = '3eb442bd-9708-451f-a55b-902cab48c2f8';
@@ -93,7 +93,7 @@ describe('AppointmentUtil', () => {
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.id = '3f091325-1fb1-4dde-bd89-3298236a730b';
-                __existing_appointment.creator = __existing_creator;
+                __existing_appointment.creatorId = __existing_creator.id;
 
                 const __given_enrollment = new Enrollment();
                 __given_enrollment.id = '3eb442bd-9708-451f-a55b-902cab48c2f8';
@@ -115,7 +115,7 @@ describe('AppointmentUtil', () => {
 
                         const __existing_appointment = new Appointment();
                         __existing_appointment.id = '3f091325-1fb1-4dde-bd89-3298236a730b';
-                        __existing_appointment.creator = __given_user;
+                        __existing_appointment.creatorId = __given_user.id;
 
                         const __given_enrollment = new Enrollment();
                         __given_enrollment.name = 'name';
@@ -136,8 +136,8 @@ describe('AppointmentUtil', () => {
 
                         const __existing_appointment = new Appointment();
                         __existing_appointment.id = '3f091325-1fb1-4dde-bd89-3298236a730b';
-                        __existing_appointment.creator = __existing_creator;
-                        __existing_appointment.administrators = [__given_user];
+                        __existing_appointment.creatorId = __existing_creator.id;
+                        __existing_appointment.administrators = [__given_user.id];
 
                         const __given_enrollment = new Enrollment();
                         __given_enrollment.name = 'name';
@@ -158,7 +158,7 @@ describe('AppointmentUtil', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.id = '3f091325-1fb1-4dde-bd89-3298236a730b';
-                    __existing_appointment.creator = __existing_creator;
+                    __existing_appointment.creatorId = __existing_creator.id;
 
                     const __given_enrollment = new Enrollment();
                     __given_enrollment.name = 'name';
@@ -185,7 +185,7 @@ describe('AppointmentUtil', () => {
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.id = '3f091325-1fb1-4dde-bd89-3298236a730b';
-                __existing_appointment.creator = __existing_creator;
+                __existing_appointment.creatorId = __existing_creator.id;
 
                 const __given_enrollment = new Enrollment();
                 __given_enrollment.name = 'name';

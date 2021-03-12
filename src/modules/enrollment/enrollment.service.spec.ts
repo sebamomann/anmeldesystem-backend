@@ -38,6 +38,8 @@ describe('EnrollmentService', () => {
     let appointmentService: AppointmentService;
     let fileService: FileService;
     let additionService: AdditionService;
+    let driverService: DriverService;
+    let passengerService: PassengerService;
     let mailerService: MailerService;
     let appointmentGateway: AppointmentGateway;
     let module: TestingModule;
@@ -101,6 +103,8 @@ describe('EnrollmentService', () => {
         appointmentService = module.get<AppointmentService>(AppointmentService);
         fileService = module.get<FileService>(FileService);
         additionService = module.get<AdditionService>(AdditionService);
+        driverService = module.get<DriverService>(DriverService);
+        passengerService = module.get<PassengerService>(PassengerService);
         pushService = module.get<PushService>(PushService);
         appointmentGateway = module.get<AppointmentGateway>(AppointmentGateway);
 
@@ -160,7 +164,7 @@ describe('EnrollmentService', () => {
     describe('* create enrollment', () => {
         describe('* successful should return created entity', () => {
             describe('* comment management', () => {
-                it('* trimming', async () => {
+                it('* should trim comment', async () => {
                     const __given_enrollment = new Enrollment();
                     const __given_user = new User();
                     __given_user.username = 'username';
@@ -176,13 +180,12 @@ describe('EnrollmentService', () => {
 
                     __given_enrollment.appointment = __existing_appointment;
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
-
-                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
-                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
-
-                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
-                        return;
+                    jest.spyOn(appointmentService, 'findByLink').mockResolvedValueOnce(__existing_appointment);
+                    jest.spyOn<any, any>(enrollmentService, '_existsByCreator').mockReturnValueOnce(false);
+                    jest.spyOn(enrollmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
+                    jest.spyOn<any, any>(enrollmentService, '_sendEmailToEnrollmentCreator').mockImplementationOnce(_ => {
+                    });
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(_ => {
                     });
 
                     const __actual = await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
@@ -190,7 +193,7 @@ describe('EnrollmentService', () => {
                     expect(__actual.comment).toBe(__expected_comment);
                 });
 
-                it('* null on empty', async () => {
+                it('* null should be replaced by empty string', async () => {
                     const __given_enrollment = new Enrollment();
                     const __given_user = new User();
                     __given_user.username = 'username';
@@ -204,13 +207,12 @@ describe('EnrollmentService', () => {
 
                     __given_enrollment.appointment = __existing_appointment;
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
-
-                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
-                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
-
-                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
-                        return;
+                    jest.spyOn(appointmentService, 'findByLink').mockResolvedValueOnce(__existing_appointment);
+                    jest.spyOn<any, any>(enrollmentService, '_existsByCreator').mockReturnValueOnce(false);
+                    jest.spyOn(enrollmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
+                    jest.spyOn<any, any>(enrollmentService, '_sendEmailToEnrollmentCreator').mockImplementationOnce(_ => {
+                    });
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(_ => {
                     });
 
                     const __actual = await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
@@ -221,7 +223,7 @@ describe('EnrollmentService', () => {
             });
 
             describe('* driver addition management', () => {
-                it('* as passenger', async () => {
+                it('* enroll as passenger', async () => {
                     const __given_enrollment = new Enrollment();
                     __given_enrollment.passenger = new Passenger();
                     __given_enrollment.passenger.requirement = 2;
@@ -241,25 +243,21 @@ describe('EnrollmentService', () => {
 
                     __given_enrollment.appointment = __existing_appointment;
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
-
-                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
-
-                    passengerRepositoryMock.findOne.mockImplementationOnce(undefined);
-                    passengerRepositoryMock.save.mockImplementation((val) => val);
-
-                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
-
-                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
-                        return;
+                    jest.spyOn(appointmentService, 'findByLink').mockResolvedValueOnce(__existing_appointment);
+                    jest.spyOn<any, any>(enrollmentService, '_existsByCreator').mockReturnValueOnce(false);
+                    jest.spyOn(passengerService, '__save').mockImplementationOnce((val) => Promise.resolve(val));
+                    jest.spyOn(enrollmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
+                    jest.spyOn<any, any>(enrollmentService, '_sendEmailToEnrollmentCreator').mockImplementationOnce(_ => {
+                    });
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(_ => {
                     });
 
                     const __actual = await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
 
                     expect(__actual.passenger.requirement).toBe(__given_enrollment.passenger.requirement);
                     expect(__actual.driver).toBeUndefined();
-                    // checking passenger management
-                    expect(passengerRepositoryMock.save).toHaveBeenCalledTimes(1);
+
+                    expect(passengerService.__save).toHaveBeenCalledTimes(1);
                 });
 
                 it('* as driver', async () => {
@@ -283,17 +281,13 @@ describe('EnrollmentService', () => {
 
                     __given_enrollment.appointment = __existing_appointment;
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
-
-                    enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
-
-                    driverRepositoryMock.findOne.mockImplementationOnce(undefined);
-                    driverRepositoryMock.save.mockImplementation((val) => val);
-
-                    enrollmentRepositoryMock.save.mockImplementation((val) => val); // save appointment
-
-                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(() => {
-                        return;
+                    jest.spyOn(appointmentService, 'findByLink').mockResolvedValueOnce(__existing_appointment);
+                    jest.spyOn<any, any>(enrollmentService, '_existsByCreator').mockReturnValueOnce(false);
+                    jest.spyOn(driverService, '__save').mockImplementationOnce((val) => Promise.resolve(val));
+                    jest.spyOn(enrollmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
+                    jest.spyOn<any, any>(enrollmentService, '_sendEmailToEnrollmentCreator').mockImplementationOnce(_ => {
+                    });
+                    jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(_ => {
                     });
 
                     const __expected_driver = new Driver();
@@ -304,8 +298,8 @@ describe('EnrollmentService', () => {
 
                     expect(__actual.driver).toEqual(__expected_driver);
                     expect(__actual.passenger).toBeUndefined();
-                    // checking passenger management
-                    expect(driverRepositoryMock.save).toHaveBeenCalledTimes(1);
+
+                    expect(driverService.__save).toHaveBeenCalledTimes(1);
                 });
             });
 
@@ -622,8 +616,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.id = __given_enrollment_id;
                 __existing_enrollment.name = 'name';
                 __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.creator = __given_user;
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // new name not in use
@@ -653,8 +646,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.comment = 'comment';
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 enrollmentRepositoryMock.save.mockImplementationOnce((val) => val);
@@ -689,8 +681,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = true;
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 driverRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment.driver);
@@ -728,8 +719,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = true;
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 driverRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment.driver);
@@ -766,8 +756,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = false;
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 driverRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment.driver);
@@ -802,8 +791,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = true;
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 passengerRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment.passenger);
@@ -839,8 +827,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = true;
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 passengerRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment.passenger);
@@ -875,8 +862,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = false;
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 passengerRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment.passenger);
@@ -913,8 +899,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = true;
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 passengerRepositoryMock.findOne.mockReturnValueOnce(undefined);
@@ -952,8 +937,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = true;
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 driverRepositoryMock.findOne.mockReturnValueOnce(undefined);
@@ -992,8 +976,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.additions = [__existing_addition];
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.additions = [__existing_addition];
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // new name not in use
@@ -1023,8 +1006,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.name = 'name';
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // new name not in use
@@ -1088,7 +1070,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.name = 'name';
                 __existing_enrollment.creator = __existing_user;
                 __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.creator = __existing_user;
+                __existing_enrollment.appointment.creatorId = __existing_user.id;
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
 
@@ -1114,8 +1096,7 @@ describe('EnrollmentService', () => {
                     __existing_enrollment.id = __given_enrollment_id;
                     __existing_enrollment.name = 'name';
                     __existing_enrollment.appointment = new Appointment();
-                    __existing_enrollment.appointment.creator = __given_user;
-                    __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                    __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                     const __existing_enrollment_by_name = new Enrollment();
 
@@ -1151,8 +1132,7 @@ describe('EnrollmentService', () => {
                     __existing_enrollment.name = 'name';
                     __existing_enrollment.creator = __given_user;
                     __existing_enrollment.appointment = new Appointment();
-                    __existing_enrollment.appointment.creator = new User();
-                    __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                    __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                     const __existing_enrollment_by_name = new Enrollment();
 
@@ -1201,8 +1181,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.additions = [__existing_addition];
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.additions = [__existing_addition];
-                __existing_enrollment.appointment.creator = new User();
-                __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+                __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // new name not in use
@@ -1235,8 +1214,7 @@ describe('EnrollmentService', () => {
             __existing_enrollment.name = 'name';
             __existing_enrollment.creator = __given_user;
             __existing_enrollment.appointment = new Appointment();
-            __existing_enrollment.appointment.creator = new User();
-            __existing_enrollment.appointment.creator.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+            __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
             enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
             enrollmentRepositoryMock.remove.mockImplementationOnce((val) => val);
@@ -1285,7 +1263,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.name = 'name';
                 __existing_enrollment.creator = __existing_user;
                 __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.creator = __existing_user;
+                __existing_enrollment.appointment.creatorId = __existing_user.id;
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
 
@@ -1309,8 +1287,7 @@ describe('EnrollmentService', () => {
                 const __given_token = '';
 
                 const __existing_appointment = new Appointment();
-                __existing_appointment.creator = new User();
-                __existing_appointment.creator.id = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
+                __existing_appointment.creatorId = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
                 __existing_appointment.administrators = [];
 
                 const __existing_enrollment = new Enrollment();
@@ -1333,15 +1310,17 @@ describe('EnrollmentService', () => {
                     .update(__given_enrollment_id + process.env.SALT_ENROLLMENT)
                     .digest('hex');
 
+                const __existing_appointment_creator = new User();
+                __existing_appointment_creator.id = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
+                __existing_appointment_creator.username = 'creator';
+
                 const __existing_appointment = new Appointment();
-                __existing_appointment.creator = new User();
-                __existing_appointment.creator.id = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
-                __existing_appointment.creator.username = 'creator';
+                __existing_appointment.creatorId = __existing_appointment_creator.id;
                 __existing_appointment.administrators = [];
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
-                __existing_enrollment.creator = __existing_appointment.creator;
+                __existing_enrollment.creatorId = __existing_appointment.creatorId;
                 __existing_enrollment.appointment = __existing_appointment;
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
@@ -1377,15 +1356,17 @@ describe('EnrollmentService', () => {
                 __given_user.username = 'username';
                 const __given_token = '';
 
+                const __existing_appointment_creator = new User();
+                __existing_appointment_creator.id = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
+                __existing_appointment_creator.username = 'creator';
+
                 const __existing_appointment = new Appointment();
-                __existing_appointment.creator = new User();
-                __existing_appointment.creator.id = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
-                __existing_appointment.creator.username = 'creator';
+                __existing_appointment.creatorId = __existing_appointment_creator.id;
                 __existing_appointment.administrators = [];
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
-                __existing_enrollment.creator = __existing_appointment.creator;
+                __existing_enrollment.creatorId = __existing_appointment.creatorId;
                 __existing_enrollment.appointment = __existing_appointment;
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);

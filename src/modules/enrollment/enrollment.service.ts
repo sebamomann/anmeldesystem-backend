@@ -96,7 +96,7 @@ export class EnrollmentService {
 
         let savedEnrollment = await this.enrollmentRepository.save(enrollment_output);
 
-        if (enrollment_output.creatorId === undefined) {
+        if (!enrollment_output.creatorId) {
             await this._sendEmailToEnrollmentCreator(savedEnrollment, domain, appointment_referenced);
         }
 

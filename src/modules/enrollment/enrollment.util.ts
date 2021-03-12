@@ -68,11 +68,12 @@ export class EnrollmentUtil {
 
         output.additions = EnrollmentUtil.filterValidAdditions(enrollment, appointment);
 
-        this._handleDriverAddition(output, enrollment, appointment);
+        this._parseDriverAddition(output, enrollment, appointment);
 
         return output;
     }
 
+    /** TODO WTF */
     public static handleDriverRelation(driverToBe: Driver, currentDriverObject: Driver): Driver | undefined {
         if (!driverToBe) {
             return undefined;
@@ -124,7 +125,7 @@ export class EnrollmentUtil {
         return undefined;
     }
 
-    private static _handleDriverAddition(output: Enrollment, enrollment: Enrollment, appointment: Appointment) {
+    private static _parseDriverAddition(output: Enrollment, enrollment: Enrollment, appointment: Appointment) {
         if (appointment.driverAddition) { // if (!!_appointment.driverAddition === true) {
             if (enrollment.driver) {
                 output.driver = EnrollmentUtil.handleDriverRelation(enrollment.driver, undefined);
