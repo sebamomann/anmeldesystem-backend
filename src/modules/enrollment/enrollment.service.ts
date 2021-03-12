@@ -96,7 +96,7 @@ export class EnrollmentService {
 
         let savedEnrollment = await this.enrollmentRepository.save(enrollment_output);
 
-        if (enrollment_output.creator === undefined) {
+        if (enrollment_output.creatorId === undefined) {
             await this._sendEmailToEnrollmentCreator(savedEnrollment, domain, appointment_referenced);
         }
 
@@ -317,7 +317,7 @@ export class EnrollmentService {
         if (enrollment_raw.editMail) {
             await this._setMailAttribute(enrollment_raw, enrollment_output);
         } else if (user !== undefined) {
-            enrollment_output.creator = user;
+            enrollment_output.creatorId = user.id;
         } else {
             throw new MissingAuthenticationException(null,
                 'Valid authentication by email or authentication header needed',
@@ -325,9 +325,20 @@ export class EnrollmentService {
         }
     }
 
-    // noinspection JSUnusedLocalSymbols // dynamic function call
+    // noinspection JSUnusedLocalSymbols
+    // function called dynamically
+    /**
+     * Update the name of a given appointment.
+     * The name can only be updated, if the enrollment didnt got created by a user.<br/>
+     * Validate, that the given name is not already in use.
+     *
+     * @param enrollment_to_change_values       Values of the enrollment to update
+     * @param enrollment_referenced             Current enrollment object
+     *
+     * @private
+     */
     private async _updateName(enrollment_to_change_values: any, enrollment_referenced: Enrollment) {
-        if (!enrollment_referenced.creator) {
+        if (!enrollment_referenced.creatorId) {
             if (await this._existsByName(enrollment_to_change_values.name, enrollment_referenced.appointment)) {
                 throw new DuplicateValueException('DUPLICATE_ENTRY',
                     'Following values are already taken',
@@ -342,12 +353,14 @@ export class EnrollmentService {
         }
     }
 
-    // noinspection JSUnusedLocalSymbols // dynamic function call
+    /// noinspection JSUnusedLocalSymbols
+    // function called dynamically
     private async _updateDriver(enrollment_to_change_values: Enrollment, enrollment_referenced: Enrollment) {
         return await this._updateDriverAndPassenger(enrollment_to_change_values, enrollment_referenced, 'driver');
     }
 
-    // noinspection JSUnusedLocalSymbols // dynamic function call
+    // noinspection JSUnusedLocalSymbols
+    // function called dynamically
     private async _updatePassenger(enrollment_to_change_values: Enrollment, enrollment_referenced: Enrollment) {
         return await this._updateDriverAndPassenger(enrollment_to_change_values, enrollment_referenced, 'passenger');
     }
@@ -391,7 +404,8 @@ export class EnrollmentService {
         return changedValue;
     }
 
-    // noinspection JSUnusedLocalSymbols,JSMethodCanBeStatic // dynamic function call
+    // noinspection JSUnusedLocalSymbols,JSMethodCanBeStatic
+    // function called dynamically
     private async _updateAdditions(enrollment_to_change_values: any, enrollment_referenced: Enrollment) {
         EnrollmentUtil.filterValidAdditions(enrollment_to_change_values, enrollment_referenced.appointment);
     }
