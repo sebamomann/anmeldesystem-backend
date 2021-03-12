@@ -130,7 +130,7 @@ export class AppointmentUtil {
             references.push('ENROLLED');
         }
 
-        if ((appointment.pinners && appointment.pinners.some(sPinner => sPinner.id === user.id))
+        if ((appointment.pinners && appointment.pinners.some(sPinner => sPinner === user.id))
             || pins.includes(appointment.link)) {
             references.push('PINNED');
         }
