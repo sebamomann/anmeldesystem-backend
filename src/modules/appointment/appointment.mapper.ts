@@ -86,10 +86,14 @@ export class AppointmentMapper {
         appointment = Object.assign(appointment, creatorObject);
         appointment = Object.assign(appointment, enrollmentsObject);
 
+        // TODO mapping user stripmin
+        // const creator = getFromKeycloak(_appointment.creatorId);
+        const creator = {} as any;
+        const mUser: any = UserUtil.stripUserMin(creator); // no inline due to type conversion
         const obj = {
             creator: {
-                name: _appointment.creator.name,
-                username: _appointment.creator.username,
+                name: mUser.name,
+                username: mUser.username,
             }
         };
 
