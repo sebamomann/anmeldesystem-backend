@@ -23,7 +23,7 @@ export class AuthGuard implements CanActivate {
 
             return true;
         } catch (e) {
-            throw new UnauthorizedException("Missing or invalid Authorization header");
+            throw new UnauthorizedException('Missing or invalid Authorization header');
         }
     }
 }

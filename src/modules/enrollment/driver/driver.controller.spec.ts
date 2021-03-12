@@ -1,5 +1,5 @@
 import {Test, TestingModule} from '@nestjs/testing';
-import {DriverController} from "./driver.controller";
+import {DriverController} from './driver.controller';
 
 describe('Driver Controller', () => {
     let controller: DriverController;

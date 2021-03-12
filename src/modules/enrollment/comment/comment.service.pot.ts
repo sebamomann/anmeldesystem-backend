@@ -123,36 +123,36 @@
 //         it('successful request', async () => {
 //             const enrollment = new Enrollment();
 //             enrollment.id = '1';
-    //             const comment = new Comment();
-    //             comment.enrollment = enrollment;
-    //
-    //             enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
-    //             commentRepositoryMock.save.mockImplementationOnce((val) => val);
-    //
-    //             commentService
-    //                 .create(comment)
-    //                 .then((res) => {
-    //                     expect(res).toBeInstanceOf(Comment);
-    //                     expect(res.enrollment).toEqual(enrollment);
-    //                 })
-    //                 .catch((err) => {
-    //                     throw new Error('I have failed you, Anakin. Should have returned created comment entity');
-    //                 });
-    //         });
-    //     });
-    //
-    //     describe('should return error if failed', () => {
-    //         it('enrollment not found', async () => {
-    //             const enrollment = new Enrollment();
-    //             enrollment.id = '1';
-    //             const comment = new Comment();
-    //             comment.enrollment = enrollment;
-    //
-    //             enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
-    //
-    //             commentService
-    //                 .create(comment)
-    //                 .then(() => {
+//             const comment = new Comment();
+//             comment.enrollment = enrollment;
+//
+//             enrollmentRepositoryMock.findOne.mockReturnValueOnce(enrollment);
+//             commentRepositoryMock.save.mockImplementationOnce((val) => val);
+//
+//             commentService
+//                 .create(comment)
+//                 .then((res) => {
+//                     expect(res).toBeInstanceOf(Comment);
+//                     expect(res.enrollment).toEqual(enrollment);
+//                 })
+//                 .catch((err) => {
+//                     throw new Error('I have failed you, Anakin. Should have returned created comment entity');
+//                 });
+//         });
+//     });
+//
+//     describe('should return error if failed', () => {
+//         it('enrollment not found', async () => {
+//             const enrollment = new Enrollment();
+//             enrollment.id = '1';
+//             const comment = new Comment();
+//             comment.enrollment = enrollment;
+//
+//             enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
+//
+//             commentService
+//                 .create(comment)
+//                 .then(() => {
 //                     throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
 //                 })
 //                 .catch((err) => {

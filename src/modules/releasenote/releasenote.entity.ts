@@ -1,17 +1,17 @@
-import {Column, CreateDateColumn, Entity, PrimaryGeneratedColumn} from "typeorm";
+import {Column, CreateDateColumn, Entity, PrimaryGeneratedColumn} from 'typeorm';
 
 @Entity()
 export class Releasenote {
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column()
     version: string;
 
-    @Column({type: "text"})
+    @Column({type: 'text'})
     data: string;
 
-    @Column({comment: "1=frontend;2=backend"})
+    @Column({comment: '1=frontend;2=backend'})
     project: number;
 
     @CreateDateColumn()

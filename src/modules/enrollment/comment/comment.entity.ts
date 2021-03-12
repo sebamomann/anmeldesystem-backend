@@ -1,6 +1,6 @@
 import {Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn} from 'typeorm';
-import {Enrollment} from "../enrollment.entity";
-import {Exclude} from "class-transformer";
+import {Enrollment} from '../enrollment.entity';
+import {Exclude} from 'class-transformer';
 
 @Entity()
 export class Comment {
@@ -16,7 +16,7 @@ export class Comment {
     @ManyToOne(type => Enrollment,
         enrollment => enrollment.comments,
         {
-            onDelete: "CASCADE"
+            onDelete: 'CASCADE'
         }
     )
     enrollment: Enrollment;

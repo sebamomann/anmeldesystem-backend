@@ -1,7 +1,7 @@
 import {Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
-import {Enrollment} from "../enrollment.entity";
+import {Enrollment} from '../enrollment.entity';
 
-@Entity({name: "enrollment_mail"})
+@Entity({name: 'enrollment_mail'})
 export class Mail {
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -11,7 +11,7 @@ export class Mail {
 
     @OneToOne(type => Enrollment,
         enrollment => enrollment.mail,
-        {onDelete: "CASCADE"})
+        {onDelete: 'CASCADE'})
     @JoinColumn()
     enrollment: Enrollment;
 }
