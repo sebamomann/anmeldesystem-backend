@@ -23,10 +23,10 @@ import {AppointmentService} from './appointment.service';
 
 import {AuthGuard} from '@nestjs/passport';
 
-import {JwtOptStrategy} from '../../auth/jwt-opt.strategy';
 import {Response} from 'express';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
+import {AuthOptGuard} from '../../auth/auth-opt.gurad';
 
 @Controller('appointment')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
@@ -35,7 +35,7 @@ export class AppointmentController {
     }
 
     @Get()
-    @UseGuards(JwtOptStrategy)
+    @UseGuards(AuthOptGuard)
     @UseInterceptors(ClassSerializerInterceptor)
     getAll(@Usr() user: User,
            @Query() params: any,
@@ -54,7 +54,7 @@ export class AppointmentController {
     }
 
     @Get('archive')
-    @UseGuards(JwtOptStrategy)
+    @UseGuards(AuthOptGuard)
     @UseInterceptors(ClassSerializerInterceptor)
     getAllArchive(@Usr() user: User,
                   @Query() params: any,
@@ -75,7 +75,7 @@ export class AppointmentController {
     }
 
     @Get(':link')
-    @UseGuards(JwtOptStrategy)
+    @UseGuards(AuthOptGuard)
     findByLink(@Usr() user: User,
                @Query('slim') slim: string,
                @Query() permissions: any,
@@ -100,7 +100,7 @@ export class AppointmentController {
     }
 
     @Post()
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard)
     create(@Usr() user: User,
            @Body() appointment: Appointment,
            @Res() res: Response,) {
@@ -115,7 +115,7 @@ export class AppointmentController {
     }
 
     @Put(':link')
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard)
     update(@Usr() user: User,
            @Param('link') link: string,
            @Body() toChange: any,
@@ -130,9 +130,10 @@ export class AppointmentController {
             });
     }
 
+    // TODO currently can be addeded multioople times ?
     @Post(':link/administrator')
-    @UseGuards(AuthGuard('jwt'))
-    addAdministrator(@Usr() user: User, // TODO currently can be addeded multioople times ?
+    @UseGuards(AuthGuard)
+    addAdministrator(@Usr() user: User,
                      @Param('link') link: string,
                      @Body('username') username: string,
                      @Res() res: Response,) {
@@ -146,7 +147,7 @@ export class AppointmentController {
     }
 
     @Delete(':link/administrator/:username')
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard)
     removeAdministrator(@Usr() user: User,
                         @Param('link') link: string,
                         @Param('username') username: string,
@@ -161,7 +162,7 @@ export class AppointmentController {
     }
 
     @Get(':link/permission')
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard)
     hasPermission(@Usr() user: User,
                   @Param('link') link: string,
                   @Res() res: Response,) {
@@ -181,7 +182,7 @@ export class AppointmentController {
     }
 
     @Post(':link/file')
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard)
     addFile(@Usr() user: User,
             @Param('link') link: string,
             @Body() data: { name: string, data: string },
@@ -198,7 +199,7 @@ export class AppointmentController {
     }
 
     @Delete(':link/file/:id')
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard)
     removeFile(@Usr() user: User,
                @Param('link') link: string,
                @Param('id') id: string,
@@ -214,7 +215,7 @@ export class AppointmentController {
     }
 
     @Get(':link/pin')
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard)
     pinAppointment(@Usr() user: User,
                    @Param('link') link: string,
                    @Res() res: Response) {

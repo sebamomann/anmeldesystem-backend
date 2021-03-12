@@ -1,37 +1,9 @@
-import {Column, CreateDateColumn, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
+import {Entity, ManyToMany, OneToMany} from 'typeorm';
 import {Appointment} from '../appointment/appointment.entity';
 import {Enrollment} from '../enrollment/enrollment.entity';
-import {TelegramUser} from './telegram/telegram-user.entity';
-import {PasswordReset} from './password-reset/password-reset.entity';
-import {Exclude} from 'class-transformer';
-import {EmailChange} from './email-change/email-change.entity';
-import {Session} from './session.entity';
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
-
-    @Column()
-    name: string;
-
-    @Column({
-        unique: true
-    })
-    username: string;
-
-    @Column({select: true})
-    @Exclude({toPlainOnly: true})
-    password: string;
-
-    @Column({
-        unique: true
-    })
-    mail: string;
-
-    @Column('smallint', {default: false})
-    activated: boolean;
-
     @OneToMany(type => Appointment,
         appointment => appointment.creator,
         {
@@ -49,37 +21,11 @@ export class User {
     )
     pinned: Appointment[];
 
-    @OneToOne(type => TelegramUser,
-        telegramUser => telegramUser.user)
-    telegramUser: TelegramUser;
-
     @OneToMany(type => Enrollment,
         enrollment => enrollment.creator)
     enrollments: Enrollment[];
 
-    @OneToMany(type => PasswordReset,
-        passwordReset => passwordReset.user,)
-    passwordReset: PasswordReset[];
-
-    @OneToMany(type => EmailChange,
-        emailChange => emailChange.user,
-        {
-            eager: true
-        })
-    emailChange: EmailChange[];
-
-    @OneToMany(() => Session, session => session.user,
-        {
-            onUpdate: 'NO ACTION'
-        })
-    sessions: Session[];
-
-    @CreateDateColumn()
-    iat: Date;
-
-    token: string;
-    refreshToken: string;
-
-    accountActivationToken?: string;
-    accountActivationEmail?: string;
+    id: string;
+    name: string;
+    username: string;
 }

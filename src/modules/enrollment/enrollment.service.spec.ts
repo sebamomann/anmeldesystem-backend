@@ -4,10 +4,6 @@ import {UserService} from '../user/user.service';
 import {MailerService} from '@nest-modules/mailer';
 import {Repository} from 'typeorm';
 import {User} from '../user/user.entity';
-import {TelegramUser} from '../user/telegram/telegram-user.entity';
-import {PasswordReset} from '../user/password-reset/password-reset.entity';
-import {PasswordChange} from '../user/password-change/password-change.entity';
-import {EmailChange} from '../user/email-change/email-change.entity';
 import {getRepositoryToken} from '@nestjs/typeorm';
 import {MAILER_OPTIONS} from '@nest-modules/mailer/dist/constants/mailer-options.constant';
 import {AppointmentService} from '../appointment/appointment.service';
@@ -28,7 +24,6 @@ import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {AppointmentGateway} from '../appointment/appointment.gateway';
-import {Session} from '../user/session.entity';
 import {MissingAuthenticationException} from '../../exceptions/MissingAuthenticationException';
 import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
 import {PushSubscription} from '../push/pushSubscription.entity';
@@ -51,10 +46,6 @@ describe('EnrollmentService', () => {
     let userRepositoryMock: MockType<Repository<User>>;
     let fileRepositoryMock: MockType<Repository<File>>;
     let additionRepositoryMock: MockType<Repository<Addition>>;
-    let telegramUserRepositoryMock: MockType<Repository<TelegramUser>>;
-    let passwordResetRepositoryMock: MockType<Repository<PasswordReset>>;
-    let passwordChangeRepositoryMock: MockType<Repository<PasswordChange>>;
-    let emailChangeRepositoryMock: MockType<Repository<EmailChange>>;
     let driverRepositoryMock: MockType<Repository<Driver>>;
     let passengerRepositoryMock: MockType<Repository<Passenger>>;
     let mailRepositoryMock: MockType<Repository<Mail>>;
@@ -84,13 +75,8 @@ describe('EnrollmentService', () => {
                 {provide: getRepositoryToken(Mail), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Appointment), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(Session), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(File), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Addition), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(TelegramUser), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(PasswordReset), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(PasswordChange), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(EmailChange), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(PushSubscription), useFactory: repositoryMockFactory},
                 {
                     name: MAILER_OPTIONS,
@@ -122,10 +108,6 @@ describe('EnrollmentService', () => {
         userRepositoryMock = module.get(getRepositoryToken(User));
         additionRepositoryMock = module.get(getRepositoryToken(Addition));
         appointmentRepositoryMock = module.get(getRepositoryToken(Appointment));
-        telegramUserRepositoryMock = module.get(getRepositoryToken(TelegramUser));
-        passwordResetRepositoryMock = module.get(getRepositoryToken(PasswordReset));
-        passwordChangeRepositoryMock = module.get(getRepositoryToken(PasswordChange));
-        emailChangeRepositoryMock = module.get(getRepositoryToken(EmailChange));
         fileRepositoryMock = module.get(getRepositoryToken(File));
         driverRepositoryMock = module.get(getRepositoryToken(Driver));
         passengerRepositoryMock = module.get(getRepositoryToken(Passenger));

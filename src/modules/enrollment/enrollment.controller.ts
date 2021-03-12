@@ -4,8 +4,8 @@ import {EnrollmentService} from './enrollment.service';
 import {Enrollment} from './enrollment.entity';
 import {Usr} from '../user/user.decorator';
 import {User} from '../user/user.entity';
-import {JwtOptStrategy} from '../../auth/jwt-opt.strategy';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
+import {AuthOptGuard} from '../../auth/auth-opt.gurad';
 
 @Controller('enrollment')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
@@ -21,7 +21,7 @@ export class EnrollmentController {
     // }
 
     @Post()
-    @UseGuards(JwtOptStrategy)
+    @UseGuards(AuthOptGuard)
     create(@Usr() user: User,
            @Body('domain') domain: string,
            @Body() enrollment: Enrollment,
@@ -38,7 +38,7 @@ export class EnrollmentController {
     }
 
     @Put(':id/:token*?')
-    @UseGuards(JwtOptStrategy)
+    @UseGuards(AuthOptGuard)
     update(@Usr() user: User,
            @Param('id') id: string,
            @Param('token') token: string,
@@ -56,7 +56,7 @@ export class EnrollmentController {
     }
 
     @Delete(':id/:token*?')
-    @UseGuards(JwtOptStrategy)
+    @UseGuards(AuthOptGuard)
     delete(@Param('id') id: string,
            @Param('token') token: string,
            @Usr() user: User,
@@ -72,7 +72,7 @@ export class EnrollmentController {
             });
     }
 
-    @UseGuards(JwtOptStrategy)
+    @UseGuards(AuthOptGuard)
     @Get('/:id/check-permission')
     checkPermissions(@Usr() user: User,
                      @Query('token') token: string,

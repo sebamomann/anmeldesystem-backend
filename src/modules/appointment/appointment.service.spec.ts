@@ -9,10 +9,6 @@ import {AdditionService} from '../addition/addition.service';
 import {AppointmentService} from './appointment.service';
 import {getRepositoryToken} from '@nestjs/typeorm';
 import {File} from '../file/file.entity';
-import {TelegramUser} from '../user/telegram/telegram-user.entity';
-import {PasswordReset} from '../user/password-reset/password-reset.entity';
-import {PasswordChange} from '../user/password-change/password-change.entity';
-import {EmailChange} from '../user/email-change/email-change.entity';
 import {MAILER_OPTIONS} from '@nest-modules/mailer/dist/constants/mailer-options.constant';
 import {MailerService} from '@nest-modules/mailer';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
@@ -21,7 +17,6 @@ import {InsufficientPermissionsException} from '../../exceptions/InsufficientPer
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
-import {Session} from '../user/session.entity';
 import {PushService} from '../push/push.service';
 import {PushSubscription} from '../push/pushSubscription.entity';
 
@@ -49,13 +44,8 @@ describe('AppointmentService', () => {
                 {provide: getRepositoryToken(Appointment), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(PushSubscription), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(Session), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(File), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Addition), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(TelegramUser), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(PasswordReset), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(PasswordChange), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(EmailChange), useFactory: repositoryMockFactory},
                 {
                     name: MAILER_OPTIONS,
                     provide: MAILER_OPTIONS,

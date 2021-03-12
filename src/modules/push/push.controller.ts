@@ -1,9 +1,9 @@
 import {Body, Controller, Get, Head, HttpStatus, NotFoundException, Post, Query, Res, UseGuards} from '@nestjs/common';
-import {JwtOptStrategy} from '../../auth/jwt-opt.strategy';
 import {Usr} from '../user/user.decorator';
 import {User} from '../user/user.entity';
 import {Response} from 'express';
 import {PushService} from './push.service';
+import {AuthOptGuard} from '../../auth/auth-opt.gurad';
 
 @Controller('push')
 export class PushController {
@@ -13,7 +13,7 @@ export class PushController {
     }
 
     @Post()
-    @UseGuards(JwtOptStrategy)
+    @UseGuards(AuthOptGuard)
     create(@Usr() user: User,
            @Body() obj: any,
            @Res() res: Response,) {
@@ -28,7 +28,7 @@ export class PushController {
     }
 
     @Post('subscribe')
-    @UseGuards(JwtOptStrategy)
+    @UseGuards(AuthOptGuard)
     subscribeToAppointment(@Usr() user: User,
                            @Body() obj: any,
                            @Res() res: Response,) {
@@ -43,7 +43,7 @@ export class PushController {
     }
 
     @Post('unsubscribe')
-    @UseGuards(JwtOptStrategy)
+    @UseGuards(AuthOptGuard)
     unsubscribeFromAppointment(@Usr() user: User,
                                @Body() obj: any,
                                @Res() res: Response,) {
@@ -58,7 +58,7 @@ export class PushController {
     }
 
     @Head('subscription')
-    @UseGuards(JwtOptStrategy)
+    @UseGuards(AuthOptGuard)
     isSubscribed(@Usr() user: User,
                  @Query('link') link: string,
                  @Query('endpoint') endpoint: string,

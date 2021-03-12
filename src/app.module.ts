@@ -20,17 +20,11 @@ import {CommentModule} from './modules/enrollment/comment/comment.module';
 import {Comment} from './modules/enrollment/comment/comment.entity';
 import {PassengerModule} from './modules/enrollment/passenger/passenger.module';
 import {AuthModule} from './auth/auth.module';
-import {TelegramUser} from './modules/user/telegram/telegram-user.entity';
 import {HandlebarsAdapter, MailerModule} from '@nest-modules/mailer';
-import {PasswordReset} from './modules/user/password-reset/password-reset.entity';
 import * as path from 'path';
-import {IcalModule} from './modules/ical/ical.module';
 import {ReleasenoteModule} from './modules/releasenote/releasenote.module';
 import {Releasenote} from './modules/releasenote/releasenote.entity';
-import {EmailChange} from './modules/user/email-change/email-change.entity';
 import {Mail} from './modules/enrollment/mail/mail.entity';
-import {PasswordChange} from './modules/user/password-change/password-change.entity';
-import {Session} from './modules/user/session.entity';
 import {loadFixtures} from '../test/protractor/loadFixtures';
 import {PushController} from './modules/push/push.controller';
 import {PushModule} from './modules/push/push.module';
@@ -50,8 +44,7 @@ const _mail = process.env.MAIL_ECA;
         database: process.env.DB_DATABASE,
         timezone: '+02:00',
         entities: [User, Appointment, Enrollment, Addition, File, Driver, Passenger, Comment,
-            TelegramUser, PasswordReset, Releasenote, EmailChange, Mail, PasswordChange, Session,
-            PushSubscription],
+            Releasenote, Mail, PushSubscription],
         synchronize: true
     }),
         MailerModule.forRoot({
@@ -76,7 +69,6 @@ const _mail = process.env.MAIL_ECA;
         PassengerModule,
         CommentModule,
         AuthModule,
-        IcalModule,
         ReleasenoteModule,
         PushModule,
     ],

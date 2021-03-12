@@ -469,6 +469,7 @@ export class AppointmentService {
      * @param user Requester, wanting to pin the appointment
      * @param link Link of appointment to pin
      */
+    // TODO reimplement with keycloak
     public async togglePinningAppointment(user: User, link: string) {
         let appointment;
 
@@ -480,6 +481,7 @@ export class AppointmentService {
 
         let _user;
 
+        // TODO obsolete, due to external user management
         try {
             _user = await this.userService.findById(user.id); // check if user even exists anymore or not
         } catch (e) {
