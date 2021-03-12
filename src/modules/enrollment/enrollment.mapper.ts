@@ -50,11 +50,19 @@ export class EnrollmentMapper {
         return enrollment;
     }
 
+    // TODO
+    // get creator information from keycloak
     public static stripCreator(enrollment: Enrollment): Enrollment {
-        enrollment.createdByUser = enrollment.creator != null;
+        enrollment.createdByUser = enrollment.creatorId != null;
+
         if (enrollment.createdByUser) {
+
+            // TODO
+            // const creator = getFromKeycloak(enrollment.creatorId);
+            const creator = {} as any;
+
             // noinspection UnnecessaryLocalVariableJS
-            const mUser: any = UserUtil.stripUserMin(enrollment.creator); // no inline due to type conversion
+            const mUser: any = UserUtil.stripUserMin(creator); // no inline due to type conversion
             enrollment.creator = mUser;
             delete enrollment.name;
         }

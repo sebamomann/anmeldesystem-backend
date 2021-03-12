@@ -83,4 +83,6 @@ export class Enrollment {
     editMail?: string;
     token?: string;
     createdByUser: boolean;
+
+    creator: any; // TODO MIN OBJECT
 }
