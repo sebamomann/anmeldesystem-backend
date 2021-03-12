@@ -15,7 +15,6 @@ import {AuthModule} from './auth/auth.module';
 import {HandlebarsAdapter, MailerModule} from '@nest-modules/mailer';
 import * as path from 'path';
 import {ReleasenoteModule} from './modules/releasenote/releasenote.module';
-import {loadFixtures} from '../test/protractor/loadFixtures';
 import {PushController} from './modules/push/push.controller';
 import {PushModule} from './modules/push/push.module';
 
@@ -55,8 +54,5 @@ const _mail = process.env.MAIL_ECA;
 })
 export class AppModule {
     constructor(private readonly connection: Connection) {
-        if (process.env.NODE_ENV === 'protractor' && process.env.DB_DATABASE.includes('protractor')) {
-            loadFixtures(connection);
-        }
     }
 }
