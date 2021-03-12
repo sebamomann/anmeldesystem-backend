@@ -35,7 +35,7 @@ export class EnrollmentUtil {
     }
 
     public static isCreator(enrollment: Enrollment, user: User) {
-        return enrollment.creatorId ?? enrollment.creatorId === user.id;
+        return enrollment.creatorId && enrollment.creatorId === user.id;
     }
 
     public static filterValidAdditions(enrollment: Enrollment, appointment: Appointment) {
