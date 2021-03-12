@@ -57,7 +57,7 @@ export class AppointmentUtil {
             return false;
         }
 
-        return appointment.creator.username === user.username;
+        return appointment.creatorId === user.id;
     }
 
     /**
@@ -71,7 +71,7 @@ export class AppointmentUtil {
             return false;
         }
 
-        return appointment.administrators?.some(sAdministrator => sAdministrator.username === user.username);
+        return appointment.administrators?.some(sAdministrator => sAdministrator === user.id);
     }
 
     /**
