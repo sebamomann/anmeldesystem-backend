@@ -35,9 +35,7 @@ export class EnrollmentUtil {
     }
 
     public static isCreator(enrollment: Enrollment, user: User) {
-        return enrollment.creator !== undefined
-            && enrollment.creator !== null
-            && enrollment.creator.id === user.id;
+        return enrollment.creatorId ?? enrollment.creatorId === user.id;
     }
 
     public static filterValidAdditions(enrollment: Enrollment, appointment: Appointment) {
@@ -76,7 +74,7 @@ export class EnrollmentUtil {
     }
 
     public static handleDriverRelation(driverToBe: Driver, currentDriverObject: Driver): Driver | undefined {
-        if(!driverToBe) {
+        if (!driverToBe) {
             return undefined;
         }
 
