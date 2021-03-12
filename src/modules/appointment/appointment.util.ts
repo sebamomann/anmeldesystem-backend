@@ -75,6 +75,11 @@ export class AppointmentUtil {
     }
 
     /**
+     * TODO REWORK
+     * actually eagering all iformation for administrators and pinners is pretty bad
+     * this way there is a huge database overhead
+     * possible to solve by adding this kind of information within the db query or querying the db multiple times
+     *
      * Check the users correlation to the appointment. <br />
      * Following correlations (references) are possible
      * <ol>
