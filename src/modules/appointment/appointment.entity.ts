@@ -1,8 +1,7 @@
-import {Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn} from 'typeorm';
+import {Column, CreateDateColumn, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn} from 'typeorm';
 import {Enrollment} from '../enrollment/enrollment.entity';
 import {Addition} from '../addition/addition.entity';
 import {File} from '../file/file.entity';
-import {User} from '../user/user.entity';
 import {Exclude} from 'class-transformer';
 import {PushSubscription} from '../push/pushSubscription.entity';
 
@@ -52,21 +51,11 @@ export class Appointment {
     @Column({default: false})
     driverAddition: boolean;
 
-    @ManyToMany(type => User,
-        user => user.administrations,
-        {
-            eager: true,
-        })
-    @JoinTable()
-    administrators: User[];
+    @ManyToMany(type => String)
+    administrators: string[];
 
-    @ManyToMany(type => User,
-        user => user.pinned,
-        {
-            eager: true
-        })
-    @JoinTable()
-    pinners: User[];
+    @ManyToMany(type => String)
+    pinners: string[];
 
     @OneToMany(type => File,
         file => file.appointment,
@@ -75,7 +64,7 @@ export class Appointment {
         })
     files: File[];
 
-    @Column({nullable: true, type: "uuid"})
+    @Column({nullable: true, type: 'uuid'})
     creatorId: string;
 
     @CreateDateColumn()
