@@ -202,7 +202,7 @@ export class AppointmentService {
         }
 
         appointmentToDB.driverAddition = appointmentData.driverAddition;
-        appointmentToDB.creator = user;
+        appointmentToDB.creatorId = user.id;
         appointmentToDB.additions = await this._createAdditionEntitiesAndFilterDuplicates(appointmentData.additions);
 
         appointmentToDB = await this.appointmentRepository.save(appointmentToDB);
