@@ -16,7 +16,6 @@ import {
 } from '@nestjs/common';
 
 import {Usr} from '../user/user.decorator';
-import {User} from '../user/user.entity';
 
 import {Appointment} from './appointment.entity';
 import {AppointmentService} from './appointment.service';
@@ -27,6 +26,7 @@ import {Response} from 'express';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {AuthOptGuard} from '../../auth/auth-opt.gurad';
+import {User} from '../user/user.model';
 
 @Controller('appointment')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
