@@ -1,6 +1,5 @@
-import {Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from 'typeorm';
 import {Exclude} from 'class-transformer';
-import {User} from '../user/user.entity';
 import {Appointment} from '../appointment/appointment.entity';
 
 @Entity()
@@ -24,9 +23,8 @@ export class PushSubscription {
     @Exclude({toPlainOnly: true})
     iat: Date;
 
-    @ManyToOne(type => User, user => user.id)
-    @JoinTable({name: 'userId'})
-    user?: User;
+    @Column({type: 'uuid'})
+    userId?: string;
 
     @ManyToMany(type => Appointment,
         appointment => appointment.subscriptions,

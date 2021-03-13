@@ -1,7 +1,7 @@
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {Appointment} from './appointment.entity';
-import {User} from '../user/user.entity';
 import {Enrollment} from '../enrollment/enrollment.entity';
+import {User} from '../user/user.model';
 
 const crypto = require('crypto');
 
@@ -43,7 +43,6 @@ export class AppointmentUtil {
     public static isCreatorOrAdministrator(appointment: Appointment, user: User) {
         return this.isCreatorOfAppointment(appointment, user)
             || this.isAdministratorOfAppointment(appointment, user);
-
     }
 
     /**
@@ -57,7 +56,7 @@ export class AppointmentUtil {
             return false;
         }
 
-        return appointment.creatorId === user.id;
+        return appointment.creatorId === user.sub;
     }
 
     /**
@@ -71,7 +70,7 @@ export class AppointmentUtil {
             return false;
         }
 
-        return appointment.administrators?.some(sAdministrator => sAdministrator === user.id);
+        return appointment.administrators?.some(sAdministrator => sAdministrator === user.sub);
     }
 
     /**
@@ -127,7 +126,7 @@ export class AppointmentUtil {
 
         const isCreatorOfAnyAppointment = appointment.enrollments?.some(sEnrollment => {
             return sEnrollment.creator != null
-                && sEnrollment.creator.id === user.id;
+                && sEnrollment.creator.id === user.sub;
         });
 
         if (appointment.enrollments
@@ -135,7 +134,7 @@ export class AppointmentUtil {
             references.push('ENROLLED');
         }
 
-        if ((appointment.pinners && appointment.pinners.some(sPinner => sPinner === user.id))
+        if ((appointment.pinners && appointment.pinners.some(sPinner => sPinner === user.sub))
             || pins.includes(appointment.link)) {
             references.push('PINNED');
         }

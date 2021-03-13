@@ -6,7 +6,6 @@ import {Appointment} from '../appointment/appointment.entity';
 import {AppointmentService} from '../appointment/appointment.service';
 import {AdditionService} from '../addition/addition.service';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
-import {User} from '../user/user.entity';
 import {PassengerService} from './passenger/passenger.service';
 import {DriverService} from './driver/driver.service';
 import {Mail} from './mail/mail.entity';
@@ -21,6 +20,7 @@ import {MissingAuthenticationException} from '../../exceptions/MissingAuthentica
 import {StringUtil} from '../../util/string.util';
 import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
 import {EnrollmentMapper} from './enrollment.mapper';
+import {User} from '../user/user.model';
 
 const crypto = require('crypto');
 const logger = require('../../logger');
@@ -149,7 +149,7 @@ export class EnrollmentService {
         }
 
         // TODO only update if anything actually changed
-        
+
         let savedEnrollment = await this.enrollmentRepository.save(enrollment_updated);
 
         savedEnrollment = EnrollmentMapper.basic(savedEnrollment);
@@ -319,7 +319,7 @@ export class EnrollmentService {
         if (enrollment_raw.editMail) {
             await this._setMailAttribute(enrollment_raw, enrollment_output);
         } else if (user !== undefined) {
-            enrollment_output.creatorId = user.id;
+            enrollment_output.creatorId = user.sub;
         } else {
             throw new MissingAuthenticationException(null,
                 'Valid authentication by email or authentication header needed',

@@ -1,7 +1,6 @@
 import {Test, TestingModule} from '@nestjs/testing';
 import {UserService} from '../user/user.service';
 import {Repository} from 'typeorm';
-import {User} from '../user/user.entity';
 import {Addition} from '../addition/addition.entity';
 import {Appointment} from './appointment.entity';
 import {FileService} from '../file/file.service';
@@ -16,6 +15,8 @@ import {Enrollment} from '../enrollment/enrollment.entity';
 import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
 import {PushSubscription} from '../push/pushSubscription.entity';
+import {instance, mock} from 'ts-mockito';
+import {User} from '../user/user.model';
 
 const crypto = require('crypto');
 
@@ -24,6 +25,7 @@ describe('AppointmentMapper', () => {
 
     let appointmentService: AppointmentService;
     let appointmentGateway: AppointmentGateway;
+    let userService: UserService;
 
     beforeEach(async () => {
         module = await Test.createTestingModule({
@@ -35,7 +37,6 @@ describe('AppointmentMapper', () => {
                 AppointmentGateway,
                 PushService,
                 {provide: getRepositoryToken(Appointment), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(File), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Addition), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(PushSubscription), useFactory: repositoryMockFactory},
@@ -47,7 +48,7 @@ describe('AppointmentMapper', () => {
                             host: process.env.MAIL_HOST,
                             port: process.env.MAIL_PORT,
                             auth: {
-                                user: process.env.MAIL_USERNAME,
+                                user: process.env.MAIL_preferred_username,
                                 pass: process.env.MAIL_PASSWORD
                             }
                         }
@@ -58,284 +59,242 @@ describe('AppointmentMapper', () => {
 
         appointmentService = module.get<AppointmentService>(AppointmentService);
         appointmentGateway = module.get<AppointmentGateway>(AppointmentGateway);
+        userService = module.get<UserService>(UserService);
     });
 
     it('should be defined', () => {
         expect(appointmentService).toBeDefined();
     });
 
-    describe('* permission', () => {
-        describe('iat and lud inclusion', () => {
-            it('* being creator should include', async () => {
-                const __given_user = new User();
-                __given_user.username = 'username';
-                const __given_permissions = {};
-                const __given_appointment = new Appointment();
-                __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                __given_appointment.creator = __given_user;
-                __given_appointment.lud = new Date(Date.now());
-                __given_appointment.iat = new Date(Date.now());
+    describe('* permission mapping', () => {
+        describe('* iat and lud information', () => {
+            let mockedUserInstance_creator;
+            let mockedAppointmentInstance;
 
-                const __expected = __given_appointment;
+            const mockedUser_creator_keycloak = mock(User);
 
-                const __actual = AppointmentMapper.permission(__given_appointment, __given_user, __given_permissions);
+            const permissions = {};
 
-                expect(__actual).toEqual(__expected);
+            beforeEach(() => {
+                const mockedUser_creator = mock(User);
+                mockedUserInstance_creator = instance(mockedUser_creator);
+                mockedUserInstance_creator.sub = 'bdb9ee47-75d4-45f3-914a-4eef91439f4c';
+
+                const mockedAppointment = mock(Appointment);
+                mockedAppointmentInstance = instance(mockedAppointment);
+                mockedAppointmentInstance.iat = new Date(Date.now());
+                mockedAppointmentInstance.lud = new Date(Date.now());
+                mockedAppointmentInstance.creatorId = mockedUserInstance_creator.sub;
+            });
+
+            it('* creator should see information', async () => {
+                // function mocking
+                jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
+
+                // execution
+                const appointmentMapper = new AppointmentMapper(userService);
+                const actual = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_creator, permissions);
+
+                // expect
+                expect('iat' in actual).toBeTruthy();
+                expect(actual.iat).toEqual(mockedAppointmentInstance.iat);
+                expect('lud' in mockedAppointmentInstance).toBeTruthy();
+                expect(actual.lud).toEqual(actual.lud);
+
+                expect(userService.findById).toHaveBeenCalledTimes(1);
+                expect(userService.findById).toHaveBeenCalledWith(mockedAppointmentInstance.creatorId);
             });
 
             it('* not being creator should not include', async () => {
-                const __given_user = new User();
-                __given_user.username = 'username';
-                const __given_permissions = {};
+                const mockedUser_requester = mock(User);
+                const mockedUserInstance_requester = instance(mockedUser_requester);
+                mockedUserInstance_requester.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
 
-                const __existing_creator = new User();
-                __existing_creator.username = 'creator';
+                // function mocking
+                jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
-                const __given_appointment = new Appointment();
-                __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                __given_appointment.creator = __existing_creator;
-                __given_appointment.lud = new Date(Date.now());
-                __given_appointment.iat = new Date(Date.now());
+                // execution
+                const appointmentMapper = new AppointmentMapper(userService);
+                const __actual = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
 
-                const __expected = {...__given_appointment};
-                delete __expected.iat;
-                delete __expected.lud;
-
-                const __actual = AppointmentMapper.permission(__given_appointment, __given_user, __given_permissions);
-
-                expect(__actual).toEqual(__expected);
+                // expect
+                expect('iat' in __actual).toBeFalsy();
+                expect('lud' in __actual).toBeFalsy();
             });
         });
 
         describe('* hidden appointment', () => {
-            it('* !(creator || admin) and no permissions should have empty enrollment list', async () => {
-                const __given_user = new User();
-                __given_user.username = 'username';
-                const __given_permissions = {};
+            let mockedUserInstance_requester;
+            let mockedUserInstance_creator;
+            let mockedAppointmentInstance;
 
-                const __existing_creator = new User();
-                __existing_creator.username = 'creator';
+            let mockedEnrollmentInstance_1;
+            let mockedEnrollmentInstance_2;
 
-                const __given_appointment = new Appointment();
-                __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                __given_appointment.hidden = true;
-                __given_appointment.creator = __existing_creator;
-                __given_appointment.enrollments = [new Enrollment(), new Enrollment()];
+            const mockedUser_creator_keycloak = mock(User);
 
-                const __expected = {...__given_appointment};
-                __expected.enrollments = [];
+            beforeEach(() => {
+                const mockedUser_requester = mock(User);
+                mockedUserInstance_requester = instance(mockedUser_requester);
+                mockedUserInstance_requester.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
 
-                const __actual = AppointmentMapper.permission(__given_appointment, __given_user, __given_permissions);
-                expect(__actual).toEqual(__expected);
+                const mockedUser_creator = mock(User);
+                mockedUserInstance_creator = instance(mockedUser_creator);
+                mockedUserInstance_creator.sub = 'bdb9ee47-75d4-45f3-914a-4eef91439f4c';
+
+                const mockedAppointment = mock(Appointment);
+                mockedAppointmentInstance = instance(mockedAppointment);
+                mockedAppointmentInstance.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+                mockedAppointmentInstance.hidden = true;
+                mockedAppointmentInstance.creatorId = mockedUserInstance_creator.sub;
+
+                const mockedEnrollment_1 = mock(Enrollment);
+                mockedEnrollmentInstance_1 = instance(mockedEnrollment_1);
+                mockedEnrollmentInstance_1.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
+                mockedEnrollmentInstance_1.name = 'Enrollment 1';
+
+                const mockedEnrollment_2 = mock(Enrollment);
+                mockedEnrollmentInstance_2 = instance(mockedEnrollment_2);
+                mockedEnrollmentInstance_2.id = '8100b9fa-9f70-4e39-b33d-1e8e7b73b6b3';
+                mockedEnrollmentInstance_2.name = 'Enrollment 2';
+
+                mockedAppointmentInstance.enrollments = [mockedEnrollmentInstance_1, mockedEnrollmentInstance_2];
             });
 
-            describe('* !(creator || admin) but correct permissions should have !empty enrollment list', () => {
-                it('* one valid permission', async () => {
-                    const __given_user = new User();
-                    __given_user.username = 'username';
+            it('* no permissions via any way should result in empty enrollment list', async () => {
+                const permissions = {};
 
-                    const __existing_creator = new User();
-                    __existing_creator.username = 'creator';
+                // function mocking
+                jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
-                    const __given_appointment = new Appointment();
-                    __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                    __given_appointment.hidden = true;
-                    __given_appointment.creator = __existing_creator;
+                const appointmentMapper = new AppointmentMapper(userService);
+                const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
 
-                    const __existing_enrollment_perm = new Enrollment();
-                    __existing_enrollment_perm.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
-                    __existing_enrollment_perm.name = 'owning user';
+                expect(actual.enrollments).toEqual([]);
+            });
 
-                    const __existing_enrollment_no_perm = new Enrollment();
-                    __existing_enrollment_no_perm.id = '507b1d1a-1f03-4927-bfad-babfa90ca6a6';
-                    __existing_enrollment_no_perm.name = 'not owning user';
-
-                    __given_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_no_perm];
-
-                    const token = crypto.createHash('sha256')
-                        .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
+            describe('* correct permission for enrollment should result in spliced enrollment list', () => {
+                it('* one permission - valid permission', async () => {
+                    const tokenForPermission = crypto.createHash('sha256')
+                        .update(mockedEnrollmentInstance_1.id + process.env.SALT_ENROLLMENT)
                         .digest('hex');
 
-                    const __given_permissions = {perm1: __existing_enrollment_perm.id, token};
-
-                    const __expected = {...__given_appointment};
-                    __expected.enrollments = [__existing_enrollment_perm];
-
-                    const __actual = AppointmentMapper.permission(__given_appointment, __given_user, __given_permissions);
-                    expect(__actual).toEqual(__expected);
-                });
-
-                it('* two valid permissions', async () => {
-                    const __given_user = new User();
-                    __given_user.username = 'username';
-
-                    const __existing_creator = new User();
-                    __existing_creator.username = 'creator';
-
-                    const __given_appointment = new Appointment();
-                    __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                    __given_appointment.hidden = true;
-                    __given_appointment.creator = __existing_creator;
-
-                    const __existing_enrollment_perm = new Enrollment();
-                    __existing_enrollment_perm.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
-                    __existing_enrollment_perm.name = 'owning user';
-
-                    const __existing_enrollment_perm_2 = new Enrollment();
-                    __existing_enrollment_perm_2.id = '507b1d1a-1f03-4927-bfad-babfa90ca6a6';
-                    __existing_enrollment_perm_2.name = 'not owning user';
-
-                    __given_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
-
-                    const token = crypto.createHash('sha256')
-                        .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
-                        .digest('hex');
-
-                    const token_2 = crypto.createHash('sha256')
-                        .update(__existing_enrollment_perm_2.id + process.env.SALT_ENROLLMENT)
-                        .digest('hex');
-
-                    const __given_permissions = {
-                        perm1: __existing_enrollment_perm.id,
-                        token1: token,
-                        perm2: __existing_enrollment_perm_2.id,
-                        token2: token_2
+                    const permissions = {
+                        perm1: mockedEnrollmentInstance_1.id,
+                        token: tokenForPermission
                     };
 
-                    const __expected = {...__given_appointment};
-                    __expected.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
+                    // function mocking
+                    jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
-                    const __actual = AppointmentMapper.permission(__given_appointment, __given_user, __given_permissions);
-                    expect(__actual).toEqual(__expected);
+                    const appointmentMapper = new AppointmentMapper(userService);
+                    const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
+
+                    expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1]);
                 });
 
-                describe('* one valid and one invalid permission', () => {
+                it('* two permissions - both valid', async () => {
+                    const tokenForPermission_1 = crypto.createHash('sha256')
+                        .update(mockedEnrollmentInstance_1.id + process.env.SALT_ENROLLMENT)
+                        .digest('hex');
+
+                    const tokenForPermission_2 = crypto.createHash('sha256')
+                        .update(mockedEnrollmentInstance_2.id + process.env.SALT_ENROLLMENT)
+                        .digest('hex');
+
+                    const permissions = {
+                        perm1: mockedEnrollmentInstance_1.id,
+                        token1: tokenForPermission_1,
+                        perm2: mockedEnrollmentInstance_2.id,
+                        token2: tokenForPermission_2
+                    };
+
+                    // function mocking
+                    jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
+
+                    const appointmentMapper = new AppointmentMapper(userService);
+                    const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
+
+                    expect(actual.enrollments)
+                        .toEqual([mockedEnrollmentInstance_1, mockedEnrollmentInstance_2]);
+                });
+
+                describe('* two permissions - one valid - one invalid', () => {
                     it('* invalid token', async () => {
-                        const __given_user = new User();
-                        __given_user.username = 'username';
-
-                        const __existing_creator = new User();
-                        __existing_creator.username = 'creator';
-
-                        const __given_appointment = new Appointment();
-                        __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                        __given_appointment.hidden = true;
-                        __given_appointment.creator = __existing_creator;
-
-                        const __existing_enrollment_perm = new Enrollment();
-                        __existing_enrollment_perm.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
-                        __existing_enrollment_perm.name = 'owning user';
-
-                        const __existing_enrollment_perm_2 = new Enrollment();
-                        __existing_enrollment_perm_2.id = '507b1d1a-1f03-4927-bfad-babfa90ca6a6';
-                        __existing_enrollment_perm_2.name = 'not owning user';
-
-                        __given_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
-
-                        const token = crypto.createHash('sha256')
-                            .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
+                        const tokenForPermission_valid = crypto.createHash('sha256')
+                            .update(mockedEnrollmentInstance_1.id + process.env.SALT_ENROLLMENT)
                             .digest('hex');
 
-                        const token_2 = 'INVALID_TOKEN';
+                        const tokenForPermission_invalid = 'INVALIDTOKEN';
 
-                        const __given_permissions = {
-                            perm1: __existing_enrollment_perm.id,
-                            token1: token,
-                            perm2: __existing_enrollment_perm_2.id,
-                            token2: token_2
+                        const permissions = {
+                            perm1: mockedEnrollmentInstance_1.id,
+                            token1: tokenForPermission_valid,
+                            perm2: mockedEnrollmentInstance_2.id,
+                            token2: tokenForPermission_invalid
                         };
 
-                        const __expected = {...__given_appointment};
-                        __expected.enrollments = [__existing_enrollment_perm];
+                        // function mocking
+                        jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
-                        const __actual = AppointmentMapper.permission(__given_appointment, __given_user, __given_permissions);
-                        expect(__actual).toEqual(__expected);
+                        const appointmentMapper = new AppointmentMapper(userService);
+                        const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
+
+                        expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1]);
                     });
 
-                    it('* non existing enrollment (id) but correct crresponding token', async () => {
-                        const __given_user = new User();
-                        __given_user.username = 'username';
-
-                        const __existing_creator = new User();
-                        __existing_creator.username = 'creator';
-
-                        const __given_appointment = new Appointment();
-                        __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                        __given_appointment.hidden = true;
-                        __given_appointment.creator = __existing_creator;
-
-                        const __existing_enrollment_perm = new Enrollment();
-                        __existing_enrollment_perm.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
-                        __existing_enrollment_perm.name = 'owning user';
-
-                        const __existing_enrollment_perm_2 = new Enrollment();
-                        __existing_enrollment_perm_2.id = '507b1d1a-1f03-4927-bfad-babfa90ca6a6';
-                        __existing_enrollment_perm_2.name = 'not owning user';
-
-                        __given_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
-
-                        const token = crypto.createHash('sha256')
-                            .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
+                    it('* invalid id but correct token', async () => {
+                        const tokenForPermission_valid = crypto.createHash('sha256')
+                            .update(mockedEnrollmentInstance_1.id + process.env.SALT_ENROLLMENT)
                             .digest('hex');
 
-                        const fakeId = 'NON_EXISTING_ID';
-
-                        const token_2 = crypto.createHash('sha256')
-                            .update(fakeId + process.env.SALT_ENROLLMENT)
+                        const invalidId = 'randomIdThatDoesNotExistsInEnrollmentList';
+                        const tokenForPermission_valid_invalid_id = crypto.createHash('sha256')
+                            .update(invalidId + process.env.SALT_ENROLLMENT)
                             .digest('hex');
 
-                        const __given_permissions = {
-                            perm1: __existing_enrollment_perm.id,
-                            token1: token,
-                            perm2: fakeId,
-                            token2: token_2
+                        const permissions = {
+                            perm1: mockedEnrollmentInstance_1.id,
+                            token1: tokenForPermission_valid,
+                            perm2: invalidId,
+                            token2: tokenForPermission_valid_invalid_id
                         };
 
-                        const __expected = {...__given_appointment};
-                        __expected.enrollments = [__existing_enrollment_perm];
+                        // function mocking
+                        jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
-                        const __actual = AppointmentMapper.permission(__given_appointment, __given_user, __given_permissions);
-                        expect(__actual).toEqual(__expected);
+                        const appointmentMapper = new AppointmentMapper(userService);
+                        const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
+
+                        expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1]);
                     });
                 });
             });
 
             it('* creator should see all enrollments', async () => {
-                const __given_user = new User();
-                __given_user.username = 'username';
-                const __given_permissions = {};
+                const permissions = {};
 
-                const __given_appointment = new Appointment();
-                __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                __given_appointment.hidden = true;
-                __given_appointment.creator = __given_user;
-                __given_appointment.enrollments = [new Enrollment(), new Enrollment()];
+                // function mocking
+                jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
-                const __expected = {...__given_appointment};
+                const appointmentMapper = new AppointmentMapper(userService);
+                const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_creator, permissions);
 
-                const __actual = AppointmentMapper.permission(__given_appointment, __given_user, __given_permissions);
-                expect(__actual).toEqual(__expected);
+                expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1, mockedEnrollmentInstance_2]);
             });
 
             it('* admin should see all enrollments', async () => {
-                const __given_user = new User();
-                __given_user.username = 'username';
-                const __given_permissions = {};
+                mockedAppointmentInstance.administrators = [mockedUserInstance_requester.sub];
 
-                const __existing_creator = new User();
-                __existing_creator.username = 'creator';
+                const permissions = {};
 
-                const __given_appointment = new Appointment();
-                __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                __given_appointment.hidden = true;
-                __given_appointment.creator = __existing_creator;
-                __given_appointment.administrators = [__given_user];
-                __given_appointment.enrollments = [new Enrollment(), new Enrollment()];
+                // function mocking
+                jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
-                const __expected = {...__given_appointment};
+                const appointmentMapper = new AppointmentMapper(userService);
+                const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
 
-                const __actual = AppointmentMapper.permission(__given_appointment, __given_user, __given_permissions);
-                expect(__actual).toEqual(__expected);
+                expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1, mockedEnrollmentInstance_2]);
             });
         });
     });
@@ -343,16 +302,17 @@ describe('AppointmentMapper', () => {
     describe('* slim', () => {
         it('* slim should remove enrollments', async () => {
             const __given_user = new User();
-            __given_user.username = 'username';
+            __given_user.preferred_username = 'preferred_username';
             const __given_slim = true;
 
             const __existing_creator = new User();
-            __existing_creator.username = 'creator';
+            __existing_creator.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
+            __existing_creator.preferred_username = 'creator';
 
             const __given_appointment = new Appointment();
             __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
             __given_appointment.hidden = false;
-            __given_appointment.creator = __existing_creator;
+            __given_appointment.creatorId = __existing_creator.sub;
             __given_appointment.enrollments = [new Enrollment(), new Enrollment()];
             __given_appointment.files = [new File(), new File()];
 
@@ -365,16 +325,17 @@ describe('AppointmentMapper', () => {
 
         it('* !slim should !remove enrollments', async () => {
             const __given_user = new User();
-            __given_user.username = 'username';
+            __given_user.preferred_username = 'preferred_username';
             const __given_slim = false;
 
             const __existing_creator = new User();
-            __existing_creator.username = 'creator';
+            __existing_creator.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
+            __existing_creator.preferred_username = 'creator';
 
             const __given_appointment = new Appointment();
             __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
             __given_appointment.hidden = false;
-            __given_appointment.creator = __existing_creator;
+            __given_appointment.creatorId = __existing_creator.sub;
             __given_appointment.enrollments = [new Enrollment(), new Enrollment()];
             __given_appointment.files = [new File(), new File()];
 
@@ -392,16 +353,16 @@ describe('AppointmentMapper', () => {
             __existing_enrollment.name = 'owning user';
 
             const __existing_admin = new User();
-            __existing_admin.id = 'f48de1b3-6900-4f0e-939b-78fec185b615';
-            __existing_admin.username = 'admin';
+            __existing_admin.sub = 'f48de1b3-6900-4f0e-939b-78fec185b615';
+            __existing_admin.preferred_username = 'admin';
             __existing_admin.name = 'Administrator';
 
             const __given_appointment = new Appointment();
-            __given_appointment.administrators = [__existing_admin];
+            __given_appointment.administrators = [__existing_admin.sub];
             __given_appointment.enrollments = [__existing_enrollment];
 
             const __expected_admin = new User();
-            __expected_admin.username = __existing_admin.username;
+            __expected_admin.preferred_username = __existing_admin.preferred_username;
             __expected_admin.name = __existing_admin.name;
 
             const __expected_enrollment = new Enrollment();
@@ -410,7 +371,7 @@ describe('AppointmentMapper', () => {
             __expected_enrollment.createdByUser = false;
 
             const __expected = {...__given_appointment};
-            __expected.administrators = [__expected_admin];
+            __expected.administrators = [__expected_admin.sub];
             __expected.enrollments = [__expected_enrollment];
 
             const __actual = (AppointmentMapper as any).basic(__given_appointment);
@@ -459,17 +420,17 @@ describe('AppointmentMapper', () => {
     });
 
     describe('* stripAdministrator', () => {
-        it('* administrators should just have attributes "name" and "username"', async () => {
+        it('* administrators should just have attributes "name" and "preferred_username"', async () => {
             const __existing_admin = new User();
-            __existing_admin.id = 'f48de1b3-6900-4f0e-939b-78fec185b615';
-            __existing_admin.username = 'admin';
+            __existing_admin.sub = 'f48de1b3-6900-4f0e-939b-78fec185b615';
+            __existing_admin.preferred_username = 'admin';
             __existing_admin.name = 'Administrator';
 
             const __given_appointment = new Appointment();
-            __given_appointment.administrators = [__existing_admin];
+            __given_appointment.administrators = [__existing_admin.sub];
 
             const __expected_admin = {
-                username: __existing_admin.username,
+                preferred_username: __existing_admin.preferred_username,
                 name: __existing_admin.name,
             };
 
@@ -500,8 +461,8 @@ describe('AppointmentMapper', () => {
 
         it('* enrollment created by user should have attribute "isCreator: true" and containing user information', async () => {
             const __existing_enrollment_creator = new User();
-            __existing_enrollment_creator.id = '96511a3c-cace-4a67-ad0c-436a37038c38';
-            __existing_enrollment_creator.username = 'enrollment_creator';
+            __existing_enrollment_creator.sub = '96511a3c-cace-4a67-ad0c-436a37038c38';
+            __existing_enrollment_creator.preferred_username = 'enrollment_creator';
             __existing_enrollment_creator.name = 'enrollment_creator_name';
 
             const __existing_enrollment = new Enrollment();
@@ -513,7 +474,7 @@ describe('AppointmentMapper', () => {
 
             const __expected_enrollment = {...__existing_enrollment};
             __expected_enrollment.creator = ({
-                username: __existing_enrollment_creator.username,
+                preferred_username: __existing_enrollment_creator.preferred_username,
                 name: __existing_enrollment_creator.name,
             } as any);
             __expected_enrollment.createdByUser = true;

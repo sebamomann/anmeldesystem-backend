@@ -4,6 +4,7 @@ import {Addition} from '../addition/addition.entity';
 import {File} from '../file/file.entity';
 import {Exclude} from 'class-transformer';
 import {PushSubscription} from '../push/pushSubscription.entity';
+import {IUserMinified} from '../user/IUserMinified';
 
 @Entity()
 export class Appointment {
@@ -79,6 +80,7 @@ export class Appointment {
         pushSubscription => pushSubscription.appointments)
     subscriptions: PushSubscription[];
 
+    creator?: IUserMinified;
     reference?: string[] = [];
     numberOfEnrollments?: number;
 }
