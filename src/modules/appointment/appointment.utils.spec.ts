@@ -6,7 +6,9 @@ import {User} from '../user/user.model';
 
 const crypto = require('crypto');
 
-describe('AppointmentUtil', () => {
+// TODO REWORK
+
+describe('Appointment util', () => {
     it('should be defined', () => {
         expect(AppointmentUtil).toBeDefined();
     });
@@ -63,12 +65,12 @@ describe('AppointmentUtil', () => {
         describe('* successful should return correct references array', () => {
             it('* is creator', async () => {
                 const __given_user = new User();
-                __given_user.username = 'username';
+                __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                 const __given_pins = [];
 
                 const __given_appointment = new Appointment();
-                __given_appointment.creator = __given_user;
+                __given_appointment.creatorId = __given_user.sub;
 
                 const __expected = ['CREATOR'];
 
@@ -78,16 +80,16 @@ describe('AppointmentUtil', () => {
 
             it('* is administrator', async () => {
                 const __given_user = new User();
-                __given_user.username = 'username';
+                __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                 const __given_pins = [];
 
                 const __existing_creator = new User();
-                __existing_creator.username = 'creator';
+                __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                 const __given_appointment = new Appointment();
-                __given_appointment.creator = __existing_creator;
-                __given_appointment._administrators = [__given_user];
+                __given_appointment.creatorId = __existing_creator.sub;
+                __given_appointment._administrators = [__given_user.sub];
 
                 const __expected = ['ADMIN'];
 
@@ -98,19 +100,19 @@ describe('AppointmentUtil', () => {
             describe('* is enrolled', () => {
                 it('* by account', async () => {
                     const __given_user = new User();
-                    __given_user.username = 'username';
+                    __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                     const __given_pins = [];
 
                     const __existing_enrollment = new Enrollment();
-                    __existing_enrollment.creator = __given_user;
+                    __existing_enrollment.creatorId = __given_user.sub;
 
                     const __existing_creator = new User();
-                    __existing_creator.username = 'creator';
+                    __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                     const __given_appointment = new Appointment();
                     __given_appointment.id = '1';
-                    __given_appointment.creator = __existing_creator;
+                    __given_appointment.creatorId = __existing_creator.sub;
                     __given_appointment.enrollments = [__existing_enrollment];
 
                     const __expected = ['ENROLLED'];
@@ -122,7 +124,7 @@ describe('AppointmentUtil', () => {
                 describe('* by parameter', () => {
                     it('* normal parameter', async () => {
                         const __given_user = new User();
-                        __given_user.username = 'username';
+                        __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                         const __given_pins = [];
                         const __given_permissions = {perm1: '996fe741-1142-4899-96fd-767a577f5268'};
@@ -131,11 +133,11 @@ describe('AppointmentUtil', () => {
                         __existing_enrollment.id = '996fe741-1142-4899-96fd-767a577f5268';
 
                         const __existing_creator = new User();
-                        __existing_creator.username = 'creator';
+                        __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                         const __given_appointment = new Appointment();
                         __given_appointment.id = '1';
-                        __given_appointment.creator = __existing_creator;
+                        __given_appointment.creatorId = __existing_creator.sub;
                         __given_appointment.enrollments = [__existing_enrollment];
 
                         const __expected = ['ENROLLED'];
@@ -146,7 +148,7 @@ describe('AppointmentUtil', () => {
 
                     it('* including invalid attribute', async () => {
                         const __given_user = new User();
-                        __given_user.username = 'username';
+                        __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                         const __given_pins = [];
                         const __given_permissions = {perm1: '996fe741-1142-4899-96fd-767a577f5268', invalid: 'attribute'};
@@ -155,11 +157,11 @@ describe('AppointmentUtil', () => {
                         __existing_enrollment.id = '996fe741-1142-4899-96fd-767a577f5268';
 
                         const __existing_creator = new User();
-                        __existing_creator.username = 'creator';
+                        __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                         const __given_appointment = new Appointment();
                         __given_appointment.id = '1';
-                        __given_appointment.creator = __existing_creator;
+                        __given_appointment.creatorId = __existing_creator.sub;
                         __given_appointment.enrollments = [__existing_enrollment];
 
                         const __expected = ['ENROLLED'];
@@ -173,17 +175,17 @@ describe('AppointmentUtil', () => {
             describe('* is pinned', () => {
                 it('* as account', async () => {
                     const __given_user = new User();
-                    __given_user.username = 'username';
+                    __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                     const __given_pins = [];
 
                     const __existing_creator = new User();
-                    __existing_creator.username = 'creator';
+                    __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                     const __given_appointment = new Appointment();
                     __given_appointment.id = '1';
-                    __given_appointment.creator = __existing_creator;
-                    __given_appointment.pinners = [__given_user];
+                    __given_appointment.creatorId = __existing_creator.sub;
+                    __given_appointment.pinners = [__given_user.sub];
 
                     const __expected = ['PINNED'];
 
@@ -193,14 +195,14 @@ describe('AppointmentUtil', () => {
 
                 it('* by parameter', async () => {
                     const __given_user = new User();
-                    __given_user.username = 'username';
+                    __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                     const __existing_creator = new User();
-                    __existing_creator.username = 'creator';
+                    __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                     const __given_appointment = new Appointment();
                     __given_appointment.id = '1';
-                    __given_appointment.creator = __existing_creator;
+                    __given_appointment.creatorId = __existing_creator.sub;
                     __given_appointment.link = 'myLink';
 
                     const __given_pins = [__given_appointment.link];
@@ -214,15 +216,15 @@ describe('AppointmentUtil', () => {
 
             it('* is creator and enrolled', async () => {
                 const __given_user = new User();
-                __given_user.username = 'username';
+                __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                 const __given_pins = [];
 
                 const __existing_enrollment = new Enrollment();
-                __existing_enrollment.creator = __given_user;
+                __existing_enrollment.creatorId = __given_user.sub;
 
                 const __given_appointment = new Appointment();
-                __given_appointment.creator = __given_user;
+                __given_appointment.creatorId = __given_user.sub;
                 __given_appointment.enrollments = [__existing_enrollment];
 
                 const __expected = ['CREATOR', 'ENROLLED'];
@@ -234,13 +236,13 @@ describe('AppointmentUtil', () => {
             describe('* is creator and pinned', () => {
                 it('* pinned by account', async () => {
                     const __given_user = new User();
-                    __given_user.username = 'username';
+                    __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                     const __given_pins = [];
 
                     const __given_appointment = new Appointment();
-                    __given_appointment.creator = __given_user;
-                    __given_appointment.pinners = [__given_user];
+                    __given_appointment.creatorId = __given_user.sub;
+                    __given_appointment.pinners = [__given_user.sub];
 
                     const __expected = ['CREATOR', 'PINNED'];
 
@@ -250,11 +252,11 @@ describe('AppointmentUtil', () => {
 
                 it('* pinned by parameter', async () => {
                     const __given_user = new User();
-                    __given_user.username = 'username';
+                    __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                     const __given_appointment = new Appointment();
-                    __given_appointment.creator = __given_user;
-                    __given_appointment.pinners = [__given_user];
+                    __given_appointment.creatorId = __given_user.sub;
+                    __given_appointment.pinners = [__given_user.sub];
                     __given_appointment.link = 'link';
 
                     const __given_pins = [__given_appointment.link];
@@ -270,18 +272,18 @@ describe('AppointmentUtil', () => {
         describe('* invalid should return empty references array', () => {
             it('* no references', async () => {
                 const __given_user = new User();
-                __given_user.username = 'username';
+                __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                 const __existing_creator = new User();
-                __existing_creator.username = 'creator';
+                __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                 const __existing_admin = new User();
-                __existing_admin.username = 'admin';
+                __existing_admin.sub = 'a3dcc7d6-2065-4793-a7cd-bf105bc95d3d';
 
                 const __given_appointment = new Appointment();
                 __given_appointment.id = '1';
-                __given_appointment.creator = __existing_creator;
-                __given_appointment._administrators = [__existing_admin];
+                __given_appointment.creatorId = __existing_creator.sub;
+                __given_appointment._administrators = [__existing_admin.sub];
 
                 const __given_pins = [];
 
@@ -295,15 +297,15 @@ describe('AppointmentUtil', () => {
                 const __given_user = null;
 
                 const __existing_creator = new User();
-                __existing_creator.username = 'creator';
+                __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                 const __existing_admin = new User();
-                __existing_admin.username = 'admin';
+                __existing_admin.sub = 'a3dcc7d6-2065-4793-a7cd-bf105bc95d3d';
 
                 const __given_appointment = new Appointment();
                 __given_appointment.id = '1';
-                __given_appointment.creator = __existing_creator;
-                __given_appointment._administrators = [__existing_admin];
+                __given_appointment.creatorId = __existing_creator.sub;
+                __given_appointment._administrators = [__existing_admin.sub];
 
                 const __given_pins = [];
 

@@ -35,48 +35,6 @@ export class AppointmentUtil {
     }
 
     /**
-     * Check if passed user is the creator or administrator of the given appointment
-     *
-     * @param appointment Appointment to check permission for
-     * @param user User to check ownership for
-     * @deprecated
-     */
-    public static isCreatorOrAdministrator(appointment: Appointment, user: User) {
-        return this.isCreatorOfAppointment(appointment, user)
-            || this.isAdministratorOfAppointment(appointment, user);
-    }
-
-    /**
-     * Check if passed user is the creator of the given appointment
-     *
-     * @param appointment Appointment to check ownership for
-     * @param user User to check ownership for
-     * @deprecated
-     */
-    public static isCreatorOfAppointment(appointment: Appointment, user: User) {
-        if (user === undefined || user === null || !user) {
-            return false;
-        }
-
-        return appointment.creatorId === user.sub;
-    }
-
-    /**
-     * Check if passed user is administrator of the given appointment
-     *
-     * @param appointment Appointment to check ownership for
-     * @param user User to check ownership for
-     * @deprecated
-     */
-    public static isAdministratorOfAppointment(appointment: Appointment, user: User) {
-        if (user === undefined || user === null || !user) {
-            return false;
-        }
-
-        return appointment._administrators?.some(sAdministrator => sAdministrator === user.sub);
-    }
-
-    /**
      * TODO REWORK
      * actually eagering all iformation for administrators and pinners is pretty bad
      * this way there is a huge database overhead
@@ -115,11 +73,11 @@ export class AppointmentUtil {
             return [];
         }
 
-        if (AppointmentUtil.isAdministratorOfAppointment(appointment, user)) {
+        if (appointment.isAdministrator(user)) {
             references.push('ADMIN');
         }
 
-        if (AppointmentUtil.isCreatorOfAppointment(appointment, user)) {
+        if (appointment.isCreator(user)) {
             references.push('CREATOR');
         }
 
@@ -127,13 +85,13 @@ export class AppointmentUtil {
             return extractedIds.includes(sEnrollment.id);
         });
 
-        const isCreatorOfAnyAppointment = appointment.enrollments?.some(sEnrollment => {
-            return sEnrollment.creator != null
-                && sEnrollment.creator.id === user.sub;
+        const isCreatorOfAnyEnrollment = appointment.enrollments?.some(sEnrollment => {
+            return sEnrollment.creatorId != null
+                && sEnrollment.creatorId === user.sub;
         });
 
         if (appointment.enrollments
-            && (isCreatorOfAnyAppointment || hasPermissionForAtLeastOneEnrollment)) {
+            && (isCreatorOfAnyEnrollment || hasPermissionForAtLeastOneEnrollment)) {
             references.push('ENROLLED');
         }
 

@@ -98,7 +98,7 @@ export class AppointmentMapper {
         }))
         (_appointment);
 
-        if (AppointmentUtil.isCreatorOfAppointment(_appointment, _user)) {
+        if (_appointment.isCreator(_user)) {
             creatorObject = (({
                                   iat,
                                   lud,
@@ -110,7 +110,7 @@ export class AppointmentMapper {
         }
 
         if (!_appointment.hidden
-            || AppointmentUtil.isCreatorOrAdministrator(_appointment, _user)) {
+            || _appointment.isCreatorOrAdministrator(_user)) {
             enrollmentsObject = (({
                                       enrollments,
                                   }) => ({

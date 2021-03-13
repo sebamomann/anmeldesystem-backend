@@ -329,7 +329,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
+        if (!appointment.isCreator(_user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -370,7 +370,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
+        if (!appointment.isCreator(_user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -404,7 +404,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
+        if (!appointment.isCreator(_user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -443,7 +443,7 @@ export class AppointmentService {
             throw e;
         }
 
-        if (!AppointmentUtil.isCreatorOfAppointment(appointment, _user)) {
+        if (!appointment.isCreator(appointment, _user)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -527,7 +527,7 @@ export class AppointmentService {
             appointment = ref;
         }
 
-        return AppointmentUtil.isCreatorOrAdministrator(appointment, user);
+        return appointment.isCreatorOrAdministrator(user);
     }
 
     public async removeSubscriptionsByUser(appointment: any, user: User) {
