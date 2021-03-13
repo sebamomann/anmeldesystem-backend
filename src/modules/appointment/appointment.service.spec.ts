@@ -1,7 +1,6 @@
 import {Test, TestingModule} from '@nestjs/testing';
 import {UserService} from '../user/user.service';
 import {Repository} from 'typeorm';
-import {User} from '../user/user.entity';
 import {Addition} from '../addition/addition.entity';
 import {Appointment} from './appointment.entity';
 import {FileService} from '../file/file.service';
@@ -19,6 +18,7 @@ import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
 import {PushService} from '../push/push.service';
 import {PushSubscription} from '../push/pushSubscription.entity';
+import {User} from '../user/user.model';
 
 describe('AppointmentService', () => {
     let module: TestingModule;

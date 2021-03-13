@@ -93,8 +93,10 @@ export class Appointment {
      * @param user          {@link User} to check ownership for
      */
     public isCreatorOrAdministrator(user: User) {
-        return this.isCreator(user)
-            || this.isAdministrator(user);
+        const isAppointmentCreator = this.isCreator(user);
+        const isAdministrator = this.isAdministrator(user);
+
+        return isAppointmentCreator || isAdministrator;
     }
 
     /**
@@ -103,7 +105,11 @@ export class Appointment {
      * @param user          {@link User} to check ownership for
      */
     public isCreator(user: User) {
-        return user && this.creatorId === user.sub;
+        if (!user) {
+            return false;
+        }
+
+        return this.creatorId === user.sub;
     }
 
     /**
@@ -112,7 +118,15 @@ export class Appointment {
      * @param user          {@link User} to check ownership for
      */
     public isAdministrator(user: User) {
-        return user && this._administrators?.some(
+        if (!this._administrators) {
+            return false;
+        }
+
+        if (!user) {
+            return false;
+        }
+
+        return this._administrators?.some(
             sAdministrator => sAdministrator === user.sub
         );
     }
