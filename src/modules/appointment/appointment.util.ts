@@ -39,6 +39,7 @@ export class AppointmentUtil {
      *
      * @param appointment Appointment to check permission for
      * @param user User to check ownership for
+     * @deprecated
      */
     public static isCreatorOrAdministrator(appointment: Appointment, user: User) {
         return this.isCreatorOfAppointment(appointment, user)
@@ -50,6 +51,7 @@ export class AppointmentUtil {
      *
      * @param appointment Appointment to check ownership for
      * @param user User to check ownership for
+     * @deprecated
      */
     public static isCreatorOfAppointment(appointment: Appointment, user: User) {
         if (user === undefined || user === null || !user) {
@@ -64,6 +66,7 @@ export class AppointmentUtil {
      *
      * @param appointment Appointment to check ownership for
      * @param user User to check ownership for
+     * @deprecated
      */
     public static isAdministratorOfAppointment(appointment: Appointment, user: User) {
         if (user === undefined || user === null || !user) {

@@ -5,6 +5,7 @@ import {File} from '../file/file.entity';
 import {Exclude} from 'class-transformer';
 import {PushSubscription} from '../push/pushSubscription.entity';
 import {IUserMinified} from '../user/IUserMinified';
+import {User} from '../user/user.model';
 
 @Entity()
 export class Appointment {
@@ -85,4 +86,34 @@ export class Appointment {
     reference?: string[] = [];
     administrators: IUserMinified[] = [];
     numberOfEnrollments?: number;
+
+    /**
+     * Check if {@link User} is the creator or administrator of this object
+     *
+     * @param user          {@link User} to check ownership for
+     */
+    public isCreatorOrAdministrator(user: User) {
+        return this.isCreator(user)
+            || this.isAdministrator(user);
+    }
+
+    /**
+     * Check if {@link User} is the creator of this object
+     *
+     * @param user          {@link User} to check ownership for
+     */
+    public isCreator(user: User) {
+        return user && this.creatorId === user.sub;
+    }
+
+    /**
+     * Check if {@link User} is administrator of this object
+     *
+     * @param user          {@link User} to check ownership for
+     */
+    public isAdministrator(user: User) {
+        return user && this._administrators?.some(
+            sAdministrator => sAdministrator === user.sub
+        );
+    }
 }

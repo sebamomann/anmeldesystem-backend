@@ -119,7 +119,7 @@ export class EnrollmentService {
         const enrollment_referenced = await this.findById(enrollment_id);
         const enrollment_updated = {...enrollment_referenced};
 
-        if (!EnrollmentUtil.hasPermission(enrollment_referenced, user, enrollment_to_change_values.token)) {
+        if (!EnrollmentUtil.hasPermissionToManipulateEnrollment(enrollment_referenced, user, enrollment_to_change_values.token)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -178,7 +178,7 @@ export class EnrollmentService {
             throw new EntityGoneException(null, null, 'enrollment');
         }
 
-        if (!(await EnrollmentUtil.hasPermission(enrollment, user, token))) {
+        if (!(await EnrollmentUtil.hasPermissionToManipulateEnrollment(enrollment, user, token))) {
             throw new InsufficientPermissionsException();
         }
 
@@ -209,11 +209,11 @@ export class EnrollmentService {
 
         let allowances = [];
 
-        if (await EnrollmentUtil.permissionByUser(enrollment, user)) {
+        if (await EnrollmentUtil.hasPermissionToManipulateEnrollmentByIdentity(enrollment, user)) {
             allowances.push('user');
         }
 
-        if (EnrollmentUtil.permissionByToken(enrollment, token)) {
+        if (EnrollmentUtil.hasPermissionToManipulateEnrollmentByToken(enrollment, token)) {
             allowances.push('token');
         }
 

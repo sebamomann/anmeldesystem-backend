@@ -18,6 +18,9 @@ import {Passenger} from './passenger/passenger.entity';
 import {Comment} from './comment/comment.entity';
 import {Exclude} from 'class-transformer';
 import {Mail} from './mail/mail.entity';
+import {User} from '../user/user.model';
+
+const crypto = require('crypto');
 
 @Entity()
 @Index('index_unique_name_appointment', ['name', 'appointment', 'creator'], {unique: true}) // first style
@@ -85,4 +88,62 @@ export class Enrollment {
     createdByUser: boolean;
 
     creator: any; // TODO MIN OBJECT
+
+    /**
+     * Check if {@link User} is allowed to manipulate this object.<br/>
+     * <ol>
+     *  <li> Allowed because {@link User} is authenticated and has permission</li>
+     *  <li> Allowed because authorization token for {@link Enrollment} is provided</li>
+     * </ol>
+     *
+     * @param user              {@link User} to check permission for (might be undefined -> token provided)
+     * @param token             Authorization token (might be undefined -> authenticated {@link User})
+     */
+    public hasPermissionToManipulate(user: User, token: string) {
+        let allowedByIdentity = this.hasPermissionToManipulateByIdentity(user);
+        let allowedByToken = this.hasPermissionToManipulateByToken(token);
+
+        return allowedByIdentity || allowedByToken;
+    }
+
+    /**
+     * Check if passed authorization token grants permission to edit<br/>
+     *
+     * @param token             Authorization token to validate
+     */
+    public hasPermissionToManipulateByToken(token: string) {
+        const validationToken = crypto.createHash('sha256')
+            .update(this.id + process.env.SALT_ENROLLMENT)
+            .digest('hex');
+
+        const tokenMatchesValidation = (token.replace(' ', '+') === validationToken);
+
+        return token && tokenMatchesValidation;
+    }
+
+    /**
+     * Check if passed {@link User} is allowed to manipulate this object<br/>
+     * <ol>
+     *  <li> Allowed because {@link User} is creator</li>
+     *  <li> Allowed because {@link User} is creator of {@link Appointment}</li>
+     *  <li> Allowed because {@link User} is admin of {@link Appointment}</li>
+     * </ol>
+     *
+     * @param user              {@link User} to check permission for
+     */
+    public hasPermissionToManipulateByIdentity(user: User) {
+        let isAllowedByAppointmentPermission = this.appointment.isCreatorOrAdministrator(user);
+        let isCreatorOfEnrollment = this.isCreator(user);
+
+        return isAllowedByAppointmentPermission || isCreatorOfEnrollment;
+    }
+
+    /**
+     * Check if provided {@link User} is the creator if the enrollment
+     *
+     * @param user               {@link User} to check for being creator
+     */
+    private isCreator(user: User) {
+        return this.creatorId && this.creatorId === user.sub;
+    }
 }
