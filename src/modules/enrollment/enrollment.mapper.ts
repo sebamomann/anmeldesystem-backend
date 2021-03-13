@@ -1,12 +1,17 @@
 import {UserUtil} from '../../util/user.util';
 import {Enrollment} from './enrollment.entity';
+import {UserService} from '../user/user.service';
+import {User} from '../user/user.model';
 
 const passengerMapper = require('./passenger/passenger.mapper');
 const driverMapper = require('./driver/driver.mapper');
 
 export class EnrollmentMapper {
 
-    public static basic(_enrollment) {
+    constructor(private readonly userService: UserService) {
+    }
+
+    public async basic(_enrollment: Enrollment) {
         let enrollment;
 
         enrollment = (({
@@ -45,28 +50,18 @@ export class EnrollmentMapper {
             enrollment.passenger = passengerMapper.basic(_enrollment.passenger);
         }
 
-        enrollment = this.stripCreator(enrollment);
+        await this.stripCreator(enrollment);
 
         return enrollment;
     }
 
-    // TODO
-    // get creator information from keycloak
-    public static stripCreator(enrollment: Enrollment): Enrollment {
+    public async stripCreator(enrollment: Enrollment): Promise<void> {
         enrollment.createdByUser = enrollment.creatorId != null;
 
         if (enrollment.createdByUser) {
-
-            // TODO
-            // const creator = getFromKeycloak(enrollment.creatorId);
-            const creator = {} as any;
-
-            // noinspection UnnecessaryLocalVariableJS
-            const mUser: any = UserUtil.stripUserMin(creator); // no inline due to type conversion
-            enrollment.creator = mUser;
+            const creator: User = await this.userService.findById(enrollment.creatorId);
+            enrollment.creator = UserUtil.stripUserMin(creator);
             delete enrollment.name;
         }
-
-        return enrollment;
     }
 }

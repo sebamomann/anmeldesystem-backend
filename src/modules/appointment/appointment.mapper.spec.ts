@@ -225,7 +225,7 @@ describe('AppointmentMapper', () => {
                             .update(mockedEnrollmentInstance_1.id + process.env.SALT_ENROLLMENT)
                             .digest('hex');
 
-                        const tokenForPermission_invalid = 'INVALIDTOKEN';
+                        const tokenForPermission_invalid = 'INVALID_TOKEN';
 
                         const permissions = {
                             perm1: mockedEnrollmentInstance_1.id,
@@ -284,7 +284,7 @@ describe('AppointmentMapper', () => {
             });
 
             it('* admin should see all enrollments', async () => {
-                mockedAppointmentInstance.administrators = [mockedUserInstance_requester.sub];
+                mockedAppointmentInstance._administrators = [mockedUserInstance_requester.sub];
 
                 const permissions = {};
 
@@ -300,217 +300,251 @@ describe('AppointmentMapper', () => {
     });
 
     describe('* slim', () => {
-        it('* slim should remove enrollments', async () => {
-            const __given_user = new User();
-            __given_user.preferred_username = 'preferred_username';
-            const __given_slim = true;
+        let mockedUserInstance_requester;
+        let mockedUserInstance_creator;
+        let mockedAppointmentInstance;
 
-            const __existing_creator = new User();
-            __existing_creator.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
-            __existing_creator.preferred_username = 'creator';
+        let mockedEnrollmentInstance_1;
+        let mockedEnrollmentInstance_2;
 
-            const __given_appointment = new Appointment();
-            __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-            __given_appointment.hidden = false;
-            __given_appointment.creatorId = __existing_creator.sub;
-            __given_appointment.enrollments = [new Enrollment(), new Enrollment()];
-            __given_appointment.files = [new File(), new File()];
+        const mockedUser_creator_keycloak = mock(User);
 
-            const __expected = {...__given_appointment};
-            delete __expected.enrollments;
+        beforeEach(() => {
+            const mockedUser_requester = mock(User);
+            mockedUserInstance_requester = instance(mockedUser_requester);
+            mockedUserInstance_requester.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
 
-            const __actual = AppointmentMapper.slim(__given_appointment, __given_slim);
-            expect(__actual).toEqual(__expected);
+            const mockedUser_creator = mock(User);
+            mockedUserInstance_creator = instance(mockedUser_creator);
+            mockedUserInstance_creator.sub = 'bdb9ee47-75d4-45f3-914a-4eef91439f4c';
+
+            const mockedAppointment = mock(Appointment);
+            mockedAppointmentInstance = instance(mockedAppointment);
+            mockedAppointmentInstance.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+            mockedAppointmentInstance.creatorId = mockedUserInstance_creator.sub;
+
+            const mockedEnrollment_1 = mock(Enrollment);
+            mockedEnrollmentInstance_1 = instance(mockedEnrollment_1);
+            mockedEnrollmentInstance_1.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
+            mockedEnrollmentInstance_1.name = 'Enrollment 1';
+
+            const mockedEnrollment_2 = mock(Enrollment);
+            mockedEnrollmentInstance_2 = instance(mockedEnrollment_2);
+            mockedEnrollmentInstance_2.id = '8100b9fa-9f70-4e39-b33d-1e8e7b73b6b3';
+            mockedEnrollmentInstance_2.name = 'Enrollment 2';
+
+            mockedAppointmentInstance.enrollments = [mockedEnrollmentInstance_1, mockedEnrollmentInstance_2];
         });
 
-        it('* !slim should !remove enrollments', async () => {
-            const __given_user = new User();
-            __given_user.preferred_username = 'preferred_username';
-            const __given_slim = false;
+        it('* true should remove enrollments', async () => {
+            const slim = true;
 
-            const __existing_creator = new User();
-            __existing_creator.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
-            __existing_creator.preferred_username = 'creator';
+            // function mocking
+            jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
-            const __given_appointment = new Appointment();
-            __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-            __given_appointment.hidden = false;
-            __given_appointment.creatorId = __existing_creator.sub;
-            __given_appointment.enrollments = [new Enrollment(), new Enrollment()];
-            __given_appointment.files = [new File(), new File()];
+            const appointmentMapper = new AppointmentMapper(userService);
+            const actual: Appointment = appointmentMapper.slim(mockedAppointmentInstance, slim);
 
-            const __expected = {...__given_appointment};
+            expect('enrollments' in actual).toBeFalsy();
+        });
 
-            const __actual = AppointmentMapper.slim(__given_appointment, __given_slim);
-            expect(__actual).toEqual(__expected);
+        it('* false should not remove enrollments', async () => {
+            const slim = false;
+
+            // function mocking
+            jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
+
+            const appointmentMapper = new AppointmentMapper(userService);
+            const actual: Appointment = appointmentMapper.slim(mockedAppointmentInstance, slim);
+
+            expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1, mockedEnrollmentInstance_2]);
         });
     });
 
     describe('* basic', () => {
-        it('* admins and enrollments exist', async () => {
-            const __existing_enrollment = new Enrollment();
-            __existing_enrollment.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
-            __existing_enrollment.name = 'owning user';
+        let mockedUserInstance_requester;
+        let mockedUserInstance_creator;
+        let mockedAppointmentInstance;
 
-            const __existing_admin = new User();
-            __existing_admin.sub = 'f48de1b3-6900-4f0e-939b-78fec185b615';
-            __existing_admin.preferred_username = 'admin';
-            __existing_admin.name = 'Administrator';
+        let mockedEnrollmentInstance_1;
+        let mockedEnrollmentInstance_2;
 
-            const __given_appointment = new Appointment();
-            __given_appointment.administrators = [__existing_admin.sub];
-            __given_appointment.enrollments = [__existing_enrollment];
+        beforeEach(() => {
+            const mockedUser_requester = mock(User);
+            mockedUserInstance_requester = instance(mockedUser_requester);
+            mockedUserInstance_requester.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
 
-            const __expected_admin = new User();
-            __expected_admin.preferred_username = __existing_admin.preferred_username;
-            __expected_admin.name = __existing_admin.name;
+            const mockedUser_creator = mock(User);
+            mockedUserInstance_creator = instance(mockedUser_creator);
+            mockedUserInstance_creator.sub = 'bdb9ee47-75d4-45f3-914a-4eef91439f4c';
 
-            const __expected_enrollment = new Enrollment();
-            __expected_enrollment.id = __existing_enrollment.id;
-            __expected_enrollment.name = __existing_enrollment.name;
-            __expected_enrollment.createdByUser = false;
+            const mockedAppointment = mock(Appointment);
+            mockedAppointmentInstance = instance(mockedAppointment);
+            mockedAppointmentInstance.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
+            mockedAppointmentInstance.creatorId = mockedUserInstance_creator.sub;
 
-            const __expected = {...__given_appointment};
-            __expected.administrators = [__expected_admin.sub];
-            __expected.enrollments = [__expected_enrollment];
+            const mockedEnrollment_1 = mock(Enrollment);
+            mockedEnrollmentInstance_1 = instance(mockedEnrollment_1);
+            mockedEnrollmentInstance_1.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
+            mockedEnrollmentInstance_1.name = 'Enrollment 1';
 
-            const __actual = (AppointmentMapper as any).basic(__given_appointment);
-            expect(__actual).toEqual(__expected);
+            const mockedEnrollment_2 = mock(Enrollment);
+            mockedEnrollmentInstance_2 = instance(mockedEnrollment_2);
+            mockedEnrollmentInstance_2.id = '8100b9fa-9f70-4e39-b33d-1e8e7b73b6b3';
+            mockedEnrollmentInstance_2.name = 'Enrollment 2';
+
+            mockedAppointmentInstance.enrollments = [mockedEnrollmentInstance_1, mockedEnrollmentInstance_2];
+            mockedAppointmentInstance.files = [];
         });
 
-        it('* admins and enrollments undefined - do nothing', async () => {
-            const __given_appointment = new Appointment();
+        it('* correctly strip enrollment creator', async () => {
+            const orig = {...mockedAppointmentInstance};
 
-            const __expected = {...__given_appointment};
+            const appointmentMapper = new AppointmentMapper(userService);
+            const actual = await appointmentMapper.basic(mockedAppointmentInstance);
 
-            const __actual = (AppointmentMapper as any).basic(__given_appointment);
-            expect(__actual).toEqual(__expected);
+            expect(actual.enrollments.length).toBe(orig.enrollments.length);
         });
 
-        describe('* delete file data', () => {
-            it('* files exist', async () => {
-                const __given_appointment = new Appointment();
-                __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                __given_appointment.hidden = false;
-                __given_appointment.enrollments = [new Enrollment(), new Enrollment()];
-                const file = new File();
-                file.name = 'filename.txt';
-                file.data = 'data';
-                __given_appointment.files = [file];
+        it('* correctly strip administrators', async () => {
+            mockedAppointmentInstance._administrators = [
+                '0a18ecf4-8168-4a06-b7bb-ec4b45bb70eb',
+                '480c1668-dba1-4bec-b85c-9de751eff21a',
+                'fe3b132c-4baa-4ff2-a7e1-8ace79cca158'
+            ];
 
-                const __expected = {...__given_appointment};
-                delete __expected.files[0].data;
+            const mockedUser1 = mock(User);
+            const mockedUserInstance1 = instance(mockedUser1);
+            mockedUserInstance1.preferred_username = 'username1';
+            mockedUserInstance1.name = 'name1';
 
-                const __actual = (AppointmentMapper as any).basic(__given_appointment);
-                expect(__actual).toEqual(__expected);
+            const mockedUser2 = mock(User);
+            const mockedUserInstance2 = instance(mockedUser2);
+            mockedUserInstance2.preferred_username = 'username2';
+            mockedUserInstance2.name = 'name2';
+
+            const mockedUser3 = mock(User);
+            const mockedUserInstance3 = instance(mockedUser3);
+            mockedUserInstance3.preferred_username = 'username3';
+            mockedUserInstance3.name = 'name3';
+
+            jest.spyOn<any, any>(userService, 'findById')
+                .mockResolvedValueOnce(mockedUserInstance1)
+                .mockResolvedValueOnce(mockedUserInstance2)
+                .mockResolvedValueOnce(mockedUserInstance3);
+
+            const orig = {...mockedAppointmentInstance};
+
+            const appointmentMapper = new AppointmentMapper(userService);
+            const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+
+            expect(actual.administrators.length).toBe(orig._administrators.length);
+            expect(userService.findById).toHaveBeenCalledTimes(orig._administrators.length);
+            expect(userService.findById).toHaveBeenNthCalledWith(1, orig._administrators[0]);
+            expect(userService.findById).toHaveBeenNthCalledWith(2, orig._administrators[1]);
+            expect(userService.findById).toHaveBeenNthCalledWith(3, orig._administrators[2]);
+            expect(actual.administrators).toEqual([
+                {username: mockedUserInstance1.preferred_username, name: mockedUserInstance1.name},
+                {username: mockedUserInstance2.preferred_username, name: mockedUserInstance2.name},
+                {username: mockedUserInstance3.preferred_username, name: mockedUserInstance3.name},
+            ]);
+        });
+
+        it('* enrollments undefined should be replaced by empty array', async () => {
+            mockedAppointmentInstance.enrollments = undefined;
+
+            const appointmentMapper = new AppointmentMapper(userService);
+            const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+
+            expect(actual.enrollments).toEqual([]);
+        });
+
+        it('* administrators undefined should be replaced by empty array', async () => {
+            mockedAppointmentInstance._administrators = undefined;
+
+            const appointmentMapper = new AppointmentMapper(userService);
+            const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+
+            expect(actual.administrators).toEqual([]);
+        });
+
+        describe('* strip files', () => {
+            it('* should remove file (binary)', async () => {
+                const mockedFile = mock(File);
+                const mockedFileInstance = instance(mockedFile);
+                mockedFileInstance.name = 'filename.txt';
+                mockedFileInstance.data = 'data';
+
+                mockedAppointmentInstance.files = [mockedFileInstance];
+
+                const appointmentMapper = new AppointmentMapper(userService);
+                const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+
+                const expected = {...mockedFileInstance};
+                delete expected.data;
+
+                expect(actual.files).toEqual([expected]);
             });
 
-            it('* files undefined', async () => {
-                const __given_appointment = new Appointment();
-                __given_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                __given_appointment.hidden = false;
-                __given_appointment.enrollments = [new Enrollment(), new Enrollment()];
+            it('* undefined files should be replaced by empty list', async () => {
+                mockedAppointmentInstance.files = undefined;
 
-                const __expected = {...__given_appointment};
+                const appointmentMapper = new AppointmentMapper(userService);
+                const actual = await appointmentMapper.basic(mockedAppointmentInstance);
 
-                const __actual = (AppointmentMapper as any).basic(__given_appointment);
-                expect(__actual).toEqual(__expected);
+                expect(actual.files).toEqual([]);
             });
         });
-    });
 
-    describe('* stripAdministrator', () => {
-        it('* administrators should just have attributes "name" and "preferred_username"', async () => {
-            const __existing_admin = new User();
-            __existing_admin.sub = 'f48de1b3-6900-4f0e-939b-78fec185b615';
-            __existing_admin.preferred_username = 'admin';
-            __existing_admin.name = 'Administrator';
+        it('* sort additions by order', async () => {
+            const mockedAddition_1 = mock(Addition);
+            const mockedAdditionInstance_1 = instance(mockedAddition_1);
+            mockedAdditionInstance_1.id = '56fa2227-e93c-49fb-a834-fd07e82d64df';
+            mockedAdditionInstance_1.name = 'addition1';
+            mockedAdditionInstance_1.order = 0;
 
-            const __given_appointment = new Appointment();
-            __given_appointment.administrators = [__existing_admin.sub];
+            const mockedAddition_2 = mock(Addition);
+            const mockedAdditionInstance_2 = instance(mockedAddition_2);
+            mockedAdditionInstance_2.id = 'dc18989b-08bb-4d94-9b61-4b73af17aa51';
+            mockedAdditionInstance_2.name = 'addition2';
+            mockedAdditionInstance_2.order = 1;
 
-            const __expected_admin = {
-                preferred_username: __existing_admin.preferred_username,
-                name: __existing_admin.name,
-            };
+            const mockedAddition_3 = mock(Addition);
+            const mockedAdditionInstance_3 = instance(mockedAddition_3);
+            mockedAdditionInstance_3.id = 'cb51d10f-91aa-4bd0-96d0-6b26bd6a66e2';
+            mockedAdditionInstance_3.name = 'addition3';
+            mockedAdditionInstance_3.order = 2;
 
-            const __expected = [__expected_admin];
+            mockedAppointmentInstance.additions = [mockedAdditionInstance_2, mockedAdditionInstance_3, mockedAdditionInstance_1];
 
-            const __actual = (AppointmentMapper as any).stripAdministrators(__given_appointment.administrators);
-            expect(__actual).toEqual(__expected);
+            const appointmentMapper = new AppointmentMapper(userService);
+            const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+
+            expect(actual.additions).toEqual([mockedAdditionInstance_1, mockedAdditionInstance_2, mockedAdditionInstance_3]);
         });
     });
 
-    describe('* enrolled by user', () => {
-        it('* enrollment !created by any user should have attribute "isCreator: false"', async () => {
-            const __existing_enrollment = new Enrollment();
-            __existing_enrollment.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
-            __existing_enrollment.name = 'owning user';
-
-            const __given_appointment = new Appointment();
-            __given_appointment.enrollments = [__existing_enrollment];
-
-            const __expected_enrollment = {...__existing_enrollment};
-            __expected_enrollment.createdByUser = false;
-
-            const __expected = [__expected_enrollment];
-
-            const __actual = (AppointmentMapper as any).enrolledByUser(__given_appointment.enrollments);
-            expect(__actual).toEqual(__expected);
-        });
-
-        it('* enrollment created by user should have attribute "isCreator: true" and containing user information', async () => {
-            const __existing_enrollment_creator = new User();
-            __existing_enrollment_creator.sub = '96511a3c-cace-4a67-ad0c-436a37038c38';
-            __existing_enrollment_creator.preferred_username = 'enrollment_creator';
-            __existing_enrollment_creator.name = 'enrollment_creator_name';
-
-            const __existing_enrollment = new Enrollment();
-            __existing_enrollment.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
-            __existing_enrollment.creator = __existing_enrollment_creator;
-
-            const __given_appointment = new Appointment();
-            __given_appointment.enrollments = [__existing_enrollment];
-
-            const __expected_enrollment = {...__existing_enrollment};
-            __expected_enrollment.creator = ({
-                preferred_username: __existing_enrollment_creator.preferred_username,
-                name: __existing_enrollment_creator.name,
-            } as any);
-            __expected_enrollment.createdByUser = true;
-
-            const __expected = [__expected_enrollment];
-
-            const __actual = (AppointmentMapper as any).enrolledByUser(__given_appointment.enrollments);
-            expect(__actual).toEqual(__expected);
-        });
-
-    });
-
-    it('* sort additions by order', () => {
-        const __existing_addition_1 = new Addition();
-        __existing_addition_1.id = '56fa2227-e93c-49fb-a834-fd07e82d64df';
-        __existing_addition_1.name = 'addition1';
-        __existing_addition_1.order = 0;
-
-        const __existing_addition_2 = new Addition();
-        __existing_addition_2.id = 'dc18989b-08bb-4d94-9b61-4b73af17aa51';
-        __existing_addition_2.name = 'addition2';
-        __existing_addition_2.order = 1;
-
-        const __existing_addition_3 = new Addition();
-        __existing_addition_3.id = 'cb51d10f-91aa-4bd0-96d0-6b26bd6a66e2';
-        __existing_addition_3.name = 'addition3';
-        __existing_addition_3.order = 2;
-
-        const __given_appointment = new Appointment();
-        __given_appointment.additions = [__existing_addition_2, __existing_addition_3, __existing_addition_1];
-
-        const __expected = [__existing_addition_1, __existing_addition_2, __existing_addition_3];
-
-        const __actual = (AppointmentMapper as any).sortAdditions(__given_appointment);
-        expect(__actual.additions).toEqual(__expected);
-    });
+    // describe('* stripAdministrator', () => {
+    //     it('* administrators should just have attributes "name" and "preferred_username"', async () => {
+    //         const __existing_admin = new User();
+    //         __existing_admin.sub = 'f48de1b3-6900-4f0e-939b-78fec185b615';
+    //         __existing_admin.preferred_username = 'admin';
+    //         __existing_admin.name = 'Administrator';
+    //
+    //         const __given_appointment = new Appointment();
+    //         __given_appointment._administrators = [__existing_admin.sub];
+    //
+    //         const __expected_admin = {
+    //             preferred_username: __existing_admin.preferred_username,
+    //             name: __existing_admin.name,
+    //         };
+    //
+    //         const __expected = [__expected_admin];
+    //
+    //         const __actual = (AppointmentMapper as any).stripAdministrators(__given_appointment._administrators);
+    //         expect(__actual).toEqual(__expected);
+    //     });
+    // });
 
     afterEach(() => {
         jest.restoreAllMocks();

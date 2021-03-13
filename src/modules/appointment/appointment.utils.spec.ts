@@ -81,7 +81,7 @@ describe('AppointmentUtil', () => {
 
                 const __given_appointment = new Appointment();
                 __given_appointment.creator = __existing_creator;
-                __given_appointment.administrators = [__given_user];
+                __given_appointment._administrators = [__given_user];
 
                 const __actual = AppointmentUtil.isCreatorOrAdministrator(__given_appointment, __given_user);
                 expect(__actual).toBeTruthy();
@@ -96,7 +96,7 @@ describe('AppointmentUtil', () => {
 
                 const __given_appointment = new Appointment();
                 __given_appointment.creator = __existing_creator;
-                __given_appointment.administrators = [__given_user];
+                __given_appointment._administrators = [__given_user];
 
                 const __actual = AppointmentUtil.isCreatorOrAdministrator(__given_appointment, __given_user);
                 expect(__actual).toBeTruthy();
@@ -164,7 +164,7 @@ describe('AppointmentUtil', () => {
                 __given_user.username = 'username';
 
                 const __given_appointment = new Appointment();
-                __given_appointment.administrators = [__given_user];
+                __given_appointment._administrators = [__given_user];
 
                 const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                 expect(__actual).toBeTruthy();
@@ -178,7 +178,7 @@ describe('AppointmentUtil', () => {
                     __appointment_admin.username = 'username';
 
                     const __given_appointment = new Appointment();
-                    __given_appointment.administrators = [__appointment_admin];
+                    __given_appointment._administrators = [__appointment_admin];
 
                     const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
@@ -191,7 +191,7 @@ describe('AppointmentUtil', () => {
                     __appointment_admin.username = 'username';
 
                     const __given_appointment = new Appointment();
-                    __given_appointment.administrators = [__appointment_admin];
+                    __given_appointment._administrators = [__appointment_admin];
 
                     const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
@@ -205,7 +205,7 @@ describe('AppointmentUtil', () => {
                     __appointment_admin.username = 'administrator';
 
                     const __given_appointment = new Appointment();
-                    __given_appointment.administrators = [__appointment_admin];
+                    __given_appointment._administrators = [__appointment_admin];
 
                     const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
@@ -216,7 +216,7 @@ describe('AppointmentUtil', () => {
                     __given_user.username = 'username';
 
                     const __given_appointment = new Appointment();
-                    __given_appointment.administrators = undefined;
+                    __given_appointment._administrators = undefined;
 
                     const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
@@ -227,7 +227,7 @@ describe('AppointmentUtil', () => {
                     __given_user.username = 'username';
 
                     const __given_appointment = new Appointment();
-                    __given_appointment.administrators = [];
+                    __given_appointment._administrators = [];
 
                     const __actual = AppointmentUtil.isAdministratorOfAppointment(__given_appointment, __given_user);
                     expect(__actual).toBeFalsy();
@@ -264,7 +264,7 @@ describe('AppointmentUtil', () => {
 
                 const __given_appointment = new Appointment();
                 __given_appointment.creator = __existing_creator;
-                __given_appointment.administrators = [__given_user];
+                __given_appointment._administrators = [__given_user];
 
                 const __expected = ['ADMIN'];
 
@@ -458,7 +458,7 @@ describe('AppointmentUtil', () => {
                 const __given_appointment = new Appointment();
                 __given_appointment.id = '1';
                 __given_appointment.creator = __existing_creator;
-                __given_appointment.administrators = [__existing_admin];
+                __given_appointment._administrators = [__existing_admin];
 
                 const __given_pins = [];
 
@@ -480,7 +480,7 @@ describe('AppointmentUtil', () => {
                 const __given_appointment = new Appointment();
                 __given_appointment.id = '1';
                 __given_appointment.creator = __existing_creator;
-                __given_appointment.administrators = [__existing_admin];
+                __given_appointment._administrators = [__existing_admin];
 
                 const __given_pins = [];
 

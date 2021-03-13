@@ -70,7 +70,7 @@ export class AppointmentUtil {
             return false;
         }
 
-        return appointment.administrators?.some(sAdministrator => sAdministrator === user.sub);
+        return appointment._administrators?.some(sAdministrator => sAdministrator === user.sub);
     }
 
     /**

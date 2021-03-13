@@ -1291,7 +1291,7 @@ describe('EnrollmentService', () => {
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.creatorId = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
-                __existing_appointment.administrators = [];
+                __existing_appointment._administrators = [];
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
@@ -1319,7 +1319,7 @@ describe('EnrollmentService', () => {
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.creatorId = __existing_appointment_creator.id;
-                __existing_appointment.administrators = [];
+                __existing_appointment._administrators = [];
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
@@ -1365,7 +1365,7 @@ describe('EnrollmentService', () => {
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.creatorId = __existing_appointment_creator.id;
-                __existing_appointment.administrators = [];
+                __existing_appointment._administrators = [];
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;

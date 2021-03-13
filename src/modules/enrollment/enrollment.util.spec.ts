@@ -137,7 +137,7 @@ describe('AppointmentUtil', () => {
                         const __existing_appointment = new Appointment();
                         __existing_appointment.id = '3f091325-1fb1-4dde-bd89-3298236a730b';
                         __existing_appointment.creatorId = __existing_creator.id;
-                        __existing_appointment.administrators = [__given_user.id];
+                        __existing_appointment._administrators = [__given_user.id];
 
                         const __given_enrollment = new Enrollment();
                         __given_enrollment.name = 'name';

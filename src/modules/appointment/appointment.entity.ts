@@ -53,7 +53,8 @@ export class Appointment {
     driverAddition: boolean;
 
     @ManyToMany(type => String)
-    administrators: string[];
+    @Column({name: 'administrators'})
+    _administrators: string[];
 
     @ManyToMany(type => String)
     pinners: string[];
@@ -63,7 +64,7 @@ export class Appointment {
         {
             eager: true,
         })
-    files: File[];
+    files: File[] = [];
 
     @Column({nullable: true, type: 'uuid'})
     creatorId: string;
@@ -82,5 +83,6 @@ export class Appointment {
 
     creator?: IUserMinified;
     reference?: string[] = [];
+    administrators: IUserMinified[] = [];
     numberOfEnrollments?: number;
 }

@@ -107,7 +107,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creator = __existing_creator;
-                    __existing_appointment.administrators = [__given_user];
+                    __existing_appointment._administrators = [__given_user];
                     __existing_appointment.link = __given_link;
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
@@ -124,7 +124,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creator = __given_user;
-                    __existing_appointment.administrators = [__given_user];
+                    __existing_appointment._administrators = [__given_user];
                     __existing_appointment.link = __given_link;
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
@@ -169,7 +169,7 @@ describe('AppointmentService', () => {
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.creator = __existing_creator;
-                __existing_appointment.administrators = [__existing_admin];
+                __existing_appointment._administrators = [__existing_admin];
                 __existing_appointment.link = __given_link;
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
@@ -203,7 +203,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creator = __existing_creator;
-                    __existing_appointment.administrators = [__given_user];
+                    __existing_appointment._administrators = [__given_user];
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
@@ -217,7 +217,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creator = __given_user;
-                    __existing_appointment.administrators = [__given_user];
+                    __existing_appointment._administrators = [__given_user];
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
@@ -239,7 +239,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creator = __existing_creator;
-                    __existing_appointment.administrators = [__existing_admin];
+                    __existing_appointment._administrators = [__existing_admin];
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
@@ -961,7 +961,7 @@ describe('AppointmentService', () => {
                 const __existing_appointment = new Appointment();
                 __existing_appointment.link = 'link';
                 __existing_appointment.creator = __given_user;
-                __existing_appointment.administrators = [];
+                __existing_appointment._administrators = [];
 
                 const __given_appointment_change_data = {
                     invalid: 'attribute'
@@ -1017,7 +1017,7 @@ describe('AppointmentService', () => {
                 const __existing_appointment = new Appointment();
                 __existing_appointment.link = 'link';
                 __existing_appointment.creator = __existing_creator;
-                __existing_appointment.administrators = [];
+                __existing_appointment._administrators = [];
 
                 const __given_appointment_change_data = {
                     link: 'newLink'
@@ -1042,7 +1042,7 @@ describe('AppointmentService', () => {
                 const __existing_appointment = new Appointment();
                 __existing_appointment.link = 'link';
                 __existing_appointment.creator = __given_user;
-                __existing_appointment.administrators = [];
+                __existing_appointment._administrators = [];
 
                 const __existing_appointment_2 = new Appointment();
                 __existing_appointment_2.link = 'existingLink';
@@ -1134,7 +1134,7 @@ describe('AppointmentService', () => {
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.creator = __given_user;
-                __existing_appointment.administrators = [];
+                __existing_appointment._administrators = [];
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
                 userRepositoryMock.findOne.mockReturnValueOnce(__existing_user); // check if admin to actually exsists
@@ -1142,7 +1142,7 @@ describe('AppointmentService', () => {
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
                 const __expected = {...__existing_appointment};
-                __expected.administrators = [__existing_user];
+                __expected._administrators = [__existing_user];
 
                 const __actual = await appointmentService.addAdministrator(__given_user, __given_link, __given_username);
                 expect(__actual).toEqual(__expected);
@@ -1179,7 +1179,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creator = __existing_creator;
-                    __existing_appointment.administrators = [];
+                    __existing_appointment._administrators = [];
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
@@ -1204,7 +1204,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creator = __given_user;
-                    __existing_appointment.administrators = [];
+                    __existing_appointment._administrators = [];
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
                     userRepositoryMock.findOne.mockReturnValueOnce(undefined); // check if admin to actually exsists
@@ -1234,7 +1234,7 @@ describe('AppointmentService', () => {
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.creator = __given_user;
-                __existing_appointment.administrators = [__existing_user];
+                __existing_appointment._administrators = [__existing_user];
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
                 userRepositoryMock.findOne.mockReturnValueOnce(__existing_user); // check if admin to actually exsists
@@ -1242,7 +1242,7 @@ describe('AppointmentService', () => {
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
                 const __expected = {...__existing_appointment};
-                __expected.administrators = [];
+                __expected._administrators = [];
 
                 const __actual = await appointmentService
                     .removeAdministrator(__given_user, __given_link, __given_username);
@@ -1283,7 +1283,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creator = __existing_creator;
-                    __existing_appointment.administrators = [__existing_user];
+                    __existing_appointment._administrators = [__existing_user];
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 

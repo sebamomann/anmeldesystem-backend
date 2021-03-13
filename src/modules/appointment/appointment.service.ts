@@ -4,7 +4,6 @@ import {Brackets, getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Addition} from '../addition/addition.entity';
 import {File} from '../file/file.entity';
-import {User} from '../user/user.entity';
 import {AdditionService} from '../addition/addition.service';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {UserService} from '../user/user.service';
@@ -17,6 +16,7 @@ import {AppointmentGateway} from './appointment.gateway';
 import {AppointmentUtil} from './appointment.util';
 import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
+import {User} from '../user/user.model';
 
 const logger = require('../../logger');
 
@@ -29,24 +29,9 @@ export class AppointmentService {
         private fileService: FileService,
         private userService: UserService,
         private appointmentGateway: AppointmentGateway,
-        private pushService: PushService
+        private pushService: PushService,
     ) {
     }
-
-    private static userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
-        appointment.reference = AppointmentUtil.parseReferences(user, appointment, [], permissions); // empty pins because fnc is only called on single appointment get request
-
-        appointment = AppointmentMapper.sortAdditions(appointment);
-        appointment = AppointmentMapper.permission(appointment, user, permissions);
-        appointment = AppointmentMapper.slim(appointment, slim);
-        appointment = AppointmentMapper.basic(appointment);
-
-        return appointment;
-    }
-
-    /** MAIN FUNCTIONS  **/
-
-    /** MAIN FUNCTIONS  **/
 
     /**
      * Find Appointment with its relations by its link.
@@ -69,7 +54,14 @@ export class AppointmentService {
         return appointment;
     }
 
+    /** MAIN FUNCTIONS  **/
+
+    /** MAIN FUNCTIONS  **/
+
     /**
+     * TODO
+     * Dont fetch enrollments when slim
+     *
      * Get an Appointment by its link. Checking for permissions by analysing query parameter,
      * being creator or being administrator.
      *
@@ -91,7 +83,7 @@ export class AppointmentService {
             throw e;
         }
 
-        appointment = AppointmentService.userBasedAppointmentPreparation(appointment, user, permissions, slim);
+        appointment = this.userBasedAppointmentPreparation(appointment, user, permissions, slim);
 
         return appointment;
     }
@@ -117,9 +109,16 @@ export class AppointmentService {
         let pins = AppointmentUtil.parsePins(params);
 
         let appointments = await this.getAppointments(user, pins, undefined, null);
-        appointments = appointments.map(appointment => AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, slim));
 
-        return appointments;
+        const output = [];
+
+        appointments.forEach(appointment => {
+            output.push(
+                this.userBasedAppointmentPreparation(appointment, user, {}, slim)
+            );
+        });
+
+        return output;
     }
 
     /**
@@ -156,7 +155,10 @@ export class AppointmentService {
         }
 
         let appointments = await this.getAppointments(user, pins, _before, limit);
-        appointments = appointments.map(appointment => AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, _slim));
+        appointments = appointments.map(appointment => {
+            this.userBasedAppointmentPreparation(appointment, user, {}, _slim);
+            return appointment;
+        });
 
         return appointments;
     }
@@ -202,12 +204,12 @@ export class AppointmentService {
         }
 
         appointmentToDB.driverAddition = appointmentData.driverAddition;
-        appointmentToDB.creatorId = user.id;
+        appointmentToDB.creatorId = user.sub;
         appointmentToDB.additions = await this._createAdditionEntitiesAndFilterDuplicates(appointmentData.additions);
 
         appointmentToDB = await this.appointmentRepository.save(appointmentToDB);
 
-        appointmentToDB = AppointmentService.userBasedAppointmentPreparation(appointmentToDB, user, {}, false);
+        appointmentToDB = await this.userBasedAppointmentPreparation(appointmentToDB, user, {}, false);
 
         return appointmentToDB;
     }
@@ -292,7 +294,7 @@ export class AppointmentService {
 
         appointment = await this.appointmentRepository.save(appointment);
 
-        appointment = AppointmentService.userBasedAppointmentPreparation(appointment, user, {}, false);
+        appointment = this.userBasedAppointmentPreparation(appointment, user, {}, false);
 
         this.appointmentGateway.appointmentUpdated(appointment);
         this.pushService
@@ -483,7 +485,7 @@ export class AppointmentService {
 
         // TODO obsolete, due to external user management
         try {
-            _user = await this.userService.findById(user.id); // check if user even exists anymore or not
+            _user = await this.userService.findById(user.sub); // check if user even exists anymore or not
         } catch (e) {
             throw e;
         }
@@ -542,10 +544,22 @@ export class AppointmentService {
         }
 
         if (app.subscriptions) {
-            app.subscriptions = app.subscriptions.filter((fSub) => fSub.user?.id !== user.id);
+            app.subscriptions = app.subscriptions.filter((fSub) => fSub.userId !== user.sub);
         }
 
         return this.appointmentRepository.save(app);
+    }
+
+    private async userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
+        const appointmentMapper = new AppointmentMapper(this.userService);
+
+        appointment.reference = AppointmentUtil.parseReferences(user, appointment, [], permissions); // empty pins because fnc is only called on single appointment get request
+
+        appointment = await appointmentMapper.permission(appointment, user, permissions);
+        appointment = appointmentMapper.slim(appointment, slim);
+        appointment = await appointmentMapper.basic(appointment);
+
+        return appointment;
     }
 
     private async handleAppointmentLink(_link: string) {
@@ -653,10 +667,10 @@ export class AppointmentService {
                 'creator.username', 'creator.name', 'files', 'administrators.username', 'administrators.name',
                 'enrollment_additions', 'pinners'])
             .where(new Brackets(br => {
-                br.where('creator.id = :creatorId', {creatorId: user.id})
-                    .orWhere('administrators.id = :admin', {admin: user.id})
-                    .orWhere('enrollments.creatorId = :user', {user: user.id})
-                    .orWhere('pinners.id = :user', {user: user.id})
+                br.where('creator.id = :creatorId', {creatorId: user.sub})
+                    .orWhere('administrators.id = :admin', {admin: user.sub})
+                    .orWhere('enrollments.creatorId = :user', {user: user.sub})
+                    .orWhere('pinners.id = :user', {user: user.sub})
                     .orWhere('appointment.link IN (:...links)', {links: pins});
             }))
             .andWhere(before ? 'UNIX_TIMESTAMP(appointment.date) < UNIX_TIMESTAMP(:date)' : 'UNIX_TIMESTAMP(appointment.date) > UNIX_TIMESTAMP(:date2)', {

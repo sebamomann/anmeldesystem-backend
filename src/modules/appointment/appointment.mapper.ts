@@ -11,42 +11,53 @@ export class AppointmentMapper {
     constructor(private readonly userService: UserService) {
     }
 
-    public static basic(appointment) {
-        if (appointment.administrators !== undefined) {
-            appointment.administrators = AppointmentMapper.stripAdministrators(appointment.administrators);
-        }
+    /**
+     * Sort additions by their specified order.
+     *
+     * @param appointment       {@link Appointment} to modify
+     */
+    private static sortAdditions(appointment: Appointment): void {
+        appointment.additions?.sort((a, b) => {
+            return a.order < b.order ? -1 : 1;
+        });
+    }
 
-        if (appointment.enrollments !== undefined) {
-            appointment.enrollments = AppointmentMapper.enrolledByUser(appointment.enrollments);
-        }
+    /**
+     * TODO
+     * mix with permission
+     *
+     * Basic mapping function. Used to strip {@link User} information.
+     * {@link User} information should just contain name and username. Other fields of {@link User} are
+     * not in interesting for requesting person.
+     *
+     * @param appointment   {@link Appointment} that should be manipulated
+     */
+    public async basic(appointment): Promise<Appointment> {
+        await this.stripAdministrators(appointment);
+        this.mapEnrollments(appointment);
+        AppointmentMapper.sortAdditions(appointment);
 
-        appointment.files?.map(mFile => delete mFile.data);
+        if (appointment.files) {
+            appointment.files.map(mFile => delete mFile.data);
+        } else {
+            appointment.files = [];
+        }
 
         return appointment;
     }
 
-    public static slim(appointment: Appointment, slim: boolean) {
+    /**
+     * If the slim parameter is set, remove all {@link Enrollment} from the {@link Appointment} list.
+     *
+     * @param appointment   {@link Appointment} to manipulate
+     * @param slim          Boolean to remove or keep {@link Enrollment} list
+     */
+    public slim(appointment: Appointment, slim: boolean) {
         if (slim) {
             delete appointment.enrollments;
         }
 
         return appointment;
-    }
-
-    public static enrolledByUser(enrollments: Enrollment[]) {
-        return enrollments.map(mEnrollment => EnrollmentMapper.stripCreator(mEnrollment));
-    }
-
-    public static sortAdditions(appointment: Appointment) {
-        appointment.additions?.sort((a, b) => {
-            return a.order < b.order ? -1 : 1;
-        });
-
-        return appointment;
-    }
-
-    private static stripAdministrators(admins: User[]) {
-        return admins.map(mAdmin => UserUtil.stripUserMin(mAdmin));
     }
 
     public async permission(_appointment: Appointment, _user: User, permissions: any): Promise<any> {
@@ -129,5 +140,49 @@ export class AppointmentMapper {
         appointment = Object.assign(appointment, obj);
 
         return appointment;
+    }
+
+    /**
+     * Foreach {@link Enrollment} in {@link Appointment} strip the creator.
+     *
+     * @param appointment   @link Appointment} to manipulate
+     *
+     * @protected
+     */
+    private mapEnrollments(appointment: Appointment): void {
+        const enrollmentMapper = new EnrollmentMapper(this.userService);
+
+        if (appointment.enrollments) {
+            appointment.enrollments.map(
+                async mEnrollment => {
+                    await enrollmentMapper.basic(mEnrollment);
+                }
+            );
+        } else {
+            appointment.enrollments = [];
+        }
+    }
+
+    /**
+     * Foreach administrator in {@link Appointment} fetch the user information and strip it to the minimum
+     *
+     * @param appointment   @link Appointment} to manipulate
+     *
+     * @protected
+     */
+    private async stripAdministrators(appointment: Appointment): Promise<void> {
+        appointment.administrators = [];
+
+        if (appointment._administrators) {
+            for (const mAdmin of appointment._administrators) {
+                const user: User = await this.userService.findById(mAdmin);
+
+                appointment.administrators.push(
+                    UserUtil.stripUserMin(user)
+                );
+            }
+
+            delete appointment._administrators;
+        }
     }
 }
