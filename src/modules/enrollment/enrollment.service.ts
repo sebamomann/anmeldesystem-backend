@@ -148,6 +148,8 @@ export class EnrollmentService {
             }
         }
 
+        // TODO only update if anything actually changed
+        
         let savedEnrollment = await this.enrollmentRepository.save(enrollment_updated);
 
         savedEnrollment = EnrollmentMapper.basic(savedEnrollment);
@@ -353,6 +355,7 @@ export class EnrollmentService {
         }
     }
 
+    // TODO dynamic call cann be directly lead to _driverAndPassenger function
     /// noinspection JSUnusedLocalSymbols
     // function called dynamically
     private async _updateDriver(enrollment_to_change_values: Enrollment, enrollment_referenced: Enrollment) {
