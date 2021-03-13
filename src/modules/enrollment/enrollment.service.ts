@@ -21,6 +21,7 @@ import {StringUtil} from '../../util/string.util';
 import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
 import {EnrollmentMapper} from './enrollment.mapper';
 import {User} from '../user/user.model';
+import {UserService} from '../user/user.service';
 
 const crypto = require('crypto');
 const logger = require('../../logger');
@@ -32,6 +33,7 @@ export class EnrollmentService {
                 @InjectRepository(Mail)
                 private readonly mailRepository: Repository<Mail>,
                 private readonly appointmentService: AppointmentService,
+                private readonly userService: UserService,
                 private readonly additionService: AdditionService,
                 private readonly passengerService: PassengerService,
                 private readonly driverService: DriverService,
@@ -101,10 +103,9 @@ export class EnrollmentService {
         }
 
         this.appointmentGateway.appointmentUpdated(enrollment_raw.appointment);
-        // noinspection UnnecessaryLocalVariableJS
-        const output = EnrollmentMapper.basic(savedEnrollment);
 
-        return output;
+        const enrollmentMapper = new EnrollmentMapper(this.userService);
+        return await enrollmentMapper.basic(savedEnrollment);
     }
 
     /**
@@ -119,7 +120,7 @@ export class EnrollmentService {
         const enrollment_referenced = await this.findById(enrollment_id);
         const enrollment_updated = {...enrollment_referenced};
 
-        if (!EnrollmentUtil.hasPermissionToManipulateEnrollment(enrollment_referenced, user, enrollment_to_change_values.token)) {
+        if (!enrollment_referenced.hasPermissionToManipulate(user, enrollment_to_change_values.token)) {
             throw new InsufficientPermissionsException();
         }
 
@@ -152,7 +153,8 @@ export class EnrollmentService {
 
         let savedEnrollment = await this.enrollmentRepository.save(enrollment_updated);
 
-        savedEnrollment = EnrollmentMapper.basic(savedEnrollment);
+        const enrollmentMapper = new EnrollmentMapper(this.userService);
+        savedEnrollment = await enrollmentMapper.basic(savedEnrollment);
 
         this.appointmentGateway.appointmentUpdated(enrollment_updated.appointment);
 
@@ -178,7 +180,7 @@ export class EnrollmentService {
             throw new EntityGoneException(null, null, 'enrollment');
         }
 
-        if (!(await EnrollmentUtil.hasPermissionToManipulateEnrollment(enrollment, user, token))) {
+        if (!(await enrollment.hasPermissionToManipulate(user, token))) {
             throw new InsufficientPermissionsException();
         }
 
@@ -209,11 +211,11 @@ export class EnrollmentService {
 
         let allowances = [];
 
-        if (await EnrollmentUtil.hasPermissionToManipulateEnrollmentByIdentity(enrollment, user)) {
+        if (await enrollment.hasPermissionToManipulateByIdentity(user)) {
             allowances.push('user');
         }
 
-        if (EnrollmentUtil.hasPermissionToManipulateEnrollmentByToken(enrollment, token)) {
+        if (enrollment.hasPermissionToManipulateByToken(token)) {
             allowances.push('token');
         }
 
