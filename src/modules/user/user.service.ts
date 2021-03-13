@@ -10,7 +10,7 @@ export class UserService {
     public async __save(user: any) {
     }
 
-    public async findById(id: string): Promise<User> {
+    public async findById(id: string): Promise<User> { // TODO REIMPLEMENT KEYCLOAK
         throw new NotImplementedException();
     }
 

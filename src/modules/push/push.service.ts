@@ -57,7 +57,7 @@ export class PushService {
             pushSubscription.auth = obj.keys.auth;
 
             if (user) {
-                pushSubscription.user = user;
+                pushSubscription.userId = user.sub;
             }
 
             existing_sub = await this.pushSubscriptionRepository.save(pushSubscription);
@@ -84,7 +84,7 @@ export class PushService {
         subscription.appointments.push(appointment);
 
         if (user) {
-            const subscriptions = await this.pushSubscriptionRepository.find({where: {user: {id: user.id}}});
+            const subscriptions = await this.pushSubscriptionRepository.find({where: {userId: user.sub}});
             subscriptions.forEach((fSubscription) => {
                 if (!fSubscription.appointments) {
                     fSubscription.appointments = [];
@@ -194,7 +194,7 @@ export class PushService {
                 .leftJoinAndSelect('subscription.appointments', 'appointments')
                 .leftJoinAndSelect('subscription.user', 'user')
                 .select(['subscription', 'appointments', 'user'])
-                .where('user.id = :userId', {userId: user.id})
+                .where('user.id = :userId', {userId: user.sub})
                 .andWhere('appointments.id = :appointmentId', {appointmentId: appointment.id})
                 .getOne();
         }

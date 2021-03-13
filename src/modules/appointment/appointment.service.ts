@@ -233,7 +233,7 @@ export class AppointmentService {
         }
 
         try {
-            if (!(await this.isCreatorOrAdministrator(user, appointment))) {
+            if (!appointment.isCreatorOrAdministrator(user)) {
                 throw  new InsufficientPermissionsException();
             }
         } catch (e) {
@@ -503,30 +503,17 @@ export class AppointmentService {
     }
 
     /**
-     * Checks if a user is administrator or creator of an Appointment.<br/>
-     * Appointment can be passed as reference or just the link of the appointment
+     * Check if passed {@link User} is administrator or creator of the referenced {@link Appointment}<br/>
      *
-     * @param user to check permissions for
-     * @param ref (1) link of Appointment
-     *            (2) Appointment itself
+     * @param user          {@link User} to check permissions for
+     * @param ref           Link of  {@link Appointment}
      *
-     * @returns boolean true if creator or admin - false if not
+     * @returns boolean     true if creator or admin - false if not
      *
-     * @throws See {@link findByLink} for reference
+     * @throws              See {@link findByLink} for reference
      */
-    public async isCreatorOrAdministrator(user: User, ref: string | Appointment): Promise<boolean> {
-        let appointment;
-
-        if (typeof ref === 'string') {
-            try {
-                appointment = await this.findByLink(ref);
-            } catch (e) {
-                throw e;
-            }
-        } else {
-            appointment = ref;
-        }
-
+    public async isCreatorOrAdministrator(user: User, ref: string): Promise<boolean> {
+        const appointment = await this.findByLink(ref);
         return appointment.isCreatorOrAdministrator(user);
     }
 
