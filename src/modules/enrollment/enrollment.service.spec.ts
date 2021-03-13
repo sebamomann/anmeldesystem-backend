@@ -3,7 +3,6 @@ import {EnrollmentService} from './enrollment.service';
 import {UserService} from '../user/user.service';
 import {MailerService} from '@nest-modules/mailer';
 import {Repository} from 'typeorm';
-import {User} from '../user/user.entity';
 import {getRepositoryToken} from '@nestjs/typeorm';
 import {MAILER_OPTIONS} from '@nest-modules/mailer/dist/constants/mailer-options.constant';
 import {AppointmentService} from '../appointment/appointment.service';
@@ -27,6 +26,7 @@ import {AppointmentGateway} from '../appointment/appointment.gateway';
 import {MissingAuthenticationException} from '../../exceptions/MissingAuthenticationException';
 import {PushSubscription} from '../push/pushSubscription.entity';
 import {PushService} from '../push/push.service';
+import {User} from '../user/user.model';
 
 const crypto = require('crypto');
 

@@ -1,11 +1,11 @@
 import {Test, TestingModule} from '@nestjs/testing';
 
-import {User} from '../user/user.entity';
 import {HttpStatus} from '@nestjs/common';
 
 import {Enrollment} from './enrollment.entity';
 import {EnrollmentService} from './enrollment.service';
 import {EnrollmentController} from './enrollment.controller';
+import {User} from '../user/user.model';
 
 jest.mock('./enrollment.service');
 

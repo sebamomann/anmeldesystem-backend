@@ -3,9 +3,9 @@ import {Response} from 'express';
 import {EnrollmentService} from './enrollment.service';
 import {Enrollment} from './enrollment.entity';
 import {Usr} from '../user/user.decorator';
-import {User} from '../user/user.entity';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 import {AuthOptGuard} from '../../auth/auth-opt.gurad';
+import {User} from '../user/user.model';
 
 @Controller('enrollment')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)

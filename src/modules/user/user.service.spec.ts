@@ -1,16 +1,11 @@
 import {Test, TestingModule} from '@nestjs/testing';
 import {UserService} from './user.service';
 import {Repository} from 'typeorm';
-import {User} from './user.entity';
 import {getRepositoryToken} from '@nestjs/typeorm';
 import {MailerService} from '@nest-modules/mailer';
 import {MAILER_OPTIONS} from '@nest-modules/mailer/dist/constants/mailer-options.constant';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
-
-const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
-const btoa = require('btoa');
-var userMapper = require('./user.mapper');
+import {User} from './user.model';
 
 describe('UserService', () => {
     let userService: UserService;

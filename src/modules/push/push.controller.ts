@@ -1,9 +1,9 @@
 import {Body, Controller, Get, Head, HttpStatus, NotFoundException, Post, Query, Res, UseGuards} from '@nestjs/common';
 import {Usr} from '../user/user.decorator';
-import {User} from '../user/user.entity';
 import {Response} from 'express';
 import {PushService} from './push.service';
 import {AuthOptGuard} from '../../auth/auth-opt.gurad';
+import {User} from '../user/user.model';
 
 @Controller('push')
 export class PushController {

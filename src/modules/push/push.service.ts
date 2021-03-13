@@ -1,11 +1,11 @@
 import {forwardRef, Inject, Injectable} from '@nestjs/common';
-import {User} from '../user/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {getRepository, Repository} from 'typeorm';
 import {PushSubscription} from './pushSubscription.entity';
 import {AppointmentService} from '../appointment/appointment.service';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {Appointment} from '../appointment/appointment.entity';
+import {User} from '../user/user.model';
 
 require('dotenv').config();
 
@@ -33,9 +33,6 @@ export class PushService {
         @Inject(forwardRef(() => AppointmentService))
         private appointmentService: AppointmentService
     ) {
-        // console.log(vapidKeys);
-        // console.log(JSON.stringify(vapidKeys));
-
         webpush.setVapidDetails(
             'mailto:info@go-join.me',
             vapidKeys.publicKey,
