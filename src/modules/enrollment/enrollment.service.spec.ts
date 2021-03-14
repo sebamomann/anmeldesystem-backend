@@ -166,7 +166,6 @@ describe('EnrollmentService', () => {
                 it('* should trim comment', async () => {
                     const __given_enrollment = new Enrollment();
                     const __given_user = new User();
-                    __given_user.username = 'username';
 
                     const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -195,7 +194,6 @@ describe('EnrollmentService', () => {
                 it('* null should be replaced by empty string', async () => {
                     const __given_enrollment = new Enrollment();
                     const __given_user = new User();
-                    __given_user.username = 'username';
 
                     const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -228,7 +226,6 @@ describe('EnrollmentService', () => {
                     __given_enrollment.passenger.requirement = 2;
 
                     const __given_user = new User();
-                    __given_user.username = 'username';
 
                     const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -266,7 +263,6 @@ describe('EnrollmentService', () => {
                     __given_enrollment.driver.seats = 4;
 
                     const __given_user = new User();
-                    __given_user.username = 'username';
 
                     const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -378,8 +374,8 @@ describe('EnrollmentService', () => {
                 it('* as logged in user', async () => {
                     const __given_enrollment = new Enrollment();
                     const __given_user = new User();
-                    __given_user.username = 'username';
-                    __given_user.id = "cool-id"
+
+                    __given_user.sub = 'cool-id';
                     const __given_domain = 'example.com/{{0}}/{{1}}';
 
                     __given_enrollment.comment = 'comment';
@@ -409,7 +405,7 @@ describe('EnrollmentService', () => {
                 it('* editMail > user', async () => {
                     const __given_enrollment = new Enrollment();
                     const __given_user = new User();
-                    __given_user.username = 'username';
+
                     const __given_domain = 'example.com/{{0}}/{{1}}';
 
                     __given_enrollment.editMail = 'mail@example.ocm';
@@ -447,7 +443,7 @@ describe('EnrollmentService', () => {
                 __given_enrollment.appointment = new Appointment();
                 __given_enrollment.appointment.link = 'link';
                 const __given_user = new User();
-                __given_user.username = 'username';
+
                 const __given_domain = 'example.com/{{0}}/{{1}}';
 
                 const __existing_appointment = undefined;
@@ -496,7 +492,7 @@ describe('EnrollmentService', () => {
                 __given_enrollment.appointment = new Appointment();
                 __given_enrollment.appointment.link = 'link';
                 const __given_user = new User();
-                __given_user.username = 'username';
+
                 const __given_domain = 'example.com/{{0}}/{{1}}';
 
                 const __existing_appointment = __given_enrollment.appointment;
@@ -523,7 +519,7 @@ describe('EnrollmentService', () => {
                 __given_enrollment.appointment = new Appointment();
                 __given_enrollment.appointment.link = 'link';
                 const __given_user = new User();
-                __given_user.username = 'username';
+
                 const __given_domain = 'example.com/{{0}}/{{1}}';
 
                 const __existing_appointment = __given_enrollment.appointment;
@@ -555,7 +551,7 @@ describe('EnrollmentService', () => {
                 __given_enrollment.appointment.additions[0].id = '08f642cf-ee55-4b18-84e4-69e218088753';
                 __given_enrollment.appointment.additions[0].name = 'additionExisting';
                 const __given_user = new User();
-                __given_user.username = 'username';
+
                 const __given_domain = 'example.com/{{0}}/{{1}}';
 
                 const __existing_appointment = __given_enrollment.appointment;
@@ -611,14 +607,13 @@ describe('EnrollmentService', () => {
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
 
                 const __given_user = new User();
-                __given_user.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
-                __given_user.username = 'username';
+                __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
                 __existing_enrollment.name = 'name';
                 __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.creatorId = __given_user.id;
+                __existing_enrollment.appointment.creatorId = __given_user.sub;
 
                 jest.spyOn<any, any>(enrollmentService, 'findById').mockReturnValueOnce(__existing_enrollment);
                 jest.spyOn<any, any>(enrollmentService, '_updateName').mockReturnValueOnce(__given_enrollment_change_data.name);
@@ -642,15 +637,14 @@ describe('EnrollmentService', () => {
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_user = new User();
-                __given_user.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
-                __given_user.username = 'username';
+                __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
                 __existing_enrollment.comment = 'comment';
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.creatorId = __given_user.id;
+                __existing_enrollment.appointment.creatorId = __given_user.sub;
 
                 jest.spyOn<any, any>(enrollmentService, 'findById').mockReturnValueOnce(__existing_enrollment);
                 jest.spyOn<any, any>(enrollmentService, '_updateName').mockReturnValueOnce(__given_enrollment_change_data.comment);
@@ -676,8 +670,7 @@ describe('EnrollmentService', () => {
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_user = new User();
-                __given_user.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
-                __given_user.username = 'username';
+                __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
@@ -687,7 +680,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = true;
-                __existing_enrollment.appointment.creatorId = __given_user.id;
+                __existing_enrollment.appointment.creatorId = __given_user.sub;
 
                 jest.spyOn<any, any>(enrollmentService, 'findById').mockReturnValueOnce(__existing_enrollment);
                 jest.spyOn<any, any>(enrollmentService, '_updateDriver').mockReturnValueOnce(__given_enrollment_change_data.driver);
@@ -716,7 +709,7 @@ describe('EnrollmentService', () => {
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
             //     const __given_user = new User();
-            //     __given_user.username = 'username';
+            //     
             //
             //     const __existing_enrollment = new Enrollment();
             //     __existing_enrollment.id = __given_enrollment_id;
@@ -753,8 +746,7 @@ describe('EnrollmentService', () => {
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_user = new User();
-                __given_user.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
-                __given_user.username = 'username';
+                __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
@@ -764,7 +756,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = false;
-                __existing_enrollment.appointment.creatorId = __given_user.id;
+                __existing_enrollment.appointment.creatorId = __given_user.sub;
 
                 jest.spyOn<any, any>(enrollmentService, 'findById').mockReturnValueOnce(__existing_enrollment);
                 jest.spyOn<any, any>(enrollmentService, '_updateDriver').mockReturnValueOnce(undefined);
@@ -790,8 +782,7 @@ describe('EnrollmentService', () => {
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_user = new User();
-                __given_user.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
-                __given_user.username = 'username';
+                __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
@@ -800,14 +791,13 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = true;
-                __existing_enrollment.appointment.creatorId = __given_user.id;
+                __existing_enrollment.appointment.creatorId = __given_user.sub;
 
                 jest.spyOn<any, any>(enrollmentService, 'findById').mockReturnValueOnce(__existing_enrollment);
                 jest.spyOn<any, any>(enrollmentService, '_updatePassenger').mockReturnValueOnce(__given_enrollment_change_data.passenger);
                 jest.spyOn(enrollmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
                 jest.spyOn(appointmentGateway, 'appointmentUpdated').mockImplementationOnce(_ => {
                 });
-
 
                 const __expected = __given_enrollment_change_data.passenger;
 
@@ -826,7 +816,7 @@ describe('EnrollmentService', () => {
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
             //     const __given_user = new User();
-            //     __given_user.username = 'username';
+            //     
             //
             //     const __existing_enrollment = new Enrollment();
             //     __existing_enrollment.id = __given_enrollment_id;
@@ -859,8 +849,7 @@ describe('EnrollmentService', () => {
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_user = new User();
-                __given_user.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
-                __given_user.username = 'username';
+                __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
@@ -869,7 +858,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.driverAddition = false;
-                __existing_enrollment.appointment.creatorId = __given_user.id;
+                __existing_enrollment.appointment.creatorId = __given_user.sub;
 
                 jest.spyOn<any, any>(enrollmentService, 'findById').mockReturnValueOnce(__existing_enrollment);
                 jest.spyOn<any, any>(enrollmentService, '_updatePassenger').mockReturnValueOnce(undefined);
@@ -897,8 +886,8 @@ describe('EnrollmentService', () => {
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
             //     const __given_user = new User();
-            //     __given_user.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
-            //     __given_user.username = 'username';
+            //     __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+            //     
             //
             //     const __existing_enrollment = new Enrollment();
             //     __existing_enrollment.id = __given_enrollment_id;
@@ -909,7 +898,7 @@ describe('EnrollmentService', () => {
             //     __existing_enrollment.creator = __given_user;
             //     __existing_enrollment.appointment = new Appointment();
             //     __existing_enrollment.appointment.driverAddition = true;
-            //     __existing_enrollment.appointment.creatorId = __given_user.id;
+            //     __existing_enrollment.appointment.creatorId = __given_user.sub;
             //
             //     jest.spyOn<any, any>(enrollmentService, 'findById').mockReturnValueOnce(__existing_enrollment);
             //     // jest.spyOn<any, any>(enrollmentService, '_updatePassenger').mockReturnValueOnce(__given_enrollment_change_data.passenger);
@@ -933,7 +922,7 @@ describe('EnrollmentService', () => {
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
             //     const __given_user = new User();
-            //     __given_user.username = 'username';
+            //     
             //
             //     const __existing_enrollment = new Enrollment();
             //     __existing_enrollment.id = __given_enrollment_id;
@@ -970,8 +959,7 @@ describe('EnrollmentService', () => {
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_user = new User();
-                __given_user.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
-                __given_user.username = 'username';
+                __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
@@ -979,7 +967,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.additions = [__existing_addition];
                 __existing_enrollment.appointment = new Appointment();
                 __existing_enrollment.appointment.additions = [__existing_addition];
-                __existing_enrollment.appointment.creatorId = __given_user.id;
+                __existing_enrollment.appointment.creatorId = __given_user.sub;
 
                 jest.spyOn<any, any>(enrollmentService, 'findById').mockReturnValueOnce(__existing_enrollment);
                 jest.spyOn(enrollmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
@@ -1000,8 +988,8 @@ describe('EnrollmentService', () => {
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
             //     const __given_user = new User();
-            //     __given_user.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
-            //     __given_user.username = 'username';
+            //     __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
+            //     
             //     __given_user.name = 'name';
             //
             //     const __existing_enrollment = new Enrollment();
@@ -1009,7 +997,7 @@ describe('EnrollmentService', () => {
             //     __existing_enrollment.name = 'name';
             //     __existing_enrollment.creator = __given_user;
             //     __existing_enrollment.appointment = new Appointment();
-            //     __existing_enrollment.appointment.creatorId = __given_user.id;
+            //     __existing_enrollment.appointment.creatorId = __given_user.sub;
             //
             //     jest.spyOn<any, any>(enrollmentService, 'findById').mockReturnValueOnce(__existing_enrollment);
             //     jest.spyOn(enrollmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
@@ -1039,8 +1027,7 @@ describe('EnrollmentService', () => {
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_user = new User();
-                __given_user.id = '909f67be-c59d-48c1-a85a-2efbffa5e78d';
-                __given_user.username = 'username';
+                __given_user.sub = '909f67be-c59d-48c1-a85a-2efbffa5e78d';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
@@ -1060,19 +1047,17 @@ describe('EnrollmentService', () => {
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_user = new User();
-                __given_user.id = '909f67be-c59d-48c1-a85a-2efbffa5e78d';
-                __given_user.username = 'username';
+                __given_user.sub = '909f67be-c59d-48c1-a85a-2efbffa5e78d';
 
                 const __existing_user = new User();
-                __existing_user.id = '9a2de186-f86c-4a2e-b589-f4fd3ced6152';
-                __existing_user.username = 'creator';
+                __existing_user.sub = '9a2de186-f86c-4a2e-b589-f4fd3ced6152';
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
                 __existing_enrollment.name = 'name';
                 __existing_enrollment.creator = __existing_user;
                 __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.creatorId = __existing_user.id;
+                __existing_enrollment.appointment.creatorId = __existing_user.sub;
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
 
@@ -1094,7 +1079,7 @@ describe('EnrollmentService', () => {
             //         };
             //         const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
             //         const __given_user = new User();
-            //         __given_user.username = 'username';
+            //         
             //
             //         const __existing_enrollment = new Enrollment();
             //         __existing_enrollment.id = __given_enrollment_id;
@@ -1129,7 +1114,7 @@ describe('EnrollmentService', () => {
             //         };
             //         const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
             //         const __given_user = new User();
-            //         __given_user.username = 'username';
+            //         
             //
             //         const __existing_enrollment = new Enrollment();
             //         __existing_enrollment.id = __given_enrollment_id;
@@ -1176,7 +1161,7 @@ describe('EnrollmentService', () => {
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
             //     const __given_user = new User();
-            //     __given_user.username = 'username';
+            //     
             //
             //     const __existing_enrollment = new Enrollment();
             //     __existing_enrollment.id = __given_enrollment_id;
@@ -1211,15 +1196,14 @@ describe('EnrollmentService', () => {
             const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
             const __given_token = '';
             const __given_user = new User();
-            __given_user.id = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
-            __given_user.username = 'username';
+            __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
             const __existing_enrollment = new Enrollment();
             __existing_enrollment.id = __given_enrollment_id;
             __existing_enrollment.name = 'name';
             __existing_enrollment.creator = __given_user;
             __existing_enrollment.appointment = new Appointment();
-            __existing_enrollment.appointment.creatorId = __given_user.id;
+            __existing_enrollment.appointment.creatorId = __given_user.sub;
 
             jest.spyOn<any, any>(enrollmentService, 'findById').mockReturnValueOnce(__existing_enrollment);
             jest.spyOn(enrollmentRepositoryMock, 'remove').mockImplementationOnce((val) => val);
@@ -1236,7 +1220,6 @@ describe('EnrollmentService', () => {
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_token = '';
                 const __given_user = new User();
-                __given_user.username = 'username';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
@@ -1254,19 +1237,17 @@ describe('EnrollmentService', () => {
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_token = '';
                 const __given_user = new User();
-                __given_user.id = '909f67be-c59d-48c1-a85a-2efbffa5e78d';
-                __given_user.username = 'username';
+                __given_user.sub = '909f67be-c59d-48c1-a85a-2efbffa5e78d';
 
                 const __existing_user = new User();
-                __existing_user.id = '9a2de186-f86c-4a2e-b589-f4fd3ced6152';
-                __existing_user.username = 'creator';
+                __existing_user.sub = '9a2de186-f86c-4a2e-b589-f4fd3ced6152';
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
                 __existing_enrollment.name = 'name';
                 __existing_enrollment.creator = __existing_user;
                 __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.creatorId = __existing_user.id;
+                __existing_enrollment.appointment.creatorId = __existing_user.sub;
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
 
@@ -1286,7 +1267,7 @@ describe('EnrollmentService', () => {
             it('* by user (enrollment creator)', async () => {
                 const __given_enrollment_id = 'c93118a9-d6cd-412f-9990-fe56c28cf70a';
                 const __given_user = new User();
-                __given_user.id = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
+                __given_user.sub = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
                 const __given_token = '';
 
                 const __existing_appointment = new Appointment();
@@ -1295,7 +1276,7 @@ describe('EnrollmentService', () => {
 
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.id = __given_enrollment_id;
-                __existing_enrollment.creatorId = __given_user.id;
+                __existing_enrollment.creatorId = __given_user.sub;
                 __existing_enrollment.appointment = __existing_appointment;
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);
@@ -1307,18 +1288,17 @@ describe('EnrollmentService', () => {
             it('* by token', async () => {
                 const __given_enrollment_id = 'c93118a9-d6cd-412f-9990-fe56c28cf70a';
                 const __given_user = new User();
-                __given_user.id = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
-                __given_user.username = 'username';
+                __given_user.sub = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
+
                 const __given_token = crypto.createHash('sha256')
                     .update(__given_enrollment_id + process.env.SALT_ENROLLMENT)
                     .digest('hex');
 
                 const __existing_appointment_creator = new User();
-                __existing_appointment_creator.id = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
-                __existing_appointment_creator.username = 'creator';
+                __existing_appointment_creator.sub = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
 
                 const __existing_appointment = new Appointment();
-                __existing_appointment.creatorId = __existing_appointment_creator.id;
+                __existing_appointment.creatorId = __existing_appointment_creator.sub;
                 __existing_appointment._administrators = [];
 
                 const __existing_enrollment = new Enrollment();
@@ -1337,7 +1317,7 @@ describe('EnrollmentService', () => {
             it('* enrollment not found', async (done) => {
                 const __given_enrollment_id = 'c93118a9-d6cd-412f-9990-fe56c28cf70a';
                 const __given_user = new User();
-                __given_user.id = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
+                __given_user.sub = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
                 const __given_token = '';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
@@ -1355,16 +1335,15 @@ describe('EnrollmentService', () => {
             it('* missing permissions', async (done) => {
                 const __given_enrollment_id = 'c93118a9-d6cd-412f-9990-fe56c28cf70a';
                 const __given_user = new User();
-                __given_user.id = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
-                __given_user.username = 'username';
+                __given_user.sub = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
+
                 const __given_token = '';
 
                 const __existing_appointment_creator = new User();
-                __existing_appointment_creator.id = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
-                __existing_appointment_creator.username = 'creator';
+                __existing_appointment_creator.sub = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
 
                 const __existing_appointment = new Appointment();
-                __existing_appointment.creatorId = __existing_appointment_creator.id;
+                __existing_appointment.creatorId = __existing_appointment_creator.sub;
                 __existing_appointment._administrators = [];
 
                 const __existing_enrollment = new Enrollment();

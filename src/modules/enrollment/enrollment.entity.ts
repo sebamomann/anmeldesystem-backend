@@ -112,13 +112,15 @@ export class Enrollment {
      * @param token             Authorization token to validate
      */
     public hasPermissionToManipulateByToken(token: string) {
+        if (!token) {
+            return false;
+        }
+
         const validationToken = crypto.createHash('sha256')
             .update(this.id + process.env.SALT_ENROLLMENT)
             .digest('hex');
 
-        const tokenMatchesValidation = (token.replace(' ', '+') === validationToken);
-
-        return token && tokenMatchesValidation;
+        return (token.replace(' ', '+') === validationToken);
     }
 
     /**
@@ -129,7 +131,7 @@ export class Enrollment {
      *  <li> Allowed because {@link User} is admin of {@link Appointment}</li>
      * </ol>
      *
-     * @param user              {@link User} to check permission for
+     * @param user          {@link User} to check permission for
      */
     public hasPermissionToManipulateByIdentity(user: User) {
         let isAllowedByAppointmentPermission = this.appointment.isCreatorOrAdministrator(user);
@@ -141,7 +143,7 @@ export class Enrollment {
     /**
      * Check if provided {@link User} is the creator if the enrollment
      *
-     * @param user               {@link User} to check for being creator
+     * @param user          {@link User} to check for being creator
      */
     private isCreator(user: User) {
         return this.creatorId && this.creatorId === user.sub;
