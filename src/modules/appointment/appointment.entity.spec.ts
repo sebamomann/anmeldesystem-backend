@@ -1,6 +1,7 @@
 import {User} from '../user/user.model';
 import {Appointment} from './appointment.entity';
 import {instance, mock, spy, verify, when} from 'ts-mockito';
+import {Administrator} from './administrator.entity';
 
 describe('* Appointment entity', () => {
     describe('* check permission', () => {
@@ -110,7 +111,18 @@ describe('* Appointment entity', () => {
                 mockedUserInstance.sub = 'ab875c28-d229-44f9-ae1c-c35144132d2f';
 
                 const appointment = new Appointment();
-                appointment._administrators = [mockedUserInstance.sub, 'any-other-id'];
+
+                const mockedAdministrator = mock(Administrator);
+                const mockedAdministratorInstance = instance(mockedAdministrator);
+                mockedAdministratorInstance.userId = mockedUserInstance.sub;
+                mockedAdministratorInstance.appointment = appointment;
+
+                const mockedAdministrator_2 = mock(Administrator);
+                const mockedAdministratorInstance_2 = instance(mockedAdministrator_2);
+                mockedAdministratorInstance_2.userId = 'any-other-id';
+                mockedAdministratorInstance_2.appointment = appointment;
+
+                appointment._administrators = [mockedAdministratorInstance, mockedAdministratorInstance_2];
 
                 const actual = appointment.isAdministrator(mockedUserInstance);
 
@@ -118,7 +130,7 @@ describe('* Appointment entity', () => {
             });
 
             describe('* invalid should return false', () => {
-                it('* different creator', () => {
+                it('* not in admin list', () => {
                     const mockedUser = mock(User);
                     const mockedUserInstance = instance(mockedUser);
                     mockedUserInstance.sub = 'ab875c28-d229-44f9-ae1c-c35144132d2f';
@@ -128,7 +140,13 @@ describe('* Appointment entity', () => {
                     mockedUserInstance_admin.sub = 'a776c0f4-89e4-436f-84c3-8e1f44306c31';
 
                     const appointment = new Appointment();
-                    appointment._administrators = [mockedUserInstance_admin.sub];
+
+                    const mockedAdministrator = mock(Administrator);
+                    const mockedAdministratorInstance = instance(mockedAdministrator);
+                    mockedAdministratorInstance.userId = "any-other-id";
+                    mockedAdministratorInstance.appointment = appointment;
+
+                    appointment._administrators = [mockedAdministratorInstance];
 
                     const actual = appointment.isAdministrator(mockedUserInstance);
 
@@ -141,7 +159,18 @@ describe('* Appointment entity', () => {
                     mockedUserInstance_admin.sub = 'ab875c28-d229-44f9-ae1c-c35144132d2f';
 
                     const appointment = new Appointment();
-                    appointment._administrators = [mockedUserInstance_admin.sub, 'any-other-id'];
+
+                    const mockedAdministrator = mock(Administrator);
+                    const mockedAdministratorInstance = instance(mockedAdministrator);
+                    mockedAdministratorInstance.userId = mockedUserInstance_admin.sub;
+                    mockedAdministratorInstance.appointment = appointment;
+
+                    const mockedAdministrator_2 = mock(Administrator);
+                    const mockedAdministratorInstance_2 = instance(mockedAdministrator_2);
+                    mockedAdministratorInstance_2.userId = 'any-other-id';
+                    mockedAdministratorInstance_2.appointment = appointment;
+
+                    appointment._administrators = [mockedAdministratorInstance, mockedAdministratorInstance_2];
 
                     const actual = appointment.isAdministrator(undefined);
 

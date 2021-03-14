@@ -6,6 +6,8 @@ import {Exclude} from 'class-transformer';
 import {PushSubscription} from '../push/pushSubscription.entity';
 import {IUserMinified} from '../user/IUserMinified';
 import {User} from '../user/user.model';
+import {Administrator} from './administrator.entity';
+import {Pinner} from './pinner.entity';
 
 @Entity()
 export class Appointment {
@@ -53,11 +55,13 @@ export class Appointment {
     @Column({default: false})
     driverAddition: boolean;
 
-    @Column("simple-array")
-    _administrators: string[];
+    @OneToMany(type => Administrator,
+        administrator => administrator.appointment)
+    _administrators: Administrator[];
 
-    @Column("simple-array")
-    pinners: string[];
+    @OneToMany(type => Pinner,
+        pinner => pinner.appointment)
+    pinners: Administrator[];
 
     @OneToMany(type => File,
         file => file.appointment,
@@ -126,7 +130,7 @@ export class Appointment {
         }
 
         return this._administrators?.some(
-            sAdministrator => sAdministrator === user.sub
+            sAdministrator => sAdministrator.userId === user.sub
         );
     }
 }
