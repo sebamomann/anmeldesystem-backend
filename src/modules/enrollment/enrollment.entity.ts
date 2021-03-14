@@ -53,6 +53,7 @@ export class Enrollment {
         eager: true,
         onDelete: 'CASCADE'
     })
+
     @JoinTable({name: 'enrollment_addition'})
     additions: Addition[];
 
@@ -85,7 +86,6 @@ export class Enrollment {
     editKey: string;
     editMail?: string;
     token?: string;
-    createdByUser: boolean;
 
     creator: any; // TODO MIN OBJECT
 

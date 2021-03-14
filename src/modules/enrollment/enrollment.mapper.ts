@@ -33,6 +33,10 @@ export class EnrollmentMapper {
         }))
         (_enrollment);
 
+        enrollment.additions.map((fAddition) => {
+            delete fAddition.id;
+        });
+
         enrollment.createdByUser = _enrollment.creator !== null
             && _enrollment.creator !== undefined;
 
@@ -56,12 +60,12 @@ export class EnrollmentMapper {
     }
 
     public async stripCreator(enrollment: Enrollment): Promise<void> {
-        enrollment.createdByUser = enrollment.creatorId != null;
-
-        if (enrollment.createdByUser) {
+        if (enrollment.creatorId != null) {
             const creator: KeycloakUser = await this.userService.findById(enrollment.creatorId);
             enrollment.creator = UserUtil.stripUserMin(creator);
             delete enrollment.name;
         }
+
+        delete enrollment.creatorId;
     }
 }

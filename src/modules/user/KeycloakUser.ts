@@ -1,5 +1,3 @@
-import {JWT_User} from './user.model';
-
 export class KeycloakUser {
     public id: string;
     public createdTimestamp: number;
@@ -20,9 +18,4 @@ export class KeycloakUser {
         impersonate: boolean,
         manage: boolean
     };
-
-    public convertToUser() {
-        const user = new JWT_User();
-        user.sub = '';
-    }
 }

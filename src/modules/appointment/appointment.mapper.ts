@@ -99,6 +99,10 @@ export class AppointmentMapper {
         }))
         (_appointment);
 
+        appointment.additions.map((fAddition) => {
+            delete fAddition.id;
+        });
+
         if (_appointment.isCreator(_user)) {
             creatorObject = (({
                                   iat,
@@ -122,6 +126,10 @@ export class AppointmentMapper {
             const __enrollments = AppointmentUtil
                 .filterPermittedEnrollments(permissions, _appointment.enrollments);
             enrollmentsObject = {enrollments: __enrollments};
+        }
+
+        if (appointment.maxEnrollments === null) {
+            delete appointment.maxEnrollments;
         }
 
         appointment = Object.assign(appointment, creatorObject);

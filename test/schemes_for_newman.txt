@@ -1,0 +1,175 @@
+schema_appointment
+
+{
+	"type": "object",
+	"properties": {
+		"reference": { 
+			"type": "array" ,
+			"items": { "type": "string" }
+		},
+		"id": { "type": "string" },
+		"title": { "type": "string" },
+		"description": { "type": "string" },
+		"link": { "type": "string" },
+		"location": { "type": "string" },
+		"date": { 
+			"type": "string",
+			"format": "date-time"    
+		},
+		"deadline": { 
+			"type": "string",
+			"format": "date-time"    
+		},
+		"creator": ##REPLACE_SCHEMA(schema_user_minified)##,
+		"maxEnrollments": { "type": "number" },
+		"hidden": { "type": "boolean" },
+		"driverAddition": { "type": "boolean" },
+		"additions": { 
+			"type": "array" ,
+			"items": ##REPLACE_SCHEMA(schema_addition)##
+		},
+		"files": { 
+			"type": "array" ,
+			"items": ##REPLACE_SCHEMA(schema_file)##
+		},
+		"administrators": { 
+			"type": "array" ,
+			"items": ##REPLACE_SCHEMA(schema_user_minified)##
+		},
+		"enrollments": { 
+			"type": "array" ,
+			"items": ##REPLACE_SCHEMA(schema_enrollment)##
+		},
+		"iat": { 
+			"type": "string",
+			"format": "date-time"    
+		},
+		"lud": { 
+			"type": "string",
+			"format": "date-time"    
+		},
+	},
+	"required": [ "id", "title", "description", "link", "location", "date", "deadline", "hidden", "driverAddition", "creator" ],
+	"additionalProperties": false
+}
+
+
+schema_user_minified
+
+{ 
+	"type": "object",
+	"properties": {
+		"name": { 
+			"type": "string" 
+		},
+		"username": { 
+			"type": "string"
+		}
+	},
+	"required": [ "name", "username" ],
+	"additionalProperties": false
+}
+
+
+schema_addition
+
+{ 
+	"type": "object",
+	"properties": {
+		"name": {
+			"type": "string"
+		},
+		"order": { 
+			"type": "number"
+		}
+	},
+	"required": [ "id", "name", "order" ],
+	"additionalProperties": false
+}
+
+
+schema_file
+
+{ 
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "string"
+		},
+		"name": { 
+			"type": "string"
+		}
+	},
+	"required": [ "id", "name" ],
+	"additionalProperties": false
+}
+
+
+schema_enrollment
+
+{ 
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "string"
+		},
+		"name": { 
+			"type": "string"
+		},
+		"comment": { 
+			"type": "string"
+		},
+		"driver": { 
+			"type": ##REPLACE_SCHEMA(schema_driver)##
+		},
+		"passenger": { 
+			"type": ##REPLACE_SCHEMA(schema_passenger)##
+		},
+		"additions": { 
+			"type": "array",
+			"items": ##REPLACE_SCHEMA(schema_addition)##
+		},
+		"creator": { 
+			"type": "array",
+			"items": ##REPLACE_SCHEMA(schema_user_minified)##
+		},
+		"iat": { 
+			"type": "string",
+			"format": "date-time"    
+		}
+	},
+	"required": [ "id", "iat"],
+	"additionalProperties": false
+}
+
+schema_driver
+
+{ 
+	"type": "object",
+	"properties": {
+		"service": { 
+			"type": "number"
+		},
+		"seats": { 
+			"type": "number"
+		}
+	},
+	"required": [ "service", "seats"],
+	"additionalProperties": false
+}
+
+
+schema_passenger
+
+{ 
+	"type": "object",
+	"properties": {
+		"requirement": { 
+			"type": "number"
+		}
+	},
+	"required": [ "requirement"],
+	"additionalProperties": false
+}
+
+
