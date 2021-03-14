@@ -354,7 +354,7 @@ export class AppointmentService {
      * @throws See {@link findByLink} for reference
      * @throws InsufficientPermissionsException if user is not the owner
      */
-    public async removeAdministrator(_user: User, link: string, username: string): Promise<Appointment> {
+    public async removeAdministrator(_user: User, link: string, username: string): Promise<void> {
         const appointment = await this.findByLink(link);
 
         if (!appointment.isCreator(_user)) {
@@ -369,7 +369,9 @@ export class AppointmentService {
             }
         );
 
-        return await this.appointmentRepository.save(appointment);
+        await this.appointmentRepository.save(appointment);
+
+        return;
     }
 
     /**
