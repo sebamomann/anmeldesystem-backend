@@ -10,7 +10,7 @@ import {DuplicateValueException} from '../../exceptions/DuplicateValueException'
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 import {AuthModule} from '../../auth/auth.module';
 
 jest.mock('./appointment.service');
@@ -47,7 +47,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'get')
                     .mockImplementation(async (): Promise<Appointment> => Promise.resolve(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockIsSlimToSatisfyParameter = 'true';
                 const mockPermissionsToSatisfyParameter = 'ObjectOfAllQueryParameters';
                 const mockLinkToSatisfyParameter = 'mylink';
@@ -74,7 +74,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'get')
                     .mockImplementation(async (): Promise<Appointment> => Promise.resolve(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockIsSlimToSatisfyParameter = 'true';
                 const mockPermissionsToSatisfyParameter = 'ObjectOfAllQueryParameters';
                 const mockLinkToSatisfyParameter = 'mylink';
@@ -102,7 +102,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'get')
                     .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockIsSlimToSatisfyParameter = 'true';
                 const mockPermissionsToSatisfyParameter = 'ObjectOfAllQueryParameters';
                 const mockLinkToSatisfyParameter = 'mylink';
@@ -130,7 +130,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'get')
                     .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockIsSlimToSatisfyParameter = 'true';
                 const mockPermissionsToSatisfyParameter = 'ObjectOfAllQueryParameters';
                 const mockLinkToSatisfyParameter = 'mylink';
@@ -165,7 +165,7 @@ describe('Appointment Controller', () => {
 
                     const res = mockResponse();
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockQueryParameterToSatisfyParameter = {};
                     const mockIsSlimToSatisfyParameter = 'true';
 
@@ -187,7 +187,7 @@ describe('Appointment Controller', () => {
 
                     const res = mockResponse();
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockQueryParameterToSatisfyParameter = {};
                     const mockIsSlimToSatisfyParameter = 'true';
 
@@ -213,7 +213,7 @@ describe('Appointment Controller', () => {
 
                     const res = mockResponse();
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockQueryParameterToSatisfyParameter = {};
                     const mockIsSlimToSatisfyParameter = 'true';
                     const mockBeforeToSatisfyParameter = '01/09/2020 01:24:26';
@@ -238,7 +238,7 @@ describe('Appointment Controller', () => {
 
                     const res = mockResponse();
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockQueryParameterToSatisfyParameter = {};
                     const mockIsSlimToSatisfyParameter = 'true';
                     const mockBeforeToSatisfyParameter = '01/09/2020 01:24:26';
@@ -265,7 +265,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'create')
                     .mockImplementation(async (): Promise<Appointment> => Promise.resolve(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockAppointmentToSatisfyParameter = new Appointment();
                 const res = mockResponse();
 
@@ -286,7 +286,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'create')
                     .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockAppointmentToSatisfyParameter = new Appointment();
                 const res = mockResponse();
 
@@ -305,7 +305,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'create')
                     .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockAppointmentToSatisfyParameter = new Appointment();
                 const res = mockResponse();
 
@@ -324,7 +324,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'create')
                     .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockAppointmentToSatisfyParameter = new Appointment();
                 const res = mockResponse();
 
@@ -347,7 +347,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'update')
                     .mockImplementation(async (): Promise<Appointment> => Promise.resolve(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const mockAppointmentToSatisfyParameter = new Appointment();
                 const res = mockResponse();
@@ -368,7 +368,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'update')
                     .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const mockAppointmentToSatisfyParameter = new Appointment();
                 const res = mockResponse();
@@ -388,7 +388,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'update')
                     .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const mockAppointmentToSatisfyParameter = new Appointment();
                 const res = mockResponse();
@@ -408,7 +408,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'update')
                     .mockImplementation(async (): Promise<Appointment> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const mockAppointmentToSatisfyParameter = new Appointment();
                 const res = mockResponse();
@@ -432,7 +432,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'addAdministrator')
                         .mockImplementation(async (): Promise<void> => Promise.resolve());
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockUsernameToSatisfyParameter = 'username';
                     const res = mockResponse();
@@ -452,7 +452,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'addAdministrator')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockUsernameToSatisfyParameter = 'username';
                     const res = mockResponse();
@@ -473,7 +473,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'addAdministrator')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockUsernameToSatisfyParameter = 'username';
                     const res = mockResponse();
@@ -494,7 +494,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'addAdministrator')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockUsernameToSatisfyParameter = 'username';
                     const res = mockResponse();
@@ -517,7 +517,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'removeAdministrator')
                         .mockImplementation(async (): Promise<void> => Promise.resolve());
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockUsernameToSatisfyParameter = 'username';
                     const res = mockResponse();
@@ -536,7 +536,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'removeAdministrator')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockUsernameToSatisfyParameter = 'username';
                     const res = mockResponse();
@@ -555,7 +555,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'removeAdministrator')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockUsernameToSatisfyParameter = 'username';
                     const res = mockResponse();
@@ -574,7 +574,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'removeAdministrator')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockUsernameToSatisfyParameter = 'username';
                     const res = mockResponse();
@@ -595,7 +595,7 @@ describe('Appointment Controller', () => {
                         jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                             .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
 
-                        const mockUserToSatisfyParameter = new User();
+                        const mockUserToSatisfyParameter = new JWT_User();
                         const mockLinkToSatisfyParameter = 'linkOfAppointment';
                         const res = mockResponse();
 
@@ -613,7 +613,7 @@ describe('Appointment Controller', () => {
                         jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                             .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
-                        const mockUserToSatisfyParameter = new User();
+                        const mockUserToSatisfyParameter = new JWT_User();
                         const mockLinkToSatisfyParameter = 'linkOfAppointment';
                         const res = mockResponse();
 
@@ -632,7 +632,7 @@ describe('Appointment Controller', () => {
                         jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                             .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
-                        const mockUserToSatisfyParameter = new User();
+                        const mockUserToSatisfyParameter = new JWT_User();
                         const mockLinkToSatisfyParameter = 'linkOfAppointment';
                         const res = mockResponse();
 
@@ -655,7 +655,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                     .mockImplementation(async (): Promise<boolean> => Promise.resolve(true));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const res = mockResponse();
 
@@ -671,7 +671,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                     .mockImplementation(async (): Promise<boolean> => Promise.resolve(false));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const res = mockResponse();
 
@@ -690,7 +690,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                     .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const res = mockResponse();
 
@@ -709,7 +709,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'isCreatorOrAdministrator')
                     .mockImplementation(async (): Promise<boolean> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const res = mockResponse();
 
@@ -731,7 +731,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'addFile')
                         .mockImplementation(async (): Promise<void> => Promise.resolve());
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockDataToSatisfyParameter = {name: 'mycoolfile.pdf', data: 'dummyData'};
                     const res = mockResponse();
@@ -751,7 +751,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'addFile')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockDataToSatisfyParameter = {name: 'mycoolfile.pdf', data: 'dummyData'};
                     const res = mockResponse();
@@ -772,7 +772,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'addFile')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockDataToSatisfyParameter = {name: 'mycoolfile.pdf', data: 'dummyData'};
                     const res = mockResponse();
@@ -793,7 +793,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'addFile')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockDataToSatisfyParameter = {name: 'mycoolfile.pdf', data: 'dummyData'};
                     const res = mockResponse();
@@ -816,7 +816,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'removeFile')
                         .mockImplementation(async (): Promise<void> => Promise.resolve());
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockIdToSatisfyParameter = 'id-of-file';
                     const res = mockResponse();
@@ -836,7 +836,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'removeFile')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockIdToSatisfyParameter = 'id-of-file';
                     const res = mockResponse();
@@ -857,7 +857,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'removeFile')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockIdToSatisfyParameter = 'id-of-file';
                     const res = mockResponse();
@@ -878,7 +878,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'removeFile')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockIdToSatisfyParameter = 'id-of-file';
                     const res = mockResponse();
@@ -899,7 +899,7 @@ describe('Appointment Controller', () => {
                     jest.spyOn(appointmentService, 'removeFile')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                    const mockUserToSatisfyParameter = new User();
+                    const mockUserToSatisfyParameter = new JWT_User();
                     const mockLinkToSatisfyParameter = 'linkOfAppointment';
                     const mockIdToSatisfyParameter = 'id-of-file';
                     const res = mockResponse();
@@ -923,7 +923,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'togglePinningAppointment')
                     .mockImplementation(async (): Promise<void> => Promise.resolve());
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const res = mockResponse();
 
@@ -941,7 +941,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'togglePinningAppointment')
                     .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const res = mockResponse();
 
@@ -960,7 +960,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'togglePinningAppointment')
                     .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const res = mockResponse();
 
@@ -979,7 +979,7 @@ describe('Appointment Controller', () => {
                 jest.spyOn(appointmentService, 'togglePinningAppointment')
                     .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockLinkToSatisfyParameter = 'linkOfAppointment';
                 const res = mockResponse();
 

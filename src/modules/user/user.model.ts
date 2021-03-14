@@ -1,4 +1,4 @@
-export class User {
+export class JWT_User {
     sub: string;
     email_verified: boolean;
     name: string;

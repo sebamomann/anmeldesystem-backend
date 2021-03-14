@@ -1,10 +1,10 @@
 import {IUserMinified} from '../modules/user/IUserMinified';
-import {User} from '../modules/user/user.model';
+import {KeycloakUser} from '../modules/user/KeycloakUser';
 
 export class UserUtil {
-    public static stripUserMin(user: User): IUserMinified {
-        return (({name, preferred_username}) => ({
-            name, username: preferred_username,
+    public static stripUserMin(user: KeycloakUser): IUserMinified {
+        return (({firstName, lastName, username}) => ({
+            name: firstName + ' ' + lastName, username,
         }))
         (user);
     }

@@ -8,21 +8,21 @@ fixtures:
             activated: 1
     -   User:
             id: 9762a73d-f278-4b80-bce1-5cacbf995b0d
-            name: User Appointment Overview
+            name: JWT_User Appointment Overview
             username: user_appointment_overview
             password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
             mail: user_appointment_overview@example.com
             activated: 1
     -   User:
             id: 2b7df0f2-8a47-411c-baaf-99734c234727
-            name: User Appointment Overview Self
+            name: JWT_User Appointment Overview Self
             username: user_appointment_overview_self
             password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
             mail: user_appointment_overview_self@example.com
             activated: 1
     -   User:
             id: 32c4fb65-17e5-48e1-a6f4-3e891638bede
-            name: User Appointment Overview Creator
+            name: JWT_User Appointment Overview Creator
             username: user_appointment_overview_creator
             password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
             mail: user_appointment_overview_creator@example.com

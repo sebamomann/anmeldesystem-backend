@@ -1,7 +1,7 @@
 // import {Enrollment} from './enrollment.entity';
 // import {Appointment} from '../appointment/appointment.entity';
 // import {AppointmentMapper} from '../appointment/appointment.mapper';
-// import {User} from '../user/user.model';
+// import {JWT_User} from '../user/user.model';
 //
 describe('* enrolled by user', () => {
     it('* enrollment !created by any user should have attribute "isCreator: false"', async () => {
@@ -22,7 +22,7 @@ describe('* enrolled by user', () => {
     });
 //
 //     it('* enrollment created by user should have attribute "isCreator: true" and containing user information', async () => {
-//         const __existing_enrollment_creator = new User();
+//         const __existing_enrollment_creator = new JWT_User();
 //         __existing_enrollment_creator.sub = '96511a3c-cace-4a67-ad0c-436a37038c38';
 //         __existing_enrollment_creator.preferred_username = 'enrollment_creator';
 //         __existing_enrollment_creator.name = 'enrollment_creator_name';

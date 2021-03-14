@@ -1,4 +1,4 @@
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 import {Appointment} from './appointment.entity';
 import {instance, mock, spy, verify, when} from 'ts-mockito';
 import {Administrator} from './administrator.entity';
@@ -8,7 +8,7 @@ describe('* Appointment entity', () => {
         describe('* is creator or administrator', () => {
             describe('* valid permission should return true', () => {
                 it('* appointment creator', () => {
-                    const mockedUser = mock(User);
+                    const mockedUser = mock(JWT_User);
 
                     const appointment = new Appointment();
                     const mockedAppointmentSpy = spy(appointment);
@@ -24,7 +24,7 @@ describe('* Appointment entity', () => {
                 });
 
                 it('* appointment administrator', async () => {
-                    const mockedUser = mock(User);
+                    const mockedUser = mock(JWT_User);
 
                     const appointment = new Appointment();
                     const mockedAppointmentSpy = spy(appointment);
@@ -41,7 +41,7 @@ describe('* Appointment entity', () => {
             });
 
             it('* invalid permission should return false', () => {
-                const mockedUser = mock(User);
+                const mockedUser = mock(JWT_User);
 
                 const appointment = new Appointment();
                 const mockedAppointmentSpy = spy(appointment);
@@ -59,7 +59,7 @@ describe('* Appointment entity', () => {
 
         describe('* is creator', () => {
             it('* valid should return true', () => {
-                const mockedUser = mock(User);
+                const mockedUser = mock(JWT_User);
                 const mockedUserInstance = instance(mockedUser);
                 mockedUserInstance.sub = 'ab875c28-d229-44f9-ae1c-c35144132d2f';
 
@@ -73,11 +73,11 @@ describe('* Appointment entity', () => {
 
             describe('* invalid should return false', () => {
                 it('* different creator', () => {
-                    const mockedUser = mock(User);
+                    const mockedUser = mock(JWT_User);
                     const mockedUserInstance = instance(mockedUser);
                     mockedUserInstance.sub = 'ab875c28-d229-44f9-ae1c-c35144132d2f';
 
-                    const mockedUser_appointment_creator = mock(User);
+                    const mockedUser_appointment_creator = mock(JWT_User);
                     const mockedUserInstance_appointment_creator = instance(mockedUser_appointment_creator);
                     mockedUserInstance_appointment_creator.sub = 'e31d3c8d-306b-4fad-850b-3d7b409bebc7';
 
@@ -90,7 +90,7 @@ describe('* Appointment entity', () => {
                 });
 
                 it('* undefined', () => {
-                    const mockedUser_appointment_creator = mock(User);
+                    const mockedUser_appointment_creator = mock(JWT_User);
                     const mockedUserInstance_appointment_creator = instance(mockedUser_appointment_creator);
                     mockedUserInstance_appointment_creator.sub = 'e31d3c8d-306b-4fad-850b-3d7b409bebc7';
 
@@ -106,7 +106,7 @@ describe('* Appointment entity', () => {
 
         describe('* is administrator', () => {
             it('* valid should return true', () => {
-                const mockedUser = mock(User);
+                const mockedUser = mock(JWT_User);
                 const mockedUserInstance = instance(mockedUser);
                 mockedUserInstance.sub = 'ab875c28-d229-44f9-ae1c-c35144132d2f';
 
@@ -131,11 +131,11 @@ describe('* Appointment entity', () => {
 
             describe('* invalid should return false', () => {
                 it('* not in admin list', () => {
-                    const mockedUser = mock(User);
+                    const mockedUser = mock(JWT_User);
                     const mockedUserInstance = instance(mockedUser);
                     mockedUserInstance.sub = 'ab875c28-d229-44f9-ae1c-c35144132d2f';
 
-                    const mockedUser_admin = mock(User);
+                    const mockedUser_admin = mock(JWT_User);
                     const mockedUserInstance_admin = instance(mockedUser_admin);
                     mockedUserInstance_admin.sub = 'a776c0f4-89e4-436f-84c3-8e1f44306c31';
 
@@ -154,7 +154,7 @@ describe('* Appointment entity', () => {
                 });
 
                 it('* undefined', () => {
-                    const mockedUser_admin = mock(User);
+                    const mockedUser_admin = mock(JWT_User);
                     const mockedUserInstance_admin = instance(mockedUser_admin);
                     mockedUserInstance_admin.sub = 'ab875c28-d229-44f9-ae1c-c35144132d2f';
 

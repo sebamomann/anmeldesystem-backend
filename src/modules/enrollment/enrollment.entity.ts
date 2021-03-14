@@ -18,7 +18,7 @@ import {Passenger} from './passenger/passenger.entity';
 import {Comment} from './comment/comment.entity';
 import {Exclude} from 'class-transformer';
 import {Mail} from './mail/mail.entity';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 
 const crypto = require('crypto');
 
@@ -90,16 +90,16 @@ export class Enrollment {
     creator: any; // TODO MIN OBJECT
 
     /**
-     * Check if {@link User} is allowed to manipulate this object.<br/>
+     * Check if {@link JWT_User} is allowed to manipulate this object.<br/>
      * <ol>
-     *  <li> Allowed because {@link User} is authenticated and has permission</li>
+     *  <li> Allowed because {@link JWT_User} is authenticated and has permission</li>
      *  <li> Allowed because authorization token for {@link Enrollment} is provided</li>
      * </ol>
      *
-     * @param user              {@link User} to check permission for (might be undefined -> token provided)
-     * @param token             Authorization token (might be undefined -> authenticated {@link User})
+     * @param user              {@link JWT_User} to check permission for (might be undefined -> token provided)
+     * @param token             Authorization token (might be undefined -> authenticated {@link JWT_User})
      */
-    public hasPermissionToManipulate(user: User, token: string) {
+    public hasPermissionToManipulate(user: JWT_User, token: string) {
         let allowedByIdentity = this.hasPermissionToManipulateByIdentity(user);
         let allowedByToken = this.hasPermissionToManipulateByToken(token);
 
@@ -124,16 +124,16 @@ export class Enrollment {
     }
 
     /**
-     * Check if passed {@link User} is allowed to manipulate this object<br/>
+     * Check if passed {@link JWT_User} is allowed to manipulate this object<br/>
      * <ol>
-     *  <li> Allowed because {@link User} is creator</li>
-     *  <li> Allowed because {@link User} is creator of {@link Appointment}</li>
-     *  <li> Allowed because {@link User} is admin of {@link Appointment}</li>
+     *  <li> Allowed because {@link JWT_User} is creator</li>
+     *  <li> Allowed because {@link JWT_User} is creator of {@link Appointment}</li>
+     *  <li> Allowed because {@link JWT_User} is admin of {@link Appointment}</li>
      * </ol>
      *
-     * @param user          {@link User} to check permission for
+     * @param user          {@link JWT_User} to check permission for
      */
-    public hasPermissionToManipulateByIdentity(user: User) {
+    public hasPermissionToManipulateByIdentity(user: JWT_User) {
         let isAllowedByAppointmentPermission = this.appointment.isCreatorOrAdministrator(user);
         let isCreatorOfEnrollment = this.isCreator(user);
 
@@ -141,11 +141,11 @@ export class Enrollment {
     }
 
     /**
-     * Check if provided {@link User} is the creator if the enrollment
+     * Check if provided {@link JWT_User} is the creator if the enrollment
      *
-     * @param user          {@link User} to check for being creator
+     * @param user          {@link JWT_User} to check for being creator
      */
-    private isCreator(user: User) {
+    private isCreator(user: JWT_User) {
         return this.creatorId && this.creatorId === user.sub;
     }
 }

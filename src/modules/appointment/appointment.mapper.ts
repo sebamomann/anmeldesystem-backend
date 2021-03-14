@@ -4,8 +4,9 @@ import {AppointmentUtil} from './appointment.util';
 import {UserUtil} from '../../util/user.util';
 import {EnrollmentMapper} from '../enrollment/enrollment.mapper';
 import {IUserMinified} from '../user/IUserMinified';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 import {UserService} from '../user/user.service';
+import {KeycloakUser} from '../user/KeycloakUser';
 
 export class AppointmentMapper {
     constructor(private readonly userService: UserService) {
@@ -26,8 +27,8 @@ export class AppointmentMapper {
      * TODO
      * mix with permission
      *
-     * Basic mapping function. Used to strip {@link User} information.
-     * {@link User} information should just contain name and username. Other fields of {@link User} are
+     * Basic mapping function. Used to strip {@link JWT_User} information.
+     * {@link JWT_User} information should just contain name and username. Other fields of {@link JWT_User} are
      * not in interesting for requesting person.
      *
      * @param appointment   {@link Appointment} that should be manipulated
@@ -60,7 +61,7 @@ export class AppointmentMapper {
         return appointment;
     }
 
-    public async permission(_appointment: Appointment, _user: User, permissions: any): Promise<any> {
+    public async permission(_appointment: Appointment, _user: JWT_User, permissions: any): Promise<any> {
         let appointment: any;
         let creatorObject = {};
         let enrollmentsObject;
@@ -127,7 +128,7 @@ export class AppointmentMapper {
         appointment = Object.assign(appointment, enrollmentsObject);
 
         // TODO mapping user stripmin
-        const creator: User = await this.userService.findById(_appointment.creatorId);
+        const creator: KeycloakUser = await this.userService.findById(_appointment.creatorId);
         const mUser: IUserMinified = UserUtil.stripUserMin(creator);
 
         const obj = {
@@ -140,6 +141,23 @@ export class AppointmentMapper {
         appointment = Object.assign(appointment, obj);
 
         return appointment;
+    }
+
+    /**
+     * Create a object only contained the important creation values of the passed {@link Appointment}. <br/>
+     * Those values are id and link.
+     *
+     * @param appointment       {@link Appointment} to minify
+     */
+    create(appointment: Appointment): { id: string, link: string } {
+        return (({
+                     id,
+                     link
+                 }) => ({
+            id,
+            link,
+        }))
+        (appointment);
     }
 
     /**
@@ -175,7 +193,7 @@ export class AppointmentMapper {
 
         if (appointment._administrators) {
             for (const mAdmin of appointment._administrators) {
-                const user: User = await this.userService.findById(mAdmin.userId); // TODO admin extends class with this functionality
+                const user: KeycloakUser = await this.userService.findById(mAdmin.userId); // TODO admin extends class with this functionality
 
                 appointment.administrators.push(
                     UserUtil.stripUserMin(user)

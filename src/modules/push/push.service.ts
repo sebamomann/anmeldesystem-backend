@@ -5,7 +5,7 @@ import {PushSubscription} from './pushSubscription.entity';
 import {AppointmentService} from '../appointment/appointment.service';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {Appointment} from '../appointment/appointment.entity';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 
 require('dotenv').config();
 
@@ -40,7 +40,7 @@ export class PushService {
         );
     }
 
-    async create(obj: any, user: User) {
+    async create(obj: any, user: JWT_User) {
         const pushSubscription = new PushSubscription();
 
         let existing_sub: PushSubscription = await this.pushSubscriptionRepository.findOne({
@@ -66,7 +66,7 @@ export class PushService {
         return existing_sub;
     }
 
-    async subscribeToAppointment(obj: any, user: User) {
+    async subscribeToAppointment(obj: any, user: JWT_User) {
         let appointment;
 
         try {
@@ -169,7 +169,7 @@ export class PushService {
         }));
     }
 
-    async isSubscribed(endpoint: string, link: string, user: User) {
+    async isSubscribed(endpoint: string, link: string, user: JWT_User) {
         let appointment;
 
         try {
@@ -206,7 +206,7 @@ export class PushService {
         return true;
     }
 
-    async unsubscribeFromAppointment(obj: any, user: User) {
+    async unsubscribeFromAppointment(obj: any, user: JWT_User) {
         let appointment;
 
         try {

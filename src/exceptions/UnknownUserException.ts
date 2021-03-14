@@ -17,7 +17,7 @@ export class UnknownUserException implements Error {
 
         if (message === null
             || message === '') {
-            this.message = 'User is not present anymore';
+            this.message = 'JWT_User is not present anymore';
         } else {
             this.message = message;
         }

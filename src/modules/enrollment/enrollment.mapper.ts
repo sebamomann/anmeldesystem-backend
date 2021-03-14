@@ -1,7 +1,7 @@
 import {UserUtil} from '../../util/user.util';
 import {Enrollment} from './enrollment.entity';
 import {UserService} from '../user/user.service';
-import {User} from '../user/user.model';
+import {KeycloakUser} from '../user/KeycloakUser';
 
 const passengerMapper = require('./passenger/passenger.mapper');
 const driverMapper = require('./driver/driver.mapper');
@@ -59,7 +59,7 @@ export class EnrollmentMapper {
         enrollment.createdByUser = enrollment.creatorId != null;
 
         if (enrollment.createdByUser) {
-            const creator: User = await this.userService.findById(enrollment.creatorId);
+            const creator: KeycloakUser = await this.userService.findById(enrollment.creatorId);
             enrollment.creator = UserUtil.stripUserMin(creator);
             delete enrollment.name;
         }

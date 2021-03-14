@@ -5,7 +5,7 @@ import {HttpStatus} from '@nestjs/common';
 import {Enrollment} from './enrollment.entity';
 import {EnrollmentService} from './enrollment.service';
 import {EnrollmentController} from './enrollment.controller';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 import {AuthModule} from '../../auth/auth.module';
 
 jest.mock('./enrollment.service');
@@ -42,7 +42,7 @@ describe('Enrollment Controller', () => {
                 jest.spyOn(enrollmentService, 'create')
                     .mockImplementation(async (): Promise<Enrollment> => Promise.resolve(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockDomainToSatisfyParameter = 'domain';
                 const mockEnrollmentToSatisfyParameter = new Enrollment();
                 const res = mockResponse();
@@ -64,7 +64,7 @@ describe('Enrollment Controller', () => {
                 jest.spyOn(enrollmentService, 'create')
                     .mockImplementation(async (): Promise<Enrollment> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockDomainToSatisfyParameter = 'domain';
                 const mockEnrollmentToSatisfyParameter = new Enrollment();
                 const res = mockResponse();
@@ -89,7 +89,7 @@ describe('Enrollment Controller', () => {
                 jest.spyOn(enrollmentService, 'update')
                     .mockImplementation(async (): Promise<Enrollment> => Promise.resolve(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockIdToSatisfyParameter = '1';
                 const mockEnrollmentToSatisfyParameter = new Enrollment();
                 const mockTokenToSatisfyParameter = 'token';
@@ -111,7 +111,7 @@ describe('Enrollment Controller', () => {
                 jest.spyOn(enrollmentService, 'update')
                     .mockImplementation(async (): Promise<Enrollment> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockIdToSatisfyParameter = '1';
                 const mockTokenToSatisfyParameter = 'token';
                 const mockEnrollmentToSatisfyParameter = new Enrollment();
@@ -136,7 +136,7 @@ describe('Enrollment Controller', () => {
 
                 const mockIdToSatisfyParameter = '1';
                 const mockTokenToSatisfyParameter = 'token';
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const res = mockResponse();
 
                 await enrollmentController.delete(mockIdToSatisfyParameter,
@@ -156,7 +156,7 @@ describe('Enrollment Controller', () => {
 
                 const mockIdToSatisfyParameter = '1';
                 const mockTokenToSatisfyParameter = 'token';
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const res = mockResponse();
 
                 await enrollmentController.delete(mockIdToSatisfyParameter,
@@ -178,7 +178,7 @@ describe('Enrollment Controller', () => {
                 jest.spyOn(enrollmentService, 'checkPermissions')
                     .mockImplementation(async (): Promise<any> => Promise.resolve(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockIdToSatisfyParameter = '1';
                 const mockTokenToSatisfyParameter = 'token';
                 const res = mockResponse();
@@ -200,7 +200,7 @@ describe('Enrollment Controller', () => {
                 jest.spyOn(enrollmentService, 'checkPermissions')
                     .mockImplementation(async (): Promise<any> => Promise.reject(result));
 
-                const mockUserToSatisfyParameter = new User();
+                const mockUserToSatisfyParameter = new JWT_User();
                 const mockIdToSatisfyParameter = '1';
                 const mockTokenToSatisfyParameter = 'token';
                 const res = mockResponse();

@@ -8,7 +8,7 @@ fixtures:
             activated: 1
     -   User:
             id: 38917d2c-039a-4a82-b109-f9fc2d82aa7c
-            name: User Enroll Edit Additions
+            name: JWT_User Enroll Edit Additions
             username: user_enroll_edit_additions
             password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
             mail: user_enroll_edit_additions@example.com

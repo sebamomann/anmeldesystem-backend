@@ -20,7 +20,7 @@ import {MissingAuthenticationException} from '../../exceptions/MissingAuthentica
 import {StringUtil} from '../../util/string.util';
 import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
 import {EnrollmentMapper} from './enrollment.mapper';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 import {UserService} from '../user/user.service';
 
 const crypto = require('crypto');
@@ -58,7 +58,7 @@ export class EnrollmentService {
 
     /**
      * Create a new enrollment. <br />
-     * The Enrollment can either be created by a logged in User, or by providing an email address.
+     * The Enrollment can either be created by a logged in JWT_User, or by providing an email address.
      * When providing an email address, then a mail with the edit token gets send to it.
      *
      * @param enrollment_raw Enrollment data to save into database
@@ -71,7 +71,7 @@ export class EnrollmentService {
      * @throws DuplicateValueException if name is already in use
      * @throws See {@link parseEnrollmentObject} for reference
      */
-    public async create(enrollment_raw: Enrollment, user: User, domain: string) {
+    public async create(enrollment_raw: Enrollment, user: JWT_User, domain: string) {
         const appointment_referenced = await this.appointmentService
             .findByLink(enrollment_raw.appointment.link);
 
@@ -116,7 +116,7 @@ export class EnrollmentService {
      * @param enrollment_id Id of Enrollment to change Values for
      * @param user Optional user
      */
-    public async update(enrollment_to_change_values: any, enrollment_id: string, user: User) {
+    public async update(enrollment_to_change_values: any, enrollment_id: string, user: JWT_User) {
         const enrollment_referenced = await this.findById(enrollment_id);
         const enrollment_updated = {...enrollment_referenced};
 
@@ -171,7 +171,7 @@ export class EnrollmentService {
      * @throws EntityGoneException if enrollment doesn't exist anymore
      * @throws InsufficientPermissionsException if user is not allowed to edit/delete
      */
-    async delete(id: string, token: string, user: User) {
+    async delete(id: string, token: string, user: JWT_User) {
         let enrollment;
 
         try {
@@ -200,7 +200,7 @@ export class EnrollmentService {
      *
      * @throws InsufficientPermissionsException if user is not authorized
      */
-    public async checkPermissions(id: string, user: User, token: string) {
+    public async checkPermissions(id: string, user: JWT_User, token: string) {
         let enrollment;
 
         try {
@@ -260,7 +260,7 @@ export class EnrollmentService {
         return enrollment;
     }
 
-    private async _findByCreatorAndAppointment(creator: User, appointment: Appointment) {
+    private async _findByCreatorAndAppointment(creator: JWT_User, appointment: Appointment) {
         let enrollment = await this.enrollmentRepository.findOne({
             where: {
                 creator: creator,
@@ -317,7 +317,7 @@ export class EnrollmentService {
             });
     }
 
-    private async _handleEnrollmentAuthentication(enrollment_raw: Enrollment, enrollment_output: Enrollment, user: User) {
+    private async _handleEnrollmentAuthentication(enrollment_raw: Enrollment, enrollment_output: Enrollment, user: JWT_User) {
         if (enrollment_raw.editMail) {
             await this._setMailAttribute(enrollment_raw, enrollment_output);
         } else if (user !== undefined) {
@@ -415,7 +415,7 @@ export class EnrollmentService {
         EnrollmentUtil.filterValidAdditions(enrollment_to_change_values, enrollment_referenced.appointment);
     }
 
-    private _existsByCreator(user: User, appointment: Appointment) {
+    private _existsByCreator(user: JWT_User, appointment: Appointment) {
         return this._findByCreatorAndAppointment(user, appointment)
             .then(() => {
                 return true;

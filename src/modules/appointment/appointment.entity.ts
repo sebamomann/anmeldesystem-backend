@@ -5,7 +5,7 @@ import {File} from '../file/file.entity';
 import {Exclude} from 'class-transformer';
 import {PushSubscription} from '../push/pushSubscription.entity';
 import {IUserMinified} from '../user/IUserMinified';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 import {Administrator} from './administrator.entity';
 import {Pinner} from './pinner.entity';
 
@@ -91,11 +91,11 @@ export class Appointment {
     numberOfEnrollments?: number;
 
     /**
-     * Check if {@link User} is the creator or administrator of this object
+     * Check if {@link JWT_User} is the creator or administrator of this object
      *
-     * @param user          {@link User} to check ownership for
+     * @param user          {@link JWT_User} to check ownership for
      */
-    public isCreatorOrAdministrator(user: User) {
+    public isCreatorOrAdministrator(user: JWT_User) {
         const isAppointmentCreator = this.isCreator(user);
         const isAdministrator = this.isAdministrator(user);
 
@@ -103,11 +103,11 @@ export class Appointment {
     }
 
     /**
-     * Check if {@link User} is the creator of this object
+     * Check if {@link JWT_User} is the creator of this object
      *
-     * @param user          {@link User} to check ownership for
+     * @param user          {@link JWT_User} to check ownership for
      */
-    public isCreator(user: User) {
+    public isCreator(user: JWT_User) {
         if (!user) {
             return false;
         }
@@ -116,11 +116,11 @@ export class Appointment {
     }
 
     /**
-     * Check if {@link User} is administrator of this object
+     * Check if {@link JWT_User} is administrator of this object
      *
-     * @param user          {@link User} to check ownership for
+     * @param user          {@link JWT_User} to check ownership for
      */
-    public isAdministrator(user: User) {
+    public isAdministrator(user: JWT_User) {
         if (!this._administrators) {
             return false;
         }

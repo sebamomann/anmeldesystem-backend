@@ -24,10 +24,10 @@ import {Response} from 'express';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {AuthOptGuard} from '../../auth/auth-opt.gurad';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 import {AuthGuard} from '../../auth/auth.gurad';
 
-@Controller('appointment')
+@Controller('appointments')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
 export class AppointmentController {
     constructor(private appointmentService: AppointmentService) {
@@ -36,7 +36,7 @@ export class AppointmentController {
     @Get()
     @UseGuards(AuthOptGuard)
     @UseInterceptors(ClassSerializerInterceptor)
-    getAll(@Usr() user: User,
+    getAll(@Usr() user: JWT_User,
            @Query() params: any,
            @Query('slim') slim: string,
            @Res() res: Response,) {
@@ -55,7 +55,7 @@ export class AppointmentController {
     @Get('archive')
     @UseGuards(AuthOptGuard)
     @UseInterceptors(ClassSerializerInterceptor)
-    getAllArchive(@Usr() user: User,
+    getAllArchive(@Usr() user: JWT_User,
                   @Query() params: any,
                   @Query('slim') slim: string,
                   @Query('before') before: string,
@@ -75,7 +75,7 @@ export class AppointmentController {
 
     @Get(':link')
     @UseGuards(AuthOptGuard)
-    findByLink(@Usr() user: User,
+    findByLink(@Usr() user: JWT_User,
                @Query('slim') slim: string,
                @Query() permissions: any,
                @Param('link') link: string,
@@ -100,12 +100,13 @@ export class AppointmentController {
 
     @Post()
     @UseGuards(AuthGuard)
-    create(@Usr() user: User,
+    create(@Usr() user: JWT_User,
            @Body() appointment: Appointment,
            @Res() res: Response,) {
         return this.appointmentService
             .create(appointment, user)
             .then(tAppointment => {
+                res.header("Location", `${process.env.API_URL}appointments/${tAppointment.link}`)
                 res.status(HttpStatus.CREATED).json(tAppointment);
             })
             .catch((err) => {
@@ -115,7 +116,7 @@ export class AppointmentController {
 
     @Put(':link')
     @UseGuards(AuthGuard)
-    update(@Usr() user: User,
+    update(@Usr() user: JWT_User,
            @Param('link') link: string,
            @Body() toChange: any,
            @Res() res: Response,) {
@@ -132,7 +133,7 @@ export class AppointmentController {
     // TODO currently can be addeded multioople times ?
     @Post(':link/administrator')
     @UseGuards(AuthGuard)
-    addAdministrator(@Usr() user: User,
+    addAdministrator(@Usr() user: JWT_User,
                      @Param('link') link: string,
                      @Body('username') username: string,
                      @Res() res: Response,) {
@@ -147,7 +148,7 @@ export class AppointmentController {
 
     @Delete(':link/administrator/:username')
     @UseGuards(AuthGuard)
-    removeAdministrator(@Usr() user: User,
+    removeAdministrator(@Usr() user: JWT_User,
                         @Param('link') link: string,
                         @Param('username') username: string,
                         @Res() res: Response) {
@@ -162,7 +163,7 @@ export class AppointmentController {
 
     @Get(':link/permission')
     @UseGuards(AuthGuard)
-    hasPermission(@Usr() user: User,
+    hasPermission(@Usr() user: JWT_User,
                   @Param('link') link: string,
                   @Res() res: Response,) {
         return this.appointmentService
@@ -182,7 +183,7 @@ export class AppointmentController {
 
     @Post(':link/file')
     @UseGuards(AuthGuard)
-    addFile(@Usr() user: User,
+    addFile(@Usr() user: JWT_User,
             @Param('link') link: string,
             @Body() data: { name: string, data: string },
             @Res() res: Response) {
@@ -199,7 +200,7 @@ export class AppointmentController {
 
     @Delete(':link/file/:id')
     @UseGuards(AuthGuard)
-    removeFile(@Usr() user: User,
+    removeFile(@Usr() user: JWT_User,
                @Param('link') link: string,
                @Param('id') id: string,
                @Res() res: Response) {
@@ -215,7 +216,7 @@ export class AppointmentController {
 
     @Get(':link/pin')
     @UseGuards(AuthGuard)
-    pinAppointment(@Usr() user: User,
+    pinAppointment(@Usr() user: JWT_User,
                    @Param('link') link: string,
                    @Res() res: Response) {
         return this.appointmentService

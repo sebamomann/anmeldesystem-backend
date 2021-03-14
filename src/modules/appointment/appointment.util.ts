@@ -1,7 +1,7 @@
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {Appointment} from './appointment.entity';
 import {Enrollment} from '../enrollment/enrollment.entity';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 
 const crypto = require('crypto');
 
@@ -57,9 +57,9 @@ export class AppointmentUtil {
      * @param pins Links of pinned Appointments (passed via query parameter)
      * @param permissions Object containing attributes in the form of `perm` and `token` (perm token for enrollment)
      *
-     * @returns string[] Array of all correlations regarding User and Appointment
+     * @returns string[] Array of all correlations regarding JWT_User and Appointment
      */
-    public static parseReferences(user: User, appointment: Appointment, pins: string[], permissions = {}) {
+    public static parseReferences(user: JWT_User, appointment: Appointment, pins: string[], permissions = {}) {
         const references = [];
 
         let extractedIds = [];

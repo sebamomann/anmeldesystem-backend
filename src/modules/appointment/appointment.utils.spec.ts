@@ -2,7 +2,7 @@ import {Appointment} from './appointment.entity';
 import {Enrollment} from '../enrollment/enrollment.entity';
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {AppointmentUtil} from './appointment.util';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 import {instance, mock} from 'ts-mockito';
 import {Administrator} from './administrator.entity';
 import {Pinner} from './pinner.entity';
@@ -67,7 +67,7 @@ describe('Appointment util', () => {
     describe('* parse references', () => {
         describe('* successful should return correct references array', () => {
             it('* is creator', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                 const __given_pins = [];
@@ -82,12 +82,12 @@ describe('Appointment util', () => {
             });
 
             it('* is administrator', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                 const __given_pins = [];
 
-                const __existing_creator = new User();
+                const __existing_creator = new JWT_User();
                 __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                 const __given_appointment = new Appointment();
@@ -108,7 +108,7 @@ describe('Appointment util', () => {
 
             describe('* is enrolled', () => {
                 it('* by account', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                     const __given_pins = [];
@@ -116,7 +116,7 @@ describe('Appointment util', () => {
                     const __existing_enrollment = new Enrollment();
                     __existing_enrollment.creatorId = __given_user.sub;
 
-                    const __existing_creator = new User();
+                    const __existing_creator = new JWT_User();
                     __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                     const __given_appointment = new Appointment();
@@ -132,7 +132,7 @@ describe('Appointment util', () => {
 
                 describe('* by parameter', () => {
                     it('* normal parameter', async () => {
-                        const __given_user = new User();
+                        const __given_user = new JWT_User();
                         __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                         const __given_pins = [];
@@ -141,7 +141,7 @@ describe('Appointment util', () => {
                         const __existing_enrollment = new Enrollment();
                         __existing_enrollment.id = '996fe741-1142-4899-96fd-767a577f5268';
 
-                        const __existing_creator = new User();
+                        const __existing_creator = new JWT_User();
                         __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                         const __given_appointment = new Appointment();
@@ -156,7 +156,7 @@ describe('Appointment util', () => {
                     });
 
                     it('* including invalid attribute', async () => {
-                        const __given_user = new User();
+                        const __given_user = new JWT_User();
                         __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                         const __given_pins = [];
@@ -165,7 +165,7 @@ describe('Appointment util', () => {
                         const __existing_enrollment = new Enrollment();
                         __existing_enrollment.id = '996fe741-1142-4899-96fd-767a577f5268';
 
-                        const __existing_creator = new User();
+                        const __existing_creator = new JWT_User();
                         __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                         const __given_appointment = new Appointment();
@@ -183,12 +183,12 @@ describe('Appointment util', () => {
 
             describe('* is pinned', () => {
                 it('* as account', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                     const __given_pins = [];
 
-                    const __existing_creator = new User();
+                    const __existing_creator = new JWT_User();
                     __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                     const __given_appointment = new Appointment();
@@ -209,10 +209,10 @@ describe('Appointment util', () => {
                 });
 
                 it('* by parameter', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
-                    const __existing_creator = new User();
+                    const __existing_creator = new JWT_User();
                     __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
                     const __given_appointment = new Appointment();
@@ -230,7 +230,7 @@ describe('Appointment util', () => {
             });
 
             it('* is creator and enrolled', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                 const __given_pins = [];
@@ -250,7 +250,7 @@ describe('Appointment util', () => {
 
             describe('* is creator and pinned', () => {
                 it('* pinned by account', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                     const __given_pins = [];
@@ -272,7 +272,7 @@ describe('Appointment util', () => {
                 });
 
                 it('* pinned by parameter', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
                     const __given_appointment = new Appointment();
@@ -298,13 +298,13 @@ describe('Appointment util', () => {
 
         describe('* invalid should return empty references array', () => {
             it('* no references', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = 'f2e50ee5-388c-4d0c-b960-29cdfdfa5a73';
 
-                const __existing_creator = new User();
+                const __existing_creator = new JWT_User();
                 __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
-                const __existing_admin = new User();
+                const __existing_admin = new JWT_User();
                 __existing_admin.sub = 'a3dcc7d6-2065-4793-a7cd-bf105bc95d3d';
 
                 const __given_appointment = new Appointment();
@@ -329,10 +329,10 @@ describe('Appointment util', () => {
             it('* invalid user object', async () => {
                 const __given_user = null;
 
-                const __existing_creator = new User();
+                const __existing_creator = new JWT_User();
                 __existing_creator.sub = '154c348a-d981-44fb-9a33-10e11b352780';
 
-                const __existing_admin = new User();
+                const __existing_admin = new JWT_User();
                 __existing_admin.sub = 'a3dcc7d6-2065-4793-a7cd-bf105bc95d3d';
 
                 const __given_appointment = new Appointment();

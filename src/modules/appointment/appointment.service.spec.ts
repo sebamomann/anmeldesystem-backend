@@ -18,7 +18,7 @@ import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
 import {PushService} from '../push/push.service';
 import {PushSubscription} from '../push/pushSubscription.entity';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 import {anyString, instance, mock, spy, verify, when} from 'ts-mockito';
 import {Administrator} from './administrator.entity';
 
@@ -45,7 +45,7 @@ describe('AppointmentService', () => {
                 AppointmentGateway,
                 {provide: getRepositoryToken(Appointment), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(PushSubscription), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
+                {provide: getRepositoryToken(JWT_User), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(File), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Addition), useFactory: repositoryMockFactory},
                 {
@@ -84,7 +84,7 @@ describe('AppointmentService', () => {
             it('* requesting as creator', async () => {
                 const link = 'link';
 
-                const mockedUser_requester = mock(User);
+                const mockedUser_requester = mock(JWT_User);
 
                 const mockedAppointment = mock(Appointment);
                 const mockedAppointmentInstance = instance(mockedAppointment);
@@ -106,7 +106,7 @@ describe('AppointmentService', () => {
             it('* appointment not found', async () => {
                 const link = 'invalid_link';
 
-                const mockedUser_requester = mock(User);
+                const mockedUser_requester = mock(JWT_User);
 
                 const mockedAppointmentServiceSpy = spy(appointmentService);
                 when(mockedAppointmentServiceSpy.findByLink(link))
@@ -129,7 +129,7 @@ describe('AppointmentService', () => {
         it('* not being creator or administrator', async () => {
             const link = 'link';
 
-            const mockedUser_requester = mock(User);
+            const mockedUser_requester = mock(JWT_User);
 
             const mockedAppointment = mock(Appointment);
             const mockedAppointmentInstance = instance(mockedAppointment);
@@ -186,11 +186,11 @@ describe('AppointmentService', () => {
 
     describe('* get appointment', () => {
         it('* should return appointment if successful', async () => {
-            const mockedUser = mock(User);
+            const mockedUser = mock(JWT_User);
             const mockedUserInstance = instance(mockedUser);
             mockedUserInstance.sub = '02bbad42-6152-4b3d-a109-48f5f5a22885';
 
-            const mockedUser_appointment_creator = mock(User);
+            const mockedUser_appointment_creator = mock(JWT_User);
             const mockedUserInstance_appointment_creator = instance(mockedUser_appointment_creator);
             mockedUserInstance_appointment_creator.sub = '89d9235b-6912-44be-8b1e-d2466d299939';
 
@@ -216,7 +216,7 @@ describe('AppointmentService', () => {
 
         describe('* failure should return error', () => {
             it('* appointment not found', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = '7f4147ed-495a-4971-a970-8e5f86795a50';
                 __given_user.preferred_username = 'username';
                 const __given_link = 'link';
@@ -251,7 +251,7 @@ describe('AppointmentService', () => {
                     const mockedAppointmentServiceSpy = spy(appointmentService);
                     when(mockedAppointmentServiceSpy.findByLink(mockedAppointmentInstance.link)).thenReject(undefined);
 
-                    const mockedUser = mock(User);
+                    const mockedUser = mock(JWT_User);
 
                     jest.spyOn(appointmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
 
@@ -269,7 +269,7 @@ describe('AppointmentService', () => {
                         const mockedAppointmentServiceSpy = spy(appointmentService);
                         when(mockedAppointmentServiceSpy.findByLink(mockedAppointmentInstance.link)).thenReject(undefined);
 
-                        const mockedUser = mock(User);
+                        const mockedUser = mock(JWT_User);
 
                         jest.spyOn(appointmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
 
@@ -286,7 +286,7 @@ describe('AppointmentService', () => {
                         const mockedAppointmentServiceSpy = spy(appointmentService);
                         when(mockedAppointmentServiceSpy.findByLink(mockedAppointmentInstance.link)).thenReject(undefined);
 
-                        const mockedUser = mock(User);
+                        const mockedUser = mock(JWT_User);
 
                         jest.spyOn(appointmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
 
@@ -302,7 +302,7 @@ describe('AppointmentService', () => {
                     const mockedAppointmentInstance = instance(mockedAppointment);
                     mockedAppointmentInstance.maxEnrollments = 10;
 
-                    const mockedUser = mock(User);
+                    const mockedUser = mock(JWT_User);
 
                     jest.spyOn(appointmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
 
@@ -316,7 +316,7 @@ describe('AppointmentService', () => {
                         const mockedAppointmentInstance = instance(mockedAppointment);
                         mockedAppointmentInstance.maxEnrollments = 0;
 
-                        const mockedUser = mock(User);
+                        const mockedUser = mock(JWT_User);
 
                         jest.spyOn(appointmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
 
@@ -328,7 +328,7 @@ describe('AppointmentService', () => {
                         const mockedAppointment = mock(Appointment);
                         const mockedAppointmentInstance = instance(mockedAppointment);
 
-                        const mockedUser = mock(User);
+                        const mockedUser = mock(JWT_User);
 
                         jest.spyOn(appointmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
 
@@ -351,7 +351,7 @@ describe('AppointmentService', () => {
                         __given_addition_2
                     ];
 
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // link not in use
@@ -379,7 +379,7 @@ describe('AppointmentService', () => {
                         __given_addition_2
                     ];
 
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // link not in use
@@ -404,7 +404,7 @@ describe('AppointmentService', () => {
                 const __given_appointment = new Appointment();
                 __given_appointment.link = __existing_appointment.link;
 
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
@@ -424,7 +424,7 @@ describe('AppointmentService', () => {
                 __given_appointment.date = new Date(Date.now() + (3 * 60 * 60 * 2000));
                 __given_appointment.deadline = new Date(Date.now() + (4 * 60 * 60 * 2000));
 
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
@@ -446,7 +446,7 @@ describe('AppointmentService', () => {
         describe('* successful should return updated entity', () => {
             describe('* update additions', () => {
                 it('* add (1) to (2)', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_addition_1 = new Addition();
@@ -510,7 +510,7 @@ describe('AppointmentService', () => {
                 });
 
                 it('* add (1) to (2) - duplicate name', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_addition_1 = new Addition();
@@ -565,7 +565,7 @@ describe('AppointmentService', () => {
                 });
 
                 it('* remove (1) from (2)', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_addition_1 = new Addition();
@@ -609,7 +609,7 @@ describe('AppointmentService', () => {
             });
 
             it('* update link', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                 const __existing_appointment = new Appointment();
@@ -640,7 +640,7 @@ describe('AppointmentService', () => {
 
             describe('* update dates', () => {
                 it('* update date', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_appointment = new Appointment();
@@ -671,7 +671,7 @@ describe('AppointmentService', () => {
                 });
 
                 it('* update deadline', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_appointment = new Appointment();
@@ -704,7 +704,7 @@ describe('AppointmentService', () => {
 
             describe('* update direct attributes', () => {
                 it('* update title', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_appointment = new Appointment();
@@ -734,7 +734,7 @@ describe('AppointmentService', () => {
                 });
 
                 it('* update description', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_appointment = new Appointment();
@@ -763,7 +763,7 @@ describe('AppointmentService', () => {
                 });
 
                 it('* update location', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_appointment = new Appointment();
@@ -793,7 +793,7 @@ describe('AppointmentService', () => {
                 });
 
                 it('* update hidden', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_appointment = new Appointment();
@@ -823,7 +823,7 @@ describe('AppointmentService', () => {
                 });
 
                 it('* update driverAddition', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_appointment = new Appointment();
@@ -854,7 +854,7 @@ describe('AppointmentService', () => {
 
                 describe('* update maxEnrollments', () => {
                     it('* normal', async () => {
-                        const __given_user = new User();
+                        const __given_user = new JWT_User();
                         __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                         const __existing_appointment = new Appointment();
@@ -885,7 +885,7 @@ describe('AppointmentService', () => {
                     });
 
                     it('* < 0 -> null', async () => {
-                        const __given_user = new User();
+                        const __given_user = new JWT_User();
                         __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                         const __existing_appointment = new Appointment();
@@ -918,7 +918,7 @@ describe('AppointmentService', () => {
             });
 
             it('* update non existing attribute', async () => {
-                // const __given_user = new User();
+                // const __given_user = new JWT_User();
                 // __given_user.sub = "546448e0-f366-4fca-957a-9bfdce6dc738";
                 //
                 // const __existing_appointment = new Appointment();
@@ -951,7 +951,7 @@ describe('AppointmentService', () => {
 
         describe('* failure should return error', () => {
             it('appointment not found', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                 const __existing_appointment = new Appointment();
@@ -976,10 +976,10 @@ describe('AppointmentService', () => {
             });
 
             it('* no permissions', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
 
-                const __existing_creator = new User();
+                const __existing_creator = new JWT_User();
                 __existing_creator.preferred_username = 'creator';
 
                 const __existing_appointment = new Appointment();
@@ -1004,7 +1004,7 @@ describe('AppointmentService', () => {
             });
 
             it('* link in use', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
 
                 const __existing_appointment = new Appointment();
@@ -1035,7 +1035,7 @@ describe('AppointmentService', () => {
 
             describe('* date changes', () => {
                 it('* date before deadline', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.link = 'link';
@@ -1061,7 +1061,7 @@ describe('AppointmentService', () => {
                 });
 
                 it('* deadline after date', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.link = 'link';
@@ -1095,11 +1095,11 @@ describe('AppointmentService', () => {
                 const link = 'valid link';
                 const username = 'username';
 
-                const mockedUser = mock(User);
+                const mockedUser = mock(JWT_User);
                 const mockedUserInstance = instance(mockedUser);
                 mockedUserInstance.sub = 'd92ce5f1-debe-4c89-af94-3c3c41c4318c';
 
-                const mockedUser_existing = mock(User);
+                const mockedUser_existing = mock(JWT_User);
                 const mockedUserInstance_existing = instance(mockedUser_existing);
                 mockedUserInstance_existing.sub = '02bbad42-6152-4b3d-a109-48f5f5a22885';
 
@@ -1123,7 +1123,7 @@ describe('AppointmentService', () => {
 
             describe('* failure should return error', () => {
                 it('* appointment not found', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
                     const __given_link = 'link';
                     const __given_username = 'admin_to_be';
@@ -1142,12 +1142,12 @@ describe('AppointmentService', () => {
                 });
 
                 it('* insufficient permissions', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
                     const __given_link = 'link';
                     const __given_username = 'admin_to_be';
 
-                    const __existing_creator = new User();
+                    const __existing_creator = new JWT_User();
                     __existing_creator.preferred_username = 'creator';
 
                     const __existing_appointment = new Appointment();
@@ -1167,12 +1167,12 @@ describe('AppointmentService', () => {
                 });
 
                 it('* admin to be not found by username', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
                     const __given_link = 'link';
                     const __given_username = 'admin_to_be';
 
-                    const __existing_user = new User();
+                    const __existing_user = new JWT_User();
                     __existing_user.preferred_username = __given_username;
 
                     const __existing_appointment = new Appointment();
@@ -1199,11 +1199,11 @@ describe('AppointmentService', () => {
                 const link = 'valid link';
                 const username = 'username';
 
-                const mockedUser = mock(User);
+                const mockedUser = mock(JWT_User);
                 const mockedUserInstance = instance(mockedUser);
                 mockedUserInstance.sub = 'd92ce5f1-debe-4c89-af94-3c3c41c4318c';
 
-                const mockedUser_existing = mock(User);
+                const mockedUser_existing = mock(JWT_User);
                 const mockedUserInstance_existing = instance(mockedUser_existing);
                 mockedUserInstance_existing.sub = '02bbad42-6152-4b3d-a109-48f5f5a22885';
 
@@ -1238,7 +1238,7 @@ describe('AppointmentService', () => {
 
             describe('* failure should return error', () => {
                 it('* appointment not found', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
                     const __given_link = 'link';
                     const __given_username = 'admin_to_remove';
@@ -1257,15 +1257,15 @@ describe('AppointmentService', () => {
                 });
 
                 it('* insufficient permissions', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
                     const __given_link = 'link';
                     const __given_username = 'admin_to_remove';
 
-                    const __existing_user = new User();
+                    const __existing_user = new JWT_User();
                     __existing_user.preferred_username = __given_username;
 
-                    const __existing_creator = new User();
+                    const __existing_creator = new JWT_User();
                     __existing_creator.preferred_username = 'creator';
 
                     const __existing_appointment = new Appointment();
@@ -1296,7 +1296,7 @@ describe('AppointmentService', () => {
     describe('* handle files', () => {
         describe('* add', () => {
             it('* successful should return updated entity', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
                 const __given_link = 'link';
                 const __given_data = {name: 'name.txt', data: '123'};
@@ -1327,7 +1327,7 @@ describe('AppointmentService', () => {
 
             describe('* failure should return error', () => {
                 it('* appointment not found', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
                     const __given_link = 'link';
                     const __given_data = {name: 'name.txt', data: '123'};
@@ -1345,12 +1345,12 @@ describe('AppointmentService', () => {
                 });
 
                 it('* insufficient permissions', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
                     const __given_link = 'link';
                     const __given_data = {name: 'name.txt', data: '123'};
 
-                    const __existing_user = new User();
+                    const __existing_user = new JWT_User();
                     __existing_user.preferred_username = 'creator';
 
                     const __existing_appointment = new Appointment();
@@ -1387,7 +1387,7 @@ describe('AppointmentService', () => {
 
         describe('* remove', () => {
             it('* successful should return updated entity', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
                 const __given_link = 'link';
                 const __given_id = 'c4703eae-a93b-484d-8eee-63d0779825b0';
@@ -1418,7 +1418,7 @@ describe('AppointmentService', () => {
 
             describe('* failure should return error', () => {
                 it('* appointment not found', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
                     const __given_link = 'link';
                     const __given_id = 'c4703eae-a93b-484d-8eee-63d0779825b0';
@@ -1437,12 +1437,12 @@ describe('AppointmentService', () => {
                 });
 
                 it('* insufficient permissions', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
                     const __given_link = 'link';
                     const __given_id = 'c4703eae-a93b-484d-8eee-63d0779825b0';
 
-                    const __existing_creator = new User();
+                    const __existing_creator = new JWT_User();
                     __existing_creator.preferred_username = 'creator';
 
                     const __existing_appointment = new Appointment();
@@ -1467,7 +1467,7 @@ describe('AppointmentService', () => {
     // describe('* pin appointment', () => {
     //     describe('* successful should return user entity', () => {
     //         it('* pin', async () => {
-    //             const __given_user = new User();
+    //             const __given_user = new JWT_User();
     //             __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
     //             const __given_link = 'link';
     //
@@ -1496,7 +1496,7 @@ describe('AppointmentService', () => {
     //             __existing_appointment.id = '3b1abdb5-cfaa-44cb-8e26-09d61b8f92c5';
     //             __existing_appointment.link = __given_link;
     //
-    //             const __given_user = new User();
+    //             const __given_user = new JWT_User();
     //             __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
     //
     //             appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
@@ -1516,7 +1516,7 @@ describe('AppointmentService', () => {
     //
     //     describe('* failure should return error', () => {
     //         it('* appointment not found', async () => {
-    //             const __given_user = new User();
+    //             const __given_user = new JWT_User();
     //             __given_user.preferred_username = 'username';
     //             const __given_link = 'link';
     //
@@ -1534,7 +1534,7 @@ describe('AppointmentService', () => {
     //         });
     //
     //         it('* user gone', async () => {
-    //             const __given_user = new User();
+    //             const __given_user = new JWT_User();
     //             __given_user.preferred_username = 'username';
     //             const __given_link = 'link';
     //
@@ -1562,7 +1562,7 @@ describe('AppointmentService', () => {
     describe('* get Appointments', () => { // cases like creator, admin enrollment ... not needed to test, because they are recieved by database
         describe('* successful should return array of entities', () => {
             it('* normal', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
                 const __given_permissions = {};
                 const __given_slim = false;
@@ -1580,7 +1580,7 @@ describe('AppointmentService', () => {
             });
 
             it('* normal - slim not provided', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
                 const __given_permissions = {};
 
@@ -1598,7 +1598,7 @@ describe('AppointmentService', () => {
 
             describe('* pin parsing', () => {
                 it('* valid pin', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
                     const __given_permissions = {pin1: 'link'};
                     const __given_slim = false;
@@ -1617,7 +1617,7 @@ describe('AppointmentService', () => {
                 });
 
                 it('* invalid pin query name', async () => {
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
                     const __given_permissions = {invalid: 'link'};
                     const __given_slim = false;
@@ -1641,7 +1641,7 @@ describe('AppointmentService', () => {
     describe('* get Appointments Archive', () => { // only test parsing of additional parameters // acutally same as getAppointments
         describe('* successful should return array of entities', () => {
             it('* normal', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
                 const __given_permissions = {};
                 const __given_slim = false;
@@ -1664,7 +1664,7 @@ describe('AppointmentService', () => {
             });
 
             it('* invalid date -> convert to current', async () => {
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
                 const __given_permissions = {};
                 const __given_slim = false;

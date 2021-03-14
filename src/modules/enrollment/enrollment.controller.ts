@@ -5,7 +5,7 @@ import {Enrollment} from './enrollment.entity';
 import {Usr} from '../user/user.decorator';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 import {AuthOptGuard} from '../../auth/auth-opt.gurad';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 
 @Controller('enrollment')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
@@ -16,7 +16,7 @@ export class EnrollmentController {
 
     @Post()
     @UseGuards(AuthOptGuard)
-    create(@Usr() user: User,
+    create(@Usr() user: JWT_User,
            @Body('domain') domain: string,
            @Body() enrollment: Enrollment,
            @Res() res: Response,) {
@@ -33,7 +33,7 @@ export class EnrollmentController {
 
     @Put(':id/:token*?')
     @UseGuards(AuthOptGuard)
-    update(@Usr() user: User,
+    update(@Usr() user: JWT_User,
            @Param('id') id: string,
            @Param('token') token: string,
            @Body() toChange: Enrollment,
@@ -53,7 +53,7 @@ export class EnrollmentController {
     @UseGuards(AuthOptGuard)
     delete(@Param('id') id: string,
            @Param('token') token: string,
-           @Usr() user: User,
+           @Usr() user: JWT_User,
            @Res() res: Response) {
         return this.enrollmentService
             .delete(id, token, user)
@@ -68,7 +68,7 @@ export class EnrollmentController {
 
     @UseGuards(AuthOptGuard)
     @Get('/:id/check-permission')
-    checkPermissions(@Usr() user: User,
+    checkPermissions(@Usr() user: JWT_User,
                      @Query('token') token: string,
                      @Param('id') id: string,
                      @Res() res: Response) {

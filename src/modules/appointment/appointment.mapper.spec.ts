@@ -16,7 +16,7 @@ import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
 import {PushSubscription} from '../push/pushSubscription.entity';
 import {instance, mock, when} from 'ts-mockito';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 import {Administrator} from './administrator.entity';
 
 const crypto = require('crypto');
@@ -73,12 +73,12 @@ describe('AppointmentMapper', () => {
             let mockedAppointment;
             let mockedAppointmentInstance;
 
-            const mockedUser_creator_keycloak = mock(User);
+            const mockedUser_creator_keycloak = mock(JWT_User);
 
             const permissions = {};
 
             beforeEach(() => {
-                const mockedUser_creator = mock(User);
+                const mockedUser_creator = mock(JWT_User);
                 mockedUserInstance_creator = instance(mockedUser_creator);
                 mockedUserInstance_creator.sub = 'bdb9ee47-75d4-45f3-914a-4eef91439f4c';
 
@@ -110,7 +110,7 @@ describe('AppointmentMapper', () => {
             });
 
             it('* not being creator should not include', async () => {
-                const mockedUser_requester = mock(User);
+                const mockedUser_requester = mock(JWT_User);
                 const mockedUserInstance_requester = instance(mockedUser_requester);
                 mockedUserInstance_requester.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
 
@@ -138,14 +138,14 @@ describe('AppointmentMapper', () => {
             let mockedEnrollmentInstance_1;
             let mockedEnrollmentInstance_2;
 
-            const mockedUser_creator_keycloak = mock(User);
+            const mockedUser_creator_keycloak = mock(JWT_User);
 
             beforeEach(() => {
-                const mockedUser_requester = mock(User);
+                const mockedUser_requester = mock(JWT_User);
                 mockedUserInstance_requester = instance(mockedUser_requester);
                 mockedUserInstance_requester.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
 
-                const mockedUser_creator = mock(User);
+                const mockedUser_creator = mock(JWT_User);
                 mockedUserInstance_creator = instance(mockedUser_creator);
                 mockedUserInstance_creator.sub = 'bdb9ee47-75d4-45f3-914a-4eef91439f4c';
 
@@ -310,14 +310,14 @@ describe('AppointmentMapper', () => {
         let mockedEnrollmentInstance_1;
         let mockedEnrollmentInstance_2;
 
-        const mockedUser_creator_keycloak = mock(User);
+        const mockedUser_creator_keycloak = mock(JWT_User);
 
         beforeEach(() => {
-            const mockedUser_requester = mock(User);
+            const mockedUser_requester = mock(JWT_User);
             mockedUserInstance_requester = instance(mockedUser_requester);
             mockedUserInstance_requester.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
 
-            const mockedUser_creator = mock(User);
+            const mockedUser_creator = mock(JWT_User);
             mockedUserInstance_creator = instance(mockedUser_creator);
             mockedUserInstance_creator.sub = 'bdb9ee47-75d4-45f3-914a-4eef91439f4c';
 
@@ -373,11 +373,11 @@ describe('AppointmentMapper', () => {
         let mockedEnrollmentInstance_2;
 
         beforeEach(() => {
-            const mockedUser_requester = mock(User);
+            const mockedUser_requester = mock(JWT_User);
             mockedUserInstance_requester = instance(mockedUser_requester);
             mockedUserInstance_requester.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
 
-            const mockedUser_creator = mock(User);
+            const mockedUser_creator = mock(JWT_User);
             mockedUserInstance_creator = instance(mockedUser_creator);
             mockedUserInstance_creator.sub = 'bdb9ee47-75d4-45f3-914a-4eef91439f4c';
 
@@ -424,17 +424,17 @@ describe('AppointmentMapper', () => {
 
             mockedAppointmentInstance._administrators = [mockedAdministrator_1,mockedAdministrator_2,mockedAdministrator_3]
 
-            const mockedUser1 = mock(User);
+            const mockedUser1 = mock(JWT_User);
             const mockedUserInstance1 = instance(mockedUser1);
             mockedUserInstance1.preferred_username = 'username1';
             mockedUserInstance1.name = 'name1';
 
-            const mockedUser2 = mock(User);
+            const mockedUser2 = mock(JWT_User);
             const mockedUserInstance2 = instance(mockedUser2);
             mockedUserInstance2.preferred_username = 'username2';
             mockedUserInstance2.name = 'name2';
 
-            const mockedUser3 = mock(User);
+            const mockedUser3 = mock(JWT_User);
             const mockedUserInstance3 = instance(mockedUser3);
             mockedUserInstance3.preferred_username = 'username3';
             mockedUserInstance3.name = 'name3';
@@ -537,7 +537,7 @@ describe('AppointmentMapper', () => {
 
     // describe('* stripAdministrator', () => {
     //     it('* administrators should just have attributes "name" and "preferred_username"', async () => {
-    //         const __existing_admin = new User();
+    //         const __existing_admin = new JWT_User();
     //         __existing_admin.sub = 'f48de1b3-6900-4f0e-939b-78fec185b615';
     //         __existing_admin.preferred_username = 'admin';
     //         __existing_admin.name = 'Administrator';

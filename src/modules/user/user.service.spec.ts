@@ -4,7 +4,7 @@ import {Repository} from 'typeorm';
 import {getRepositoryToken} from '@nestjs/typeorm';
 import {MailerService} from '@nest-modules/mailer';
 import {MAILER_OPTIONS} from '@nest-modules/mailer/dist/constants/mailer-options.constant';
-import {User} from './user.model';
+import {JWT_User} from './user.model';
 
 describe('UserService', () => {
     let userService: UserService;
@@ -15,7 +15,7 @@ describe('UserService', () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [UserService,
                 MailerService,
-                {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
+                {provide: getRepositoryToken(JWT_User), useFactory: repositoryMockFactory},
                 {
                     name: MAILER_OPTIONS,
                     provide: MAILER_OPTIONS,
@@ -46,7 +46,7 @@ describe('UserService', () => {
     //         it('* successful should return entity', async () => {
     //             const __given_id = '583bb85b-c951-4cd0-8b82-16500b5bda17';
     //
-    //             const __existing_user = new User();
+    //             const __existing_user = new JWT_User();
     //             __existing_user.sub = __given_id;
     //
     //             userRepositoryMock.findOne.mockReturnValue(__existing_user);
@@ -80,7 +80,7 @@ describe('UserService', () => {
     //         it('* successful should return entity', async () => {
     //             const __given_username = 'username';
     //
-    //             const __existing_user = new User();
+    //             const __existing_user = new JWT_User();
     //             __existing_user.sub = __given_username;
     //
     //             userRepositoryMock.findOne.mockReturnValue(__existing_user);

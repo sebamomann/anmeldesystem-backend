@@ -16,7 +16,7 @@ import {AppointmentGateway} from './appointment.gateway';
 import {AppointmentUtil} from './appointment.util';
 import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 
 const logger = require('../../logger');
 
@@ -74,7 +74,7 @@ export class AppointmentService {
      *
      * @throws EntityNotFoundException if appointment not found
      */
-    public async get(user: User, link: string, permissions: any, slim: boolean): Promise<Appointment> {
+    public async get(user: JWT_User, link: string, permissions: any, slim: boolean): Promise<Appointment> {
         let appointment;
 
         try {
@@ -105,7 +105,7 @@ export class AppointmentService {
      *
      * @returns Appointment[]
      */
-    public async getAll(user: User, params: any, slim): Promise<Appointment[]> {
+    public async getAll(user: JWT_User, params: any, slim): Promise<Appointment[]> {
         let pins = AppointmentUtil.parsePins(params);
 
         let appointments = await this.getAppointments(user, pins, undefined, null);
@@ -140,7 +140,7 @@ export class AppointmentService {
      *
      * @returns Appointment[]
      */
-    public async getAllArchive(user: User, params: any, _slim: boolean, before: string, limit: number): Promise<Appointment[]> {
+    public async getAllArchive(user: JWT_User, params: any, _slim: boolean, before: string, limit: number): Promise<Appointment[]> {
         let pins: any[] = AppointmentUtil.parsePins(params);
 
         let _before;
@@ -175,7 +175,7 @@ export class AppointmentService {
      *
      * @throws DuplicateValueException if link is already in use
      */
-    public async create(appointmentData: Appointment, user: User): Promise<Appointment> {
+    public async create(appointmentData: Appointment, user: JWT_User): Promise<{ id: string, link: string }> {
         let appointmentToDB = new Appointment();
 
         appointmentToDB.title = appointmentData.title;
@@ -205,7 +205,8 @@ export class AppointmentService {
 
         appointmentToDB = await this.appointmentRepository.save(appointmentToDB);
 
-        return appointmentToDB;
+        const appointmentMapper = new AppointmentMapper(this.userService);
+        return appointmentMapper.create(appointmentToDB);
     }
 
     /**
@@ -217,7 +218,7 @@ export class AppointmentService {
      * @param link Current link of Appointment
      * @param user Requester
      */
-    public async update(toChange: any, link: string, user: User) {
+    public async update(toChange: any, link: string, user: JWT_User) {
         let appointment;
 
         try {
@@ -314,7 +315,7 @@ export class AppointmentService {
      * @throws InsufficientPermissionsException if user is not the owner
      * @throws UnknownUserException if user to add does not exist
      */
-    public async addAdministrator(_user: User, link: string, username: string) {
+    public async addAdministrator(_user: JWT_User, link: string, username: string) {
         let appointment;
 
         try {
@@ -357,7 +358,7 @@ export class AppointmentService {
      * TODO
      * go over admin directly?
      */
-    public async removeAdministrator(_user: User, link: string, username: string): Promise<void> {
+    public async removeAdministrator(_user: JWT_User, link: string, username: string): Promise<void> {
         const appointment = await this.findByLink(link);
 
         if (!appointment.isCreator(_user)) {
@@ -389,7 +390,7 @@ export class AppointmentService {
      * @throws InsufficientPermissionsException if user is not the owner
      * @throws UnknownUserException if user to add does not exist
      */
-    public async addFile(_user: User, link: string, data: any) {
+    public async addFile(_user: JWT_User, link: string, data: any) {
         let appointment;
 
         try {
@@ -428,7 +429,7 @@ export class AppointmentService {
      * @throws See {@link findByLink} for reference
      * @throws InsufficientPermissionsException if user is not the owner
      */
-    public async removeFile(_user: User, link: string, id: string) {
+    public async removeFile(_user: JWT_User, link: string, id: string) {
         let appointment;
 
         try {
@@ -466,7 +467,7 @@ export class AppointmentService {
      * @param link Link of appointment to pin
      */
     // TODO reimplement with keycloak
-    public async togglePinningAppointment(user: User, link: string) {
+    public async togglePinningAppointment(user: JWT_User, link: string) {
         let appointment;
 
         try {
@@ -497,21 +498,21 @@ export class AppointmentService {
     }
 
     /**
-     * Check if passed {@link User} is administrator or creator of the referenced {@link Appointment}<br/>
+     * Check if passed {@link JWT_User} is administrator or creator of the referenced {@link Appointment}<br/>
      *
-     * @param user          {@link User} to check permissions for
+     * @param user          {@link JWT_User} to check permissions for
      * @param ref           Link of  {@link Appointment}
      *
      * @returns boolean     true if creator or admin - false if not
      *
      * @throws              See {@link findByLink} for reference
      */
-    public async isCreatorOrAdministrator(user: User, ref: string): Promise<boolean> {
+    public async isCreatorOrAdministrator(user: JWT_User, ref: string): Promise<boolean> {
         const appointment = await this.findByLink(ref);
         return appointment.isCreatorOrAdministrator(user);
     }
 
-    public async removeSubscriptionsByUser(appointment: any, user: User) {
+    public async removeSubscriptionsByUser(appointment: any, user: JWT_User) {
         let app = await this.appointmentRepository.findOne({
             where: {
                 link: appointment.link
@@ -531,7 +532,7 @@ export class AppointmentService {
         return this.appointmentRepository.save(app);
     }
 
-    private async userBasedAppointmentPreparation(appointment: Appointment, user: User, permissions: any, slim: boolean) {
+    private async userBasedAppointmentPreparation(appointment: Appointment, user: JWT_User, permissions: any, slim: boolean) {
         const appointmentMapper = new AppointmentMapper(this.userService);
 
         appointment.reference = AppointmentUtil.parseReferences(user, appointment, [], permissions); // empty pins because fnc is only called on single appointment get request
@@ -625,7 +626,7 @@ export class AppointmentService {
     }
 
     /* istanbul ignore next */
-    private async getAppointments(user: User, pins, before: Date, limit) {
+    private async getAppointments(user: JWT_User, pins, before: Date, limit) {
         // add value, cuz SQL cant process empty list
         if (pins.length === 0) {
             pins.push('_');

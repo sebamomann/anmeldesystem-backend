@@ -8,14 +8,14 @@ fixtures:
             activated: 1
     -   User:
             id: c51f4e34-6152-4778-9b9c-48cf47ec5b80
-            name: User Enroll Mid Login
+            name: JWT_User Enroll Mid Login
             username: user_enroll_mid_login
             password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
             mail: user_enroll_mid_login@example.com
             activated: 1
     -   User:
             id: 093ccd67-9078-4f5e-b63d-5d2179753eda
-            name: User Enroll Existing Enrollment
+            name: JWT_User Enroll Existing Enrollment
             username: user_enroll_existing_enrollment
             password: $2a$10$VpnLF9W2Da4YDiYq06JJROS.otvES2vYE.8wrd8ic2t68lp71iuRe
             mail: user_enroll_existing_enrollment@example.com
@@ -56,4 +56,4 @@ fixtures:
             appointment:
                 id: cc1a91c9-ff03-4da0-a528-89bd9db1d438
             creator:
-                id: 093ccd67-9078-4f5e-b63d-5d2179753eda # User Enroll Existing Enrollment
+                id: 093ccd67-9078-4f5e-b63d-5d2179753eda # JWT_User Enroll Existing Enrollment

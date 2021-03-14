@@ -3,7 +3,7 @@ import {Usr} from '../user/user.decorator';
 import {Response} from 'express';
 import {PushService} from './push.service';
 import {AuthOptGuard} from '../../auth/auth-opt.gurad';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 
 @Controller('push')
 export class PushController {
@@ -14,7 +14,7 @@ export class PushController {
 
     @Post()
     @UseGuards(AuthOptGuard)
-    create(@Usr() user: User,
+    create(@Usr() user: JWT_User,
            @Body() obj: any,
            @Res() res: Response,) {
         return this.pushService
@@ -29,7 +29,7 @@ export class PushController {
 
     @Post('subscribe')
     @UseGuards(AuthOptGuard)
-    subscribeToAppointment(@Usr() user: User,
+    subscribeToAppointment(@Usr() user: JWT_User,
                            @Body() obj: any,
                            @Res() res: Response,) {
         return this.pushService
@@ -44,7 +44,7 @@ export class PushController {
 
     @Post('unsubscribe')
     @UseGuards(AuthOptGuard)
-    unsubscribeFromAppointment(@Usr() user: User,
+    unsubscribeFromAppointment(@Usr() user: JWT_User,
                                @Body() obj: any,
                                @Res() res: Response,) {
         return this.pushService
@@ -59,7 +59,7 @@ export class PushController {
 
     @Head('subscription')
     @UseGuards(AuthOptGuard)
-    isSubscribed(@Usr() user: User,
+    isSubscribed(@Usr() user: JWT_User,
                  @Query('link') link: string,
                  @Query('endpoint') endpoint: string,
                  @Res() res: Response,) {

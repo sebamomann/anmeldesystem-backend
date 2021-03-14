@@ -1,4 +1,4 @@
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 import {Appointment} from '../appointment/appointment.entity';
 import {Enrollment} from './enrollment.entity';
 import {instance, mock, verify, when} from 'ts-mockito';
@@ -11,7 +11,7 @@ describe('* Enrollment entity', () => {
             describe('* valid permission should return true', () => {
                 it('* is permitted by identity', () => {
                     const token = 'INVALID_TOKEN';
-                    const mockedUser = mock(User);
+                    const mockedUser = mock(JWT_User);
 
                     const mockedEnrollment = mock(Enrollment);
                     const mockedEnrollmentInstance = instance(mockedEnrollment);
@@ -25,7 +25,7 @@ describe('* Enrollment entity', () => {
 
                 it('* is permitted by token', () => {
                     const token = 'VALID_TOKEN';
-                    const mockedUser = mock(User);
+                    const mockedUser = mock(JWT_User);
 
                     const mockedEnrollment = mock(Enrollment);
                     const mockedEnrollmentInstance = instance(mockedEnrollment);
@@ -41,7 +41,7 @@ describe('* Enrollment entity', () => {
 
             it('* failure should return false', async () => {
                 const token = 'VALID_TOKEN';
-                const mockedUser = mock(User);
+                const mockedUser = mock(JWT_User);
 
                 const mockedEnrollment = mock(Enrollment);
                 const mockedEnrollmentInstance = instance(mockedEnrollment);
@@ -57,11 +57,11 @@ describe('* Enrollment entity', () => {
         describe('* permission by identity', () => {
             describe('* valid permission should return true', () => {
                 it('* permission via appointment', () => {
-                    const mockedUser = mock(User);
+                    const mockedUser = mock(JWT_User);
                     const mockedUserInstance = instance(mockedUser);
                     mockedUserInstance.sub = '7efff1cc-a623-459f-b665-90d22446cc49';
 
-                    const mockedUser_enrollment_creator = mock(User);
+                    const mockedUser_enrollment_creator = mock(JWT_User);
                     const mockedUserInstance_enrollment_creator = instance(mockedUser_enrollment_creator);
                     mockedUserInstance_enrollment_creator.sub = '0a93e84c-d0a8-4b6d-ae29-8ea820c992de';
 
@@ -81,7 +81,7 @@ describe('* Enrollment entity', () => {
                 });
 
                 it('* is enrollment creator', async () => {
-                    const mockedUser = mock(User);
+                    const mockedUser = mock(JWT_User);
                     const mockedUserInstance = instance(mockedUser);
                     mockedUserInstance.sub = '7efff1cc-a623-459f-b665-90d22446cc49';
 
@@ -102,11 +102,11 @@ describe('* Enrollment entity', () => {
             });
 
             it('* failure should return false', () => {
-                const mockedUser = mock(User);
+                const mockedUser = mock(JWT_User);
                 const mockedUserInstance = instance(mockedUser);
                 mockedUserInstance.sub = '7efff1cc-a623-459f-b665-90d22446cc49';
 
-                const mockedUser_enrollment_creator = mock(User);
+                const mockedUser_enrollment_creator = mock(JWT_User);
                 const mockedUserInstance_enrollment_creator = instance(mockedUser_enrollment_creator);
                 mockedUserInstance_enrollment_creator.sub = '0a93e84c-d0a8-4b6d-ae29-8ea820c992de';
 

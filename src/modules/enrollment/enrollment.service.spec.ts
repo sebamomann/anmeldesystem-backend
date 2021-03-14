@@ -26,7 +26,7 @@ import {AppointmentGateway} from '../appointment/appointment.gateway';
 import {MissingAuthenticationException} from '../../exceptions/MissingAuthenticationException';
 import {PushSubscription} from '../push/pushSubscription.entity';
 import {PushService} from '../push/push.service';
-import {User} from '../user/user.model';
+import {JWT_User} from '../user/user.model';
 
 const crypto = require('crypto');
 
@@ -74,7 +74,7 @@ describe('EnrollmentService', () => {
                 {provide: getRepositoryToken(Passenger), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Mail), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Appointment), useFactory: repositoryMockFactory},
-                {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
+                {provide: getRepositoryToken(JWT_User), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(File), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(Addition), useFactory: repositoryMockFactory},
                 {provide: getRepositoryToken(PushSubscription), useFactory: repositoryMockFactory},
@@ -163,7 +163,7 @@ describe('EnrollmentService', () => {
             describe('* comment management', () => {
                 it('* should trim comment', async () => {
                     const __given_enrollment = new Enrollment();
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
 
                     const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -191,7 +191,7 @@ describe('EnrollmentService', () => {
 
                 it('* null should be replaced by empty string', async () => {
                     const __given_enrollment = new Enrollment();
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
 
                     const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -223,7 +223,7 @@ describe('EnrollmentService', () => {
                     __given_enrollment.passenger = new Passenger();
                     __given_enrollment.passenger.requirement = 2;
 
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
 
                     const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -260,7 +260,7 @@ describe('EnrollmentService', () => {
                     __given_enrollment.driver.service = 1;
                     __given_enrollment.driver.seats = 4;
 
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
 
                     const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -371,7 +371,7 @@ describe('EnrollmentService', () => {
 
                 it('* as logged in user', async () => {
                     const __given_enrollment = new Enrollment();
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
 
                     __given_user.sub = 'cool-id';
                     const __given_domain = 'example.com/{{0}}/{{1}}';
@@ -402,7 +402,7 @@ describe('EnrollmentService', () => {
 
                 it('* editMail > user', async () => {
                     const __given_enrollment = new Enrollment();
-                    const __given_user = new User();
+                    const __given_user = new JWT_User();
 
                     const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -440,7 +440,7 @@ describe('EnrollmentService', () => {
                 const __given_enrollment = new Enrollment();
                 __given_enrollment.appointment = new Appointment();
                 __given_enrollment.appointment.link = 'link';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
 
                 const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -489,7 +489,7 @@ describe('EnrollmentService', () => {
                 __given_enrollment.name = 'existingName';
                 __given_enrollment.appointment = new Appointment();
                 __given_enrollment.appointment.link = 'link';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
 
                 const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -516,7 +516,7 @@ describe('EnrollmentService', () => {
                 __given_enrollment.comment = 'comment';
                 __given_enrollment.appointment = new Appointment();
                 __given_enrollment.appointment.link = 'link';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
 
                 const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -548,7 +548,7 @@ describe('EnrollmentService', () => {
                 __given_enrollment.appointment.additions = [new Addition()];
                 __given_enrollment.appointment.additions[0].id = '08f642cf-ee55-4b18-84e4-69e218088753';
                 __given_enrollment.appointment.additions[0].name = 'additionExisting';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
 
                 const __given_domain = 'example.com/{{0}}/{{1}}';
 
@@ -604,7 +604,7 @@ describe('EnrollmentService', () => {
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
 
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
@@ -634,7 +634,7 @@ describe('EnrollmentService', () => {
                     comment: 'newComment'
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
@@ -667,7 +667,7 @@ describe('EnrollmentService', () => {
                     }
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
@@ -706,7 +706,7 @@ describe('EnrollmentService', () => {
             //         }
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-            //     const __given_user = new User();
+            //     const __given_user = new JWT_User();
             //     
             //
             //     const __existing_enrollment = new Enrollment();
@@ -743,7 +743,7 @@ describe('EnrollmentService', () => {
                     }
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
@@ -779,7 +779,7 @@ describe('EnrollmentService', () => {
                     }
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
@@ -813,7 +813,7 @@ describe('EnrollmentService', () => {
             //         }
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-            //     const __given_user = new User();
+            //     const __given_user = new JWT_User();
             //     
             //
             //     const __existing_enrollment = new Enrollment();
@@ -846,7 +846,7 @@ describe('EnrollmentService', () => {
                     }
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
@@ -883,7 +883,7 @@ describe('EnrollmentService', () => {
             //         }
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-            //     const __given_user = new User();
+            //     const __given_user = new JWT_User();
             //     __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
             //     
             //
@@ -919,7 +919,7 @@ describe('EnrollmentService', () => {
             //         }
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-            //     const __given_user = new User();
+            //     const __given_user = new JWT_User();
             //     
             //
             //     const __existing_enrollment = new Enrollment();
@@ -956,7 +956,7 @@ describe('EnrollmentService', () => {
                     ]
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
                 const __existing_enrollment = new Enrollment();
@@ -985,7 +985,7 @@ describe('EnrollmentService', () => {
             //         invalid: 'attribute'
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-            //     const __given_user = new User();
+            //     const __given_user = new JWT_User();
             //     __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
             //     
             //     __given_user.name = 'name';
@@ -1024,7 +1024,7 @@ describe('EnrollmentService', () => {
                     name: 'existing_name'
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = '909f67be-c59d-48c1-a85a-2efbffa5e78d';
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
@@ -1044,10 +1044,10 @@ describe('EnrollmentService', () => {
                     name: 'existing_name'
                 };
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = '909f67be-c59d-48c1-a85a-2efbffa5e78d';
 
-                const __existing_user = new User();
+                const __existing_user = new JWT_User();
                 __existing_user.sub = '9a2de186-f86c-4a2e-b589-f4fd3ced6152';
 
                 const __existing_enrollment = new Enrollment();
@@ -1076,7 +1076,7 @@ describe('EnrollmentService', () => {
             //             name: 'existing_name'
             //         };
             //         const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-            //         const __given_user = new User();
+            //         const __given_user = new JWT_User();
             //         
             //
             //         const __existing_enrollment = new Enrollment();
@@ -1111,7 +1111,7 @@ describe('EnrollmentService', () => {
             //             name: 'existing_name'
             //         };
             //         const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-            //         const __given_user = new User();
+            //         const __given_user = new JWT_User();
             //         
             //
             //         const __existing_enrollment = new Enrollment();
@@ -1158,7 +1158,7 @@ describe('EnrollmentService', () => {
             //         ]
             //     };
             //     const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
-            //     const __given_user = new User();
+            //     const __given_user = new JWT_User();
             //     
             //
             //     const __existing_enrollment = new Enrollment();
@@ -1193,7 +1193,7 @@ describe('EnrollmentService', () => {
         it('* successful should return nothing', async () => {
             const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
             const __given_token = '';
-            const __given_user = new User();
+            const __given_user = new JWT_User();
             __given_user.sub = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
 
             const __existing_enrollment = new Enrollment();
@@ -1217,7 +1217,7 @@ describe('EnrollmentService', () => {
             it('* enrollment gone', async (done) => {
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_token = '';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
 
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
@@ -1234,10 +1234,10 @@ describe('EnrollmentService', () => {
             it('* insufficient permissions', async (done) => {
                 const __given_enrollment_id = 'a48cc175-e11a-4f0c-a133-27608f5c63b4';
                 const __given_token = '';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = '909f67be-c59d-48c1-a85a-2efbffa5e78d';
 
-                const __existing_user = new User();
+                const __existing_user = new JWT_User();
                 __existing_user.sub = '9a2de186-f86c-4a2e-b589-f4fd3ced6152';
 
                 const __existing_enrollment = new Enrollment();
@@ -1264,7 +1264,7 @@ describe('EnrollmentService', () => {
         describe('* successful should return allowance object', () => {
             it('* by user (enrollment creator)', async () => {
                 const __given_enrollment_id = 'c93118a9-d6cd-412f-9990-fe56c28cf70a';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
                 const __given_token = '';
 
@@ -1285,14 +1285,14 @@ describe('EnrollmentService', () => {
 
             it('* by token', async () => {
                 const __given_enrollment_id = 'c93118a9-d6cd-412f-9990-fe56c28cf70a';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
 
                 const __given_token = crypto.createHash('sha256')
                     .update(__given_enrollment_id + process.env.SALT_ENROLLMENT)
                     .digest('hex');
 
-                const __existing_appointment_creator = new User();
+                const __existing_appointment_creator = new JWT_User();
                 __existing_appointment_creator.sub = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
 
                 const __existing_appointment = new Appointment();
@@ -1314,7 +1314,7 @@ describe('EnrollmentService', () => {
         describe('* failure should return error', () => {
             it('* enrollment not found', async (done) => {
                 const __given_enrollment_id = 'c93118a9-d6cd-412f-9990-fe56c28cf70a';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
                 const __given_token = '';
 
@@ -1332,12 +1332,12 @@ describe('EnrollmentService', () => {
 
             it('* missing permissions', async (done) => {
                 const __given_enrollment_id = 'c93118a9-d6cd-412f-9990-fe56c28cf70a';
-                const __given_user = new User();
+                const __given_user = new JWT_User();
                 __given_user.sub = '32fb8012-8115-4ee0-8a29-c256936bdf9a';
 
                 const __given_token = '';
 
-                const __existing_appointment_creator = new User();
+                const __existing_appointment_creator = new JWT_User();
                 __existing_appointment_creator.sub = '4cd9b7ff-e157-416d-bb1c-d3847a96e866';
 
                 const __existing_appointment = new Appointment();

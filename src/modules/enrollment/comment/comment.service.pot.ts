@@ -14,7 +14,7 @@
 // import {Passenger} from '../passenger/passenger.entity';
 // import {Mail} from '../mail/mail.entity';
 // import {Appointment} from '../../appointment/appointment.entity';
-// import {User} from '../../user/user.entity';
+// import {JWT_User} from '../../user/user.entity';
 // import {File} from '../../file/file.entity';
 // import {Addition} from '../../addition/addition.entity';
 // import {TelegramUser} from '../../user/telegram/telegram-user.entity';
@@ -39,7 +39,7 @@
 // let commentRepositoryMock: MockType<Repository<Comment>>;
 // let enrollmentRepositoryMock: MockType<Repository<Enrollment>>;
 // let appointmentRepositoryMock: MockType<Repository<Appointment>>;
-// let userRepositoryMock: MockType<Repository<User>>;
+// let userRepositoryMock: MockType<Repository<JWT_User>>;
 // let fileRepositoryMock: MockType<Repository<File>>;
 // let additionRepositoryMock: MockType<Repository<Addition>>;
 // let telegramUserRepositoryMock: MockType<Repository<TelegramUser>>;
@@ -66,7 +66,7 @@
 //             {provide: getRepositoryToken(Passenger), useFactory: repositoryMockFactory},
 //             {provide: getRepositoryToken(Mail), useFactory: repositoryMockFactory},
 //             {provide: getRepositoryToken(Appointment), useFactory: repositoryMockFactory},
-//             {provide: getRepositoryToken(User), useFactory: repositoryMockFactory},
+//             {provide: getRepositoryToken(JWT_User), useFactory: repositoryMockFactory},
 //             {provide: getRepositoryToken(File), useFactory: repositoryMockFactory},
 //             {provide: getRepositoryToken(Addition), useFactory: repositoryMockFactory},
 //             {provide: getRepositoryToken(TelegramUser), useFactory: repositoryMockFactory},
@@ -105,7 +105,7 @@
 //     commentRepositoryMock = module.get(getRepositoryToken(Comment));
 //     enrollmentRepositoryMock = module.get(getRepositoryToken(Enrollment));
 //     appointmentRepositoryMock = module.get(getRepositoryToken(Appointment));
-//     userRepositoryMock = module.get(getRepositoryToken(User));
+//     userRepositoryMock = module.get(getRepositoryToken(JWT_User));
 //     fileRepositoryMock = module.get(getRepositoryToken(File));
 //     additionRepositoryMock = module.get(getRepositoryToken(Addition));
 //     telegramUserRepositoryMock = module.get(getRepositoryToken(TelegramUser));
