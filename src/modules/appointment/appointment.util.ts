@@ -95,7 +95,7 @@ export class AppointmentUtil {
             references.push('ENROLLED');
         }
 
-        if ((appointment.pinners && appointment.pinners.some(sPinner => sPinner === user.sub))
+        if ((appointment.pinners && appointment.pinners.some(sPinner => sPinner.userId === user.sub))
             || pins.includes(appointment.link)) {
             references.push('PINNED');
         }

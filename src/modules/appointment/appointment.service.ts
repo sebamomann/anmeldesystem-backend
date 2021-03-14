@@ -353,6 +353,9 @@ export class AppointmentService {
      *
      * @throws See {@link findByLink} for reference
      * @throws InsufficientPermissionsException if user is not the owner
+     *
+     * TODO
+     * go over admin directly?
      */
     public async removeAdministrator(_user: User, link: string, username: string): Promise<void> {
         const appointment = await this.findByLink(link);
@@ -365,7 +368,7 @@ export class AppointmentService {
 
         appointment._administrators = appointment._administrators.filter(
             fAdministrator => {
-                return fAdministrator !== user.sub;
+                return fAdministrator.userId !== user.sub;
             }
         );
 

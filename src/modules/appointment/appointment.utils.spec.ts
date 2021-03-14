@@ -3,6 +3,9 @@ import {Enrollment} from '../enrollment/enrollment.entity';
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {AppointmentUtil} from './appointment.util';
 import {User} from '../user/user.model';
+import {instance, mock} from 'ts-mockito';
+import {Administrator} from './administrator.entity';
+import {Pinner} from './pinner.entity';
 
 const crypto = require('crypto');
 
@@ -89,7 +92,13 @@ describe('Appointment util', () => {
 
                 const __given_appointment = new Appointment();
                 __given_appointment.creatorId = __existing_creator.sub;
-                __given_appointment._administrators = [__given_user.sub];
+
+                const mockedAdministrator = mock(Administrator);
+                const mockedAdministratorInstance = instance(mockedAdministrator);
+                mockedAdministratorInstance.userId = __given_user.sub;
+                mockedAdministratorInstance.appointment = __given_appointment;
+
+                __given_appointment._administrators = [mockedAdministratorInstance];
 
                 const __expected = ['ADMIN'];
 
@@ -185,7 +194,13 @@ describe('Appointment util', () => {
                     const __given_appointment = new Appointment();
                     __given_appointment.id = '1';
                     __given_appointment.creatorId = __existing_creator.sub;
-                    __given_appointment.pinners = [__given_user.sub];
+
+                    const mockedPinner = mock(Pinner);
+                    const mockedPinnerInstance = instance(mockedPinner);
+                    mockedPinnerInstance.userId = __given_user.sub;
+                    mockedPinnerInstance.appointment = __given_appointment;
+
+                    __given_appointment.pinners = [mockedPinnerInstance];
 
                     const __expected = ['PINNED'];
 
@@ -242,7 +257,13 @@ describe('Appointment util', () => {
 
                     const __given_appointment = new Appointment();
                     __given_appointment.creatorId = __given_user.sub;
-                    __given_appointment.pinners = [__given_user.sub];
+
+                    const mockedPinner = mock(Pinner);
+                    const mockedPinnerInstance = instance(mockedPinner);
+                    mockedPinnerInstance.userId = __given_user.sub;
+                    mockedPinnerInstance.appointment = __given_appointment;
+
+                    __given_appointment.pinners = [mockedPinnerInstance];
 
                     const __expected = ['CREATOR', 'PINNED'];
 
@@ -256,7 +277,13 @@ describe('Appointment util', () => {
 
                     const __given_appointment = new Appointment();
                     __given_appointment.creatorId = __given_user.sub;
-                    __given_appointment.pinners = [__given_user.sub];
+
+                    const mockedPinner = mock(Pinner);
+                    const mockedPinnerInstance = instance(mockedPinner);
+                    mockedPinnerInstance.userId = __given_user.sub;
+                    mockedPinnerInstance.appointment = __given_appointment;
+
+                    __given_appointment.pinners = [mockedPinnerInstance];
                     __given_appointment.link = 'link';
 
                     const __given_pins = [__given_appointment.link];
@@ -283,7 +310,13 @@ describe('Appointment util', () => {
                 const __given_appointment = new Appointment();
                 __given_appointment.id = '1';
                 __given_appointment.creatorId = __existing_creator.sub;
-                __given_appointment._administrators = [__existing_admin.sub];
+
+                const mockedAdministrator = mock(Administrator);
+                const mockedAdministratorInstance = instance(mockedAdministrator);
+                mockedAdministratorInstance.userId = __existing_admin.sub;
+                mockedAdministratorInstance.appointment = __given_appointment;
+
+                __given_appointment._administrators = [mockedAdministratorInstance];
 
                 const __given_pins = [];
 
@@ -305,7 +338,13 @@ describe('Appointment util', () => {
                 const __given_appointment = new Appointment();
                 __given_appointment.id = '1';
                 __given_appointment.creatorId = __existing_creator.sub;
-                __given_appointment._administrators = [__existing_admin.sub];
+
+                const mockedAdministrator = mock(Administrator);
+                const mockedAdministratorInstance = instance(mockedAdministrator);
+                mockedAdministratorInstance.userId = __existing_admin.sub;
+                mockedAdministratorInstance.appointment = __given_appointment;
+
+                __given_appointment._administrators = [mockedAdministratorInstance];
 
                 const __given_pins = [];
 
