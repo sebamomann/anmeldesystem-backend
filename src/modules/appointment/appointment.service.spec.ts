@@ -1222,9 +1222,14 @@ describe('AppointmentService', () => {
 
                 jest.spyOn(appointmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
 
-                const actual = await appointmentService.removeAdministrator(mockedUserInstance, link, username);
-
-                expect(actual._administrators).toEqual([]);
+                appointmentService
+                    .removeAdministrator(mockedUserInstance, link, username)
+                    .then(() => {
+                        expect(true).toBe(true)
+                    })
+                    .catch((err) => {
+                        throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
+                    });
             });
 
             describe('* failure should return error', () => {

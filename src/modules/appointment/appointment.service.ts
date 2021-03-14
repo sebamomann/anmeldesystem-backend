@@ -370,8 +370,6 @@ export class AppointmentService {
         );
 
         await this.appointmentRepository.save(appointment);
-
-        return;
     }
 
     /**
