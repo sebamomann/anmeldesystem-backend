@@ -10,7 +10,6 @@ describe('UserService', () => {
     let userService: UserService;
     let mailerService: MailerService;
     let module: TestingModule;
-    let userRepositoryMock: MockType<Repository<User>>;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -36,8 +35,6 @@ describe('UserService', () => {
 
         userService = module.get<UserService>(UserService);
         mailerService = module.get<MailerService>(MailerService);
-
-        userRepositoryMock = module.get(getRepositoryToken(User));
     });
 
     it('should be defined', () => {

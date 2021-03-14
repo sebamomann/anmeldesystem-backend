@@ -53,11 +53,10 @@ export class Appointment {
     @Column({default: false})
     driverAddition: boolean;
 
-    @ManyToMany(type => String)
-    @Column({name: 'administrators'})
+    @Column("simple-array")
     _administrators: string[];
 
-    @ManyToMany(type => String)
+    @Column("simple-array")
     pinners: string[];
 
     @OneToMany(type => File,
@@ -65,7 +64,7 @@ export class Appointment {
         {
             eager: true,
         })
-    files: File[] = [];
+    files: File[];
 
     @Column({nullable: true, type: 'uuid'})
     creatorId: string;

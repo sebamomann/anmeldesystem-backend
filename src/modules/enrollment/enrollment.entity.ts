@@ -23,7 +23,7 @@ import {User} from '../user/user.model';
 const crypto = require('crypto');
 
 @Entity()
-@Index('index_unique_name_appointment', ['name', 'appointment', 'creator'], {unique: true}) // first style
+@Index('index_unique_name_appointment', ['name', 'appointment'], {unique: true}) // first style
 export class Enrollment {
     @PrimaryGeneratedColumn('uuid')
     id: string;

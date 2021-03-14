@@ -20,13 +20,12 @@ import {Usr} from '../user/user.decorator';
 import {Appointment} from './appointment.entity';
 import {AppointmentService} from './appointment.service';
 
-import {AuthGuard} from '@nestjs/passport';
-
 import {Response} from 'express';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {AuthOptGuard} from '../../auth/auth-opt.gurad';
 import {User} from '../user/user.model';
+import {AuthGuard} from '../../auth/auth.gurad';
 
 @Controller('appointment')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)

@@ -14,12 +14,6 @@ export class EnrollmentController {
     constructor(private enrollmentService: EnrollmentService) {
     }
 
-    // @Get()
-    // @UseGuards(AuthGuard('jwt'))
-    // async find(@Query() id: string) {
-    //     return this.enrollmentService.find(id);
-    // }
-
     @Post()
     @UseGuards(AuthOptGuard)
     create(@Usr() user: User,

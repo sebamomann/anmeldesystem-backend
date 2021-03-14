@@ -2,7 +2,7 @@ import {CanActivate, ExecutionContext, HttpService, Injectable, UnauthorizedExce
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(private httpService: HttpService) {
+    constructor(private readonly httpService: HttpService) {
     }
 
     async canActivate(

@@ -30,7 +30,6 @@ describe('AppointmentService', () => {
 
     let appointmentRepositoryMock: MockType<Repository<Appointment>>;
     let pushSubscriptionRepositoryMock: MockType<Repository<PushSubscription>>;
-    let userRepositoryMock: MockType<Repository<User>>;
     let fileRepositoryMock: MockType<Repository<File>>;
     let additionRepositoryMock: MockType<Repository<Addition>>;
 
@@ -70,7 +69,6 @@ describe('AppointmentService', () => {
         userService = module.get<UserService>(UserService);
 
         appointmentRepositoryMock = module.get(getRepositoryToken(Appointment));
-        userRepositoryMock = module.get(getRepositoryToken(User));
         fileRepositoryMock = module.get(getRepositoryToken(File));
         additionRepositoryMock = module.get(getRepositoryToken(Addition));
         pushSubscriptionRepositoryMock = module.get(getRepositoryToken(PushSubscription));
@@ -1181,7 +1179,6 @@ describe('AppointmentService', () => {
                     __existing_appointment._administrators = [];
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
-                    userRepositoryMock.findOne.mockReturnValueOnce(undefined); // check if admin to actually exsists
 
                     appointmentService
                         .addAdministrator(__given_user, __given_link, __given_username)

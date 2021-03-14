@@ -9,9 +9,11 @@ import {PassengerModule} from './passenger/passenger.module';
 import {CommentModule} from './comment/comment.module';
 import {AppointmentModule} from '../appointment/appointment.module';
 import {AdditionModule} from '../addition/addition.module';
+import {UserModule} from '../user/user.module';
+import {AuthModule} from '../../auth/auth.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Enrollment, Mail]), AppointmentModule, AdditionModule, DriverModule, PassengerModule, CommentModule],
+    imports: [TypeOrmModule.forFeature([Enrollment, Mail]), AuthModule, AppointmentModule, AdditionModule, DriverModule, PassengerModule, CommentModule, UserModule],
     providers: [EnrollmentService],
     exports: [EnrollmentService],
     controllers: [EnrollmentController],

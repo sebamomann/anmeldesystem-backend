@@ -14,7 +14,6 @@ import {AuthModule} from './auth/auth.module';
 import {HandlebarsAdapter, MailerModule} from '@nest-modules/mailer';
 import * as path from 'path';
 import {ReleasenoteModule} from './modules/releasenote/releasenote.module';
-import {PushController} from './modules/push/push.controller';
 import {PushModule} from './modules/push/push.module';
 
 require('dotenv').config();
@@ -38,6 +37,7 @@ const _mail = process.env.MAIL_GJM;
                 },
             },
         }),
+        AuthModule,
         UserModule,
         AppointmentModule,
         AdditionModule,
@@ -46,11 +46,10 @@ const _mail = process.env.MAIL_GJM;
         DriverModule,
         PassengerModule,
         CommentModule,
-        AuthModule,
         ReleasenoteModule,
         PushModule,
     ],
-    controllers: [AppController, PushController],
+    controllers: [AppController],
     providers: [AppService],
 })
 export class AppModule {

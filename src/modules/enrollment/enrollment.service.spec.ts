@@ -44,7 +44,6 @@ describe('EnrollmentService', () => {
     let module: TestingModule;
     let enrollmentRepositoryMock: MockType<Repository<Enrollment>>;
     let appointmentRepositoryMock: MockType<Repository<Appointment>>;
-    let userRepositoryMock: MockType<Repository<User>>;
     let fileRepositoryMock: MockType<Repository<File>>;
     let additionRepositoryMock: MockType<Repository<Addition>>;
     let driverRepositoryMock: MockType<Repository<Driver>>;
@@ -108,7 +107,6 @@ describe('EnrollmentService', () => {
         appointmentGateway = module.get<AppointmentGateway>(AppointmentGateway);
 
         enrollmentRepositoryMock = module.get(getRepositoryToken(Enrollment));
-        userRepositoryMock = module.get(getRepositoryToken(User));
         additionRepositoryMock = module.get(getRepositoryToken(Addition));
         appointmentRepositoryMock = module.get(getRepositoryToken(Appointment));
         fileRepositoryMock = module.get(getRepositoryToken(File));
