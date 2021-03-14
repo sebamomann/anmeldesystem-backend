@@ -14,7 +14,15 @@ export class AppointmentUtil {
      */
     public static handleDateValidation(date, deadline) {
         if (Date.parse(date) < Date.parse(deadline)) {
-            throw new InvalidValuesException(null, 'The date can not be before the deadline', ['date']);
+            throw new InvalidValuesException(null, null,
+                [
+                    {
+                        'attribute': 'date',
+                        'value': date,
+                        'message': 'The specified date is timed before the deadline'
+                    }
+                ]
+            );
         }
 
         return date;
@@ -28,7 +36,15 @@ export class AppointmentUtil {
      */
     public static handleDeadlineValidation(date, deadline) {
         if (Date.parse(deadline) > Date.parse(date)) {
-            throw new InvalidValuesException(null, 'The deadline can not be after the date', ['deadline']);
+            throw new InvalidValuesException(null, null,
+                [
+                    {
+                        'attribute': 'deadline',
+                        'value': deadline,
+                        'message': 'The specified deadline is timed after the date'
+                    }
+                ]
+            );
         }
 
         return deadline;

@@ -5,11 +5,15 @@
 -- ---------
 -- DEFAULT -
 -- ---------
--- JWT_User with ID f406c1a0-ea46-4229-a83e-bba9b5d2f313
+-- JWT_User with ID c9eee8c1-e701-4a3d-8cb9-6e7cd1209aba
 
--- --------------------
--- FOR FAILURE - AUTH -
--- --------------------
-INSERT INTO `link` (`id`, `short`, `original`, `isActive`, `iat`, `creatorId`) VALUES
-('07ce868f-a293-46be-afd1-1e3e2b38b691', 'test-createlink-existingshort-short', 'https://dein.li', 1, '2021-02-07 12:59:00.596617', NULL);
+-- -------------
+-- FOR FAILURE -
+-- -------------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`,
+                           `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`)
+VALUES ('1823042c-4282-49d4-9e0f-eed859d34b62', 'test-createappointment-existinglink-title',
+        'test-createappointment-existinglink-description', 'test-createappointment-existinglink-link',
+        'test-createappointment-existinglink-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0',
+        NULL, '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
 COMMIT;

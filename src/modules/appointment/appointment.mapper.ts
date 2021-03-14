@@ -44,6 +44,26 @@ export class AppointmentMapper {
             appointment.files = [];
         }
 
+        if (appointment.maxEnrollments === null) {
+            delete appointment.maxEnrollments;
+        }
+
+        if (appointment.additions?.length === 0) {
+            delete appointment.additions;
+        }
+
+        if (appointment.files?.length === 0) {
+            delete appointment.files;
+        }
+
+        if (appointment.administrators?.length === 0) {
+            delete appointment.administrators;
+        }
+
+        if (appointment.enrollments?.length === 0) {
+            delete appointment.enrollments;
+        }
+
         return appointment;
     }
 
@@ -126,10 +146,6 @@ export class AppointmentMapper {
             const __enrollments = AppointmentUtil
                 .filterPermittedEnrollments(permissions, _appointment.enrollments);
             enrollmentsObject = {enrollments: __enrollments};
-        }
-
-        if (appointment.maxEnrollments === null) {
-            delete appointment.maxEnrollments;
         }
 
         appointment = Object.assign(appointment, creatorObject);

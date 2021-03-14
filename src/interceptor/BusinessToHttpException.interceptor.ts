@@ -1,6 +1,7 @@
 import {
     BadRequestException,
     CallHandler,
+    ConflictException,
     ExecutionContext,
     ForbiddenException,
     GoneException,
@@ -35,15 +36,17 @@ export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
                         if (exception instanceof EntityNotFoundException
                             || exception instanceof UnknownUserException) {
                             throw new NotFoundException(exception.parse());
-                        } else if (exception instanceof InvalidValuesException
-                            || exception instanceof InvalidTokenException
+                        } else if (exception instanceof InvalidTokenException
                             || exception instanceof ExpiredTokenException
-                            || exception instanceof AlreadyUsedException
                             || exception instanceof DuplicateValueException
                             || exception instanceof EmptyFieldsException) {
                             throw new BadRequestException(exception.parse());
                         } else if (exception instanceof InsufficientPermissionsException) {
                             throw new ForbiddenException(exception.parse());
+                        } else if (exception instanceof AlreadyUsedException) {
+                            throw new ConflictException(exception.parse());
+                        } else if (exception instanceof InvalidValuesException) {
+                            throw new UnprocessableEntityException(exception.parse());
                         } else if (exception instanceof EntityGoneException) {
                             throw new GoneException(exception.parse());
                         } else if (exception instanceof InvalidAttributesException) {

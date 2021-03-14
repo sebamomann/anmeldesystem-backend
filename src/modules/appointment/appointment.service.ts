@@ -17,6 +17,7 @@ import {AppointmentUtil} from './appointment.util';
 import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
 import {JWT_User} from '../user/user.model';
+import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
 
 const logger = require('../../logger');
 
@@ -199,7 +200,7 @@ export class AppointmentService {
             appointmentToDB.maxEnrollments = null;
         }
 
-        appointmentToDB.driverAddition = appointmentData.driverAddition;
+        appointmentToDB.driverAddition = !!(appointmentData.driverAddition);
         appointmentToDB.creatorId = user.sub;
         appointmentToDB.additions = await this._createAdditionEntitiesAndFilterDuplicates(appointmentData.additions);
 
@@ -553,7 +554,12 @@ export class AppointmentService {
             } while (await this.linkInUse(link));
         } else {
             if (await this.linkInUse(_link)) {
-                throw new DuplicateValueException(null, null, ['link']);
+                throw new AlreadyUsedException('DUPLICATE_VALUES',
+                    'Provided values are already in use', [{
+                        'attribute': 'link',
+                        'value': _link,
+                        'message': 'Value is already in use by other appointment. Specify a different link'
+                    }]);
             }
 
             link = _link;

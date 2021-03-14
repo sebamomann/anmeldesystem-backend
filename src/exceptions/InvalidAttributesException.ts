@@ -10,14 +10,14 @@ export class InvalidAttributesException implements Error {
     constructor(code: string = null, message: string = null, data: string[] = null) {
         if (code === null
             || code === '') {
-            this.code = 'INVALID_ATTRIBUTE';
+            this.code = 'INVALID_ATTRIBUTES';
         } else {
             this.code = code;
         }
 
         if (message === null
             || message === '') {
-            this.message = 'Following attributes are not processable';
+            this.message = 'Given attributes can not be processed';
         } else {
             this.message = message;
         }

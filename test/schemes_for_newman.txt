@@ -4,7 +4,7 @@ schema_appointment
 	"type": "object",
 	"properties": {
 		"reference": { 
-			"type": "array" ,
+			"type": "array",
 			"items": { "type": "string" }
 		},
 		"id": { "type": "string" },
@@ -29,15 +29,15 @@ schema_appointment
 			"items": ##REPLACE_SCHEMA(schema_addition)##
 		},
 		"files": { 
-			"type": "array" ,
+			"type": "array",
 			"items": ##REPLACE_SCHEMA(schema_file)##
 		},
 		"administrators": { 
-			"type": "array" ,
+			"type": "array",
 			"items": ##REPLACE_SCHEMA(schema_user_minified)##
 		},
 		"enrollments": { 
-			"type": "array" ,
+			"type": "array",
 			"items": ##REPLACE_SCHEMA(schema_enrollment)##
 		},
 		"iat": { 
@@ -47,7 +47,7 @@ schema_appointment
 		"lud": { 
 			"type": "string",
 			"format": "date-time"    
-		},
+		}
 	},
 	"required": [ "id", "title", "description", "link", "location", "date", "deadline", "hidden", "driverAddition", "creator" ],
 	"additionalProperties": false
@@ -83,7 +83,7 @@ schema_addition
 			"type": "number"
 		}
 	},
-	"required": [ "id", "name", "order" ],
+	"required": [ "name", "order" ],
 	"additionalProperties": false
 }
 
@@ -119,12 +119,8 @@ schema_enrollment
 		"comment": { 
 			"type": "string"
 		},
-		"driver": { 
-			"type": ##REPLACE_SCHEMA(schema_driver)##
-		},
-		"passenger": { 
-			"type": ##REPLACE_SCHEMA(schema_passenger)##
-		},
+		"driver":  ##REPLACE_SCHEMA(schema_driver)##,
+		"passenger": ##REPLACE_SCHEMA(schema_passenger)##,
 		"additions": { 
 			"type": "array",
 			"items": ##REPLACE_SCHEMA(schema_addition)##
@@ -171,5 +167,47 @@ schema_passenger
 	"required": [ "requirement"],
 	"additionalProperties": false
 }
+
+
+schema_error
+
+{
+	"type": "object",
+	"properties": {
+		"code": { "type": "string"},
+		"message": { "type": "string" },
+		"data":  {
+			"anyOf": [
+				{ 
+					"type": "object",
+					"properties": {
+						"attribute": { "type": "string" },
+						"value": { "type": "string" },
+						"in": { "type": "string" },
+						"message": { "type": "string" }
+					},
+					"required": [
+						"attribute",
+						"value"
+					] 
+				},
+				{ "type": "string" },
+				{ 
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{ "type": "object" },
+							{ "type": "string" }
+						]
+					}
+				}
+			]
+		}
+	},
+	"required": ["code", "message"],
+	"additionalProperties": false
+}
+
+
 
 
