@@ -175,7 +175,7 @@ export class AppointmentMapper {
 
         if (appointment._administrators) {
             for (const mAdmin of appointment._administrators) {
-                const user: User = await this.userService.findById(mAdmin);
+                const user: User = await this.userService.findById(mAdmin.userId); // TODO admin extends class with this functionality
 
                 appointment.administrators.push(
                     UserUtil.stripUserMin(user)

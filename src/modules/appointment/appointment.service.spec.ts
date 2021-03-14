@@ -20,6 +20,7 @@ import {PushService} from '../push/push.service';
 import {PushSubscription} from '../push/pushSubscription.entity';
 import {User} from '../user/user.model';
 import {anyString, instance, mock, spy, verify, when} from 'ts-mockito';
+import {Administrator} from './administrator.entity';
 
 describe('AppointmentService', () => {
     let module: TestingModule;
@@ -1208,7 +1209,13 @@ describe('AppointmentService', () => {
 
                 const mockedAppointment = mock(Appointment);
                 const mockedAppointmentInstance = instance(mockedAppointment);
-                mockedAppointmentInstance._administrators = [mockedUserInstance_existing.sub];
+
+                const mockedAdministrator = mock(Administrator);
+                const mockedAdministratorInstance = instance(mockedAdministrator);
+                mockedAdministratorInstance.userId = mockedUserInstance.sub;
+                mockedAdministratorInstance.appointment = mockedAppointmentInstance;
+
+                mockedAppointmentInstance._administrators = [mockedAdministratorInstance];
 
                 const mockedAppointmentServiceSpy = spy(appointmentService);
                 const mockedUserServiceSpy = spy(userService);
@@ -1263,7 +1270,13 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creatorId = __existing_creator.sub;
-                    __existing_appointment._administrators = [__existing_user.sub];
+
+                    const mockedAdministrator = mock(Administrator);
+                    const mockedAdministratorInstance = instance(mockedAdministrator);
+                    mockedAdministratorInstance.userId = __existing_user.sub;
+                    mockedAdministratorInstance.appointment = __existing_appointment;
+
+                    __existing_appointment._administrators = [mockedAdministratorInstance];
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
