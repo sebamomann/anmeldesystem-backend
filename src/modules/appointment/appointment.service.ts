@@ -181,11 +181,7 @@ export class AppointmentService {
         appointmentToDB.title = appointmentData.title;
         appointmentToDB.description = appointmentData.description;
 
-        try {
-            appointmentToDB.link = await this.handleAppointmentLink(appointmentData.link);
-        } catch (e) {
-            throw e;
-        }
+        appointmentToDB.link = await this.handleAppointmentLink(appointmentData.link);
 
         appointmentToDB.location = appointmentData.location;
 
@@ -208,8 +204,6 @@ export class AppointmentService {
         appointmentToDB.additions = await this._createAdditionEntitiesAndFilterDuplicates(appointmentData.additions);
 
         appointmentToDB = await this.appointmentRepository.save(appointmentToDB);
-
-        appointmentToDB = await this.userBasedAppointmentPreparation(appointmentToDB, user, {}, false);
 
         return appointmentToDB;
     }
@@ -337,13 +331,12 @@ export class AppointmentService {
 
         try {
             admin = await this.userService.findByUsername(username);
-
         } catch (e) {
             throw new UnknownUserException('NOT_FOUND',
                 `User not found by username`, username);
         }
 
-        appointment.administrators.push(admin);
+        appointment._administrators.push(admin.sub);
 
         return await this.appointmentRepository.save(appointment);
     }
@@ -361,24 +354,22 @@ export class AppointmentService {
      * @throws See {@link findByLink} for reference
      * @throws InsufficientPermissionsException if user is not the owner
      */
-    public async removeAdministrator(_user: User, link: string, username: string) {
-        let appointment;
-
-        try {
-            appointment = await this.findByLink(link);
-        } catch (e) {
-            throw e;
-        }
+    public async removeAdministrator(_user: User, link: string, username: string): Promise<Appointment> {
+        const appointment = await this.findByLink(link);
 
         if (!appointment.isCreator(_user)) {
             throw new InsufficientPermissionsException();
         }
 
-        appointment.administrators = appointment.administrators.filter(fAdministrator => {
-            return fAdministrator.username !== username;
-        });
+        const user = await this.userService.findByUsername(username);
 
-        return this.appointmentRepository.save(appointment);
+        appointment._administrators = appointment._administrators.filter(
+            fAdministrator => {
+                return fAdministrator !== user.sub;
+            }
+        );
+
+        return await this.appointmentRepository.save(appointment);
     }
 
     /**
@@ -580,7 +571,7 @@ export class AppointmentService {
         let output = [];
 
         let i = 0;
-        if (additions !== undefined) {
+        if (Array.isArray(additions)) {
             for (const fAddition of additions) {
                 if (!output.some(sAddition => sAddition.name === fAddition.name)) {
                     let addition: Addition = new Addition();
