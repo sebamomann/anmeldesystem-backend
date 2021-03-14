@@ -4,13 +4,14 @@ import {Appointment} from './appointment.entity';
 import {AppointmentService} from './appointment.service';
 import {AppointmentController} from './appointment.controller';
 
-import {HttpStatus, NotFoundException} from '@nestjs/common';
+import {HttpModule, HttpStatus, NotFoundException} from '@nestjs/common';
 import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {User} from '../user/user.model';
+import {AuthModule} from '../../auth/auth.module';
 
 jest.mock('./appointment.service');
 
@@ -23,6 +24,7 @@ describe('Appointment Controller', () => {
 
     beforeEach(async () => {
         module = await Test.createTestingModule({
+            imports: [AuthModule, HttpModule],
             controllers: [AppointmentController],
             providers: [
                 AppointmentService

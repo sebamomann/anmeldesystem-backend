@@ -6,6 +6,7 @@ import {Enrollment} from './enrollment.entity';
 import {EnrollmentService} from './enrollment.service';
 import {EnrollmentController} from './enrollment.controller';
 import {User} from '../user/user.model';
+import {AuthModule} from '../../auth/auth.module';
 
 jest.mock('./enrollment.service');
 
@@ -18,6 +19,7 @@ describe('Enrollment Controller', () => {
 
     beforeEach(async () => {
         module = await Test.createTestingModule({
+            imports: [AuthModule],
             controllers: [EnrollmentController],
             providers: [
                 EnrollmentService

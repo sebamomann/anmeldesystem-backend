@@ -3,8 +3,8 @@
 // import {AppointmentMapper} from '../appointment/appointment.mapper';
 // import {User} from '../user/user.model';
 //
-// describe('* enrolled by user', () => {
-//     it('* enrollment !created by any user should have attribute "isCreator: false"', async () => {
+describe('* enrolled by user', () => {
+    it('* enrollment !created by any user should have attribute "isCreator: false"', async () => {
 //         const __existing_enrollment = new Enrollment();
 //         __existing_enrollment.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
 //         __existing_enrollment.name = 'owning user';
@@ -19,7 +19,7 @@
 //
 //         const __actual = (AppointmentMapper as any).enrolledByUser(__given_appointment.enrollments);
 //         expect(__actual).toEqual(__expected);
-//     });
+    });
 //
 //     it('* enrollment created by user should have attribute "isCreator: true" and containing user information', async () => {
 //         const __existing_enrollment_creator = new User();
@@ -47,4 +47,4 @@
 //         expect(__actual).toEqual(__expected);
 //     });
 //
-// });
+});

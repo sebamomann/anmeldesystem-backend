@@ -15,8 +15,9 @@ import {Enrollment} from '../enrollment/enrollment.entity';
 import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
 import {PushSubscription} from '../push/pushSubscription.entity';
-import {instance, mock} from 'ts-mockito';
+import {instance, mock, when} from 'ts-mockito';
 import {User} from '../user/user.model';
+import {Administrator} from './administrator.entity';
 
 const crypto = require('crypto');
 
@@ -69,6 +70,7 @@ describe('AppointmentMapper', () => {
     describe('* permission mapping', () => {
         describe('* iat and lud information', () => {
             let mockedUserInstance_creator;
+            let mockedAppointment;
             let mockedAppointmentInstance;
 
             const mockedUser_creator_keycloak = mock(User);
@@ -80,7 +82,7 @@ describe('AppointmentMapper', () => {
                 mockedUserInstance_creator = instance(mockedUser_creator);
                 mockedUserInstance_creator.sub = 'bdb9ee47-75d4-45f3-914a-4eef91439f4c';
 
-                const mockedAppointment = mock(Appointment);
+                mockedAppointment = mock(Appointment);
                 mockedAppointmentInstance = instance(mockedAppointment);
                 mockedAppointmentInstance.iat = new Date(Date.now());
                 mockedAppointmentInstance.lud = new Date(Date.now());
@@ -90,6 +92,8 @@ describe('AppointmentMapper', () => {
             it('* creator should see information', async () => {
                 // function mocking
                 jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
+
+                when(mockedAppointment.isCreator(mockedUserInstance_creator)).thenReturn(true);
 
                 // execution
                 const appointmentMapper = new AppointmentMapper(userService);
@@ -111,6 +115,7 @@ describe('AppointmentMapper', () => {
                 mockedUserInstance_requester.sub = '6dc8df21-9a38-41d7-ae24-83d2a3bdbe7b';
 
                 // function mocking
+                when(mockedAppointment.isCreator(mockedUserInstance_creator)).thenReturn(false);
                 jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
                 // execution
@@ -126,6 +131,8 @@ describe('AppointmentMapper', () => {
         describe('* hidden appointment', () => {
             let mockedUserInstance_requester;
             let mockedUserInstance_creator;
+
+            let mockedAppointment;
             let mockedAppointmentInstance;
 
             let mockedEnrollmentInstance_1;
@@ -142,7 +149,7 @@ describe('AppointmentMapper', () => {
                 mockedUserInstance_creator = instance(mockedUser_creator);
                 mockedUserInstance_creator.sub = 'bdb9ee47-75d4-45f3-914a-4eef91439f4c';
 
-                const mockedAppointment = mock(Appointment);
+                mockedAppointment = mock(Appointment);
                 mockedAppointmentInstance = instance(mockedAppointment);
                 mockedAppointmentInstance.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
                 mockedAppointmentInstance.hidden = true;
@@ -165,6 +172,8 @@ describe('AppointmentMapper', () => {
                 const permissions = {};
 
                 // function mocking
+                when(mockedAppointment.isCreator(mockedUserInstance_creator)).thenReturn(false);
+                when(mockedAppointment.isCreatorOrAdministrator(mockedUserInstance_creator)).thenReturn(false);
                 jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
                 const appointmentMapper = new AppointmentMapper(userService);
@@ -185,6 +194,8 @@ describe('AppointmentMapper', () => {
                     };
 
                     // function mocking
+                    when(mockedAppointment.isCreator(mockedUserInstance_creator)).thenReturn(false);
+                    when(mockedAppointment.isCreatorOrAdministrator(mockedUserInstance_creator)).thenReturn(false);
                     jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
                     const appointmentMapper = new AppointmentMapper(userService);
@@ -210,6 +221,8 @@ describe('AppointmentMapper', () => {
                     };
 
                     // function mocking
+                    when(mockedAppointment.isCreator(mockedUserInstance_creator)).thenReturn(false);
+                    when(mockedAppointment.isCreatorOrAdministrator(mockedUserInstance_creator)).thenReturn(false);
                     jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
                     const appointmentMapper = new AppointmentMapper(userService);
@@ -235,6 +248,8 @@ describe('AppointmentMapper', () => {
                         };
 
                         // function mocking
+                        when(mockedAppointment.isCreator(mockedUserInstance_creator)).thenReturn(false);
+                        when(mockedAppointment.isCreatorOrAdministrator(mockedUserInstance_creator)).thenReturn(false);
                         jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
                         const appointmentMapper = new AppointmentMapper(userService);
@@ -271,28 +286,16 @@ describe('AppointmentMapper', () => {
                 });
             });
 
-            it('* creator should see all enrollments', async () => {
+            it('* creator/admin should see all enrollments', async () => {
                 const permissions = {};
 
                 // function mocking
+                when(mockedAppointment.isCreator(mockedUserInstance_creator)).thenReturn(false);
+                when(mockedAppointment.isCreatorOrAdministrator(mockedUserInstance_creator)).thenReturn(true);
                 jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
 
                 const appointmentMapper = new AppointmentMapper(userService);
                 const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_creator, permissions);
-
-                expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1, mockedEnrollmentInstance_2]);
-            });
-
-            it('* admin should see all enrollments', async () => {
-                mockedAppointmentInstance._administrators = [mockedUserInstance_requester.sub];
-
-                const permissions = {};
-
-                // function mocking
-                jest.spyOn(userService, 'findById').mockResolvedValueOnce(mockedUser_creator_keycloak);
-
-                const appointmentMapper = new AppointmentMapper(userService);
-                const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
 
                 expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1, mockedEnrollmentInstance_2]);
             });
@@ -407,11 +410,19 @@ describe('AppointmentMapper', () => {
         });
 
         it('* correctly strip administrators', async () => {
-            mockedAppointmentInstance._administrators = [
-                '0a18ecf4-8168-4a06-b7bb-ec4b45bb70eb',
-                '480c1668-dba1-4bec-b85c-9de751eff21a',
-                'fe3b132c-4baa-4ff2-a7e1-8ace79cca158'
-            ];
+            const mockedAdministrator_1 = mock(Administrator);
+            const mockedAdministratorInstance_1 = instance(mockedAdministrator_1);
+            mockedAdministratorInstance_1.userId =   '0a18ecf4-8168-4a06-b7bb-ec4b45bb70eb';
+
+            const mockedAdministrator_2 = mock(Administrator);
+            const mockedAdministratorInstance_2 = instance(mockedAdministrator_2);
+            mockedAdministratorInstance_2.userId =   '480c1668-dba1-4bec-b85c-9de751eff21a';
+
+            const mockedAdministrator_3 = mock(Administrator);
+            const mockedAdministratorInstance_3 = instance(mockedAdministrator_3);
+            mockedAdministratorInstance_3.userId =   'fe3b132c-4baa-4ff2-a7e1-8ace79cca158';
+
+            mockedAppointmentInstance._administrators = [mockedAdministrator_1,mockedAdministrator_2,mockedAdministrator_3]
 
             const mockedUser1 = mock(User);
             const mockedUserInstance1 = instance(mockedUser1);
@@ -440,9 +451,9 @@ describe('AppointmentMapper', () => {
 
             expect(actual.administrators.length).toBe(orig._administrators.length);
             expect(userService.findById).toHaveBeenCalledTimes(orig._administrators.length);
-            expect(userService.findById).toHaveBeenNthCalledWith(1, orig._administrators[0]);
-            expect(userService.findById).toHaveBeenNthCalledWith(2, orig._administrators[1]);
-            expect(userService.findById).toHaveBeenNthCalledWith(3, orig._administrators[2]);
+            expect(userService.findById).toHaveBeenNthCalledWith(1, orig._administrators[0].userId);
+            expect(userService.findById).toHaveBeenNthCalledWith(2, orig._administrators[1].userId);
+            expect(userService.findById).toHaveBeenNthCalledWith(3, orig._administrators[2].userId);
             expect(actual.administrators).toEqual([
                 {username: mockedUserInstance1.preferred_username, name: mockedUserInstance1.name},
                 {username: mockedUserInstance2.preferred_username, name: mockedUserInstance2.name},
