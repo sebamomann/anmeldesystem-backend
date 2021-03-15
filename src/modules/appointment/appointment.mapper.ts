@@ -35,7 +35,8 @@ export class AppointmentMapper {
      */
     public async basic(appointment): Promise<Appointment> {
         await this.stripAdministrators(appointment);
-        this.mapEnrollments(appointment);
+        await this.mapEnrollments(appointment);
+
         AppointmentMapper.sortAdditions(appointment);
 
         if (appointment.files) {
@@ -100,7 +101,7 @@ export class AppointmentMapper {
                             driverAddition,
                             additions,
                             files,
-                            administrators,
+                            _administrators,
                         }) => ({
             reference,
             id,
@@ -115,7 +116,7 @@ export class AppointmentMapper {
             driverAddition,
             additions,
             files,
-            administrators,
+            _administrators,
         }))
         (_appointment);
 
@@ -143,8 +144,11 @@ export class AppointmentMapper {
             }))
             (_appointment);
         } else {
+            /**
+             * TODO can be made in request
+             */
             const __enrollments = AppointmentUtil
-                .filterPermittedEnrollments(permissions, _appointment.enrollments);
+                .filterPermittedEnrollments(_user, permissions, _appointment.enrollments);
             enrollmentsObject = {enrollments: __enrollments};
         }
 
@@ -191,15 +195,19 @@ export class AppointmentMapper {
      *
      * @protected
      */
-    private mapEnrollments(appointment: Appointment): void {
+    private async mapEnrollments(appointment: Appointment): Promise<void> {
         const enrollmentMapper = new EnrollmentMapper(this.userService);
 
         if (appointment.enrollments) {
-            appointment.enrollments.map(
-                async mEnrollment => {
-                    await enrollmentMapper.basic(mEnrollment);
-                }
-            );
+            const enrollments = [];
+
+            for (const mEnrollment of appointment.enrollments) {
+                const enrollment = await enrollmentMapper.basic(mEnrollment);
+
+                enrollments.push(enrollment);
+            }
+
+            appointment.enrollments = enrollments;
         } else {
             appointment.enrollments = [];
         }

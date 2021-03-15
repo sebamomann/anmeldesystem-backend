@@ -56,7 +56,9 @@ export class Appointment {
     driverAddition: boolean;
 
     @OneToMany(type => Administrator,
-        administrator => administrator.appointment)
+        administrator => administrator.appointment, {
+            eager: true
+        })
     _administrators: Administrator[];
 
     @OneToMany(type => Pinner,

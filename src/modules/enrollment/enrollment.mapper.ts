@@ -20,7 +20,7 @@ export class EnrollmentMapper {
                            comment,
                            additions, // TODO REMOVE NAMES OF ADDITIONS
                            comments,
-                           creator,
+                           creatorId,
                            iat
                        }) => ({
             id,
@@ -28,7 +28,7 @@ export class EnrollmentMapper {
             comment,
             additions,
             comments,
-            creator,
+            creatorId,
             iat
         }))
         (_enrollment);
@@ -36,9 +36,6 @@ export class EnrollmentMapper {
         enrollment.additions.map((fAddition) => {
             delete fAddition.id;
         });
-
-        enrollment.createdByUser = _enrollment.creator !== null
-            && _enrollment.creator !== undefined;
 
         if (_enrollment.token !== undefined) {
             enrollment.token = _enrollment.token;
@@ -55,6 +52,13 @@ export class EnrollmentMapper {
         }
 
         await this.stripCreator(enrollment);
+
+        const keys = Object.keys(enrollment);
+        keys.forEach((key) => {
+            if (!enrollment[key] || enrollment[key].length === 0) {
+                delete enrollment[key];
+            }
+        });
 
         return enrollment;
     }

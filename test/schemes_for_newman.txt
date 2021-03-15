@@ -125,10 +125,7 @@ schema_enrollment
 			"type": "array",
 			"items": ##REPLACE_SCHEMA(schema_addition)##
 		},
-		"creator": { 
-			"type": "array",
-			"items": ##REPLACE_SCHEMA(schema_user_minified)##
-		},
+		"creator": ##REPLACE_SCHEMA(schema_user_minified)##,
 		"iat": { 
 			"type": "string",
 			"format": "date-time"    

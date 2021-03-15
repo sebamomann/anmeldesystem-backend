@@ -133,12 +133,13 @@ export class AppointmentUtil {
      * IMPORTANT - The order of the ids with their corresponding token is important!.
      * The second id passed, will be verified with the second PASSED token (not token number)!
      *
+     * @param user
      * @param permissions All raw query parameters
      * @param enrollments Enrollments to filter
      *
      * @returns Enrollment[] ALl filtered enrollments
      */
-    public static filterPermittedEnrollments(permissions: any, enrollments: Enrollment[]) {
+    public static filterPermittedEnrollments(user: JWT_User, permissions: any, enrollments: Enrollment[]) {
         let extractedIds = [];
         let extractedTokens = [];
         for (const queryKey of Object.keys(permissions)) {
@@ -161,7 +162,7 @@ export class AppointmentUtil {
         });
 
         return enrollments.filter(fEnrollment => {
-            if (validIds.includes(fEnrollment.id)) {
+            if (validIds.includes(fEnrollment.id) || fEnrollment.creatorId === user?.sub) {
                 return fEnrollment;
             }
         });
