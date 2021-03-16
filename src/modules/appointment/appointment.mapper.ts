@@ -40,7 +40,10 @@ export class AppointmentMapper {
         AppointmentMapper.sortAdditions(appointment);
 
         if (appointment.files) {
-            appointment.files.map(mFile => delete mFile.data);
+            appointment.files.map(mFile => {
+                delete mFile.data;
+                mFile.url = process.env.API_URL + "file/" + mFile.id;
+            });
         } else {
             appointment.files = [];
         }

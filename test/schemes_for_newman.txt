@@ -101,9 +101,12 @@ schema_file
 		},
 		"name": { 
 			"type": "string"
-		}
+		},
+		"url": {
+            "type": "string"
+        }
 	},
-	"required": [ "id", "name" ],
+	"required": [ "id", "name", "url" ],
 	"additionalProperties": false
 }
 

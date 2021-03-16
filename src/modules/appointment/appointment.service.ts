@@ -35,11 +35,11 @@ export class AppointmentService {
     }
 
     /**
-     * Find Appointment with its relations by its link.
+     * Find {@link Appointment} its unique link.
      *
-     * @param link String link of Appointment
+     * @param link          Link of {@link Appointment}
      *
-     * @throws EntityNotFoundException if given link does not match any appointment
+     * @throws EntityNotFoundException if given link does not match any {@link Appointment}
      */
     public async findByLink(link: string): Promise<Appointment> {
         let appointment = await this.appointmentRepository.findOne({
@@ -49,7 +49,11 @@ export class AppointmentService {
         });
 
         if (appointment === undefined) {
-            throw new EntityNotFoundException(null, null, 'appointment');
+            throw new EntityNotFoundException(null, null, {
+                'attribute': 'link',
+                'in': 'path',
+                'value': link
+            });
         }
 
         return appointment;
