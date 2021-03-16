@@ -159,7 +159,7 @@ describe('AppointmentService', () => {
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
                 const __expected = __existing_appointment;
-                __expected.reference = [];
+                __expected.relations = [];
 
                 const __actual = await appointmentService.findByLink(__given_link);
                 expect(__actual).toEqual(__expected);

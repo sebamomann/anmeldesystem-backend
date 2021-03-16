@@ -91,7 +91,7 @@ export class AppointmentMapper {
         let enrollmentsObject;
 
         appointment = (({
-                            reference,
+                            relations,
                             id,
                             title,
                             description,
@@ -106,7 +106,7 @@ export class AppointmentMapper {
                             files,
                             _administrators,
                         }) => ({
-            reference,
+            relations,
             id,
             title,
             description,

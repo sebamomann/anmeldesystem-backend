@@ -29,6 +29,7 @@ COMMIT;
 -- ---------
 -- JWT_User with ID 9055cf00-0911-4311-9f3e-c3813dd4e4f9 // APPOINTMENT CREATOR
 -- JWT_User with ID 51a7fb18-1f44-4d13-ae30-d5e27d2621e0 // APPOINTMENT ADMIN
+-- JWT_USER with ID 171bcb51-c1c9-470f-8e0b-9b36c03efcbd // APPOINTMENT PINNER
 -- JWT_User with ID 0f72f964-a0b2-4347-9e52-9d2cd2441849 // ENROLLMENT CREATOR
 
 -- ---------
@@ -37,6 +38,50 @@ COMMIT;
 INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
 ('5163f213-c168-408c-ad63-4faa7ec61ae5', 'test-getappointment-default-title', 'test-getappointment-default-description', 'test-getappointment-default-link', 'test-getappointment-default-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', '9055cf00-0911-4311-9f3e-c3813dd4e4f9', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
 COMMIT;
+
+
+-- ------------
+-- REFERENCES -
+-- ------------
+-- ---------------------
+-- APPOINTMENT CREATOR -
+-- ---------------------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('814006b0-e4dc-4bfa-84b7-41f1cc8824de', 'test-getappointment-relations-title', 'test-getappointment-relations-description', 'test-getappointment-relations-link', 'test-getappointment-relations-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', '9055cf00-0911-4311-9f3e-c3813dd4e4f9', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+-- -------------------
+-- APPOINTMENT ADMIN -
+-- -------------------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('e2ddb10b-4ef3-4f67-8f00-be1667ebb65c', 'test-getappointment-relations-admin-title', 'test-getappointment-relations-admin-description', 'test-getappointment-relations-admin-link', 'test-getappointment-relations-admin-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', '9055cf00-0911-4311-9f3e-c3813dd4e4f9', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `administrator` (`id`, `userId`, `appointmentId`) VALUES
+('b7916c2c-210c-44cb-9e02-7d48c7a6891b', '51a7fb18-1f44-4d13-ae30-d5e27d2621e0', 'e2ddb10b-4ef3-4f67-8f00-be1667ebb65c');
+COMMIT;
+-- --------------------
+-- ENROLLMENT CREATOR -
+-- --------------------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('02ff5aff-d1a3-40f9-a6ca-21cfc36f701c', 'test-getappointment-relations-enrolled-title', 'test-getappointment-relations-enrolled-description', 'test-getappointment-relations-enrolled-link', 'test-getappointment-relations-enrolled-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', '9055cf00-0911-4311-9f3e-c3813dd4e4f9', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `enrollment` (`id`, `name`, `comment`, `creatorId`, `iat`, `lud`, `appointmentId`) VALUES
+('fa002311-fa84-45dd-8b4a-fed641affb91', 'test-getappointment-relations-enrolled-name', 'test-getappointment-relations-enrolled-comment', NULL, '2021-01-01 05:05:23', '2021-03-01 05:05:23', '02ff5aff-d1a3-40f9-a6ca-21cfc36f701c'),
+('d2990e80-26e0-4ad0-a953-e836d89a9bdf', NULL, 'test-getappointment-relations-enrolled-name-creator', '0f72f964-a0b2-4347-9e52-9d2cd2441849', '2021-01-01 05:09:23', '2021-03-01 05:09:23', '02ff5aff-d1a3-40f9-a6ca-21cfc36f701c');
+COMMIT;
+-- --------------------
+-- APPOINTMENT PINNER -
+-- --------------------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('9acaa38a-377d-4a69-b1ea-95042fde741a', 'test-getappointment-relations-pinned-title', 'test-getappointment-relations-pinned-description', 'test-getappointment-relations-pinned-link', 'test-getappointment-relations-pinned-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', '9055cf00-0911-4311-9f3e-c3813dd4e4f9', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `pinner` (`id`, `userId`, `appointmentId`) VALUES
+('0e62cea3-b66b-492d-8ab4-5826d807f4f5', '171bcb51-c1c9-470f-8e0b-9b36c03efcbd', '171bcb51-c1c9-470f-8e0b-9b36c03efcbd');
+COMMIT;
+
+
 
 
 -- ---------------------

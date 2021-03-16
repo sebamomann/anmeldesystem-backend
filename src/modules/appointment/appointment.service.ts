@@ -102,7 +102,7 @@ export class AppointmentService {
      * When passing a link with this request, the corresponding Appointment gets marked as "PINNED"
      * <br />
      * <br />
-     * All appointments include a reference. See {@link parseReferences} for more information
+     * All appointments include a relations. See {@link parseReferences} for more information
      *
      * @param user      Requester (if existing)
      * @param params    All query parameters to parse pinned links
@@ -135,7 +135,7 @@ export class AppointmentService {
      * When passing a link with this request, the corresponding Appointment gets marked as "PINNED"
      * <br />
      * <br />
-     * All appointments include a reference. See {@link parseReferences} for more information
+     * All appointments include a relations. See {@link parseReferences} for more information
      *
      * @param user      Requester (if existing)
      * @param params    All query parameters to parse pinned links
@@ -316,7 +316,7 @@ export class AppointmentService {
      *
      * @returns void if successful
      *
-     * @throws See {@link findByLink} for reference
+     * @throws See {@link findByLink} for relations
      * @throws InsufficientPermissionsException if user is not the owner
      * @throws UnknownUserException if user to add does not exist
      */
@@ -357,7 +357,7 @@ export class AppointmentService {
      *
      * @returns void if successful
      *
-     * @throws See {@link findByLink} for reference
+     * @throws See {@link findByLink} for relations
      * @throws InsufficientPermissionsException if user is not the owner
      *
      * TODO
@@ -391,7 +391,7 @@ export class AppointmentService {
      *
      * @returns void if successful
      *
-     * @throws See {@link findByLink} for reference
+     * @throws See {@link findByLink} for relations
      * @throws InsufficientPermissionsException if user is not the owner
      * @throws UnknownUserException if user to add does not exist
      */
@@ -431,7 +431,7 @@ export class AppointmentService {
      *
      * @returns void if successful
      *
-     * @throws See {@link findByLink} for reference
+     * @throws See {@link findByLink} for relations
      * @throws InsufficientPermissionsException if user is not the owner
      */
     public async removeFile(_user: JWT_User, link: string, id: string) {
@@ -510,7 +510,7 @@ export class AppointmentService {
      *
      * @returns boolean     true if creator or admin - false if not
      *
-     * @throws              See {@link findByLink} for reference
+     * @throws              See {@link findByLink} for relations
      */
     public async isCreatorOrAdministrator(user: JWT_User, ref: string): Promise<boolean> {
         const appointment = await this.findByLink(ref);
@@ -540,7 +540,7 @@ export class AppointmentService {
     private async userBasedAppointmentPreparation(appointment: Appointment, user: JWT_User, permissions: any, slim: boolean) {
         const appointmentMapper = new AppointmentMapper(this.userService);
 
-        appointment.reference = AppointmentUtil.parseReferences(user, appointment, [], permissions); // empty pins because fnc is only called on single appointment get request
+        appointment.relations = AppointmentUtil.parseReferences(user, appointment, [], permissions); // empty pins because fnc is only called on single appointment get request
 
         appointment = await appointmentMapper.permission(appointment, user, permissions);
         appointment = appointmentMapper.slim(appointment, slim);

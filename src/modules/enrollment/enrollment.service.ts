@@ -67,9 +67,9 @@ export class EnrollmentService {
      *
      * @return Enrollment entity that was created
      *
-     * @throws See {@link findByLink} for reference
+     * @throws See {@link findByLink} for relations
      * @throws DuplicateValueException if name is already in use
-     * @throws See {@link parseEnrollmentObject} for reference
+     * @throws See {@link parseEnrollmentObject} for relations
      */
     public async create(enrollment_raw: Enrollment, user: JWT_User, domain: string) {
         const appointment_referenced = await this.appointmentService

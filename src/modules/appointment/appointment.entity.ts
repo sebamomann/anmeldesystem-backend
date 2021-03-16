@@ -62,7 +62,9 @@ export class Appointment {
     _administrators: Administrator[];
 
     @OneToMany(type => Pinner,
-        pinner => pinner.appointment)
+        pinner => pinner.appointment, {
+            eager: true
+        })
     pinners: Administrator[];
 
     @OneToMany(type => File,
@@ -88,7 +90,7 @@ export class Appointment {
     subscriptions: PushSubscription[];
 
     creator?: IUserMinified;
-    reference?: string[] = [];
+    relations?: string[] = [];
     administrators: IUserMinified[] = [];
     numberOfEnrollments?: number;
 

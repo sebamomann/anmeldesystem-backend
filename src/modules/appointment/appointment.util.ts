@@ -66,7 +66,7 @@ export class AppointmentUtil {
      * </ol>
      * Note that a permission granted via passing a link is also marked as "PINNED".<br/>
      * Multiple correlations are possible. Two references of the same type are not possible.<br/>
-     * For the "Enrolled" reference to happen, only the ID is needed. No token validation happening.
+     * For the "Enrolled" relations to happen, only the ID is needed. No token validation happening.
      *
      * @param user Requester (if existing) to correlate
      * @param appointment Appointment to correlate user with
@@ -76,7 +76,9 @@ export class AppointmentUtil {
      * @returns string[] Array of all correlations regarding JWT_User and Appointment
      */
     public static parseReferences(user: JWT_User, appointment: Appointment, pins: string[], permissions = {}) {
-        const references = [];
+        const relations = [];
+
+        console.log(user);
 
         let extractedIds = [];
         for (const queryKey of Object.keys(permissions)) {
@@ -85,16 +87,16 @@ export class AppointmentUtil {
             }
         }
 
-        if (user === null) {
+        if (user === null && extractedIds.length === 0) {
             return [];
         }
 
         if (appointment.isAdministrator(user)) {
-            references.push('ADMIN');
+            relations.push('ADMIN');
         }
 
         if (appointment.isCreator(user)) {
-            references.push('CREATOR');
+            relations.push('CREATOR');
         }
 
         const hasPermissionForAtLeastOneEnrollment = appointment.enrollments?.some(sEnrollment => {
@@ -102,21 +104,22 @@ export class AppointmentUtil {
         });
 
         const isCreatorOfAnyEnrollment = appointment.enrollments?.some(sEnrollment => {
-            return sEnrollment.creatorId != null
+            return user
+                && sEnrollment.creatorId != null
                 && sEnrollment.creatorId === user.sub;
         });
 
         if (appointment.enrollments
             && (isCreatorOfAnyEnrollment || hasPermissionForAtLeastOneEnrollment)) {
-            references.push('ENROLLED');
+            relations.push('ENROLLED');
         }
 
         if ((appointment.pinners && appointment.pinners.some(sPinner => sPinner.userId === user.sub))
             || pins.includes(appointment.link)) {
-            references.push('PINNED');
+            relations.push('PINNED');
         }
 
-        return references;
+        return relations;
     }
 
     /**

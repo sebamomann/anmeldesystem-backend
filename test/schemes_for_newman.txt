@@ -3,7 +3,7 @@ schema_appointment
 {
 	"type": "object",
 	"properties": {
-		"reference": { 
+		"relations": {
 			"type": "array",
 			"items": { "type": "string" }
 		},
