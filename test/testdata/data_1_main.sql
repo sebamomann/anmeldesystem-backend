@@ -78,7 +78,7 @@ INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `da
 COMMIT;
 
 INSERT INTO `pinner` (`id`, `userId`, `appointmentId`) VALUES
-('0e62cea3-b66b-492d-8ab4-5826d807f4f5', '171bcb51-c1c9-470f-8e0b-9b36c03efcbd', '171bcb51-c1c9-470f-8e0b-9b36c03efcbd');
+('0e62cea3-b66b-492d-8ab4-5826d807f4f5', '171bcb51-c1c9-470f-8e0b-9b36c03efcbd', '9acaa38a-377d-4a69-b1ea-95042fde741a');
 COMMIT;
 
 
