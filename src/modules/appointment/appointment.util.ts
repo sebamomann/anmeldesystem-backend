@@ -78,8 +78,6 @@ export class AppointmentUtil {
     public static parseReferences(user: JWT_User, appointment: Appointment, pins: string[], permissions = {}) {
         const relations = [];
 
-        console.log(user);
-
         let extractedIds = [];
         for (const queryKey of Object.keys(permissions)) {
             if (queryKey.startsWith('perm')) {
