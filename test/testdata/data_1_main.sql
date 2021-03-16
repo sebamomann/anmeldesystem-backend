@@ -38,6 +38,52 @@ INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `da
 ('5163f213-c168-408c-ad63-4faa7ec61ae5', 'test-getappointment-default-title', 'test-getappointment-default-description', 'test-getappointment-default-link', 'test-getappointment-default-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', '9055cf00-0911-4311-9f3e-c3813dd4e4f9', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
 COMMIT;
 
+-- ------------------
+-- WITH ENROLLMENTS -
+-- ------------------
+-- ---------
+-- PRESENT -
+-- ---------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('8d397266-75f5-413c-a9b4-3237e50c7852', 'test-getappointment-enrollments-title', 'test-getappointment-enrollments-description', 'test-getappointment-enrollments-link', 'test-getappointment-enrollments-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', '9055cf00-0911-4311-9f3e-c3813dd4e4f9', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `enrollment` (`id`, `name`, `comment`, `creatorId`, `iat`, `lud`, `appointmentId`) VALUES
+('b1bc5530-c9cc-40c1-9280-cf99ec6cc63d', 'test-getappointment-enrollments-name-1', 'test-getappointment-enrollments-comment-1', NULL, '2021-01-01 05:05:23', '2021-03-01 05:05:23', '8d397266-75f5-413c-a9b4-3237e50c7852'),
+('14bba460-69d8-4238-8d79-5e2106d2998e', 'test-getappointment-enrollments-name-2', 'test-getappointment-enrollments-comment-2', NULL, '2021-01-01 05:06:23', '2021-03-01 05:06:23', '8d397266-75f5-413c-a9b4-3237e50c7852'),
+('77fd09fb-f44b-4646-9e47-e45a0e8d7fc1', 'test-getappointment-enrollments-name-3', 'test-getappointment-enrollments-comment-3', NULL, '2021-01-01 05:07:23', '2021-03-01 05:07:23', '8d397266-75f5-413c-a9b4-3237e50c7852'),
+('33d5cc7c-7278-4ce5-bd1d-d5a527e315c8', 'test-getappointment-enrollments-name-4', 'test-getappointment-enrollments-comment-4', NULL, '2021-01-01 05:08:23', '2021-03-01 05:08:23', '8d397266-75f5-413c-a9b4-3237e50c7852'),
+('7e826bb0-0008-4503-86fa-7ea9f10525d1', NULL, 'test-getappointment-enrollments-comment-5-creator', '0f72f964-a0b2-4347-9e52-9d2cd2441849', '2021-01-01 05:09:23', '2021-03-01 05:09:23', '8d397266-75f5-413c-a9b4-3237e50c7852');
+COMMIT;
+
+
+-- ---------------------
+-- WITH ADMINISTRATORS -
+-- ---------------------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('aa7a0cf0-9b32-4b74-8b52-de00d3d13e4b', 'test-getappointment-administrators-title', 'test-getappointment-administrators-description', 'test-getappointment-administrators-link', 'test-getappointment-administrators-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', '9055cf00-0911-4311-9f3e-c3813dd4e4f9', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `administrator` (`id`, `userId`, `appointmentId`) VALUES
+('0bde968c-8649-461e-be66-dbd3ed5b956c', '51a7fb18-1f44-4d13-ae30-d5e27d2621e0', 'aa7a0cf0-9b32-4b74-8b52-de00d3d13e4b');
+COMMIT;
+
+
+-- ----------------
+-- WITH ADDITIONS -
+-- ----------------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('229135fa-d66f-4819-a375-82995d8203e6', 'test-getappointment-additions-title', 'test-getappointment-additions-description', 'test-getappointment-additions-link', 'test-getappointment-additions-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', '9055cf00-0911-4311-9f3e-c3813dd4e4f9', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `addition` (`id`, `name`, `order`, `appointmentId`) VALUES
+('28a03edc-cde5-4ce3-bb4c-04dcbe85f116', 'test-getappointment-additions-name-1', '0', '229135fa-d66f-4819-a375-82995d8203e6'),
+('74b5eae6-1e5f-47eb-bf46-57f292f56e44', 'test-getappointment-additions-name-2', '1', '229135fa-d66f-4819-a375-82995d8203e6'),
+('16a7edc6-c403-446f-89a1-f1a1d61f9ec9', 'test-getappointment-additions-name-3', '2', '229135fa-d66f-4819-a375-82995d8203e6'),
+('ee59654b-b6cf-4ea2-81a2-8d097a54bd44', 'test-getappointment-additions-name-4', '3', '229135fa-d66f-4819-a375-82995d8203e6');
+COMMIT;
+
+
 
 -- ------------------
 -- WITH ENROLLMENTS -
@@ -61,8 +107,6 @@ COMMIT;
 -- ---------
 -- HIDDEN -
 -- ---------
-
-
 INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
 ('e0655f6b-b2a9-42f1-8ce3-3492c1af257f', 'test-getappointment-enrollments-hidden-title', 'test-getappointment-enrollments-hidden-description', 'test-getappointment-enrollments-hidden-link', 'test-getappointment-enrollments-hidden-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '1', '0', '9055cf00-0911-4311-9f3e-c3813dd4e4f9', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
 COMMIT;

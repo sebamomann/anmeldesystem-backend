@@ -120,10 +120,6 @@ export class AppointmentMapper {
         }))
         (_appointment);
 
-        appointment.additions.map((fAddition) => {
-            delete fAddition.id;
-        });
-
         if (_appointment.isCreator(_user)) {
             creatorObject = (({
                                   iat,

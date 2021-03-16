@@ -76,6 +76,9 @@ schema_addition
 { 
 	"type": "object",
 	"properties": {
+	    "id": {
+            "type": "string"
+        },
 		"name": {
 			"type": "string"
 		},
@@ -83,7 +86,7 @@ schema_addition
 			"type": "number"
 		}
 	},
-	"required": [ "name", "order" ],
+	"required": [ "id", "name", "order" ],
 	"additionalProperties": false
 }
 

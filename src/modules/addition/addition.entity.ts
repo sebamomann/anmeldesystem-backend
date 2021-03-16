@@ -6,7 +6,6 @@ import {Exclude} from 'class-transformer';
 @Index('index_unique_name_appointment', ['name', 'appointment'], {unique: true}) // first style
 export class Addition {
     @PrimaryGeneratedColumn('uuid')
-    @Exclude({toPlainOnly: true})
     id: string;
 
     @Exclude()
