@@ -86,7 +86,7 @@ schema_addition
 			"type": "number"
 		}
 	},
-	"required": [ "id", "name", "order" ],
+	"required": [ "name" ],
 	"additionalProperties": false
 }
 

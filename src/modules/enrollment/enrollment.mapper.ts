@@ -35,6 +35,7 @@ export class EnrollmentMapper {
 
         enrollment.additions.map((fAddition) => {
             delete fAddition.id;
+            delete fAddition.order;
         });
 
         if (_enrollment.token !== undefined) {
