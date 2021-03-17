@@ -245,15 +245,6 @@ COMMIT;
 
 
 -- ---------
--- LINK -
--- ---------
--- ---------
--- DEFAULT -
--- ---------
-INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
-('9feef7ac-dd44-4daa-8613-f1ebdada645a', 'test-updateappointment-link-title', 'test-updateappointment-link-description', 'test-updateappointment-link-link', 'test-updateappointment-link-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', NULL, '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
-COMMIT;
--- ---------
 -- FAILURE -
 -- ---------
 -- ----------
