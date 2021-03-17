@@ -242,3 +242,26 @@ INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `da
 ('d1fffbb1-a6c4-486f-acad-2a85162546c7', 'test-updateappointment-missingpermissions-title', 'test-updateappointment-missingpermissions-description', 'test-updateappointment-missingpermissions-link', 'test-updateappointment-missingpermissions-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', NULL, '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
 COMMIT;
 
+
+
+-- ---------
+-- LINK -
+-- ---------
+-- ---------
+-- DEFAULT -
+-- ---------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('9feef7ac-dd44-4daa-8613-f1ebdada645a', 'test-updateappointment-link-title', 'test-updateappointment-link-description', 'test-updateappointment-link-link', 'test-updateappointment-link-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', NULL, '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+-- ---------
+-- FAILURE -
+-- ---------
+-- ----------
+-- EXISTING -
+-- ----------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('d435c986-90de-4f5f-9e71-155fdcd4b1ee', 'test-updateappointment-link-existinglink-title', 'test-updateappointment-link-existinglink-description', 'test-updateappointment-link-existinglink-link', 'test-updateappointment-link-existinglink-location', '2021-01-01 20:05:23', '2021-03-01 10:05:23', NULL, '0', '0', NULL, '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+
+

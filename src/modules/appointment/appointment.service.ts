@@ -252,7 +252,12 @@ export class AppointmentService {
 
                 if (key === 'link') {
                     if (await this.linkInUse(value)) {
-                        throw new DuplicateValueException(null, null, ['link']);
+                        throw new AlreadyUsedException('DUPLICATE_VALUES',
+                            'Provided values are already in use', [{
+                                'attribute': 'link',
+                                'value': value,
+                                'message': 'Value is already in use by other appointment. Specify a different link'
+                            }]);
                     }
 
                     changedValue = value;
