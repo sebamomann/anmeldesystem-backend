@@ -7,10 +7,10 @@ export class InsufficientPermissionsException implements Error {
     data: string;
     code: string;
 
-    constructor(code: string = null, message: string = null, data: string = null) {
+    constructor(code: string = null, message: string = null, data: any = null) {
         if (code === null
             || code === '') {
-            this.code = 'FORBIDDEN';
+            this.code = 'INSUFFICIENT_PERMISSIONS';
         } else {
             this.code = code;
         }

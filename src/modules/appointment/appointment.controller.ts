@@ -107,7 +107,7 @@ export class AppointmentController {
         return this.appointmentService
             .create(appointment, user)
             .then(tAppointment => {
-                res.header("Location", `${process.env.API_URL}appointments/${tAppointment.link}`)
+                res.header('Location', `${process.env.API_URL}appointments/${tAppointment.link}`);
                 res.status(HttpStatus.CREATED).json(tAppointment);
             })
             .catch((err) => {
@@ -124,7 +124,8 @@ export class AppointmentController {
         return this.appointmentService
             .update(toChange, link, user)
             .then(tAppointment => {
-                res.status(HttpStatus.OK).json(tAppointment);
+                res.header('Location', `${process.env.API_URL}appointments/${tAppointment.link}`);
+                res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch((err) => {
                 throw err;

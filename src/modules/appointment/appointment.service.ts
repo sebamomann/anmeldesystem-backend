@@ -226,18 +226,18 @@ export class AppointmentService {
     public async update(toChange: any, link: string, user: JWT_User) {
         let appointment;
 
-        try {
-            appointment = await this.findByLink(link);
-        } catch (e) {
-            throw e;
-        }
+        appointment = await this.findByLink(link);
 
-        try {
-            if (!appointment.isCreatorOrAdministrator(user)) {
-                throw  new InsufficientPermissionsException();
-            }
-        } catch (e) {
-            throw new InsufficientPermissionsException();
+        if (!appointment.isCreatorOrAdministrator(user)) {
+            throw  new InsufficientPermissionsException(null, null, [
+                    {
+                        'attribute': 'link',
+                        'in': 'path',
+                        'value': link,
+                        'message': 'Specified appointment is not in your ownership. You are also not permitted to administrate this appointment.'
+                    }
+                ]
+            );
         }
 
         const allowedValuesToChange = ['title', 'description', 'link',
