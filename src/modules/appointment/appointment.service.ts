@@ -299,8 +299,6 @@ export class AppointmentService {
 
         appointment = await this.appointmentRepository.save(appointment);
 
-        appointment = this.userBasedAppointmentPreparation(appointment, user, {}, false);
-
         this.appointmentGateway.appointmentUpdated(appointment);
         this.pushService
             .appointmentChanged(appointment)
@@ -609,6 +607,17 @@ export class AppointmentService {
         return output;
     }
 
+    /**
+     * // TODO ALLOW UNDEFINED / NULL
+     * Loop through all passed {@link Addition}. <br/>
+     *      - If {@link Addition} exists by name, take it. <br/>
+     *      - Else create new {@link Addition}. <br/>
+     * Order of elements in passed array is important
+     *
+     * @param mixedAdditions
+     * @param appointment
+     * @private
+     */
     private async _handleAdditionUpdate(mixedAdditions, appointment: Appointment) {
         let output = [];
 
@@ -617,7 +626,7 @@ export class AppointmentService {
             let potExistingAddition;
 
             try {
-                potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment);
+                potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment); // TODO get from appointment and not an extra request
 
                 if (!output.some(sAddition => sAddition.name === potExistingAddition.name)) {
                     potExistingAddition.order = i;
@@ -627,11 +636,13 @@ export class AppointmentService {
                 }
             } catch (e) {
 
-                potExistingAddition = new Addition();
-                potExistingAddition.name = fAddition.name;
-                potExistingAddition.order = i;
-                potExistingAddition = await this.additionService.__save(potExistingAddition);
-                output.push(potExistingAddition);
+                if (!output.some(sAddition => sAddition.name === fAddition.name)) {
+                    potExistingAddition = new Addition();
+                    potExistingAddition.name = fAddition.name;
+                    potExistingAddition.order = i;
+                    potExistingAddition = await this.additionService.__save(potExistingAddition);
+                    output.push(potExistingAddition);
+                }
 
                 i++;
             }
