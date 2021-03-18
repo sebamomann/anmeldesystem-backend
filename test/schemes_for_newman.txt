@@ -184,6 +184,7 @@ schema_error
 				{ 
 					"type": "object",
 					"properties": {
+					    "object": { "type": "string" },
 						"attribute": { "type": "string" },
 						"value": { "type": "string" },
 						"in": { "type": "string" },
