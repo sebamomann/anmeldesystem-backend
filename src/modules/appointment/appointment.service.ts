@@ -584,23 +584,44 @@ export class AppointmentService {
         }
     }
 
-    private async _createAdditionEntitiesAndFilterDuplicates(additions: Addition[]) {
+    private async _createAdditionEntitiesAndFilterDuplicates(additions: Addition[]): Promise<Addition[]> {
         let output = [];
+
+        if (!additions) {
+            return output;
+        }
+
+        let _additionNames = additions.map(mMixedAdditions => mMixedAdditions.name);
+
+        const sorted_arr = _additionNames.slice().sort();
+        const duplicates = [];
+        for (let i = 0; i < sorted_arr.length - 1; i++) {
+            if (sorted_arr[i + 1] === sorted_arr[i]) {
+                duplicates.push(sorted_arr[i]);
+            }
+        }
+
+        const errors = [];
+        duplicates.forEach((fDuplicate) => {
+            errors.push({'object': 'addition', 'attribute': 'name', 'value': fDuplicate, 'in': 'body'});
+        });
+
+        if (duplicates.length > 0) {
+            throw new DuplicateValueException('DUPLICATE_ENTRY',
+                'Following values are duplicates and can not be used',
+                errors);
+        }
 
         let i = 0;
         if (Array.isArray(additions)) {
             for (const fAddition of additions) {
-                if (!output.some(sAddition => sAddition.name === fAddition.name)) {
-                    let addition: Addition = new Addition();
-                    addition.name = fAddition.name;
-                    addition.order = i;
+                let addition: Addition = new Addition();
+                addition.name = fAddition.name;
+                addition.order = i;
 
-                    await this.additionService.__save(addition);
+                output.push(addition);
 
-                    output.push(addition);
-
-                    i++;
-                }
+                i++;
             }
         }
 
@@ -621,32 +642,81 @@ export class AppointmentService {
     private async _handleAdditionUpdate(mixedAdditions, appointment: Appointment) {
         let output = [];
 
-        let i = 0;
-        for (let fAddition of mixedAdditions) {
-            let potExistingAddition;
+        const _additionsNames = mixedAdditions.map(mMixedAdditions => mMixedAdditions.name);
 
-            try {
-                potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment); // TODO get from appointment and not an extra request
-
-                if (!output.some(sAddition => sAddition.name === potExistingAddition.name)) {
-                    potExistingAddition.order = i;
-                    potExistingAddition = await this.additionService.__save(potExistingAddition);
-                    output.push(potExistingAddition);
-                    i++;
-                }
-            } catch (e) {
-
-                if (!output.some(sAddition => sAddition.name === fAddition.name)) {
-                    potExistingAddition = new Addition();
-                    potExistingAddition.name = fAddition.name;
-                    potExistingAddition.order = i;
-                    potExistingAddition = await this.additionService.__save(potExistingAddition);
-                    output.push(potExistingAddition);
-                }
-
-                i++;
+        const sorted_arr = _additionsNames.slice().sort();
+        const duplicates = [];
+        for (let i = 0; i < sorted_arr.length - 1; i++) {
+            if (sorted_arr[i + 1] === sorted_arr[i] && sorted_arr[i]) {
+                duplicates.push(sorted_arr[i]);
             }
         }
+
+        if (duplicates.length > 0) {
+            const errors = [];
+            duplicates.forEach((fDuplicate) => {
+                errors.push({'object': 'addition', 'attribute': 'name', 'value': fDuplicate, 'in': 'body'});
+            });
+
+            throw new DuplicateValueException('DUPLICATE_ENTRY',
+                'Following values are duplicates and can not be used',
+                errors);
+        }
+
+        let index = 0;
+        for (let fAddition of mixedAdditions) {
+            let addition = new Addition();
+
+            if (fAddition.id) {
+                addition = appointment.additions.find(sAddition => sAddition.id === fAddition.id);
+
+                if (!addition) {
+                    throw new EntityNotFoundException(null, null, {
+                        'object': 'addition',
+                        'attribute': 'id',
+                        'in': 'body',
+                        'value': fAddition.id
+                    });
+                }
+            }
+
+            if (fAddition.name) {
+                addition.name = fAddition.name;
+            }
+
+            addition.order = index;
+
+            output.push(addition);
+
+            index++;
+        }
+
+        // let i = 0;
+        // for (let fAddition of mixedAdditions) {
+        //     let potExistingAddition;
+        //
+        //     try {
+        //         potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment); // TODO get from appointment and not an extra request
+        //
+        //         if (!output.some(sAddition => sAddition.name === potExistingAddition.name)) {
+        //             potExistingAddition.order = i;
+        //             potExistingAddition = await this.additionService.__save(potExistingAddition);
+        //             output.push(potExistingAddition);
+        //             i++;
+        //         }
+        //     } catch (e) {
+        //
+        //         if (!output.some(sAddition => sAddition.name === fAddition.name)) {
+        //             potExistingAddition = new Addition();
+        //             potExistingAddition.name = fAddition.name;
+        //             potExistingAddition.order = i;
+        //             potExistingAddition = await this.additionService.__save(potExistingAddition);
+        //             output.push(potExistingAddition);
+        //         }
+        //
+        //         i++;
+        //     }
+        // }
 
         return output;
     }

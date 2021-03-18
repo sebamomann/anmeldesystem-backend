@@ -49,6 +49,7 @@ export class Appointment {
         addition => addition.appointment,
         {
             eager: true,
+            cascade: true
         })
     additions: Addition[];
 
