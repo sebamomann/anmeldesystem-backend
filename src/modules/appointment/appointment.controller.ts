@@ -134,7 +134,7 @@ export class AppointmentController {
     }
 
     // TODO currently can be addeded multioople times ?
-    @Post(':link/administrator')
+    @Post(':link/administrators')
     @UseGuards(AuthGuard)
     addAdministrator(@Usr() user: JWT_User,
                      @Param('link') link: string,
@@ -149,7 +149,7 @@ export class AppointmentController {
             });
     }
 
-    @Delete(':link/administrator/:username')
+    @Delete(':link/administrators/:username')
     @UseGuards(AuthGuard)
     removeAdministrator(@Usr() user: JWT_User,
                         @Param('link') link: string,

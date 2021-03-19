@@ -275,6 +275,7 @@ export class AppointmentService {
                     }
                 }
 
+                // TODO NEEDS TO ACCOUNT FOR DOUBLE CHANGE (DATE AND DEADLINE AT THE SAME TIME)
                 if (key === 'deadline') {
                     try {
                         changedValue = await AppointmentUtil.handleDeadlineValidation(appointment.date, value);

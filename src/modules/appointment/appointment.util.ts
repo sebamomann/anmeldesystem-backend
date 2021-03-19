@@ -35,6 +35,9 @@ export class AppointmentUtil {
      * @param deadline Date deadline of appointment
      */
     public static handleDeadlineValidation(date, deadline) {
+        console.log(date);
+        console.log(deadline);
+
         if (Date.parse(deadline) > Date.parse(date)) {
             throw new InvalidValuesException(null, null,
                 [
