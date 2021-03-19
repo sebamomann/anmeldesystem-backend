@@ -18,6 +18,8 @@ import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
 import {JWT_User} from '../user/user.model';
 import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
+import {Administrator} from './administrator.entity';
+import {KeycloakUser} from '../user/KeycloakUser';
 
 const logger = require('../../logger');
 
@@ -337,16 +339,33 @@ export class AppointmentService {
             throw new InsufficientPermissionsException();
         }
 
-        let admin;
+        let adminToAdd: KeycloakUser;
 
         try {
-            admin = await this.userService.findByUsername(username);
+            adminToAdd = await this.userService.findByUsername(username);
         } catch (e) {
-            throw new UnknownUserException('NOT_FOUND',
-                `User not found by username`, username);
+            throw new EntityNotFoundException(null, null, {
+                'attribute': 'username',
+                'in': 'path',
+                'value': username
+            });
         }
 
-        appointment._administrators.push(admin.sub);
+        const admin = new Administrator();
+        admin.userId = adminToAdd.id;
+
+        if (appointment._administrators.some((iAdmin) => iAdmin.userId === admin.userId)) {
+            throw new DuplicateValueException('DUPLICATE_ENTRY',
+                'Following values are duplicates and can not be used',
+                [{
+                    'attribute': 'username',
+                    'in': 'body',
+                    'value': username,
+                    'message': 'The specified user is already an administrator of this appointment'
+                }]);
+        }
+
+        appointment._administrators.push(admin);
 
         return await this.appointmentRepository.save(appointment);
     }
@@ -374,13 +393,36 @@ export class AppointmentService {
             throw new InsufficientPermissionsException();
         }
 
-        const user = await this.userService.findByUsername(username);
+        let adminToDelete;
+
+        try {
+            adminToDelete = await this.userService.findByUsername(username);
+        } catch (e) {
+            throw new EntityNotFoundException(null, null, {
+                'attribute': 'username',
+                'in': 'path',
+                'value': username
+            });
+        }
+
+        const currentLength = appointment._administrators.length;
 
         appointment._administrators = appointment._administrators.filter(
             fAdministrator => {
-                return fAdministrator.userId !== user.sub;
+                return fAdministrator.userId !== adminToDelete.id;
             }
         );
+
+        const updatedLength = appointment._administrators.length;
+
+        if (currentLength === updatedLength) {
+            throw new EntityNotFoundException(null, null, {
+                'attribute': 'username',
+                'in': 'path',
+                'value': username,
+                'message': 'Specified user was no administrator for this appointment'
+            });
+        }
 
         await this.appointmentRepository.save(appointment);
     }

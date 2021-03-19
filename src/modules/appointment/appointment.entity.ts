@@ -58,7 +58,8 @@ export class Appointment {
 
     @OneToMany(type => Administrator,
         administrator => administrator.appointment, {
-            eager: true
+            eager: true,
+            cascade: true
         })
     _administrators: Administrator[];
 

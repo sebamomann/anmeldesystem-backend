@@ -267,3 +267,28 @@ INSERT INTO `enrollment` (`id`, `name`, `comment`, `creatorId`, `iat`, `lud`, `a
 ('3c61784f-28bc-4598-aa1a-393bb61c84de', 'test-updateappointment-hidden-name-2', 'test-updateappointment-hidden-comment-2', NULL, '2021-01-01 05:06:23', '2021-03-01 05:06:23', 'd89301f0-9b22-4ee4-9acf-35eaba489355'),
 ('4bdcb4d7-b82c-408a-8669-142671cc7584', 'test-updateappointment-hidden-name-3', 'test-updateappointment-hidden-comment-3', NULL, '2021-01-01 05:07:23', '2021-03-01 05:07:23', 'd89301f0-9b22-4ee4-9acf-35eaba489355');
 COMMIT;
+
+
+-- -----------------------
+-- MANAGE ADMINISTRATORS -
+-- -----------------------
+-- ---------
+-- DEFAULT -
+-- ---------
+-- JWT_User with ID a67cfcc1-10ae-4200-a06e-e3ba93953663 // APPOINTMENT CREATOR
+-- JWT_User with ID 16167e00-8998-4a95-a24a-b45a0a5c37c5 // ADMIN-1
+-- JWT_User with ID 113e07f2-203a-44b1-97b0-cb1f976531e0 // ADMIN-2
+-- JWT_User with ID ee9406e1-0fc8-4d55-ab9a-6426434a3a2c // DUMMY
+-- -----
+-- ADD -
+-- -----
+-- ---------
+-- FAILURE -
+-- ---------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('ce3fa150-49e8-4173-9166-2e368bc5d0ea', 'test-manageadministrators-existingadmin-title', 'test-manageadministrators-existingadmin-description', 'test-manageadministrators-existingadmin-link', 'test-manageadministrators-existingadmin-location', '2021-03-01 10:05:23', '2021-01-01 20:05:23', NULL, '0', '0', '1eeae237-1baf-4e79-9d46-85f6354aa521', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `administrator` (`id`, `userId`, `appointmentId`) VALUES
+('80615bcb-3dad-46b8-8de5-dbead120c3f8', '16167e00-8998-4a95-a24a-b45a0a5c37c5', 'ce3fa150-49e8-4173-9166-2e368bc5d0ea');
+COMMIT;

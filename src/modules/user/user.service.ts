@@ -1,5 +1,4 @@
-import {Injectable, NotImplementedException} from '@nestjs/common';
-import {JWT_User} from './user.model';
+import {Injectable} from '@nestjs/common';
 
 import KcAdminClient from 'keycloak-admin';
 import {Issuer} from 'openid-client';
@@ -42,7 +41,7 @@ export class UserService {
                 });
 
                 setInterval(async () => {
-                    console.log("REFRESH");
+                    console.log('REFRESH');
                     console.log(tokenSet);
                     const refreshToken = tokenSet.refresh_token;
                     tokenSet = await client.refresh(refreshToken);
@@ -58,20 +57,42 @@ export class UserService {
     public async __save(user: any) {
     }
 
-    public async findById(id: string): Promise<KeycloakUser> { // TODO REIMPLEMENT KEYCLOAK
+    public async findById(id: string): Promise<KeycloakUser> {
         let user: KeycloakUser;
 
         try {
             user = await this.kcAdminClient.users.findOne({id});
         } catch (e) {
-            console.log(e);
             throw new EntityNotFoundException(null, null, 'user');
         }
 
         return user;
     }
 
-    public async findByUsername(username: string): Promise<JWT_User> { // TODO REIMPLEMENT KEYCLOAK
-        throw new NotImplementedException();
+    public async findByUsername(username: string): Promise<KeycloakUser> {
+        let user: KeycloakUser;
+
+        try {
+            let users: KeycloakUser[] = await this.kcAdminClient.users.findOne({username: username});
+
+            if (users.length === 0) {
+                throw new Error();
+            }
+
+            for (const fUser of users) {
+                if (fUser.username === username) {
+                    user = fUser;
+                    break;
+                }
+            }
+
+            if (!user) {
+                throw new Error();
+            }
+        } catch (e) {
+            throw new EntityNotFoundException(null, null, 'user');
+        }
+
+        return user;
     }
 }

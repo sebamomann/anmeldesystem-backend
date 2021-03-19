@@ -1,9 +1,9 @@
-import {Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm';
+import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
 import {Appointment} from './appointment.entity';
 
 @Entity()
 export class Pinner {
-    @PrimaryColumn('uuid')
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @ManyToOne(type => Appointment,
