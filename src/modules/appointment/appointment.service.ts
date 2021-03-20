@@ -231,14 +231,12 @@ export class AppointmentService {
         appointment = await this.findByLink(link);
 
         if (!appointment.isCreatorOrAdministrator(user)) {
-            throw  new InsufficientPermissionsException(null, null, [
-                    {
-                        'attribute': 'link',
-                        'in': 'path',
-                        'value': link,
-                        'message': 'Specified appointment is not in your ownership. You are also not permitted to administrate this appointment.'
-                    }
-                ]
+            throw new InsufficientPermissionsException(null, null, {
+                    'attribute': 'link',
+                    'in': 'path',
+                    'value': link,
+                    'message': 'Specified appointment is not in your ownership. You are also not permitted to administrate this appointment.'
+                }
             );
         }
 
@@ -336,7 +334,14 @@ export class AppointmentService {
         }
 
         if (!appointment.isCreator(_user)) {
-            throw new InsufficientPermissionsException();
+            throw new InsufficientPermissionsException(null, null,
+                {
+                    'attribute': 'link',
+                    'in': 'path',
+                    'value': link,
+                    'message': 'Specified appointment is not in your ownership. You are not allowed to manage administrators as administrator.'
+                }
+            );
         }
 
         let adminToAdd: KeycloakUser;
@@ -390,7 +395,14 @@ export class AppointmentService {
         const appointment = await this.findByLink(link);
 
         if (!appointment.isCreator(_user)) {
-            throw new InsufficientPermissionsException();
+            throw new InsufficientPermissionsException(null, null,
+                {
+                    'attribute': 'link',
+                    'in': 'path',
+                    'value': link,
+                    'message': 'Specified appointment is not in your ownership. You are not allowed to manage administrators as administrator.'
+                }
+            );
         }
 
         let adminToDelete;
