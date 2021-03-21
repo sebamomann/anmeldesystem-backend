@@ -31,7 +31,7 @@ export class EnrollmentUtil {
 
         output.name = enrollment.name;
 
-        const trimmedComment = enrollment.comment.trim();
+        const trimmedComment = enrollment.comment?.trim();
         output.comment = trimmedComment === '' ? null : trimmedComment;
 
         output.additions = EnrollmentUtil.filterValidAdditions(enrollment, appointment);

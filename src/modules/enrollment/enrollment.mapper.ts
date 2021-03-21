@@ -11,6 +11,27 @@ export class EnrollmentMapper {
     constructor(private readonly userService: UserService) {
     }
 
+    /**
+     * Create a object only contained the important creation values of the passed {@link Enrollment}. <br/>
+     * Those values are only the id and the permission token (if existing).
+     *
+     * @param enrollment       {@link Enrollment} to minify
+     */
+    create(enrollment: Enrollment): { id: string, token?: string } { // INTERFACE
+        const _enrollment = (({
+                                  id,
+                              }) => ({
+            id,
+        } as any))
+        (enrollment);
+
+        if (enrollment.token) {
+            _enrollment.token = enrollment.token;
+        }
+
+        return _enrollment;
+    }
+
     public async basic(_enrollment: Enrollment) {
         let enrollment;
 
@@ -21,7 +42,6 @@ export class EnrollmentMapper {
                            additions, // TODO REMOVE NAMES OF ADDITIONS
                            comments,
                            creatorId,
-                           iat
                        }) => ({
             id,
             name,
@@ -29,11 +49,10 @@ export class EnrollmentMapper {
             additions,
             comments,
             creatorId,
-            iat
         }))
         (_enrollment);
 
-        enrollment.additions.map((fAddition) => {
+        enrollment.additions?.map((fAddition) => {
             delete fAddition.id;
             delete fAddition.order;
         });
@@ -50,6 +69,13 @@ export class EnrollmentMapper {
         if (_enrollment.passenger !== undefined
             && _enrollment.passenger !== null) {
             enrollment.passenger = passengerMapper.basic(_enrollment.passenger);
+        }
+
+        if(_enrollment.appointment) {
+            enrollment.appointment = {
+                link: _enrollment.appointment.link,
+                location: `${process.env.API_URL}appointments/${_enrollment.appointment.link}`
+            }
         }
 
         await this.stripCreator(enrollment);

@@ -135,9 +135,16 @@ schema_enrollment
 		"iat": { 
 			"type": "string",
 			"format": "date-time"    
+		},
+		"appointment": {
+		    "type": "object",
+		    "properties": {
+		        "link": { "type": "string" },
+		        "location": { "type": "string" }
+		    }
 		}
 	},
-	"required": [ "id", "iat"],
+	"required": [ "id"],
 	"additionalProperties": false
 }
 

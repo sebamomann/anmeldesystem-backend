@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Query, Res, UseGuards, UseInterceptors} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Headers, HttpStatus, Param, Post, Put, Query, Res, UseGuards, UseInterceptors} from '@nestjs/common';
 import {Response} from 'express';
 import {EnrollmentService} from './enrollment.service';
 import {Enrollment} from './enrollment.entity';
@@ -7,11 +7,28 @@ import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHt
 import {AuthOptGuard} from '../../auth/auth-opt.gurad';
 import {JWT_User} from '../user/user.model';
 
-@Controller('enrollment')
+@Controller('enrollments')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
 export class EnrollmentController {
 
     constructor(private enrollmentService: EnrollmentService) {
+    }
+
+    @UseGuards(AuthOptGuard)
+    @Get('/:id')
+    get(@Usr() user: JWT_User,
+        @Headers('x-enrollment-permission') token: string,
+        @Param('id') id: string,
+        @Res() res: Response) {
+        return this.enrollmentService
+            .get(id, user, token)
+            .then((result) => {
+                res.status(HttpStatus.OK).json(result);
+            })
+            .catch((err) => {
+                console.log(err);
+                throw err;
+            });
     }
 
     @Post()
@@ -23,9 +40,11 @@ export class EnrollmentController {
         return this.enrollmentService
             .create(enrollment, user, domain)
             .then(tEnrollment => {
+                res.header('Location', `${process.env.API_URL}enrollments/${tEnrollment.id}`);
                 res.status(HttpStatus.CREATED).json(tEnrollment);
             })
             .catch((err) => {
+                console.log(err);
                 throw err;
             });
     }

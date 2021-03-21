@@ -107,7 +107,7 @@ export class AppointmentController {
         return this.appointmentService
             .create(appointment, user)
             .then(tAppointment => {
-                res.header('Location', `${process.env.API_URL}appointments/${tAppointment.link}`);
+                res.header('Location', `${process.env.API_URL}appointments/${tAppointment.link}`); // TODO add function to appointment
                 res.status(HttpStatus.CREATED).json(tAppointment);
             })
             .catch((err) => {

@@ -4,12 +4,24 @@ export class MissingAuthenticationException implements Error {
     readonly lineNumber: number;
     message: string;
     name: string;
-    data: string;
+    data: string[];
     code: string;
 
-    constructor(code: string = null, message: string = null, data: string = null) {
-        this.code = code;
-        this.message = message;
+    constructor(code: string = null, message: string = null, data: any = null) {
+        if (code === null
+            || code === '') {
+            this.code = 'UNAUTHORIZED';
+        } else {
+            this.code = code;
+        }
+
+        if (message === null
+            || message === '') {
+            this.message = 'Missing or invalid Authorization';
+        } else {
+            this.message = message;
+        }
+
         this.data = data;
     }
 
@@ -21,5 +33,13 @@ export class MissingAuthenticationException implements Error {
     }
 
     printStackTrace() {
+    }
+
+    parse() {
+        return {
+            code: this.code,
+            message: this.message,
+            data: this.data
+        };
     }
 }

@@ -9,6 +9,7 @@ import {
     InternalServerErrorException,
     NestInterceptor,
     NotFoundException,
+    UnauthorizedException,
     UnprocessableEntityException
 } from '@nestjs/common';
 import {Observable} from 'rxjs';
@@ -25,6 +26,7 @@ import {ExpiredTokenException} from '../exceptions/ExpiredTokenException';
 import {AlreadyUsedException} from '../exceptions/AlreadyUsedException';
 import {InvalidAttributesException} from '../exceptions/InvalidAttributesException';
 import {UnknownUserException} from '../exceptions/UnknownUserException';
+import {MissingAuthenticationException} from '../exceptions/MissingAuthenticationException';
 
 @Injectable()
 export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
@@ -41,6 +43,8 @@ export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
                             || exception instanceof DuplicateValueException
                             || exception instanceof EmptyFieldsException) {
                             throw new BadRequestException(exception.parse());
+                        } else if (exception instanceof MissingAuthenticationException) {
+                            throw new UnauthorizedException(exception.parse());
                         } else if (exception instanceof InsufficientPermissionsException) {
                             throw new ForbiddenException(exception.parse());
                         } else if (exception instanceof AlreadyUsedException) {

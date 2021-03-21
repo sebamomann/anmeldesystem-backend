@@ -22,6 +22,7 @@ import {InvalidAttributesException} from '../../exceptions/InvalidAttributesExce
 import {EnrollmentMapper} from './enrollment.mapper';
 import {JWT_User} from '../user/user.model';
 import {UserService} from '../user/user.service';
+import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
 
 const crypto = require('crypto');
 const logger = require('../../logger');
@@ -41,12 +42,40 @@ export class EnrollmentService {
                 private readonly appointmentGateway: AppointmentGateway) {
     }
 
+    public async get(id: string, user: JWT_User, token: string) {
+        try {
+            await this.checkPermissions(id, user, token);
+        } catch (e) {
+            throw new InsufficientPermissionsException(null, null, {
+                    'attribute': 'id',
+                    'in': 'path',
+                    'value': 'id',
+                    'message': 'Specified enrollment is not in your ownership. You are also not permitted by being a manager of the related appointment.'
+                }
+            );
+        }
+
+        let enrollment = await this.enrollmentRepository.createQueryBuilder('enrollment')
+            .leftJoinAndSelect('enrollment.appointment', 'appointment')
+            .where('enrollment.id = :enrollmentId', {enrollmentId: id})
+            .select(['enrollment', 'appointment.link'])
+            .getOne();
+
+        if (enrollment === undefined) {
+            throw new EntityNotFoundException(null, null, 'enrollment');
+        }
+
+        const enrollmentMapper = new EnrollmentMapper(this.userService);
+
+        return enrollmentMapper.basic(enrollment);
+    }
+
     public async findById(id: string) {
         let enrollment = await this.enrollmentRepository.findOne({
             where: {
                 id: id
             },
-            relations: ['appointment', 'creator'],
+            relations: ['appointment'],
         });
 
         if (enrollment === undefined) {
@@ -75,25 +104,56 @@ export class EnrollmentService {
         const appointment_referenced = await this.appointmentService
             .findByLink(enrollment_raw.appointment.link);
 
+        const enrollment_output = await EnrollmentUtil.parseEnrollmentObject(enrollment_raw, appointment_referenced);
+
         // TODO
         // VALIDATE IF IS VALID MAIL
         if (enrollment_raw.editMail) {
             if (await this._existsByName(enrollment_raw.name, appointment_referenced)) {
-                throw new DuplicateValueException(null, null, ['name']);
+                throw new AlreadyUsedException('DUPLICATE_VALUES',
+                    'Provided values are already in use', [{
+                        'attribute': 'name',
+                        'in': 'body',
+                        'value': enrollment_raw.name,
+                        'message': 'Enrollment with specified name already existing.'
+                    }]);
             }
-        } else {
+
+            await this._setMailAttribute(enrollment_raw, enrollment_output);
+        } else if (user) { // IF USER AUTH
             if (await this._existsByCreator(user, appointment_referenced)) {
-                throw new DuplicateValueException(null, null, ['creator']);
+                throw new AlreadyUsedException('DUPLICATE_VALUES',
+                    'Provided values are already in use', [{
+                        'object': 'user',
+                        'attribute': 'sub',
+                        'in': 'authorization-header',
+                        'value': user.sub,
+                        'message': 'Authenticated user already enrolled'
+                    }]);
             }
 
-            enrollment_raw.name = null;
-        }
+            enrollment_output.creatorId = user.sub;
 
-        const enrollment_output = await EnrollmentUtil.parseEnrollmentObject(enrollment_raw, appointment_referenced);
+            enrollment_output.name = null;
+        } else {
+            throw new MissingAuthenticationException(null,
+                'Missing or invalid Authorization. Email or Authorization header needed',
+                [{
+                    'attribute': 'editMail',
+                    'value': undefined,
+                    'in': 'body',
+                    'message': 'Provide email address for enrollment linking'
+                }, {
+                    'object': 'user',
+                    'attribute': 'sub',
+                    'in': 'authorization-header',
+                    'value': undefined,
+                    'message': 'Enroll as authenticated user'
+                }]);
+        }
 
         enrollment_output.appointment = appointment_referenced;
 
-        await this._handleEnrollmentAuthentication(enrollment_raw, enrollment_output, user);
         await this._storeDriverAndPassengerObjects(enrollment_output, appointment_referenced);
 
         let savedEnrollment = await this.enrollmentRepository.save(enrollment_output);
@@ -105,7 +165,7 @@ export class EnrollmentService {
         this.appointmentGateway.appointmentUpdated(enrollment_raw.appointment);
 
         const enrollmentMapper = new EnrollmentMapper(this.userService);
-        return await enrollmentMapper.basic(savedEnrollment);
+        return enrollmentMapper.create(savedEnrollment);
     }
 
     /**
@@ -121,7 +181,13 @@ export class EnrollmentService {
         const enrollment_updated = {...enrollment_referenced};
 
         if (!enrollment_referenced.hasPermissionToManipulate(user, enrollment_to_change_values.token)) {
-            throw new InsufficientPermissionsException();
+            throw new InsufficientPermissionsException(null, null, {
+                    'attribute': 'id',
+                    'in': 'path',
+                    'value': 'id',
+                    'message': 'Specified enrollment is not in your ownership. You are also not permitted by being a manager of the related appointment.'
+                }
+            );
         }
 
         const allowedValuesToChange = ['name', 'comment', 'driver', 'passenger', 'additions'];
@@ -317,6 +383,13 @@ export class EnrollmentService {
             });
     }
 
+    /**
+     * CAN BE COMBINED WITH OTHER PART
+     * @param enrollment_raw
+     * @param enrollment_output
+     * @param user
+     * @private
+     */
     private async _handleEnrollmentAuthentication(enrollment_raw: Enrollment, enrollment_output: Enrollment, user: JWT_User) {
         if (enrollment_raw.editMail) {
             await this._setMailAttribute(enrollment_raw, enrollment_output);
