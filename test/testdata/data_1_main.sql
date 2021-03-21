@@ -331,3 +331,24 @@ INSERT INTO `enrollment` (`id`, `name`, `comment`, `creatorId`, `iat`, `lud`, `a
 ('dffa4356-232c-4379-8313-71a27422b2a7', 'test-createenrollment-existingenrollment-name', 'test-createenrollment-existingenrollment-comment', NULL, '2021-01-01 05:05:23', '2021-03-01 05:05:23', 'fc0cf2d4-f04d-4da2-8164-f7912ba74096'),
 ('b19ad9d6-0dea-4e31-bfde-887b3a1a071e', NULL, 'test-createenrollment-existingenrollment-creator-comment', '528c97cb-4eb8-410f-a38c-df544819af28', '2021-01-01 05:09:23', '2021-03-01 05:09:23', 'fc0cf2d4-f04d-4da2-8164-f7912ba74096');
 COMMIT;
+
+-- -----------
+-- ADDITIONS -
+-- -----------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('6aa6486c-8f20-458a-9c2f-94ef2849061a', 'test-createenrollment-additions-title', 'test-createenrollment-additions-description', 'test-createenrollment-additions-link', 'test-createenrollment-additions-location', '2021-03-01 10:05:23', '2021-01-01 20:05:23', NULL, '0', '0', '5352299e-6554-4fb9-bd77-95932b79b7ab', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `addition` (`id`, `name`, `order`, `appointmentId`) VALUES
+('626cceb8-916f-4132-b035-ce8eb8403510', 'test-createenrollment-additions-name-1', '0', '6aa6486c-8f20-458a-9c2f-94ef2849061a'),
+('b190aa03-72d1-4687-8579-0fed36aa78a4', 'test-createenrollment-additions-name-2', '1', '6aa6486c-8f20-458a-9c2f-94ef2849061a'),
+('c96e5fe9-a648-4171-92d4-9c7e96c8ccbf', 'test-createenrollment-additions-name-3', '2', '6aa6486c-8f20-458a-9c2f-94ef2849061a'),
+('e828a2bc-8f00-4926-affc-5dc98b322f12', 'test-createenrollment-additions-name-4', '3', '6aa6486c-8f20-458a-9c2f-94ef2849061a');
+COMMIT;
+
+-- -----------------
+-- DRIVER ADDITION -
+-- -----------------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('635bcf12-98ae-4d79-9b25-f695f85d6710', 'test-createenrollment-driverAddition-title', 'test-createenrollment-driverAddition-description', 'test-createenrollment-driverAddition-link', 'test-createenrollment-driverAddition-location', '2021-03-01 10:05:23', '2021-01-01 20:05:23', NULL, '0', '1', '5352299e-6554-4fb9-bd77-95932b79b7ab', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;

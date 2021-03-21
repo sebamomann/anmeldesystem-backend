@@ -1,4 +1,4 @@
-export class EmptyFieldsException implements Error {
+export class MissingValuesException implements Error {
     readonly columnNumber: number;
     readonly fileName: string;
     readonly lineNumber: number;
@@ -10,7 +10,7 @@ export class EmptyFieldsException implements Error {
     constructor(code: string = null, message: string = null, data: string[] = null) {
         if (code === null
             || code === '') {
-            this.code = 'EMPTY_FIELDS';
+            this.code = 'MISSING_VALUES';
         } else {
             this.code = code;
         }

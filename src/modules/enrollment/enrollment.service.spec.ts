@@ -19,7 +19,7 @@ import {DriverService} from './driver/driver.service';
 import {PassengerService} from './passenger/passenger.service';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
-import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
+import {MissingValuesException} from '../../exceptions/MissingValuesException';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityGoneException} from '../../exceptions/EntityGoneException';
 import {AppointmentGateway} from '../appointment/appointment.gateway';
@@ -528,9 +528,9 @@ describe('EnrollmentService', () => {
 
                 try {
                     await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
-                    done.fail(new Error('I have failed you, Anakin. Should have gotten an EmptyFieldsException'));
+                    done.fail(new Error('I have failed you, Anakin. Should have gotten an MissingValuesException'));
                 } catch (e) {
-                    expect(e).toBeInstanceOf(EmptyFieldsException);
+                    expect(e).toBeInstanceOf(MissingValuesException);
                     expect(e.data).toEqual(['driver', 'passenger']);
                     done();
                 }

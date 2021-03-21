@@ -19,7 +19,6 @@ import {DuplicateValueException} from '../exceptions/DuplicateValueException';
 import {GeneratorUtil} from '../util/generator.util';
 import {InsufficientPermissionsException} from '../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../exceptions/EntityNotFoundException';
-import {EmptyFieldsException} from '../exceptions/EmptyFieldsException';
 import {EntityGoneException} from '../exceptions/EntityGoneException';
 import {InvalidTokenException} from '../exceptions/InvalidTokenException';
 import {ExpiredTokenException} from '../exceptions/ExpiredTokenException';
@@ -27,6 +26,7 @@ import {AlreadyUsedException} from '../exceptions/AlreadyUsedException';
 import {InvalidAttributesException} from '../exceptions/InvalidAttributesException';
 import {UnknownUserException} from '../exceptions/UnknownUserException';
 import {MissingAuthenticationException} from '../exceptions/MissingAuthenticationException';
+import {MissingValuesException} from '../exceptions/MissingValuesException';
 
 @Injectable()
 export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
@@ -41,7 +41,7 @@ export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
                         } else if (exception instanceof InvalidTokenException
                             || exception instanceof ExpiredTokenException
                             || exception instanceof DuplicateValueException
-                            || exception instanceof EmptyFieldsException) {
+                            || exception instanceof MissingValuesException) {
                             throw new BadRequestException(exception.parse());
                         } else if (exception instanceof MissingAuthenticationException) {
                             throw new UnauthorizedException(exception.parse());

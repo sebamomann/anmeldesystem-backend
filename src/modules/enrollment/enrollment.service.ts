@@ -57,8 +57,11 @@ export class EnrollmentService {
 
         let enrollment = await this.enrollmentRepository.createQueryBuilder('enrollment')
             .leftJoinAndSelect('enrollment.appointment', 'appointment')
+            .leftJoinAndSelect('enrollment.additions', 'additions')
+            .leftJoinAndSelect('enrollment.driver', 'driver')
+            .leftJoinAndSelect('enrollment.passenger', 'passenger')
             .where('enrollment.id = :enrollmentId', {enrollmentId: id})
-            .select(['enrollment', 'appointment.link'])
+            .select(['enrollment', 'appointment.link', 'additions.name', 'driver', 'passenger'])
             .getOne();
 
         if (enrollment === undefined) {

@@ -3,7 +3,7 @@ import {Appointment} from '../appointment/appointment.entity';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {Driver} from './driver/driver.entity';
 import {Passenger} from './passenger/passenger.entity';
-import {EmptyFieldsException} from '../../exceptions/EmptyFieldsException';
+import {MissingValuesException} from '../../exceptions/MissingValuesException';
 
 export class EnrollmentUtil {
     public static filterValidAdditions(enrollment: Enrollment, appointment: Appointment) {
@@ -16,9 +16,13 @@ export class EnrollmentUtil {
                 if (additions.length > 0) {
                     output.push(additions[0]);
                 } else {
-                    throw new EntityNotFoundException(null,
-                        'The following addition can not be found in the appointment',
-                        JSON.stringify(fAddition));
+                    throw new EntityNotFoundException(null, null, {
+                        'object': 'addition',
+                        'attribute': 'id',
+                        'in': 'body',
+                        'value': fAddition.id,
+                        'message': 'Specified addition does not exist in this appointment'
+                    });
                 }
             }
         }
@@ -100,7 +104,7 @@ export class EnrollmentUtil {
             } else if (enrollment.passenger) {
                 output.passenger = EnrollmentUtil.handlePassengerRelation(enrollment.passenger, undefined);
             } else {
-                throw new EmptyFieldsException('EMPTY_FIELDS',
+                throw new MissingValuesException(null,
                     'Please specify one of the following values',
                     ['driver', 'passenger']);
             }
