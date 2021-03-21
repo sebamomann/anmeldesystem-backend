@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Headers, HttpStatus, Param, Post, Put, Query, Res, UseGuards, UseInterceptors} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Headers, HttpStatus, Param, Post, Put, Res, UseGuards, UseInterceptors} from '@nestjs/common';
 import {Response} from 'express';
 import {EnrollmentService} from './enrollment.service';
 import {Enrollment} from './enrollment.entity';
@@ -84,16 +84,16 @@ export class EnrollmentController {
             });
     }
 
-    @UseGuards(AuthOptGuard)
     @Get('/:id/check-permission')
+    @UseGuards(AuthOptGuard)
     checkPermissions(@Usr() user: JWT_User,
-                     @Query('token') token: string,
+                     @Headers('x-enrollment-token') token: string,
                      @Param('id') id: string,
                      @Res() res: Response) {
         return this.enrollmentService
             .checkPermissions(id, user, token)
             .then((result) => {
-                res.status(HttpStatus.OK).json(result);
+                res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch((err) => {
                 throw err;

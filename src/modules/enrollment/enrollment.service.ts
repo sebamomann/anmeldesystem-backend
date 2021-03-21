@@ -43,17 +43,7 @@ export class EnrollmentService {
     }
 
     public async get(id: string, user: JWT_User, token: string) {
-        try {
-            await this.checkPermissions(id, user, token);
-        } catch (e) {
-            throw new InsufficientPermissionsException(null, null, {
-                    'attribute': 'id',
-                    'in': 'path',
-                    'value': 'id',
-                    'message': 'Specified enrollment is not in your ownership. You are also not permitted by being a manager of the related appointment.'
-                }
-            );
-        }
+        await this.checkPermissions(id, user, token);
 
         let enrollment = await this.enrollmentRepository.createQueryBuilder('enrollment')
             .leftJoinAndSelect('enrollment.appointment', 'appointment')
@@ -289,7 +279,13 @@ export class EnrollmentService {
         }
 
         if (allowances.length === 0) {
-            throw new InsufficientPermissionsException();
+            throw new InsufficientPermissionsException(null, null, {
+                    'attribute': 'id',
+                    'in': 'path',
+                    'value': enrollment.id,
+                    'message': 'Specified enrollment is not in your ownership. You are also not permitted by being a manager of the related appointment.'
+                }
+            );
         }
 
         return allowances;

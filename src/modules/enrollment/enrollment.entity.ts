@@ -146,6 +146,10 @@ export class Enrollment {
      * @param user          {@link JWT_User} to check for being creator
      */
     private isCreator(user: JWT_User) {
+        if (!user) {
+            return false;
+        }
+
         return this.creatorId && this.creatorId === user.sub;
     }
 }

@@ -352,3 +352,31 @@ COMMIT;
 INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
 ('635bcf12-98ae-4d79-9b25-f695f85d6710', 'test-createenrollment-driverAddition-title', 'test-createenrollment-driverAddition-description', 'test-createenrollment-driverAddition-link', 'test-createenrollment-driverAddition-location', '2021-03-01 10:05:23', '2021-01-01 20:05:23', NULL, '0', '1', '5352299e-6554-4fb9-bd77-95932b79b7ab', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
 COMMIT;
+
+
+
+
+
+
+-- #########################
+-- # ENROLLMENT PERMISSION #
+-- #########################
+-- ---------
+-- DEFAULT -
+-- ---------
+-- JWT_User with ID 30815c97-37f7-4547-a863-9f70e4cd2348 // APPOINTMENT CREATOR
+-- JWT_User with ID befb26b2-8cbf-4641-b9af-d8fba189ac0a // APPOINTMENT ADMIN
+-- JWT_User with ID 53527fb6-f591-4294-ba0c-f1b5c7ac50f1 // ENROLLMENT CREATOR
+-- JWT_User with ID 30815c97-37f7-4547-a863-9f70e4cd2348 // REGULAR USER
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('7e4995df-936c-438d-bd11-ba691b3eb177', 'test-enrollmentpermission-title', 'test-enrollmentpermission-description', 'test-enrollmentpermission-link', 'test-enrollmentpermission -location', '2021-03-01 10:05:23', '2021-01-01 20:05:23', NULL, '0', '1', '30815c97-37f7-4547-a863-9f70e4cd2348', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `administrator` (`id`, `userId`, `appointmentId`) VALUES
+('589e8145-3dd5-4522-ad5a-5d3eb4a81b5b', 'befb26b2-8cbf-4641-b9af-d8fba189ac0a', '7e4995df-936c-438d-bd11-ba691b3eb177');
+COMMIT;
+
+INSERT INTO `enrollment` (`id`, `name`, `comment`, `creatorId`, `iat`, `lud`, `appointmentId`) VALUES
+('cde285ef-b0b0-466c-86a9-bf146a39b59d', 'test-enrollmentpermission-name-1', 'test-enrollmentpermission-comment-1', NULL, '2021-01-01 05:05:23', '2021-03-01 05:05:23', '7e4995df-936c-438d-bd11-ba691b3eb177'),
+('13fe4f6c-b1ef-4b94-8e3c-95ee95e3efb5', NULL, 'test-enrollmentpermission-comment-2-creator', '53527fb6-f591-4294-ba0c-f1b5c7ac50f1', '2021-01-01 05:09:23', '2021-03-01 05:09:23', '7e4995df-936c-438d-bd11-ba691b3eb177');
+COMMIT;
