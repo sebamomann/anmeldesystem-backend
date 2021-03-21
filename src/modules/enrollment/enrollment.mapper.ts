@@ -42,6 +42,7 @@ export class EnrollmentMapper {
                            additions, // TODO REMOVE NAMES OF ADDITIONS
                            comments,
                            creatorId,
+                           iat
                        }) => ({
             id,
             name,
@@ -49,6 +50,7 @@ export class EnrollmentMapper {
             additions,
             comments,
             creatorId,
+            iat
         }))
         (_enrollment);
 
@@ -71,11 +73,11 @@ export class EnrollmentMapper {
             enrollment.passenger = passengerMapper.basic(_enrollment.passenger);
         }
 
-        if(_enrollment.appointment) {
+        if (_enrollment.appointment) {
             enrollment.appointment = {
                 link: _enrollment.appointment.link,
                 location: `${process.env.API_URL}appointments/${_enrollment.appointment.link}`
-            }
+            };
         }
 
         await this.stripCreator(enrollment);
