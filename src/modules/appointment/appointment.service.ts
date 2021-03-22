@@ -225,7 +225,7 @@ export class AppointmentService {
      * @param link Current link of Appointment
      * @param user Requester
      */
-    public async update(toChange: any, link: string, user: JWT_User) {
+    public async update(toChange: any, link: string, user: JWT_User) { // TODO INVALID ATTRIBUTE
         let appointment;
 
         appointment = await this.findByLink(link);

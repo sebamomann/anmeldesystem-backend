@@ -188,7 +188,7 @@ export class EnrollmentService {
 
         const allowedValuesToChange = ['name', 'comment', 'driver', 'passenger', 'additions'];
 
-        for (const [key, value] of Object.entries(enrollment_to_change_values)) {
+        for (const [key, value] of Object.entries(enrollment_to_change_values)) { // TODO INVALID ATTRIBUTE
             if (key in enrollment_referenced
                 && enrollment_referenced[key] !== value
                 && allowedValuesToChange.indexOf(key) > -1) {
