@@ -380,3 +380,30 @@ INSERT INTO `enrollment` (`id`, `name`, `comment`, `creatorId`, `iat`, `lud`, `a
 ('cde285ef-b0b0-466c-86a9-bf146a39b59d', 'test-enrollmentpermission-name-1', 'test-enrollmentpermission-comment-1', NULL, '2021-01-01 05:05:23', '2021-03-01 05:05:23', '7e4995df-936c-438d-bd11-ba691b3eb177'),
 ('13fe4f6c-b1ef-4b94-8e3c-95ee95e3efb5', NULL, 'test-enrollmentpermission-comment-2-creator', '53527fb6-f591-4294-ba0c-f1b5c7ac50f1', '2021-01-01 05:09:23', '2021-03-01 05:09:23', '7e4995df-936c-438d-bd11-ba691b3eb177');
 COMMIT;
+
+
+
+
+
+-- #####################
+-- # ENROLLMENT UPDATE #
+-- #####################
+-- ---------
+-- DEFAULT -
+-- ---------
+-- JWT_User with ID 721a16f8-db82-4fa1-9cb3-97032cc33da6 // APPOINTMENT CREATOR
+-- JWT_User with ID efa6668c-b949-4084-ac97-cbf802251179 // APPOINTMENT ADMIN
+-- JWT_User with ID 69f81e64-31c9-4b97-a03b-d0b98268e46c // ENROLLMENT CREATOR
+-- JWT_User with ID b038cca3-0a23-4314-9a13-22153f2a4f40 // REGULAR USaER
+
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('2a0f2a6b-6cfa-4fa9-ac04-eea268090cc4', 'test-updateenrollment-title', 'test-updateenrollment-description', 'test-updateenrollment-link', 'test-updateenrollment-location', '2021-03-01 10:05:23', '2021-01-01 20:05:23', NULL, '0', '1', '721a16f8-db82-4fa1-9cb3-97032cc33da6', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `administrator` (`id`, `userId`, `appointmentId`) VALUES
+('71fa1551-c749-48af-955b-98ff55ae7972', 'efa6668c-b949-4084-ac97-cbf802251179', '2a0f2a6b-6cfa-4fa9-ac04-eea268090cc4');
+COMMIT;
+
+INSERT INTO `enrollment` (`id`, `name`, `comment`, `creatorId`, `iat`, `lud`, `appointmentId`) VALUES
+('36aa22e6-43cf-42c1-a10b-8a4de1460e0d', 'test-updateenrollment-name', 'test-updateenrollment-comment', '69f81e64-31c9-4b97-a03b-d0b98268e46c', '2021-01-01 05:05:23', '2021-03-01 05:05:23', '2a0f2a6b-6cfa-4fa9-ac04-eea268090cc4');
+COMMIT;

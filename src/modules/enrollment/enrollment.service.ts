@@ -43,19 +43,21 @@ export class EnrollmentService {
     }
 
     public async get(id: string, user: JWT_User, token: string) {
-        await this.checkPermissions(id, user, token);
-
         let enrollment = await this.enrollmentRepository.createQueryBuilder('enrollment')
             .leftJoinAndSelect('enrollment.appointment', 'appointment')
             .leftJoinAndSelect('enrollment.additions', 'additions')
             .leftJoinAndSelect('enrollment.driver', 'driver')
             .leftJoinAndSelect('enrollment.passenger', 'passenger')
             .where('enrollment.id = :enrollmentId', {enrollmentId: id})
-            .select(['enrollment', 'appointment.link', 'additions.name', 'driver', 'passenger'])
+            .select(['enrollment', 'appointment.link', 'additions.name', 'driver', 'passenger', 'appointment.hidden'])
             .getOne();
 
         if (enrollment === undefined) {
             throw new EntityNotFoundException(null, null, 'enrollment');
+        }
+
+        if (enrollment.appointment.hidden) {
+            await this.checkPermissions(id, user, token); // TODO INEFFECTIVE; DUE TO DUPLICATE DB FETCH
         }
 
         const enrollmentMapper = new EnrollmentMapper(this.userService);
@@ -168,16 +170,17 @@ export class EnrollmentService {
      * @param enrollment_to_change_values Values to change
      * @param enrollment_id Id of Enrollment to change Values for
      * @param user Optional user
+     * @param token
      */
-    public async update(enrollment_to_change_values: any, enrollment_id: string, user: JWT_User) {
+    public async update(enrollment_to_change_values: any, enrollment_id: string, user: JWT_User, token: string) {
         const enrollment_referenced = await this.findById(enrollment_id);
         const enrollment_updated = {...enrollment_referenced};
 
-        if (!enrollment_referenced.hasPermissionToManipulate(user, enrollment_to_change_values.token)) {
+        if (!enrollment_referenced.hasPermissionToManipulate(user, token)) {
             throw new InsufficientPermissionsException(null, null, {
                     'attribute': 'id',
                     'in': 'path',
-                    'value': 'id',
+                    'value': enrollment_id,
                     'message': 'Specified enrollment is not in your ownership. You are also not permitted by being a manager of the related appointment.'
                 }
             );

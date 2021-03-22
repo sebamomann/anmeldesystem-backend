@@ -14,8 +14,8 @@ export class EnrollmentController {
     constructor(private enrollmentService: EnrollmentService) {
     }
 
-    @UseGuards(AuthOptGuard)
     @Get('/:id')
+    @UseGuards(AuthOptGuard)
     get(@Usr() user: JWT_User,
         @Headers('x-enrollment-permission') token: string,
         @Param('id') id: string,
@@ -49,17 +49,18 @@ export class EnrollmentController {
             });
     }
 
-    @Put(':id/:token*?')
+    @Put(':id')
     @UseGuards(AuthOptGuard)
     update(@Usr() user: JWT_User,
            @Param('id') id: string,
-           @Param('token') token: string,
+           @Headers('x-enrollment-token') token: string,
            @Body() toChange: Enrollment,
            @Res() res: Response) {
         return this.enrollmentService
-            .update(toChange, id, user)
+            .update(toChange, id, user, token)
             .then((tEnrollment) => {
-                res.status(HttpStatus.OK).json(tEnrollment);
+                res.header('Location', `${process.env.API_URL}enrollments/${tEnrollment.id}`);
+                res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch((err) => {
                 console.log(err);
