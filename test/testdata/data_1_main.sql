@@ -405,5 +405,7 @@ INSERT INTO `administrator` (`id`, `userId`, `appointmentId`) VALUES
 COMMIT;
 
 INSERT INTO `enrollment` (`id`, `name`, `comment`, `creatorId`, `iat`, `lud`, `appointmentId`) VALUES
-('36aa22e6-43cf-42c1-a10b-8a4de1460e0d', 'test-updateenrollment-name', 'test-updateenrollment-comment', '69f81e64-31c9-4b97-a03b-d0b98268e46c', '2021-01-01 05:05:23', '2021-03-01 05:05:23', '2a0f2a6b-6cfa-4fa9-ac04-eea268090cc4');
+('36aa22e6-43cf-42c1-a10b-8a4de1460e0d', 'test-updateenrollment-name', 'test-updateenrollment-comment', NULL, '2021-01-01 05:05:23', '2021-03-01 05:05:23', '2a0f2a6b-6cfa-4fa9-ac04-eea268090cc4'),
+('e0bce961-7b26-40b8-b1f8-39b6da3b586d', 'test-updateenrollment-existingname-name', 'test-updateenrollment-existingname-comment', NULL, '2021-01-01 05:05:23', '2021-03-01 05:05:23', '2a0f2a6b-6cfa-4fa9-ac04-eea268090cc4'),
+('1f4815c0-a38a-4f72-a1ad-9f36f61494cf', NULL , 'test-updateenrollment-comment-creator', '69f81e64-31c9-4b97-a03b-d0b98268e46c', '2021-01-01 05:05:23', '2021-03-01 05:05:23', '2a0f2a6b-6cfa-4fa9-ac04-eea268090cc4');
 COMMIT;

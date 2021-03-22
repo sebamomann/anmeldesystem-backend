@@ -420,15 +420,25 @@ export class EnrollmentService {
         if (!enrollment_referenced.creatorId) {
             if (await this._existsByName(enrollment_to_change_values.name, enrollment_referenced.appointment)) {
                 throw new DuplicateValueException('DUPLICATE_ENTRY',
-                    'Following values are already taken',
-                    ['name']);
+                    'Following values are duplicates and can not be used',
+                    [{
+                        'attribute': 'name',
+                        'in': 'body',
+                        'value': enrollment_to_change_values.name,
+                        'message': 'The specified name is already used by another enrollment. A person can only be enrolled once.'
+                    }]);
             }
 
             return enrollment_to_change_values.name;
         } else {
             throw new InvalidAttributesException('INVALID_ATTRIBUTE',
                 'Following attributes are not allowed to be updated',
-                ['name']);
+                [{
+                    'attribute': 'name',
+                    'in': 'body',
+                    'value': enrollment_to_change_values.name,
+                    'message': 'The specified enrollment got created by an authenticated user. Thus the name can not be modified.'
+                }]);
         }
     }
 
