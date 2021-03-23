@@ -49,7 +49,7 @@ export class EnrollmentService {
             .leftJoinAndSelect('enrollment.driver', 'driver')
             .leftJoinAndSelect('enrollment.passenger', 'passenger')
             .where('enrollment.id = :enrollmentId', {enrollmentId: id})
-            .select(['enrollment', 'appointment.link', 'additions.name', 'driver', 'passenger', 'appointment.hidden'])
+            .select(['enrollment', 'appointment.link', 'additions.name', 'additions.order', 'driver', 'passenger', 'appointment.hidden'])
             .getOne();
 
         if (enrollment === undefined) {

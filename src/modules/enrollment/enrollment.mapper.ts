@@ -54,6 +54,16 @@ export class EnrollmentMapper {
         }))
         (_enrollment);
 
+        enrollment.additions.sort((a, b) => {
+            if (a.order < b.order) {
+                return -1;
+            }
+            if (a.order > b.order) {
+                return 1;
+            }
+            return 0;
+        });
+
         enrollment.additions?.map((fAddition) => {
             delete fAddition.id;
             delete fAddition.order;
