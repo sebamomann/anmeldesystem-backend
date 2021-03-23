@@ -207,7 +207,12 @@ export class EnrollmentService {
                     changedValue = value;
                 }
 
-                enrollment_updated[key] = changedValue;
+                if (key === 'comment') {
+                    const trimmedComment = changedValue.trim();
+                    enrollment_updated[key] = trimmedComment === '' ? null : trimmedComment;
+                } else {
+                    enrollment_updated[key] = changedValue;
+                }
             }
         }
 
