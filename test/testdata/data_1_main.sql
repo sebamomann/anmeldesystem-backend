@@ -424,3 +424,7 @@ INSERT INTO `addition` (`id`, `name`, `order`, `appointmentId`) VALUES
 ('a04fcbba-1c4e-4c60-b7f1-46f9b03a1de6', 'test-updateenrollment-additions-name-3', '2', '1c50a32b-0533-4628-8261-555f66398ffb'),
 ('a3600ddc-66ef-4d9c-9937-ff29e69630c9', 'test-updateenrollment-additions-name-4', '3', '1c50a32b-0533-4628-8261-555f66398ffb');
 COMMIT;
+
+INSERT INTO `enrollment` (`id`, `name`, `comment`, `creatorId`, `iat`, `lud`, `appointmentId`) VALUES
+('9dd1e2c9-416f-4e47-963c-f6c916b13f3b', 'test-updateenrollment-additions-name', 'test-updateenrollment-additions-comment', NULL, '2021-01-01 05:05:23', '2021-03-01 05:05:23', '1c50a32b-0533-4628-8261-555f66398ffb');
+COMMIT;

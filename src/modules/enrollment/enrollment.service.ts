@@ -201,8 +201,8 @@ export class EnrollmentService {
                     } catch (e) {
                         throw e;
                     }
-                } // do nothing if attribute does not exist
-
+                }
+                
                 if (changedValue === undefined) {
                     changedValue = value;
                 }
