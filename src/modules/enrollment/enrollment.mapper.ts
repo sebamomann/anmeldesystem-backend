@@ -85,8 +85,8 @@ export class EnrollmentMapper {
 
         if (_enrollment.appointment) {
             enrollment.appointment = {
-                link: _enrollment.appointment.link,
-                location: `${process.env.API_URL}appointments/${_enrollment.appointment.link}`
+                link: _enrollment.appointment._link,
+                location: `${process.env.API_URL}appointments/${_enrollment.appointment._link}`
             };
         }
 

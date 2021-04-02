@@ -10,14 +10,12 @@ import {UserService} from '../user/user.service';
 import {FileService} from '../file/file.service';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
-import {GeneratorUtil} from '../../util/generator.util';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
 import {AppointmentUtil} from './appointment.util';
 import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
 import {JWT_User} from '../user/user.model';
-import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
 import {Administrator} from './administrator.entity';
 import {KeycloakUser} from '../user/KeycloakUser';
 import {AppointmentPermissionChecker} from './appointmentPermission.checker';
@@ -60,16 +58,16 @@ export class AppointmentService {
     /** MAIN FUNCTIONS  **/
 
     /**
-     * Find {@link Appointment} its unique link.
+     * Find {@link Appointment} its unique _link.
      *
      * @param link          Link of {@link Appointment}
      *
-     * @throws EntityNotFoundException if given link does not match any {@link Appointment}
+     * @throws EntityNotFoundException if given _link does not match any {@link Appointment}
      */
     public async findByLink(link: string): Promise<Appointment> {
         let appointment = await this.appointmentRepository.findOne({
             where: {
-                link: link
+                _link: link
             }
         });
 
@@ -88,7 +86,7 @@ export class AppointmentService {
      * TODO
      * Dont fetch enrollments when slim
      *
-     * Get an Appointment by its link. Checking for permissions by analysing query parameter,
+     * Get an Appointment by its _link. Checking for permissions by analysing query parameter,
      * being creator or being administrator.
      *
      * @param user Requester
@@ -120,7 +118,7 @@ export class AppointmentService {
      * Additionally, pinned appointments get returned. Further an array of links can be passed
      * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
      * <br />
-     * When passing a link with this request, the corresponding Appointment gets marked as "PINNED"
+     * When passing a _link with this request, the corresponding Appointment gets marked as "PINNED"
      * <br />
      * <br />
      * All appointments include a relations. See {@link parseReferences} for more information
@@ -153,7 +151,7 @@ export class AppointmentService {
      * Additionally, pinned appointments get returned. Further an array of links can be passed
      * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
      * <br />
-     * When passing a link with this request, the corresponding Appointment gets marked as "PINNED"
+     * When passing a _link with this request, the corresponding Appointment gets marked as "PINNED"
      * <br />
      * <br />
      * All appointments include a relations. See {@link parseReferences} for more information
@@ -161,7 +159,7 @@ export class AppointmentService {
      * @param user      Requester (if existing)
      * @param params    All query parameters to parse pinned links
      * @param _slim     Delete information overhead. See {@link AppointmentMapper.slim} for more information.
-     * @param before    Date (string) for pagination. Return elements that took place before this particular date
+     * @param before    Date (string) for pagination. Return elements that took place before this particular _date
      * @param limit     Number of elements to return
      *
      * @returns Appointment[]
@@ -199,33 +197,19 @@ export class AppointmentService {
      *
      * @returns Created appointment after applying filters
      *
-     * @throws DuplicateValueException if link is already in use
+     * @throws DuplicateValueException if _link is already in use
      */
     public async create(appointmentCreationDTO: IAppointmentCreationDTO, user: JWT_User): Promise<{ id: string, link: string }> {
-        let appointmentToDB = new Appointment();
+        let appointmentToDB = new Appointment(this);
 
         appointmentToDB.title = appointmentCreationDTO.title;
         appointmentToDB.description = appointmentCreationDTO.description;
-
-        appointmentToDB.link = await this.handleAppointmentLink(appointmentCreationDTO.link);
-
+        await appointmentToDB.setLink(appointmentCreationDTO.link);
         appointmentToDB.location = appointmentCreationDTO.location;
-
-        try {
-            appointmentToDB.date = await AppointmentUtil.handleDateValidation(appointmentCreationDTO.date, appointmentCreationDTO.deadline);
-        } catch (e) {
-            throw e;
-        }
-
+        appointmentToDB.date = appointmentCreationDTO.date;
         appointmentToDB.deadline = appointmentCreationDTO.deadline;
-
-        if (appointmentCreationDTO.maxEnrollments > 0) {
-            appointmentToDB.maxEnrollments = appointmentCreationDTO.maxEnrollments;
-        } else {
-            appointmentToDB.maxEnrollments = null;
-        }
-
-        appointmentToDB.driverAddition = !!(appointmentCreationDTO.driverAddition);
+        appointmentToDB.maxEnrollments = appointmentCreationDTO.maxEnrollments;
+        appointmentToDB.driverAddition = appointmentCreationDTO.driverAddition;
         appointmentToDB.creatorId = user.sub;
 
         const additionList = new AdditionList();
@@ -242,10 +226,10 @@ export class AppointmentService {
     /**
      *
      * Updated values passed by any object. Only overall data allowed to update like this.<br/>
-     * _additions, link, date deadline need special validation.
+     * _additions, _link, _date _deadline need special validation.
      *
      * @param toChange any {} with the values to change given Appointment with
-     * @param link Current link of Appointment
+     * @param link Current _link of Appointment
      * @param user Requester
      */
     public async update(toChange: any, link: string, user: JWT_User) { // TODO INVALID ATTRIBUTE
@@ -263,6 +247,8 @@ export class AppointmentService {
             );
         }
 
+        appointment.setAppointmentService(this);
+
         const allowedValuesToChange = ['title', 'description', 'link',
             'location', 'date', 'deadline', 'maxEnrollments', 'hidden', 'additions',
             'driverAddition'];
@@ -272,19 +258,6 @@ export class AppointmentService {
                 && appointment[key] !== value
                 && allowedValuesToChange.indexOf(key) > -1) {
                 let changedValue = value;
-
-                if (key === 'link') {
-                    if (await this.linkInUse(value)) {
-                        throw new AlreadyUsedException('DUPLICATE_VALUES',
-                            'Provided values are already in use', [{
-                                'attribute': 'link',
-                                'value': value,
-                                'message': 'Value is already in use by other appointment. Specify a different link'
-                            }]);
-                    }
-
-                    changedValue = value;
-                }
 
                 if (key === 'additions') {
                     changedValue = AppointmentService._handleAdditionUpdate(value as (IAppointmentCreationAdditionDTO | Addition)[], appointment);
@@ -321,7 +294,11 @@ export class AppointmentService {
                     key = '_additions';
                 }
 
-                appointment[key] = changedValue;
+                if (key === 'link') {
+                    await appointment.setLink(changedValue);
+                } else{
+                    appointment[key] = changedValue;
+                }
             }
         }
 
@@ -609,7 +586,7 @@ export class AppointmentService {
     public async removeSubscriptionsByUser(appointment: any, user: JWT_User) {
         let app = await this.appointmentRepository.findOne({
             where: {
-                link: appointment.link
+                _link: appointment.link
             },
             loadEagerRelations: false,
             relations: ['subscriptions', 'subscriptions.user']
@@ -626,6 +603,15 @@ export class AppointmentService {
         return this.appointmentRepository.save(app);
     }
 
+    async linkInUse(link) {
+        try {
+            await this.findByLink(link);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
     private async userBasedAppointmentPreparation(appointment: Appointment, user: JWT_User, permissions: any, slim: boolean) {
         const appointmentMapper = new AppointmentMapper(this.userService);
 
@@ -636,38 +622,6 @@ export class AppointmentService {
         appointment = await appointmentMapper.basic(appointment);
 
         return appointment;
-    }
-
-    private async handleAppointmentLink(_link: string) {
-        let link = '';
-
-        if (_link === undefined || _link === '') {
-            do {
-                link = GeneratorUtil.makeid(5);
-            } while (await this.linkInUse(link));
-        } else {
-            if (await this.linkInUse(_link)) {
-                throw new AlreadyUsedException('DUPLICATE_VALUES',
-                    'Provided values are already in use', [{
-                        'attribute': 'link',
-                        'value': _link,
-                        'message': 'Value is already in use by other appointment. Specify a different link'
-                    }]);
-            }
-
-            link = _link;
-        }
-
-        return link;
-    }
-
-    private async linkInUse(link) {
-        try {
-            await this.findByLink(link);
-            return true;
-        } catch (e) {
-            return false;
-        }
     }
 
     /* istanbul ignore next */
@@ -698,13 +652,13 @@ export class AppointmentService {
                     .orWhere('administrators.id = :admin', {admin: user.sub})
                     .orWhere('enrollments.creatorId = :user', {user: user.sub})
                     .orWhere('pinners.id = :user', {user: user.sub})
-                    .orWhere('appointment.link IN (:...links)', {links: pins});
+                    .orWhere('appointment._link IN (:...links)', {links: pins});
             }))
-            .andWhere(before ? 'UNIX_TIMESTAMP(appointment.date) < UNIX_TIMESTAMP(:date)' : 'UNIX_TIMESTAMP(appointment.date) > UNIX_TIMESTAMP(:date2)', {
+            .andWhere(before ? 'UNIX_TIMESTAMP(appointment._date) < UNIX_TIMESTAMP(:_date)' : 'UNIX_TIMESTAMP(appointment._date) > UNIX_TIMESTAMP(:date2)', {
                 date: before,
                 date2: new Date()
             })
-            .orderBy('appointment.date', 'DESC')
+            .orderBy('appointment._date', 'DESC')
             .getMany();
 
         if (!limit) {
@@ -728,10 +682,10 @@ export class AppointmentService {
         //             {administrators: {id: user.id}},
         //             {enrollmentsCreator: {id: user.id}},
         //             {pinners: {id: user.id}},
-        //             {link: In(pins)},
+        //             {_link: In(pins)},
         //         ],
         //         order: {
-        //             date: 'DESC'
+        //             _date: 'DESC'
         //         },
         //     }
         // );

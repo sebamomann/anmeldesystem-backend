@@ -148,13 +148,13 @@ describe('AppointmentService', () => {
     });
 
     describe('* find appointment', () => {
-        describe('* by link', () => {
+        describe('* by _link', () => {
             it('* successful should return appointment object', async () => {
                 const __given_link = 'link';
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.id = 'd92fe1a9-47cb-4c9b-8749-dde4c6764e5d';
-                __existing_appointment.link = __given_link;
+                __existing_appointment._link = __given_link;
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
@@ -200,7 +200,7 @@ describe('AppointmentService', () => {
 
             const mockedAppointment = mock(Appointment);
             const mockedAppointmentInstance = instance(mockedAppointment);
-            mockedAppointmentInstance.link = link;
+            mockedAppointmentInstance._link = link;
             mockedAppointmentInstance.creatorId = mockedUserInstance_appointment_creator.sub;
 
             const mockedAppointmentServiceSpy = spy(appointmentService);
@@ -211,7 +211,7 @@ describe('AppointmentService', () => {
 
             const actual = await appointmentService.get(mockedUserInstance, link, permissions, slim);
 
-            expect(actual.link).toEqual(mockedAppointmentInstance.link);
+            expect(actual._link).toEqual(mockedAppointmentInstance._link);
         });
 
         describe('* failure should return error', () => {
@@ -242,14 +242,14 @@ describe('AppointmentService', () => {
 
     describe('* create appointment', () => {
         describe('* successful should return created entity', () => {
-            describe('* link handling', () => {
-                it('* link specified', async () => {
+            describe('* _link handling', () => {
+                it('* _link specified', async () => {
                     const mockedAppointment = mock(Appointment);
                     const mockedAppointmentInstance = instance(mockedAppointment);
-                    mockedAppointmentInstance.link = 'unusedLink';
+                    mockedAppointmentInstance._link = 'unusedLink';
 
                     const mockedAppointmentServiceSpy = spy(appointmentService);
-                    when(mockedAppointmentServiceSpy.findByLink(mockedAppointmentInstance.link)).thenReject(undefined);
+                    when(mockedAppointmentServiceSpy.findByLink(mockedAppointmentInstance._link)).thenReject(undefined);
 
                     const mockedUser = mock(JWT_User);
 
@@ -257,17 +257,17 @@ describe('AppointmentService', () => {
 
                     const actual = await appointmentService.create(mockedAppointmentInstance, mockedUser);
 
-                    expect(actual.link).toEqual(mockedAppointmentInstance.link);
+                    expect(actual.link).toEqual(mockedAppointmentInstance._link);
                 });
 
-                describe('* link not specified', () => {
+                describe('* _link not specified', () => {
                     it('* empty', async () => {
                         const mockedAppointment = mock(Appointment);
                         const mockedAppointmentInstance = instance(mockedAppointment);
-                        mockedAppointmentInstance.link = '';
+                        mockedAppointmentInstance._link = '';
 
                         const mockedAppointmentServiceSpy = spy(appointmentService);
-                        when(mockedAppointmentServiceSpy.findByLink(mockedAppointmentInstance.link)).thenReject(undefined);
+                        when(mockedAppointmentServiceSpy.findByLink(mockedAppointmentInstance._link)).thenReject(undefined);
 
                         const mockedUser = mock(JWT_User);
 
@@ -281,10 +281,10 @@ describe('AppointmentService', () => {
                     it('* undefined', async () => {
                         const mockedAppointment = mock(Appointment);
                         const mockedAppointmentInstance = instance(mockedAppointment);
-                        mockedAppointmentInstance.link = undefined;
+                        mockedAppointmentInstance._link = undefined;
 
                         const mockedAppointmentServiceSpy = spy(appointmentService);
-                        when(mockedAppointmentServiceSpy.findByLink(mockedAppointmentInstance.link)).thenReject(undefined);
+                        when(mockedAppointmentServiceSpy.findByLink(mockedAppointmentInstance._link)).thenReject(undefined);
 
                         const mockedUser = mock(JWT_User);
 
@@ -300,21 +300,21 @@ describe('AppointmentService', () => {
                 it('* valid limit set', async () => {
                     const mockedAppointment = mock(Appointment);
                     const mockedAppointmentInstance = instance(mockedAppointment);
-                    mockedAppointmentInstance.maxEnrollments = 10;
+                    mockedAppointmentInstance._maxEnrollments = 10;
 
                     const mockedUser = mock(JWT_User);
 
                     jest.spyOn(appointmentRepositoryMock, 'save').mockImplementationOnce((val) => val);
 
                     const actual = await appointmentService.create(mockedAppointmentInstance, mockedUser);
-                    expect(actual.maxEnrollments).toEqual(mockedAppointmentInstance.maxEnrollments);
+                    expect(actual.maxEnrollments).toEqual(mockedAppointmentInstance._maxEnrollments);
                 });
 
                 describe('* no limit should set limit to null', () => {
                     it('* limit < min boundary', async () => {
                         const mockedAppointment = mock(Appointment);
                         const mockedAppointmentInstance = instance(mockedAppointment);
-                        mockedAppointmentInstance.maxEnrollments = 0;
+                        mockedAppointmentInstance._maxEnrollments = 0;
 
                         const mockedUser = mock(JWT_User);
 
@@ -354,7 +354,7 @@ describe('AppointmentService', () => {
                     const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // link not in use
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // _link not in use
                     appointmentRepositoryMock.save.mockImplementation((val) => val);
 
                     additionRepositoryMock.save.mockImplementation((val) => val);
@@ -382,7 +382,7 @@ describe('AppointmentService', () => {
                     const __given_user = new JWT_User();
                     __given_user.preferred_username = 'username';
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // link not in use
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // _link not in use
                     appointmentRepositoryMock.save.mockImplementation((val) => val);
 
                     additionRepositoryMock.save.mockImplementation((val) => val);
@@ -397,12 +397,12 @@ describe('AppointmentService', () => {
         });
 
         describe('* failure should return error', () => {
-            it('* specified link in use', async () => {
+            it('* specified _link in use', async () => {
                 const __existing_appointment = new Appointment();
-                __existing_appointment.link = 'link';
+                __existing_appointment._link = 'link';
 
                 const __given_appointment = new Appointment();
-                __given_appointment.link = __existing_appointment.link;
+                __given_appointment._link = __existing_appointment._link;
 
                 const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
@@ -419,10 +419,10 @@ describe('AppointmentService', () => {
                     });
             });
 
-            it('* deadline date after actual date', async () => {
+            it('* _deadline _date after actual _date', async () => {
                 const __given_appointment = new Appointment();
-                __given_appointment.date = new Date(Date.now() + (3 * 60 * 60 * 2000));
-                __given_appointment.deadline = new Date(Date.now() + (4 * 60 * 60 * 2000));
+                __given_appointment._date = new Date(Date.now() + (3 * 60 * 60 * 2000));
+                __given_appointment._deadline = new Date(Date.now() + (4 * 60 * 60 * 2000));
 
                 const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
@@ -457,7 +457,7 @@ describe('AppointmentService', () => {
                     __existing_addition_2.name = 'addition2';
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
                     __existing_appointment._additions = [__existing_addition_1, __existing_addition_2];
 
@@ -504,7 +504,7 @@ describe('AppointmentService', () => {
 
                     const __expected = [__existing_addition_1, __existing_addition_2, __expected_addition_3];
 
-                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                     expect(__actual.additions).toHaveLength(3);
                     expect(__actual.additions.sort()).toEqual(__expected);
                 });
@@ -521,7 +521,7 @@ describe('AppointmentService', () => {
                     __existing_addition_2.name = 'TAKENNAME';
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
                     __existing_appointment._additions = [__existing_addition_1, __existing_addition_2];
 
@@ -559,7 +559,7 @@ describe('AppointmentService', () => {
 
                     const __expected = [__existing_addition_1, __existing_addition_2];
 
-                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                     expect(__actual.additions).toHaveLength(2);
                     expect(__actual.additions.sort()).toEqual(__expected);
                 });
@@ -576,7 +576,7 @@ describe('AppointmentService', () => {
                     __existing_addition_2.name = 'addition2';
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
                     __existing_appointment._additions = [__existing_addition_1, __existing_addition_2];
 
@@ -602,18 +602,18 @@ describe('AppointmentService', () => {
 
                     const __expected = [__existing_addition_1];
 
-                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                     expect(__actual.additions).toHaveLength(1);
                     expect(__actual.additions.sort()).toEqual(__expected);
                 });
             });
 
-            it('* update link', async () => {
+            it('* update _link', async () => {
                 const __given_user = new JWT_User();
                 __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                 const __existing_appointment = new Appointment();
-                __existing_appointment.link = 'link';
+                __existing_appointment._link = 'link';
                 __existing_appointment.creatorId = __given_user.sub;
 
                 const __given_appointment_change_data = {
@@ -621,7 +621,7 @@ describe('AppointmentService', () => {
                 };
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // new link not in use
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // new _link not in use
 
                 appointmentRepositoryMock.save.mockImplementationOnce((val) => val);
 
@@ -634,20 +634,20 @@ describe('AppointmentService', () => {
 
                 const __expected = __given_appointment_change_data.link;
 
-                const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                 expect(__actual.link).toEqual(__expected);
             });
 
             describe('* update dates', () => {
-                it('* update date', async () => {
+                it('* update _date', async () => {
                     const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
-                    __existing_appointment.date = new Date(Date.now() + (3 * 60 * 60 * 1000));
-                    __existing_appointment.deadline = new Date(Date.now() + (2 * 60 * 60 * 1000));
+                    __existing_appointment._date = new Date(Date.now() + (3 * 60 * 60 * 1000));
+                    __existing_appointment._deadline = new Date(Date.now() + (2 * 60 * 60 * 1000));
 
                     const __given_appointment_change_data = {
                         date: new Date(Date.now() + (5 * 60 * 60 * 1000))
@@ -666,19 +666,19 @@ describe('AppointmentService', () => {
 
                     const __expected = __given_appointment_change_data.date;
 
-                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                     expect(__actual.date).toEqual(__expected);
                 });
 
-                it('* update deadline', async () => {
+                it('* update _deadline', async () => {
                     const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
-                    __existing_appointment.date = new Date(Date.now() + (3 * 60 * 60 * 1000));
-                    __existing_appointment.deadline = new Date(Date.now() + (2 * 60 * 60 * 1000));
+                    __existing_appointment._date = new Date(Date.now() + (3 * 60 * 60 * 1000));
+                    __existing_appointment._deadline = new Date(Date.now() + (2 * 60 * 60 * 1000));
 
                     const __given_appointment_change_data = {
                         deadline: new Date(Date.now() + (2.5 * 60 * 60 * 1000))
@@ -697,7 +697,7 @@ describe('AppointmentService', () => {
 
                     const __expected = __given_appointment_change_data.deadline;
 
-                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                     expect(__actual.deadline).toEqual(__expected);
                 });
             });
@@ -709,7 +709,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.title = 'title';
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
 
                     const __given_appointment_change_data = {
@@ -729,7 +729,7 @@ describe('AppointmentService', () => {
 
                     const __expected = __given_appointment_change_data.title;
 
-                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                     expect(__actual.title).toEqual(__expected);
                 });
 
@@ -739,7 +739,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.description = 'description';
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
 
                     const __given_appointment_change_data = {
@@ -758,7 +758,7 @@ describe('AppointmentService', () => {
                     when(mockedUserService.findById(anyString())).thenResolve(__given_user);
                     const __expected = __given_appointment_change_data.description;
 
-                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                     expect(__actual.description).toEqual(__expected);
                 });
 
@@ -768,7 +768,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.location = 'location';
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
 
                     const __given_appointment_change_data = {
@@ -788,7 +788,7 @@ describe('AppointmentService', () => {
 
                     const __expected = __given_appointment_change_data.location;
 
-                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                     expect(__actual.location).toEqual(__expected);
                 });
 
@@ -798,7 +798,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.hidden = false;
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
 
                     const __given_appointment_change_data = {
@@ -818,7 +818,7 @@ describe('AppointmentService', () => {
 
                     const __expected = __given_appointment_change_data.hidden;
 
-                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                     expect(__actual.hidden).toEqual(__expected);
                 });
 
@@ -828,7 +828,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.driverAddition = false;
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
 
                     const __given_appointment_change_data = {
@@ -848,20 +848,20 @@ describe('AppointmentService', () => {
 
                     const __expected = __given_appointment_change_data.driverAddition;
 
-                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                    const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                     expect(__actual.driverAddition).toEqual(__expected);
                 });
 
-                describe('* update maxEnrollments', () => {
+                describe('* update _maxEnrollments', () => {
                     it('* normal', async () => {
                         const __given_user = new JWT_User();
                         __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                         const __existing_appointment = new Appointment();
                         __existing_appointment.driverAddition = false;
-                        __existing_appointment.link = 'link';
+                        __existing_appointment._link = 'link';
                         __existing_appointment.creatorId = __given_user.sub;
-                        __existing_appointment.maxEnrollments = 5;
+                        __existing_appointment._maxEnrollments = 5;
 
                         const __given_appointment_change_data = {
                             maxEnrollments: 10
@@ -880,7 +880,7 @@ describe('AppointmentService', () => {
 
                         const __expected = __given_appointment_change_data.maxEnrollments;
 
-                        const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                        const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                         expect(__actual.maxEnrollments).toEqual(__expected);
                     });
 
@@ -890,9 +890,9 @@ describe('AppointmentService', () => {
 
                         const __existing_appointment = new Appointment();
                         __existing_appointment.driverAddition = false;
-                        __existing_appointment.link = 'link';
+                        __existing_appointment._link = 'link';
                         __existing_appointment.creatorId = __given_user.sub;
-                        __existing_appointment.maxEnrollments = 5;
+                        __existing_appointment._maxEnrollments = 5;
 
                         const __given_appointment_change_data = {
                             maxEnrollments: -1
@@ -911,7 +911,7 @@ describe('AppointmentService', () => {
 
                         const __expected = null;
 
-                        const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                        const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                         expect(__actual.maxEnrollments).toEqual(__expected);
                     });
                 });
@@ -922,7 +922,7 @@ describe('AppointmentService', () => {
                 // __given_user.sub = "546448e0-f366-4fca-957a-9bfdce6dc738";
                 //
                 // const __existing_appointment = new Appointment();
-                // __existing_appointment.link = 'link';
+                // __existing_appointment._link = '_link';
                 // __existing_appointment.creatorId = __given_user.sub;
                 // __existing_appointment._administrators = [];
                 //
@@ -944,7 +944,7 @@ describe('AppointmentService', () => {
                 // const __expected = __existing_appointment;
                 // delete __expected._administrators;
                 //
-                // const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment.link, __given_user);
+                // const __actual = await appointmentService.update(__given_appointment_change_data, __existing_appointment._link, __given_user);
                 // expect(__actual).toEqual(__expected);
             });
         });
@@ -955,7 +955,7 @@ describe('AppointmentService', () => {
                 __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
 
                 const __existing_appointment = new Appointment();
-                __existing_appointment.link = 'link';
+                __existing_appointment._link = 'link';
                 __existing_appointment.creatorId = __given_user.sub;
 
                 const __given_appointment_change_data = {
@@ -965,7 +965,7 @@ describe('AppointmentService', () => {
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined); // appointment not found
 
                 appointmentService
-                    .update(__given_appointment_change_data, __existing_appointment.link, __given_user)
+                    .update(__given_appointment_change_data, __existing_appointment._link, __given_user)
                     .then(() => {
                         throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
                     })
@@ -983,7 +983,7 @@ describe('AppointmentService', () => {
                 __existing_creator.preferred_username = 'creator';
 
                 const __existing_appointment = new Appointment();
-                __existing_appointment.link = 'link';
+                __existing_appointment._link = 'link';
                 __existing_appointment.creatorId = __existing_creator.sub;
                 __existing_appointment._administrators = [];
 
@@ -994,7 +994,7 @@ describe('AppointmentService', () => {
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
                 appointmentService
-                    .update(__given_appointment_change_data, __existing_appointment.link, __given_user)
+                    .update(__given_appointment_change_data, __existing_appointment._link, __given_user)
                     .then(() => {
                         throw new Error('I have failed you, Anakin. Should have gotten an InsufficientPermissionsException');
                     })
@@ -1003,27 +1003,27 @@ describe('AppointmentService', () => {
                     });
             });
 
-            it('* link in use', async () => {
+            it('* _link in use', async () => {
                 const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
 
                 const __existing_appointment = new Appointment();
-                __existing_appointment.link = 'link';
+                __existing_appointment._link = 'link';
                 __existing_appointment.creatorId = __given_user.sub;
                 __existing_appointment._administrators = [];
 
                 const __existing_appointment_2 = new Appointment();
-                __existing_appointment_2.link = 'existingLink';
+                __existing_appointment_2._link = 'existingLink';
 
                 const __given_appointment_change_data = {
                     link: 'existingLink'
                 };
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment_2); // new link in use
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment_2); // new _link in use
 
                 appointmentService
-                    .update(__given_appointment_change_data, __existing_appointment.link, __given_user)
+                    .update(__given_appointment_change_data, __existing_appointment._link, __given_user)
                     .then(() => {
                         throw new Error('I have failed you, Anakin. Should have gotten an DuplicateValueException');
                     })
@@ -1033,15 +1033,15 @@ describe('AppointmentService', () => {
                     });
             });
 
-            describe('* date changes', () => {
-                it('* date before deadline', async () => {
+            describe('* _date changes', () => {
+                it('* _date before _deadline', async () => {
                     const __given_user = new JWT_User();
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
-                    __existing_appointment.date = new Date(Date.now() + (4 * 60 * 60 * 1000));
-                    __existing_appointment.deadline = new Date(Date.now() + (3 * 60 * 60 * 1000));
+                    __existing_appointment._date = new Date(Date.now() + (4 * 60 * 60 * 1000));
+                    __existing_appointment._deadline = new Date(Date.now() + (3 * 60 * 60 * 1000));
 
                     const __given_appointment_change_data = {
                         date: new Date(Date.now() + (2 * 60 * 60 * 1000))
@@ -1050,7 +1050,7 @@ describe('AppointmentService', () => {
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
                     appointmentService
-                        .update(__given_appointment_change_data, __existing_appointment.link, __given_user)
+                        .update(__given_appointment_change_data, __existing_appointment._link, __given_user)
                         .then(() => {
                             throw new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException');
                         })
@@ -1060,14 +1060,14 @@ describe('AppointmentService', () => {
                         });
                 });
 
-                it('* deadline after date', async () => {
+                it('* _deadline after _date', async () => {
                     const __given_user = new JWT_User();
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
-                    __existing_appointment.date = new Date(Date.now() + (4 * 60 * 60 * 1000));
-                    __existing_appointment.deadline = new Date(Date.now() + (3 * 60 * 60 * 1000));
+                    __existing_appointment._date = new Date(Date.now() + (4 * 60 * 60 * 1000));
+                    __existing_appointment._deadline = new Date(Date.now() + (3 * 60 * 60 * 1000));
 
                     const __given_appointment_change_data = {
                         deadline: new Date(Date.now() + (5 * 60 * 60 * 1000))
@@ -1076,7 +1076,7 @@ describe('AppointmentService', () => {
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
                     appointmentService
-                        .update(__given_appointment_change_data, __existing_appointment.link, __given_user)
+                        .update(__given_appointment_change_data, __existing_appointment._link, __given_user)
                         .then(() => {
                             throw new Error('I have failed you, Anakin. Should have gotten an InvalidValuesException');
                         })
@@ -1092,7 +1092,7 @@ describe('AppointmentService', () => {
     describe('* handle administrators', () => {
         describe('* add', () => {
             it('* should have user in admin list', async () => {
-                const link = 'valid link';
+                const link = 'valid _link';
                 const username = 'username';
 
                 const mockedUser = mock(JWT_User);
@@ -1196,7 +1196,7 @@ describe('AppointmentService', () => {
 
         describe('* remove', () => {
             it('* successful should return updated entity', async () => {
-                const link = 'valid link';
+                const link = 'valid _link';
                 const username = 'username';
 
                 const mockedUser = mock(JWT_User);
@@ -1469,11 +1469,11 @@ describe('AppointmentService', () => {
     //         it('* pin', async () => {
     //             const __given_user = new JWT_User();
     //             __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
-    //             const __given_link = 'link';
+    //             const __given_link = '_link';
     //
     //             const __existing_appointment = new Appointment();
     //             __existing_appointment.id = '3b1abdb5-cfaa-44cb-8e26-09d61b8f92c5';
-    //             __existing_appointment.link = __given_link;
+    //             __existing_appointment._link = __given_link;
     //
     //             appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
     //             userRepositoryMock.findOne.mockReturnValueOnce(__given_user);
@@ -1490,11 +1490,11 @@ describe('AppointmentService', () => {
     //         });
     //
     //         it('* un-pin', async () => {
-    //             const __given_link = 'link';
+    //             const __given_link = '_link';
     //
     //             const __existing_appointment = new Appointment();
     //             __existing_appointment.id = '3b1abdb5-cfaa-44cb-8e26-09d61b8f92c5';
-    //             __existing_appointment.link = __given_link;
+    //             __existing_appointment._link = __given_link;
     //
     //             const __given_user = new JWT_User();
     //             __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
@@ -1518,7 +1518,7 @@ describe('AppointmentService', () => {
     //         it('* appointment not found', async () => {
     //             const __given_user = new JWT_User();
     //             __given_user.preferred_username = 'username';
-    //             const __given_link = 'link';
+    //             const __given_link = '_link';
     //
     //             appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
     //
@@ -1536,11 +1536,11 @@ describe('AppointmentService', () => {
     //         it('* user gone', async () => {
     //             const __given_user = new JWT_User();
     //             __given_user.preferred_username = 'username';
-    //             const __given_link = 'link';
+    //             const __given_link = '_link';
     //
     //             const __existing_appointment = new Appointment();
     //             __existing_appointment.id = '3b1abdb5-cfaa-44cb-8e26-09d61b8f92c5';
-    //             __existing_appointment.link = __given_link;
+    //             __existing_appointment._link = __given_link;
     //
     //             appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
     //             userRepositoryMock.findOne.mockReturnValueOnce(undefined);
@@ -1606,7 +1606,7 @@ describe('AppointmentService', () => {
                     const __existing_appointment = new Appointment();
                     __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';
                     __existing_appointment.creatorId = __given_user.sub;
-                    __existing_appointment.link = __given_permissions.pin1;
+                    __existing_appointment._link = __given_permissions.pin1;
                     __existing_appointment.enrollments = [];
 
                     jest.spyOn(appointmentService as any, 'getAppointments')
@@ -1625,7 +1625,7 @@ describe('AppointmentService', () => {
                     const __existing_appointment = new Appointment();
                     __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';
                     __existing_appointment.creatorId = __given_user.sub;
-                    __existing_appointment.link = 'anylink';
+                    __existing_appointment._link = 'anylink';
                     __existing_appointment.enrollments = [];
 
                     jest.spyOn(appointmentService as any, 'getAppointments')
@@ -1663,7 +1663,7 @@ describe('AppointmentService', () => {
                     .toHaveBeenCalledWith(__given_user, [], new Date(__given_before), __given_limit);
             });
 
-            it('* invalid date -> convert to current', async () => {
+            it('* invalid _date -> convert to current', async () => {
                 const __given_user = new JWT_User();
                 __given_user.preferred_username = 'username';
                 const __given_permissions = {};

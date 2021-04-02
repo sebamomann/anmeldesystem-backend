@@ -49,7 +49,7 @@ export class EnrollmentService {
             .leftJoinAndSelect('enrollment.driver', 'driver')
             .leftJoinAndSelect('enrollment.passenger', 'passenger')
             .where('enrollment.id = :enrollmentId', {enrollmentId: id})
-            .select(['enrollment', 'appointment.link', 'additions.name', 'additions.order', 'driver', 'passenger', 'appointment.hidden'])
+            .select(['enrollment', 'appointment._link', 'additions.name', 'additions.order', 'driver', 'passenger', 'appointment.hidden'])
             .getOne();
 
         if (enrollment === undefined) {
@@ -87,7 +87,7 @@ export class EnrollmentService {
      *
      * @param enrollment_raw Enrollment data to save into database
      * @param user optional logged in user
-     * @param domain Domain to build link for edit/delete with
+     * @param domain Domain to build _link for edit/delete with
      *
      * @return Enrollment entity that was created
      *
@@ -96,9 +96,19 @@ export class EnrollmentService {
      * @throws See {@link parseEnrollmentObject} for relations
      */
     public async create(enrollment_raw: Enrollment, user: JWT_User, domain: string) {
-        const appointment_referenced = await this.appointmentService
-            .findByLink(enrollment_raw.appointment.link);
+        let appointment_referenced: Appointment;
 
+        try {
+            appointment_referenced = await this.appointmentService
+                .findByLink(enrollment_raw.appointment.link);
+        } catch (e) {
+            throw new EntityNotFoundException(null, null, {
+                'object': "appointment",
+                'attribute': 'link',
+                'in': 'body',
+                'value': enrollment_raw.appointment.link
+            });
+        }
         const enrollment_output = await EnrollmentUtil.parseEnrollmentObject(enrollment_raw, appointment_referenced);
 
         // TODO

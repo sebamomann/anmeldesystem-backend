@@ -172,7 +172,7 @@ describe('EnrollmentService', () => {
                     __given_enrollment.comment = ` ${__expected_comment}  `;
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
 
                     __given_enrollment.appointment = __existing_appointment;
 
@@ -198,7 +198,7 @@ describe('EnrollmentService', () => {
                     __given_enrollment.comment = ``;
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
 
                     __given_enrollment.appointment = __existing_appointment;
 
@@ -232,7 +232,7 @@ describe('EnrollmentService', () => {
                     __given_enrollment.comment = ` ${__expected_comment}  `;
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.driverAddition = true;
 
                     __given_enrollment.appointment = __existing_appointment;
@@ -269,7 +269,7 @@ describe('EnrollmentService', () => {
                     __given_enrollment.comment = ` ${__expected_comment}  `;
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
                     __existing_appointment.driverAddition = true;
 
                     __given_enrollment.appointment = __existing_appointment;
@@ -306,11 +306,11 @@ describe('EnrollmentService', () => {
                     __given_enrollment.editMail = 'mail@example.com';
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
 
                     __given_enrollment.appointment = __existing_appointment;
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific _link
 
                     enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
 
@@ -342,11 +342,11 @@ describe('EnrollmentService', () => {
                     __given_enrollment.editMail = 'mail@example.com';
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
 
                     __given_enrollment.appointment = __existing_appointment;
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific _link
 
                     enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
 
@@ -379,11 +379,11 @@ describe('EnrollmentService', () => {
                     __given_enrollment.comment = 'comment';
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
 
                     __given_enrollment.appointment = __existing_appointment;
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific _link
 
                     enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
 
@@ -410,11 +410,11 @@ describe('EnrollmentService', () => {
                     __given_enrollment.comment = 'comment';
 
                     const __existing_appointment = new Appointment();
-                    __existing_appointment.link = 'link';
+                    __existing_appointment._link = 'link';
 
                     __given_enrollment.appointment = __existing_appointment;
 
-                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+                    appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific _link
 
                     enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
 
@@ -439,14 +439,14 @@ describe('EnrollmentService', () => {
             it('appointment not found', async (done) => {
                 const __given_enrollment = new Enrollment();
                 __given_enrollment.appointment = new Appointment();
-                __given_enrollment.appointment.link = 'link';
+                __given_enrollment.appointment._link = 'link';
                 const __given_user = new JWT_User();
 
                 const __given_domain = 'example.com/{{0}}/{{1}}';
 
                 const __existing_appointment = undefined;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific _link
 
                 try {
                     await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
@@ -462,7 +462,7 @@ describe('EnrollmentService', () => {
                 const __given_enrollment = new Enrollment();
                 __given_enrollment.name = 'existingName';
                 __given_enrollment.appointment = new Appointment();
-                __given_enrollment.appointment.link = 'link';
+                __given_enrollment.appointment._link = 'link';
                 __given_enrollment.editMail = 'mail@example.com';
                 const __given_user = undefined;
                 const __given_domain = 'example.com/{{0}}/{{1}}';
@@ -471,8 +471,8 @@ describe('EnrollmentService', () => {
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.name = __given_enrollment.name;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment); // cant find appointment with specific link
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific _link
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment); // cant find appointment with specific _link
 
                 try {
                     await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
@@ -488,7 +488,7 @@ describe('EnrollmentService', () => {
                 const __given_enrollment = new Enrollment();
                 __given_enrollment.name = 'existingName';
                 __given_enrollment.appointment = new Appointment();
-                __given_enrollment.appointment.link = 'link';
+                __given_enrollment.appointment._link = 'link';
                 const __given_user = new JWT_User();
 
                 const __given_domain = 'example.com/{{0}}/{{1}}';
@@ -497,8 +497,8 @@ describe('EnrollmentService', () => {
                 const __existing_enrollment = new Enrollment();
                 __existing_enrollment.name = __given_enrollment.name;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
-                enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment); // cant find appointment with specific link
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific _link
+                enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment); // cant find appointment with specific _link
 
                 try {
                     await enrollmentService.create(__given_enrollment, __given_user, __given_domain);
@@ -515,7 +515,7 @@ describe('EnrollmentService', () => {
                 __given_enrollment.name = 'existingName';
                 __given_enrollment.comment = 'comment';
                 __given_enrollment.appointment = new Appointment();
-                __given_enrollment.appointment.link = 'link';
+                __given_enrollment.appointment._link = 'link';
                 const __given_user = new JWT_User();
 
                 const __given_domain = 'example.com/{{0}}/{{1}}';
@@ -523,7 +523,7 @@ describe('EnrollmentService', () => {
                 const __existing_appointment = __given_enrollment.appointment;
                 __existing_appointment.driverAddition = true;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific _link
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
                 try {
@@ -544,7 +544,7 @@ describe('EnrollmentService', () => {
                 __given_enrollment.additions[0].name = 'additonUndefined';
                 __given_enrollment.additions[0].id = '940599c5-b6fb-4f33-a090-017e31c2b22a';
                 __given_enrollment.appointment = new Appointment();
-                __given_enrollment.appointment.link = 'link';
+                __given_enrollment.appointment._link = 'link';
                 __given_enrollment.appointment._additions = [new Addition()];
                 __given_enrollment.appointment._additions[0].id = '08f642cf-ee55-4b18-84e4-69e218088753';
                 __given_enrollment.appointment._additions[0].name = 'additionExisting';
@@ -555,7 +555,7 @@ describe('EnrollmentService', () => {
                 const __existing_appointment = __given_enrollment.appointment;
                 __existing_appointment.driverAddition = true;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific _link
                 enrollmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
                 try {
@@ -577,11 +577,11 @@ describe('EnrollmentService', () => {
                 const __given_domain = 'example.com/{{0}}/{{1}}';
 
                 const __existing_appointment = new Appointment();
-                __existing_appointment.link = 'link';
+                __existing_appointment._link = 'link';
 
                 __given_enrollment.appointment = __existing_appointment;
 
-                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific link
+                appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment); // cant find appointment with specific _link
 
                 enrollmentRepositoryMock.findOne.mockImplementationOnce(undefined);
 

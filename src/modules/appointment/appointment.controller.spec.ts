@@ -39,7 +39,7 @@ describe('Appointment Controller', () => {
         expect(appointmentController).toBeDefined();
     });
 
-    describe('* find appointments by link', () => {
+    describe('* find appointments by _link', () => {
         describe('* successful should return entity of appointment with 200 status code', () => {
             it('successful request', async () => {
                 const result = new Appointment();
@@ -299,7 +299,7 @@ describe('Appointment Controller', () => {
                     });
             });
 
-            it('link in use', async () => {
+            it('_link in use', async () => {
                 const result = new DuplicateValueException(null, null, ['link']);
 
                 jest.spyOn(appointmentService, 'create')
@@ -382,7 +382,7 @@ describe('Appointment Controller', () => {
                     });
             });
 
-            it('link in use', async () => {
+            it('_link in use', async () => {
                 const result = new DuplicateValueException(null, null, ['link']);
 
                 jest.spyOn(appointmentService, 'update')

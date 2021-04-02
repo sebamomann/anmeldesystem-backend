@@ -166,7 +166,7 @@ export class AppointmentMapper {
 
     /**
      * Create a object only contained the important creation values of the passed {@link Appointment}. <br/>
-     * Those values are id and link.
+     * Those values are id and _link.
      *
      * @param appointment       {@link Appointment} to minify
      */

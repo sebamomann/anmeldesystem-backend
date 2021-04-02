@@ -9,44 +9,29 @@ import {JWT_User} from '../user/user.model';
 import {Administrator} from './administrator.entity';
 import {Pinner} from './pinner.entity';
 import {AdditionList} from '../addition/additionList';
+import {AppointmentService} from './appointment.service';
+import {GeneratorUtil} from '../../util/generator.util';
+import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
+import {AppointmentUtil} from './appointment.util';
 
 @Entity()
 export class Appointment {
     @PrimaryGeneratedColumn('uuid')
     id: string;
-
     @Column({nullable: false})
     title: string;
-
     @Column({nullable: false})
     description: string;
-
-    @Column({nullable: false, unique: true})
-    link: string;
-
     @Column({nullable: false})
     location: string;
-
-    @Column('timestamp', {nullable: false, default: () => 'CURRENT_TIMESTAMP'})
-    date: Date;
-
-    @Column('timestamp', {default: null})
-    deadline: Date;
-
-    @Column('int', {default: null})
-    maxEnrollments: number;
-
     @Column('boolean', {default: false})
     hidden: boolean;
-
     @OneToMany(type => Enrollment,
         enrollment => enrollment.appointment,
         {
             eager: true
         })
     enrollments: Enrollment[];
-    @Column({default: false})
-    driverAddition: boolean;
     @OneToMany(type => Administrator,
         administrator => administrator.appointment, {
             eager: true,
@@ -80,6 +65,79 @@ export class Appointment {
     administrators: IUserMinified[] = [];
     numberOfEnrollments?: number;
 
+    constructor(private appointmentService: AppointmentService) {
+    }
+
+    @Column({default: false, name: 'driverAddition'})
+    _driverAddition: boolean;
+
+    get driverAddition() {
+        console.log(this._driverAddition);
+
+        return !!this._driverAddition;
+    }
+
+    set driverAddition(value: any) {
+        this._driverAddition = !!(value);
+    }
+
+    @Column('int', {default: null, name: 'maxEnrollments'})
+    _maxEnrollments: number;
+
+    get maxEnrollments() {
+        return this._maxEnrollments;
+    }
+
+    set maxEnrollments(maxEnrollments: number) {
+        if (maxEnrollments > 0) {
+            this._maxEnrollments = maxEnrollments;
+        } else {
+            this._maxEnrollments = null;
+        }
+    }
+
+    @Column('timestamp', {nullable: false, default: () => 'CURRENT_TIMESTAMP', name: 'date'})
+    _date: Date;
+
+    get date() {
+        return this._date;
+    }
+
+    set date(date: Date) {
+        AppointmentUtil.handleDateValidation(date, this._deadline);
+
+        console.log(date, this._deadline);
+        this._date = date;
+    }
+
+    @Column('timestamp', {default: null, name: 'deadline'})
+    _deadline: Date;
+
+    get deadline() {
+        return this._deadline;
+    }
+
+    set deadline(deadline: Date) {
+        AppointmentUtil.handleDeadlineValidation(this._date, deadline);
+        console.log(this._date, deadline);
+
+        this._deadline = deadline;
+    }
+
+    @Column({nullable: false, unique: true, name: 'link'})
+    _link: string;
+
+    get link() {
+        return this._link;
+    }
+
+    /**
+     * @deprecated DO NOT USE DUE TO MISSING IN USE CHECK. ASYNC SETTER NOT POSSIBLE
+     */
+    set link(_link: string) {
+        throw new Error('DO NOT USE');
+    }
+
     @OneToMany(type => Addition,
         addition => addition.appointment,
         {
@@ -94,6 +152,35 @@ export class Appointment {
 
     set additions(list: AdditionList) {
         this._additions = list.getArray();
+    }
+
+    public setAppointmentService(appointmentService: AppointmentService) {
+        this.appointmentService = appointmentService;
+    }
+
+    public async setLink(_link: string): Promise<void> {
+        let link = '';
+
+        if (!_link) {
+            do {
+                link = GeneratorUtil.makeid(5);
+            } while (await this.appointmentService.linkInUse(link));
+        } else {
+            if (await this.appointmentService.linkInUse(_link)) {
+                throw new AlreadyUsedException('DUPLICATE_VALUES',
+                    'Provided values are already in use', [{
+                        'attribute': 'link',
+                        'value': _link,
+                        'message': 'Value is already in use by other appointment. Specify a different link'
+                    }]);
+            }
+
+            link = _link;
+        }
+
+        this._link = link;
+
+        return Promise.resolve();
     }
 
     /**

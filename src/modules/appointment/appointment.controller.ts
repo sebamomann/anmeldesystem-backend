@@ -233,22 +233,22 @@ export class AppointmentController {
             });
     }
 
-    // @Post('newcontent/:link')
-    // updateAvailable(@Param('link') link: string, @Body("lastUpdated") lud: Date, @Request() req: Request, @Res() res: Response) {
-    //     const date = new Date(lud).getTime();
+    // @Post('newcontent/:_link')
+    // updateAvailable(@Param('_link') _link: string, @Body("lastUpdated") lud: Date, @Request() req: Request, @Res() res: Response) {
+    //     const _date = new Date(lud).getTime();
     //     return this.appointmentService
-    //         .find(link)
+    //         .find(_link)
     //         .then(tAppointment => {
     //             if (tAppointment != null) {
     //                 const appointmentDate = tAppointment.lud.getTime();
     //                 const enrollments = tAppointment.enrollments.filter(fEnrollment => {
-    //                     if (fEnrollment.lud.getTime() > date) {
+    //                     if (fEnrollment.lud.getTime() > _date) {
     //                         return fEnrollment;
     //                     }
     //                 });
-    //                 console.log(`${appointmentDate} ${date}`);
+    //                 console.log(`${appointmentDate} ${_date}`);
     //
-    //                 if (enrollments.length > 0 || appointmentDate > date) {
+    //                 if (enrollments.length > 0 || appointmentDate > _date) {
     //                     res.status(HttpStatus.OK).json(tAppointment);
     //                 } else {
     //                     res.status(HttpStatus.NOT_MODIFIED).json();

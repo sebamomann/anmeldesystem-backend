@@ -16,8 +16,8 @@ describe('Appointment util', () => {
         expect(AppointmentUtil).toBeDefined();
     });
 
-    describe('* handle date validation', () => {
-        it('* on valid date return date (date > deadline)', () => {
+    describe('* handle _date validation', () => {
+        it('* on valid _date return _date (_date > _deadline)', () => {
             const __given_date = new Date();
             const __given_deadline = new Date(__given_date.getTime() - 15 * 60000);
 
@@ -25,7 +25,7 @@ describe('Appointment util', () => {
             expect(__actual).toEqual(__given_date);
         });
 
-        it('* on invalid date return error (date < deadline)', (done) => {
+        it('* on invalid _date return error (_date < _deadline)', (done) => {
             const __given_date = new Date();
             const __given_deadline = new Date(__given_date.getTime() + 15 * 60000);
 
@@ -40,8 +40,8 @@ describe('Appointment util', () => {
         });
     });
 
-    describe('* handle deadline validation', () => {
-        it('* on valid deadline return deadline (date > deadline)', () => {
+    describe('* handle _deadline validation', () => {
+        it('* on valid _deadline return _deadline (_date > _deadline)', () => {
             const __given_date = new Date();
             const __given_deadline = new Date(__given_date.getTime() - 15 * 60000);
 
@@ -49,7 +49,7 @@ describe('Appointment util', () => {
             expect(__actual).toEqual(__given_deadline);
         });
 
-        it('* on invalid deadline return error (date < deadline)', (done) => {
+        it('* on invalid _deadline return error (_date < _deadline)', (done) => {
             const __given_date = new Date();
             const __given_deadline = new Date(__given_date.getTime() + 15 * 60000);
 
@@ -218,9 +218,9 @@ describe('Appointment util', () => {
                     const __given_appointment = new Appointment();
                     __given_appointment.id = '1';
                     __given_appointment.creatorId = __existing_creator.sub;
-                    __given_appointment.link = 'myLink';
+                    __given_appointment._link = 'myLink';
 
-                    const __given_pins = [__given_appointment.link];
+                    const __given_pins = [__given_appointment._link];
 
                     const __expected = ['PINNED'];
 
@@ -284,9 +284,9 @@ describe('Appointment util', () => {
                     mockedPinnerInstance.appointment = __given_appointment;
 
                     __given_appointment.pinners = [mockedPinnerInstance];
-                    __given_appointment.link = 'link';
+                    __given_appointment._link = 'link';
 
-                    const __given_pins = [__given_appointment.link];
+                    const __given_pins = [__given_appointment._link];
 
                     const __expected = ['CREATOR', 'PINNED'];
 

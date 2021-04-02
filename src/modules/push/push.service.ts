@@ -143,7 +143,7 @@ export class PushService {
                 'body': 'Es gibt Änderungen zu diesem Termin!',
                 'vibrate': [50, 50, 50, 100, 200, 200],
                 'data': {
-                    'link': appointment.link,
+                    'link': appointment._link,
                     'primaryKey': 1
                 },
                 'actions': [{

@@ -8,12 +8,16 @@ const crypto = require('crypto');
 
 export class AppointmentUtil {
     /**
-     * Compare deadline and set date, to check if the date is before the deadline
+     * Compare _deadline and set _date, to check if the _date is before the _deadline
      *
      * @param date Date of appointment
-     * @param deadline Date deadline of appointment
+     * @param deadline Date _deadline of appointment
      */
     public static handleDateValidation(date, deadline) {
+        if (!deadline) {
+            return date;
+        }
+
         if (Date.parse(date) < Date.parse(deadline)) {
             throw new InvalidValuesException(null, null,
                 [
@@ -30,16 +34,17 @@ export class AppointmentUtil {
     }
 
     /**
-     * Compare deadline and set date, to check if the deadline is after the appointment date
+     * Compare _deadline and set _date, to check if the _deadline is after the appointment _date
      *
      * @param date Date of appointment
-     * @param deadline Date deadline of appointment
+     * @param deadline Date _deadline of appointment
      */
     public static handleDeadlineValidation(date, deadline) {
-        console.log(date);
-        console.log(deadline);
+        if (!date) {
+            return deadline;
+        }
 
-        if (Date.parse(deadline) > Date.parse(date)) {
+        if (Date.parse(date) < Date.parse(deadline)) {
             throw new InvalidValuesException(null, null,
                 [
                     {
@@ -68,7 +73,7 @@ export class AppointmentUtil {
      *     <li>ENROLLED</li>
      *     <li>PINNED</li>
      * </ol>
-     * Note that a permission granted via passing a link is also marked as "PINNED".<br/>
+     * Note that a permission granted via passing a _link is also marked as "PINNED".<br/>
      * Multiple correlations are possible. Two references of the same type are not possible.<br/>
      * For the "Enrolled" relations to happen, only the ID is needed. No token validation happening.
      *
@@ -119,7 +124,7 @@ export class AppointmentUtil {
         }
 
         if ((appointment.pinners && appointment.pinners.some(sPinner => sPinner.userId === user.sub))
-            || pins.includes(appointment.link)) {
+            || pins.includes(appointment._link)) {
             relations.push('PINNED');
         }
 
