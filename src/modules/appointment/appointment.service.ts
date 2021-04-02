@@ -24,6 +24,7 @@ import {AppointmentPermissionChecker} from './appointmentPermission.checker';
 import {AdditionList} from '../addition/additionList';
 import {IAppointmentCreationDTO} from './IAppointmentCreationDTO';
 import {IAppointmentCreationAdditionDTO} from './IAppointmentCreationAdditionDTO';
+import {IAppointmentUpdateAdditionDTO} from './IAppointmentUpdateAdditionDTO';
 
 const logger = require('../../logger');
 
@@ -39,6 +40,24 @@ export class AppointmentService {
         private pushService: PushService,
     ) {
     }
+
+    /**
+     * Update the {@link AdditionList} of the passed {@link Appointment}
+     *
+     * @param mixedAdditions        A list of {@link IAppointmentUpdateAdditionDTO} containing the id of an existing {@link Addition}
+     *                              or a name for a new {@link Addition}
+     * @param appointment           Referenced {@link Appointment} to update
+     */
+    private static _handleAdditionUpdate(mixedAdditions: IAppointmentUpdateAdditionDTO[], appointment: Appointment) {
+        const additionList = appointment.additions;
+        additionList.updateList(mixedAdditions);
+
+        return additionList.getArray();
+    }
+
+    /** MAIN FUNCTIONS  **/
+
+    /** MAIN FUNCTIONS  **/
 
     /**
      * Find {@link Appointment} its unique link.
@@ -64,10 +83,6 @@ export class AppointmentService {
 
         return appointment;
     }
-
-    /** MAIN FUNCTIONS  **/
-
-    /** MAIN FUNCTIONS  **/
 
     /**
      * TODO
@@ -272,7 +287,7 @@ export class AppointmentService {
                 }
 
                 if (key === 'additions') {
-                    changedValue = this._handleAdditionUpdate(value as (IAppointmentCreationAdditionDTO | Addition)[], appointment);
+                    changedValue = AppointmentService._handleAdditionUpdate(value as (IAppointmentCreationAdditionDTO | Addition)[], appointment);
                 }
 
                 if (key === 'date') {
@@ -653,24 +668,6 @@ export class AppointmentService {
         } catch (e) {
             return false;
         }
-    }
-
-    /**
-     * // TODO ALLOW UNDEFINED / NULL
-     * Loop through all passed {@link Addition}. <br/>
-     *      - If {@link Addition} exists by name, take it. <br/>
-     *      - Else create new {@link Addition}. <br/>
-     * Order of elements in passed array is important
-     *
-     * @param mixedAdditions
-     * @param appointment
-     * @private
-     */
-    private _handleAdditionUpdate(mixedAdditions: (IAppointmentCreationAdditionDTO | Addition)[], appointment: Appointment) {
-        const additionList = appointment.additions;
-        additionList.updateList(mixedAdditions);
-
-        return additionList.getArray();
     }
 
     /* istanbul ignore next */

@@ -4,6 +4,7 @@ import {IAppointmentCreationAdditionDTO} from '../appointment/IAppointmentCreati
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {Appointment} from '../appointment/appointment.entity';
 import {MissingValuesException} from '../../exceptions/MissingValuesException';
+import {IAppointmentUpdateAdditionDTO} from '../appointment/IAppointmentUpdateAdditionDTO';
 
 export class AdditionList {
     private list: Addition[];
@@ -17,9 +18,9 @@ export class AdditionList {
     }
 
     /**
-     * Get raw data of {@link AdditionList}
+     * Get raw {@link Addition} list of {@link AdditionList}
      *
-     * @return list         Array of {@link Addition}
+     * @return Array of {@link Addition}
      */
     public getArray(): Addition[] {
         return this.list;
@@ -27,8 +28,8 @@ export class AdditionList {
 
     /**
      * Converts raw data from {@link Appointment} creation into a proper {@link Addition} format.
-     * List of {@link Addition} does not foresee duplicates. Method checks for duplicates.<br/>
-     * Populates {@link Addition} with a order based on passed array
+     * List of {@link Addition} does not foresee duplicates. Method executes check for duplicates.<br/>
+     * Populates {@link Addition} with a order value based on passed array.
      *
      * @throws {@link DuplicateValueException}      See {@link checkForDuplicateNames}
      *
@@ -67,14 +68,14 @@ export class AdditionList {
 
     /**
      * Update list of {@link Addition}.<br/>
-     * Check for duplicate names and if {@link Addition} is even part of the referenced {@link Appointment}
+     * Check for duplicate names and if {@link Addition} is even part of the referenced {@link Appointment}.<br/>
      *
-     * @param mixedAdditions                        List of existing {@link Addition} and
-     *                                              {@link Addition} to create by {@link IAppointmentCreationAdditionDTO}
+     * @param mixedAdditions                        List of existing {@link IAppointmentUpdateAdditionDTO} to use existing
+     *                                              or create new {@link Addition}
      *
      * @throws {@link EntityNotFoundException}      See {@link findById}
      */
-    public updateList(mixedAdditions: (IAppointmentCreationAdditionDTO | Addition)[]) {
+    public updateList(mixedAdditions: IAppointmentUpdateAdditionDTO[]) {
         let refreshedList = [];
 
         this.checkForDuplicateNames(mixedAdditions);
@@ -84,10 +85,10 @@ export class AdditionList {
             let addition = new Addition();
 
             if (fAddition['id']) {
-                addition = this.findById(fAddition['id']);
+                addition = this.findById(fAddition['id']!);
             }
 
-            if (fAddition.name) {
+            if (fAddition.name && !addition.name) {
                 addition.name = fAddition.name;
             }
 
@@ -113,12 +114,15 @@ export class AdditionList {
     }
 
     /**
-     * Get a string array containing all names of the passed {@link IAppointmentCreationAdditionDTO} or {@link Addition}
+     * Get a string array all names of the passed {@link IAppointmentCreationAdditionDTO} or {@link IAppointmentUpdateAdditionDTO}.<br/>
+     * When {@link IAppointmentUpdateAdditionDTO} is not providing a name, search for existing {@link Addition} in {@link Appointment} and use
+     * found name
      *
-     * @param additions         Array of {@link IAppointmentCreationAdditionDTO} or {@link Addition}
-     * @private
+     * @param additions         List of {@link IAppointmentCreationAdditionDTO} or {@link IAppointmentUpdateAdditionDTO}
+     *
+     * @return  string[] containing all directly and indirectly occurring names
      */
-    private getListOfAdditionNames(additions: (IAppointmentCreationAdditionDTO | Addition)[]) {
+    private getListOfAdditionNames(additions: (IAppointmentCreationAdditionDTO | IAppointmentUpdateAdditionDTO)[]): string[] {
         return additions.map(
             (mUnfilteredAddition: Addition) => {
                 if (mUnfilteredAddition.name) {
@@ -135,29 +139,14 @@ export class AdditionList {
     }
 
     /**
-     * Check array of {@link IAppointmentCreationAdditionDTO} for duplicates.<br/>
-     * Method searches all names, and identifies duplicates.
+     * Check array of {@link IAppointmentCreationAdditionDTO} and {@link IAppointmentUpdateAdditionDTO} for duplicate names.
      *
-     * @throws {@link DuplicateValueException}      If name of {@link Addition} occurs more than once in List
+     * @param additions                             List of {@link IAppointmentCreationAdditionDTO} or {@link IAppointmentUpdateAdditionDTO}
      *
-     * @param additions                             {@link IAppointmentCreationAdditionDTO}
-     *
-     * @private Method is used internally for mapping only
+     * @throws {@link DuplicateValueException}      If name of {@link Addition} occurs more than once in provided list
      */
-    private checkForDuplicateNames(additions: (IAppointmentCreationAdditionDTO | Addition)[]): void {
-        let occurringNames = this.getListOfAdditionNames(additions);
-
-        const occurringNames_sorted = occurringNames.slice().sort();
-
-        const duplicates = [];
-        for (let i = 0; i < occurringNames_sorted.length - 1; i++) {
-            const currentName = occurringNames_sorted[i];
-            if (currentName === occurringNames_sorted[i + 1]) {
-                if (!duplicates.includes(currentName)) {
-                    duplicates.push(currentName);
-                }
-            }
-        }
+    private checkForDuplicateNames(additions: (IAppointmentCreationAdditionDTO | IAppointmentUpdateAdditionDTO)[]): void {
+        const duplicates = this.getDuplicateNames(additions);
 
         const errors = [];
         duplicates.forEach(
@@ -179,9 +168,31 @@ export class AdditionList {
     }
 
     /**
-     * Sort list by "order" attribute
+     * Get all duplicate values of array of {@link IAppointmentCreationAdditionDTO} and {@link IAppointmentUpdateAdditionDTO}
      *
-     * @private
+     * @param additions         List of {@link IAppointmentCreationAdditionDTO} and {@link IAppointmentUpdateAdditionDTO}
+     *
+     * @return string[] list of duplicate values
+     */
+    private getDuplicateNames(additions: (IAppointmentCreationAdditionDTO | IAppointmentUpdateAdditionDTO)[]): string[] {
+        let occurringNames = this.getListOfAdditionNames(additions);
+
+        const occurringNames_sorted = occurringNames.slice().sort();
+
+        const duplicates = [];
+        for (let i = 0; i < occurringNames_sorted.length - 1; i++) {
+            const currentName = occurringNames_sorted[i];
+            if (currentName === occurringNames_sorted[i + 1]) {
+                if (!duplicates.includes(currentName)) {
+                    duplicates.push(currentName);
+                }
+            }
+        }
+        return duplicates;
+    }
+
+    /**
+     * Sort list by "order" attribute
      */
     private sortByOrder() {
         this.list
@@ -195,11 +206,9 @@ export class AdditionList {
     /**
      * Find {@link Addition} by its unique ID.
      *
-     * @param id        String ID of addition
+     * @param id        String ID of {@link Addition}
      *
-     * @throws          {@EntityNotFoundException} if {@link Addition} is not found in list
-     *
-     * @private
+     * @throws          {@link EntityNotFoundException} if {@link Addition} is not found in list
      */
     private findById(id: string) {
         const addition = this.list.find(

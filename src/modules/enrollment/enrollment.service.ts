@@ -395,7 +395,6 @@ export class EnrollmentService {
      * @param enrollment_raw
      * @param enrollment_output
      * @param user
-     * @private
      */
     private async _handleEnrollmentAuthentication(enrollment_raw: Enrollment, enrollment_output: Enrollment, user: JWT_User) {
         if (enrollment_raw.editMail) {
@@ -418,8 +417,6 @@ export class EnrollmentService {
      *
      * @param enrollment_to_change_values       Values of the enrollment to update
      * @param enrollment_referenced             Current enrollment object
-     *
-     * @private
      */
     private async _updateName(enrollment_to_change_values: any, enrollment_referenced: Enrollment) {
         if (!enrollment_referenced.creatorId) {
