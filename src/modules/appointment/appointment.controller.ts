@@ -16,8 +16,6 @@ import {
 } from '@nestjs/common';
 
 import {Usr} from '../user/user.decorator';
-
-import {Appointment} from './appointment.entity';
 import {AppointmentService} from './appointment.service';
 
 import {Response} from 'express';
@@ -26,6 +24,7 @@ import {InsufficientPermissionsException} from '../../exceptions/InsufficientPer
 import {AuthOptGuard} from '../../auth/auth-opt.gurad';
 import {JWT_User} from '../user/user.model';
 import {AuthGuard} from '../../auth/auth.gurad';
+import {IAppointmentCreationDTO} from './IAppointmentCreationDTO';
 
 @Controller('appointments')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
@@ -102,7 +101,7 @@ export class AppointmentController {
     @Post()
     @UseGuards(AuthGuard)
     create(@Usr() user: JWT_User,
-           @Body() appointment: Appointment,
+           @Body() appointment: IAppointmentCreationDTO,
            @Res() res: Response,) {
         return this.appointmentService
             .create(appointment, user)
@@ -111,6 +110,7 @@ export class AppointmentController {
                 res.status(HttpStatus.CREATED).json(tAppointment);
             })
             .catch((err) => {
+                console.log(err);
                 throw err;
             });
     }

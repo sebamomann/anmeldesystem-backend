@@ -11,9 +11,9 @@ describe('Enrollment Util', () => {
         expect(EnrollmentUtil).toBeDefined();
     });
 
-    describe('* filter valid additions', () => {
+    describe('* filter valid _additions', () => {
         describe('* successful should return addition list', () => {
-            it('* valid additions provided', async () => {
+            it('* valid _additions provided', async () => {
                 const __existing_addition_1 = new Addition();
                 __existing_addition_1.id = 'a1f6f0d6-6391-4709-a44e-f878c8754921';
                 __existing_addition_1.name = 'addition1';
@@ -23,7 +23,7 @@ describe('Enrollment Util', () => {
                 __existing_addition_2.name = 'addition2';
 
                 const __given_appointment = new Appointment();
-                __given_appointment.additions = [__existing_addition_1, __existing_addition_2];
+                __given_appointment._additions = [__existing_addition_1, __existing_addition_2];
 
                 const __given_enrollment_addition_1 = __existing_addition_1;
                 const __given_enrollment_addition_2 = __existing_addition_2;
@@ -37,7 +37,7 @@ describe('Enrollment Util', () => {
                 expect(__actual).toEqual(__expected);
             });
 
-            it('* no additions provided - return empty list', async () => {
+            it('* no _additions provided - return empty list', async () => {
                 const __given_appointment = new Appointment();
 
                 const __given_enrollment = new Enrollment();
@@ -59,7 +59,7 @@ describe('Enrollment Util', () => {
             __given_addition.name = 'not existing';
 
             const __given_appointment = new Appointment();
-            __given_appointment.additions = [__existing_addition_1];
+            __given_appointment._additions = [__existing_addition_1];
 
             const __given_enrollment_addition_1 = __given_addition;
 

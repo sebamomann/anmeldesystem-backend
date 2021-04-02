@@ -507,7 +507,7 @@ describe('AppointmentMapper', () => {
             });
         });
 
-        it('* sort additions by order', async () => {
+        it('* sort _additions by order', async () => {
             const mockedAddition_1 = mock(Addition);
             const mockedAdditionInstance_1 = instance(mockedAddition_1);
             mockedAdditionInstance_1.id = '56fa2227-e93c-49fb-a834-fd07e82d64df';
@@ -531,7 +531,7 @@ describe('AppointmentMapper', () => {
             const appointmentMapper = new AppointmentMapper(userService);
             const actual = await appointmentMapper.basic(mockedAppointmentInstance);
 
-            expect(actual.additions).toEqual([mockedAdditionInstance_1, mockedAdditionInstance_2, mockedAdditionInstance_3]);
+            expect(actual._additions).toEqual([mockedAdditionInstance_1, mockedAdditionInstance_2, mockedAdditionInstance_3]);
         });
     });
 

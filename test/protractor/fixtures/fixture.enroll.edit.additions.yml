@@ -16,7 +16,7 @@ fixtures:
     -   Appointment:
             id: d907c595-a2b5-4507-bee8-3738e1f00066
             title: Protractor Enroll Edit Additions
-            description: Protractor enroll edit test appointment with additions
+            description: Protractor enroll edit test appointment with _additions
             link: protractorEnrollEditAdditions
             location: Here
             date: '2020-11-18 12:23:14'
@@ -65,7 +65,7 @@ fixtures:
             appointment:
                 id: d907c595-a2b5-4507-bee8-3738e1f00066
             creator:
-                id: 38917d2c-039a-4a82-b109-f9fc2d82aa7c # user enroll edit additions
+                id: 38917d2c-039a-4a82-b109-f9fc2d82aa7c # user enroll edit _additions
     -   Enrollment:
             id: 1a515fc0-5e88-4331-bc44-afeb62a2d195
             name: Unknown Enroll Edit Additions

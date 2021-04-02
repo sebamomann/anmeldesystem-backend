@@ -545,9 +545,9 @@ describe('EnrollmentService', () => {
                 __given_enrollment.additions[0].id = '940599c5-b6fb-4f33-a090-017e31c2b22a';
                 __given_enrollment.appointment = new Appointment();
                 __given_enrollment.appointment.link = 'link';
-                __given_enrollment.appointment.additions = [new Addition()];
-                __given_enrollment.appointment.additions[0].id = '08f642cf-ee55-4b18-84e4-69e218088753';
-                __given_enrollment.appointment.additions[0].name = 'additionExisting';
+                __given_enrollment.appointment._additions = [new Addition()];
+                __given_enrollment.appointment._additions[0].id = '08f642cf-ee55-4b18-84e4-69e218088753';
+                __given_enrollment.appointment._additions[0].name = 'additionExisting';
                 const __given_user = new JWT_User();
 
                 const __given_domain = 'example.com/{{0}}/{{1}}';
@@ -945,7 +945,7 @@ describe('EnrollmentService', () => {
             //     expect(__actual.passenger).toBeUndefined();
             // });
 
-            it('* update additions', async () => {
+            it('* update _additions', async () => {
                 const __existing_addition = new Addition();
                 __existing_addition.id = '24c53466-338e-4331-9640-98c8649d60f7';
                 __existing_addition.name = 'addition';
@@ -964,7 +964,7 @@ describe('EnrollmentService', () => {
                 __existing_enrollment.creator = __given_user;
                 __existing_enrollment.additions = [__existing_addition];
                 __existing_enrollment.appointment = new Appointment();
-                __existing_enrollment.appointment.additions = [__existing_addition];
+                __existing_enrollment.appointment._additions = [__existing_addition];
                 __existing_enrollment.appointment.creatorId = __given_user.sub;
 
                 jest.spyOn<any, any>(enrollmentService, 'findById').mockReturnValueOnce(__existing_enrollment);
@@ -1153,7 +1153,7 @@ describe('EnrollmentService', () => {
             //     __existing_addition.name = 'existing';
             //
             //     const __given_enrollment_change_data = {
-            //         additions: [
+            //         _additions: [
             //             __given_addition
             //         ]
             //     };
@@ -1165,9 +1165,9 @@ describe('EnrollmentService', () => {
             //     __existing_enrollment.id = __given_enrollment_id;
             //     __existing_enrollment.name = 'name';
             //     __existing_enrollment.creator = __given_user;
-            //     __existing_enrollment.additions = [__existing_addition];
+            //     __existing_enrollment._additions = [__existing_addition];
             //     __existing_enrollment.appointment = new Appointment();
-            //     __existing_enrollment.appointment.additions = [__existing_addition];
+            //     __existing_enrollment.appointment._additions = [__existing_addition];
             //     __existing_enrollment.appointment.creatorId = 'bde4b628-f0ee-4e4e-a7f5-2422d8e3d348';
             //
             //     enrollmentRepositoryMock.findOne.mockReturnValueOnce(__existing_enrollment);

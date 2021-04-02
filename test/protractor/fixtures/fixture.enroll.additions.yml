@@ -16,7 +16,7 @@ fixtures:
     -   Appointment:
             id: c1c056ff-5caa-4182-a74f-5e0e7053ecd4
             title: Protractor Enroll Additions
-            description: Protractor enroll additions test appointment
+            description: Protractor enroll _additions test appointment
             link: protractorEnrollAdditions
             location: Here
             date: '2020-11-18 12:23:14'

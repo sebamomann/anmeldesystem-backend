@@ -339,14 +339,14 @@ describe('AppointmentService', () => {
             });
 
             describe('* addition handling', () => {
-                it('* add (2) additions', async () => {
+                it('* add (2) _additions', async () => {
                     const __given_addition_1 = new Addition();
                     __given_addition_1.name = 'addition1';
                     const __given_addition_2 = new Addition();
                     __given_addition_2.name = 'addition2';
 
                     const __given_appointment = new Appointment();
-                    __given_appointment.additions = [
+                    __given_appointment._additions = [
                         __given_addition_1,
                         __given_addition_2
                     ];
@@ -367,14 +367,14 @@ describe('AppointmentService', () => {
                     expect(__actual.additions.sort()).toEqual([__given_addition_1, __given_addition_2].sort());
                 });
 
-                it('add additions correctly (2) - remove duplicates (1)', async () => {
+                it('add _additions correctly (2) - remove duplicates (1)', async () => {
                     const __given_addition_1 = new Addition();
                     __given_addition_1.name = 'addition';
                     const __given_addition_2 = new Addition();
                     __given_addition_2.name = 'addition';
 
                     const __given_appointment = new Appointment();
-                    __given_appointment.additions = [
+                    __given_appointment._additions = [
                         __given_addition_1,
                         __given_addition_2
                     ];
@@ -444,7 +444,7 @@ describe('AppointmentService', () => {
 
     describe('* update appointment', () => {
         describe('* successful should return updated entity', () => {
-            describe('* update additions', () => {
+            describe('* update _additions', () => {
                 it('* add (1) to (2)', async () => {
                     const __given_user = new JWT_User();
                     __given_user.sub = '546448e0-f366-4fca-957a-9bfdce6dc738';
@@ -459,7 +459,7 @@ describe('AppointmentService', () => {
                     const __existing_appointment = new Appointment();
                     __existing_appointment.link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
-                    __existing_appointment.additions = [__existing_addition_1, __existing_addition_2];
+                    __existing_appointment._additions = [__existing_addition_1, __existing_addition_2];
 
                     const __given_appointment_change_addition = new Addition();
                     __given_appointment_change_addition.name = 'addition3';
@@ -523,7 +523,7 @@ describe('AppointmentService', () => {
                     const __existing_appointment = new Appointment();
                     __existing_appointment.link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
-                    __existing_appointment.additions = [__existing_addition_1, __existing_addition_2];
+                    __existing_appointment._additions = [__existing_addition_1, __existing_addition_2];
 
                     const __given_appointment_change_addition = new Addition();
                     __given_appointment_change_addition.name = __existing_addition_2.name;
@@ -578,7 +578,7 @@ describe('AppointmentService', () => {
                     const __existing_appointment = new Appointment();
                     __existing_appointment.link = 'link';
                     __existing_appointment.creatorId = __given_user.sub;
-                    __existing_appointment.additions = [__existing_addition_1, __existing_addition_2];
+                    __existing_appointment._additions = [__existing_addition_1, __existing_addition_2];
 
                     const __given_appointment_change_data = {
                         additions: [

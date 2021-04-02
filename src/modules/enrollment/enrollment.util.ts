@@ -11,7 +11,7 @@ export class EnrollmentUtil {
 
         if (Array.isArray(enrollment.additions)) {
             for (const fAddition of enrollment.additions) {
-                const additions = appointment.additions.filter(filterAddition => filterAddition.id === fAddition.id);
+                const additions = appointment._additions.filter(filterAddition => filterAddition.id === fAddition.id);
 
                 if (additions.length > 0) {
                     output.push(additions[0]);

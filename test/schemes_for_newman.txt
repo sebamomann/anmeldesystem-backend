@@ -24,7 +24,7 @@ schema_appointment
 		"maxEnrollments": { "type": "number" },
 		"hidden": { "type": "boolean" },
 		"driverAddition": { "type": "boolean" },
-		"additions": { 
+		"_additions": {
 			"type": "array" ,
 			"items": ##REPLACE_SCHEMA(schema_addition)##
 		},
@@ -127,7 +127,7 @@ schema_enrollment
 		},
 		"driver":  ##REPLACE_SCHEMA(schema_driver)##,
 		"passenger": ##REPLACE_SCHEMA(schema_passenger)##,
-		"additions": { 
+		"_additions": {
 			"type": "array",
 			"items": ##REPLACE_SCHEMA(schema_addition)##
 		},

@@ -45,11 +45,11 @@ export class EnrollmentService {
     public async get(id: string, user: JWT_User, token: string) {
         let enrollment = await this.enrollmentRepository.createQueryBuilder('enrollment')
             .leftJoinAndSelect('enrollment.appointment', 'appointment')
-            .leftJoinAndSelect('enrollment.additions', 'additions')
+            .leftJoinAndSelect('enrollment._additions', 'additions')
             .leftJoinAndSelect('enrollment.driver', 'driver')
             .leftJoinAndSelect('enrollment.passenger', 'passenger')
             .where('enrollment.id = :enrollmentId', {enrollmentId: id})
-            .select(['enrollment', 'appointment.link', 'additions.name', 'additions.order', 'driver', 'passenger', 'appointment.hidden'])
+            .select(['enrollment', 'appointment.link', '_additions.name', '_additions.order', 'driver', 'passenger', 'appointment.hidden'])
             .getOne();
 
         if (enrollment === undefined) {

@@ -8,6 +8,7 @@ import {IUserMinified} from '../user/IUserMinified';
 import {JWT_User} from '../user/user.model';
 import {Administrator} from './administrator.entity';
 import {Pinner} from './pinner.entity';
+import {AdditionList} from '../addition/additionList';
 
 @Entity()
 export class Appointment {
@@ -44,57 +45,56 @@ export class Appointment {
             eager: true
         })
     enrollments: Enrollment[];
-
-    @OneToMany(type => Addition,
-        addition => addition.appointment,
-        {
-            eager: true,
-            cascade: true
-        })
-    additions: Addition[];
-
     @Column({default: false})
     driverAddition: boolean;
-
     @OneToMany(type => Administrator,
         administrator => administrator.appointment, {
             eager: true,
             cascade: true
         })
     _administrators: Administrator[];
-
     @OneToMany(type => Pinner,
         pinner => pinner.appointment, {
             eager: true
         })
     pinners: Administrator[];
-
     @OneToMany(type => File,
         file => file.appointment,
         {
             eager: true,
         })
     files: File[];
-
     @Column({nullable: true, type: 'uuid'})
     creatorId: string;
-
     @CreateDateColumn()
     @Exclude({toPlainOnly: true})
     iat: Date;
-
     @UpdateDateColumn({name: 'lud', nullable: true})
     @Exclude({toPlainOnly: true})
     lud: Date;
-
     @ManyToMany(type => PushSubscription,
         pushSubscription => pushSubscription.appointments)
     subscriptions: PushSubscription[];
-
     creator?: IUserMinified;
     relations?: string[] = [];
     administrators: IUserMinified[] = [];
     numberOfEnrollments?: number;
+
+    @OneToMany(type => Addition,
+        addition => addition.appointment,
+        {
+            eager: true,
+            cascade: true,
+        })
+    _additions: Addition[];
+
+    get additions(): AdditionList {
+        return new AdditionList(this._additions);
+    }
+
+    set additions(list: AdditionList) {
+        this._additions = list.getArray();
+    }
 
     /**
      * Check if {@link JWT_User} is the creator or administrator of this object

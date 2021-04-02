@@ -21,6 +21,8 @@ import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
 import {Administrator} from './administrator.entity';
 import {KeycloakUser} from '../user/KeycloakUser';
 import {AppointmentPermissionChecker} from './appointmentPermission.checker';
+import {AdditionList} from '../addition/additionList';
+import {IAppointmentCreationDTO} from './IAppointmentCreationDTO';
 
 const logger = require('../../logger');
 
@@ -176,51 +178,55 @@ export class AppointmentService {
      * Not all options are passed here. Only the core information gets processed.
      * All other information are getting set via the specific options
      *
-     * @param appointmentData Appointment data to create appointment with
+     * @param appointmentCreationDTO
      * @param user Requester
      *
      * @returns Created appointment after applying filters
      *
      * @throws DuplicateValueException if link is already in use
      */
-    public async create(appointmentData: Appointment, user: JWT_User): Promise<{ id: string, link: string }> {
+    public async create(appointmentCreationDTO: IAppointmentCreationDTO, user: JWT_User): Promise<{ id: string, link: string }> {
         let appointmentToDB = new Appointment();
 
-        appointmentToDB.title = appointmentData.title;
-        appointmentToDB.description = appointmentData.description;
+        appointmentToDB.title = appointmentCreationDTO.title;
+        appointmentToDB.description = appointmentCreationDTO.description;
 
-        appointmentToDB.link = await this.handleAppointmentLink(appointmentData.link);
+        appointmentToDB.link = await this.handleAppointmentLink(appointmentCreationDTO.link);
 
-        appointmentToDB.location = appointmentData.location;
+        appointmentToDB.location = appointmentCreationDTO.location;
 
         try {
-            appointmentToDB.date = await AppointmentUtil.handleDateValidation(appointmentData.date, appointmentData.deadline);
+            appointmentToDB.date = await AppointmentUtil.handleDateValidation(appointmentCreationDTO.date, appointmentCreationDTO.deadline);
         } catch (e) {
             throw e;
         }
 
-        appointmentToDB.deadline = appointmentData.deadline;
+        appointmentToDB.deadline = appointmentCreationDTO.deadline;
 
-        if (appointmentData.maxEnrollments > 0) {
-            appointmentToDB.maxEnrollments = appointmentData.maxEnrollments;
+        if (appointmentCreationDTO.maxEnrollments > 0) {
+            appointmentToDB.maxEnrollments = appointmentCreationDTO.maxEnrollments;
         } else {
             appointmentToDB.maxEnrollments = null;
         }
 
-        appointmentToDB.driverAddition = !!(appointmentData.driverAddition);
+        appointmentToDB.driverAddition = !!(appointmentCreationDTO.driverAddition);
         appointmentToDB.creatorId = user.sub;
-        appointmentToDB.additions = await this._createAdditionEntitiesAndFilterDuplicates(appointmentData.additions);
+
+        const additionList = new AdditionList();
+        additionList.convertRawDataToAdditionList(appointmentCreationDTO.additions);
+        appointmentToDB.additions = additionList;
 
         appointmentToDB = await this.appointmentRepository.save(appointmentToDB);
 
         const appointmentMapper = new AppointmentMapper(this.userService);
+
         return appointmentMapper.create(appointmentToDB);
     }
 
     /**
      *
      * Updated values passed by any object. Only overall data allowed to update like this.<br/>
-     * additions, link, date deadline need special validation.
+     * _additions, link, date deadline need special validation.
      *
      * @param toChange any {} with the values to change given Appointment with
      * @param link Current link of Appointment
@@ -245,7 +251,7 @@ export class AppointmentService {
             'location', 'date', 'deadline', 'maxEnrollments', 'hidden', 'additions',
             'driverAddition'];
 
-        for (const [key, value] of Object.entries(toChange)) { // TODO REFACTOR LIKE AT USER AND ENROLLMENT
+        for (let [key, value] of Object.entries(toChange)) { // TODO REFACTOR LIKE AT USER AND ENROLLMENT
             if (key in appointment
                 && appointment[key] !== value
                 && allowedValuesToChange.indexOf(key) > -1) {
@@ -294,6 +300,10 @@ export class AppointmentService {
                 }
 
                 logger.log('debug', `[${appointment.id}] ${key} changed from ${JSON.stringify(appointment[key])} to ${JSON.stringify(changedValue)}`);
+
+                if (key === 'additions') {
+                    key = '_additions';
+                }
 
                 appointment[key] = changedValue;
             }
@@ -395,7 +405,6 @@ export class AppointmentService {
     public async removeAdministrator(_user: JWT_User, link: string, username: string): Promise<void> {
         const appointment = await this.findByLink(link);
         const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
-
 
         if (!appointmentPermissionChecker.userIsCreator(_user)) {
             throw new InsufficientPermissionsException(null, null,
@@ -645,50 +654,6 @@ export class AppointmentService {
         }
     }
 
-    private async _createAdditionEntitiesAndFilterDuplicates(additions: Addition[]): Promise<Addition[]> {
-        let output = [];
-
-        if (!additions) {
-            return output;
-        }
-
-        let _additionNames = additions.map(mMixedAdditions => mMixedAdditions.name);
-
-        const sorted_arr = _additionNames.slice().sort();
-        const duplicates = [];
-        for (let i = 0; i < sorted_arr.length - 1; i++) {
-            if (sorted_arr[i + 1] === sorted_arr[i]) {
-                duplicates.push(sorted_arr[i]);
-            }
-        }
-
-        const errors = [];
-        duplicates.forEach((fDuplicate) => {
-            errors.push({'object': 'addition', 'attribute': 'name', 'value': fDuplicate, 'in': 'body'});
-        });
-
-        if (duplicates.length > 0) {
-            throw new DuplicateValueException('DUPLICATE_ENTRY',
-                'Following values are duplicates and can not be used',
-                errors);
-        }
-
-        let i = 0;
-        if (Array.isArray(additions)) {
-            for (const fAddition of additions) {
-                let addition: Addition = new Addition();
-                addition.name = fAddition.name;
-                addition.order = i;
-
-                output.push(addition);
-
-                i++;
-            }
-        }
-
-        return output;
-    }
-
     /**
      * // TODO ALLOW UNDEFINED / NULL
      * Loop through all passed {@link Addition}. <br/>
@@ -729,7 +694,7 @@ export class AppointmentService {
             let addition = new Addition();
 
             if (fAddition.id) {
-                addition = appointment.additions.find(sAddition => sAddition.id === fAddition.id);
+                addition = appointment._additions.find(sAddition => sAddition.id === fAddition.id);
 
                 if (!addition) {
                     throw new EntityNotFoundException(null, null, {
@@ -792,11 +757,11 @@ export class AppointmentService {
         const output = await getRepository(Appointment)
             .createQueryBuilder('appointment')
             .leftJoinAndSelect('appointment.creator', 'creator')
-            .leftJoinAndSelect('appointment.additions', 'additions')
+            .leftJoinAndSelect('appointment._additions', 'additions')
             .leftJoinAndSelect('appointment.enrollments', 'enrollments')
             .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
             .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
-            .leftJoinAndSelect('enrollments.additions', 'enrollment_additions')
+            .leftJoinAndSelect('enrollments._additions', 'enrollment_additions')
             .leftJoinAndSelect('enrollments.creator', 'enrollment_creator')
             .leftJoinAndSelect('appointment.files', 'files')
             .leftJoinAndSelect('appointment.administrators', 'administrators')

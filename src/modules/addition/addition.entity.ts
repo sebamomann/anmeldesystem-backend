@@ -10,7 +10,7 @@ export class Addition {
 
     @Exclude()
     @ManyToOne(type => Appointment,
-        appointment => appointment.additions,
+        appointment => appointment._additions,
     )
     appointment: Appointment;
 

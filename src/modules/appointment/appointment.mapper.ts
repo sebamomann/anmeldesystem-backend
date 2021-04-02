@@ -14,17 +14,6 @@ export class AppointmentMapper {
     }
 
     /**
-     * Sort additions by their specified order.
-     *
-     * @param appointment       {@link Appointment} to modify
-     */
-    private static sortAdditions(appointment: Appointment): void {
-        appointment.additions?.sort((a, b) => {
-            return a.order < b.order ? -1 : 1;
-        });
-    }
-
-    /**
      * TODO
      * mix with permission
      *
@@ -37,8 +26,6 @@ export class AppointmentMapper {
     public async basic(appointment): Promise<Appointment> {
         await this.stripAdministrators(appointment);
         await this.mapEnrollments(appointment);
-
-        AppointmentMapper.sortAdditions(appointment);
 
         if (appointment.files) {
             appointment.files.map(mFile => {
@@ -167,6 +154,10 @@ export class AppointmentMapper {
                 username: mUser.username,
             }
         };
+
+        appointment.additions.sortByOrder()
+        appointment.additions = appointment.additions.getArray();
+        delete appointment._additions;
 
         appointment = Object.assign(appointment, obj);
 
