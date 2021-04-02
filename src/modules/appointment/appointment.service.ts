@@ -23,6 +23,7 @@ import {KeycloakUser} from '../user/KeycloakUser';
 import {AppointmentPermissionChecker} from './appointmentPermission.checker';
 import {AdditionList} from '../addition/additionList';
 import {IAppointmentCreationDTO} from './IAppointmentCreationDTO';
+import {IAppointmentCreationAdditionDTO} from './IAppointmentCreationAdditionDTO';
 
 const logger = require('../../logger');
 
@@ -271,7 +272,7 @@ export class AppointmentService {
                 }
 
                 if (key === 'additions') {
-                    changedValue = await this._handleAdditionUpdate(value, appointment);
+                    changedValue = this._handleAdditionUpdate(value as (IAppointmentCreationAdditionDTO | Addition)[], appointment);
                 }
 
                 if (key === 'date') {
@@ -665,86 +666,11 @@ export class AppointmentService {
      * @param appointment
      * @private
      */
-    private async _handleAdditionUpdate(mixedAdditions, appointment: Appointment) {
-        let output = [];
+    private _handleAdditionUpdate(mixedAdditions: (IAppointmentCreationAdditionDTO | Addition)[], appointment: Appointment) {
+        const additionList = appointment.additions;
+        additionList.updateList(mixedAdditions);
 
-        const _additionsNames = mixedAdditions.map(mMixedAdditions => mMixedAdditions.name);
-
-        const sorted_arr = _additionsNames.slice().sort();
-        const duplicates = [];
-        for (let i = 0; i < sorted_arr.length - 1; i++) {
-            if (sorted_arr[i + 1] === sorted_arr[i] && sorted_arr[i]) {
-                duplicates.push(sorted_arr[i]);
-            }
-        }
-
-        if (duplicates.length > 0) {
-            const errors = [];
-            duplicates.forEach((fDuplicate) => {
-                errors.push({'object': 'addition', 'attribute': 'name', 'value': fDuplicate, 'in': 'body'});
-            });
-
-            throw new DuplicateValueException('DUPLICATE_ENTRY',
-                'Following values are duplicates and can not be used',
-                errors);
-        }
-
-        let index = 0;
-        for (let fAddition of mixedAdditions) {
-            let addition = new Addition();
-
-            if (fAddition.id) {
-                addition = appointment._additions.find(sAddition => sAddition.id === fAddition.id);
-
-                if (!addition) {
-                    throw new EntityNotFoundException(null, null, {
-                        'object': 'addition',
-                        'attribute': 'id',
-                        'in': 'body',
-                        'value': fAddition.id
-                    });
-                }
-            }
-
-            if (fAddition.name) {
-                addition.name = fAddition.name;
-            }
-
-            addition.order = index;
-
-            output.push(addition);
-
-            index++;
-        }
-
-        // let i = 0;
-        // for (let fAddition of mixedAdditions) {
-        //     let potExistingAddition;
-        //
-        //     try {
-        //         potExistingAddition = await this.additionService.findByNameAndAppointment(fAddition.name, appointment); // TODO get from appointment and not an extra request
-        //
-        //         if (!output.some(sAddition => sAddition.name === potExistingAddition.name)) {
-        //             potExistingAddition.order = i;
-        //             potExistingAddition = await this.additionService.__save(potExistingAddition);
-        //             output.push(potExistingAddition);
-        //             i++;
-        //         }
-        //     } catch (e) {
-        //
-        //         if (!output.some(sAddition => sAddition.name === fAddition.name)) {
-        //             potExistingAddition = new Addition();
-        //             potExistingAddition.name = fAddition.name;
-        //             potExistingAddition.order = i;
-        //             potExistingAddition = await this.additionService.__save(potExistingAddition);
-        //             output.push(potExistingAddition);
-        //         }
-        //
-        //         i++;
-        //     }
-        // }
-
-        return output;
+        return additionList.getArray();
     }
 
     /* istanbul ignore next */

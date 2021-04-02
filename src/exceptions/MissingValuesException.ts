@@ -7,7 +7,7 @@ export class MissingValuesException implements Error {
     data: string[];
     code: string;
 
-    constructor(code: string = null, message: string = null, data: string[] = null) {
+    constructor(code: string = null, message: string = null, data: any[] = null) {
         if (code === null
             || code === '') {
             this.code = 'MISSING_VALUES';
