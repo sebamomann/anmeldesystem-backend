@@ -19,6 +19,7 @@ import {Comment} from './comment/comment.entity';
 import {Exclude} from 'class-transformer';
 import {Mail} from './mail/mail.entity';
 import {JWT_User} from '../user/user.model';
+import {AppointmentPermissionChecker} from '../appointment/appointmentPermission.checker';
 
 const crypto = require('crypto');
 
@@ -134,7 +135,8 @@ export class Enrollment {
      * @param user          {@link JWT_User} to check permission for
      */
     public hasPermissionToManipulateByIdentity(user: JWT_User) {
-        let isAllowedByAppointmentPermission = this.appointment.isCreatorOrAdministrator(user);
+        const appointmentPermissionChecker = new AppointmentPermissionChecker(this.appointment);
+        let isAllowedByAppointmentPermission = appointmentPermissionChecker.userIsCreatorOrAdministrator(user);
         let isCreatorOfEnrollment = this.isCreator(user);
 
         return isAllowedByAppointmentPermission || isCreatorOfEnrollment;

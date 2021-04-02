@@ -2,6 +2,7 @@ import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {Appointment} from './appointment.entity';
 import {Enrollment} from '../enrollment/enrollment.entity';
 import {JWT_User} from '../user/user.model';
+import {AppointmentPermissionChecker} from './appointmentPermission.checker';
 
 const crypto = require('crypto');
 
@@ -88,15 +89,17 @@ export class AppointmentUtil {
             }
         }
 
+        const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
+
         if (user === null && extractedIds.length === 0) {
             return [];
         }
 
-        if (appointment.isAdministrator(user)) {
+        if (appointmentPermissionChecker.userIsAdministrator(user)) {
             relations.push('ADMIN');
         }
 
-        if (appointment.isCreator(user)) {
+        if (appointmentPermissionChecker.userIsCreator(user)) {
             relations.push('CREATOR');
         }
 

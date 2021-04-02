@@ -20,6 +20,7 @@ import {JWT_User} from '../user/user.model';
 import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
 import {Administrator} from './administrator.entity';
 import {KeycloakUser} from '../user/KeycloakUser';
+import {AppointmentPermissionChecker} from './appointmentPermission.checker';
 
 const logger = require('../../logger');
 
@@ -393,8 +394,10 @@ export class AppointmentService {
      */
     public async removeAdministrator(_user: JWT_User, link: string, username: string): Promise<void> {
         const appointment = await this.findByLink(link);
+        const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
 
-        if (!appointment.isCreator(_user)) {
+
+        if (!appointmentPermissionChecker.userIsCreator(_user)) {
             throw new InsufficientPermissionsException(null, null,
                 {
                     'attribute': 'link',
@@ -572,7 +575,10 @@ export class AppointmentService {
      */
     public async isCreatorOrAdministrator(user: JWT_User, ref: string): Promise<boolean> {
         const appointment = await this.findByLink(ref);
-        return appointment.isCreatorOrAdministrator(user);
+
+        const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
+
+        return appointmentPermissionChecker.userIsCreatorOrAdministrator(user);
     }
 
     public async removeSubscriptionsByUser(appointment: any, user: JWT_User) {

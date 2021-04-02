@@ -100,6 +100,7 @@ export class Appointment {
      * Check if {@link JWT_User} is the creator or administrator of this object
      *
      * @param user          {@link JWT_User} to check ownership for
+     * @deprecated          Use {@link AppointmentPermissionChecker}
      */
     public isCreatorOrAdministrator(user: JWT_User) {
         const isAppointmentCreator = this.isCreator(user);
@@ -112,6 +113,7 @@ export class Appointment {
      * Check if {@link JWT_User} is the creator of this object
      *
      * @param user          {@link JWT_User} to check ownership for
+     * @deprecated          Use {@link AppointmentPermissionChecker}
      */
     public isCreator(user: JWT_User) {
         if (!user) {
@@ -125,6 +127,7 @@ export class Appointment {
      * Check if {@link JWT_User} is administrator of this object
      *
      * @param user          {@link JWT_User} to check ownership for
+     * @deprecated          Use {@link AppointmentPermissionChecker}
      */
     public isAdministrator(user: JWT_User) {
         if (!this._administrators) {

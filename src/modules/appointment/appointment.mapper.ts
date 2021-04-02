@@ -7,6 +7,7 @@ import {IUserMinified} from '../user/IUserMinified';
 import {JWT_User} from '../user/user.model';
 import {UserService} from '../user/user.service';
 import {KeycloakUser} from '../user/KeycloakUser';
+import {AppointmentPermissionChecker} from './appointmentPermission.checker';
 
 export class AppointmentMapper {
     constructor(private readonly userService: UserService) {
@@ -42,7 +43,7 @@ export class AppointmentMapper {
         if (appointment.files) {
             appointment.files.map(mFile => {
                 delete mFile.data;
-                mFile.url = process.env.API_URL + "file/" + mFile.id;
+                mFile.url = process.env.API_URL + 'file/' + mFile.id;
             });
         } else {
             appointment.files = [];
@@ -123,7 +124,9 @@ export class AppointmentMapper {
         }))
         (_appointment);
 
-        if (_appointment.isCreator(_user)) {
+        const appointmentPermissionChecker = new AppointmentPermissionChecker(_appointment);
+
+        if (appointmentPermissionChecker.userIsCreator(_user)) {
             creatorObject = (({
                                   iat,
                                   lud,
@@ -135,7 +138,7 @@ export class AppointmentMapper {
         }
 
         if (!_appointment.hidden
-            || _appointment.isCreatorOrAdministrator(_user)) {
+            || appointmentPermissionChecker.userIsCreatorOrAdministrator(_user)) {
             enrollmentsObject = (({
                                       enrollments,
                                   }) => ({

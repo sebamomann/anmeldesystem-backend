@@ -4,7 +4,7 @@
 // import {JWT_User} from '../user/user.model';
 //
 describe('* enrolled by user', () => {
-    it('* enrollment !created by any user should have attribute "isCreator: false"', async () => {
+    it('* enrollment !created by any user should have attribute "userIsCreator: false"', async () => {
 //         const __existing_enrollment = new Enrollment();
 //         __existing_enrollment.id = '2ee12ca8-3839-4c83-bd92-ee86d420edee';
 //         __existing_enrollment.name = 'owning user';
@@ -21,7 +21,7 @@ describe('* enrolled by user', () => {
 //         expect(__actual).toEqual(__expected);
     });
 //
-//     it('* enrollment created by user should have attribute "isCreator: true" and containing user information', async () => {
+//     it('* enrollment created by user should have attribute "userIsCreator: true" and containing user information', async () => {
 //         const __existing_enrollment_creator = new JWT_User();
 //         __existing_enrollment_creator.sub = '96511a3c-cace-4a67-ad0c-436a37038c38';
 //         __existing_enrollment_creator.preferred_username = 'enrollment_creator';
