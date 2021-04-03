@@ -1,7 +1,7 @@
 import {JWT_User} from '../user/user.model';
 import {Appointment} from './appointment.entity';
 import {instance, mock, spy, verify, when} from 'ts-mockito';
-import {Administrator} from './administrator.entity';
+import {Administrator} from '../adminsitrator/administrator.entity';
 
 describe('* Appointment entity', () => {
     describe('* check permission', () => {

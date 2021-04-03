@@ -2,6 +2,7 @@ import {UserUtil} from '../../util/user.util';
 import {Enrollment} from './enrollment.entity';
 import {UserService} from '../user/user.service';
 import {KeycloakUser} from '../user/KeycloakUser';
+import {IEnrollmentDTO} from './IEnrollmentDTO';
 
 const passengerMapper = require('./passenger/passenger.mapper');
 const driverMapper = require('./driver/driver.mapper');
@@ -32,14 +33,14 @@ export class EnrollmentMapper {
         return _enrollment;
     }
 
-    public async basic(_enrollment: Enrollment) {
+    public async basic(_enrollment: Enrollment): Promise<IEnrollmentDTO> {
         let enrollment;
 
         enrollment = (({
                            id,
                            name,
                            comment,
-                           additions, // TODO REMOVE NAMES OF ADDITIONS
+                           additions,
                            comments,
                            creatorId,
                            iat

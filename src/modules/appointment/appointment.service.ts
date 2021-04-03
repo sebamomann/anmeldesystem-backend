@@ -16,13 +16,13 @@ import {AppointmentUtil} from './appointment.util';
 import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
 import {JWT_User} from '../user/user.model';
-import {Administrator} from './administrator.entity';
-import {KeycloakUser} from '../user/KeycloakUser';
 import {AppointmentPermissionChecker} from './appointmentPermission.checker';
 import {AdditionList} from '../addition/additionList';
+import {IAppointmentDTO} from './IAppointmentDTO';
 import {IAppointmentCreationDTO} from './IAppointmentCreationDTO';
 import {IAppointmentCreationAdditionDTO} from './IAppointmentCreationAdditionDTO';
 import {IAppointmentUpdateAdditionDTO} from './IAppointmentUpdateAdditionDTO';
+import {EnrollmentPermissionList} from '../enrollment/enrollmentPermissionList';
 
 const logger = require('../../logger');
 
@@ -98,18 +98,15 @@ export class AppointmentService {
      *
      * @throws EntityNotFoundException if appointment not found
      */
-    public async get(user: JWT_User, link: string, permissions: any, slim: boolean): Promise<Appointment> {
+    public async get(user: JWT_User, link: string, permissions: any, slim: boolean): Promise<IAppointmentDTO> {
         let appointment;
 
-        try {
-            appointment = await this.findByLink(link);
-        } catch (e) {
-            throw e;
-        }
+        appointment = await this.findByLink(link);
 
-        appointment = this.userBasedAppointmentPreparation(appointment, user, permissions, slim);
+        const appointmentMapper = new AppointmentMapper(this.userService);
+        const enrollmentPermissionList = new EnrollmentPermissionList(permissions);
 
-        return appointment;
+        return appointmentMapper.basic(appointment, user, [], enrollmentPermissionList, slim);
     }
 
     /**
@@ -136,11 +133,11 @@ export class AppointmentService {
 
         const output = [];
 
-        appointments.forEach(appointment => {
+        for (const appointment of appointments) {
             output.push(
-                this.userBasedAppointmentPreparation(appointment, user, {}, slim)
+                await this.userBasedAppointmentPreparation(appointment, user, {}, slim)
             );
-        });
+        }
 
         return output;
     }
@@ -179,9 +176,8 @@ export class AppointmentService {
         }
 
         let appointments = await this.getAppointments(user, pins, _before, limit);
-        appointments = appointments.map(appointment => {
-            this.userBasedAppointmentPreparation(appointment, user, {}, _slim);
-            return appointment;
+        appointments = await appointments.filter(async appointment => {
+            return await this.userBasedAppointmentPreparation(appointment, user, {}, _slim);
         });
 
         return appointments;
@@ -200,7 +196,7 @@ export class AppointmentService {
      * @throws DuplicateValueException if _link is already in use
      */
     public async create(appointmentCreationDTO: IAppointmentCreationDTO, user: JWT_User): Promise<{ id: string, link: string }> {
-        let appointmentToDB = new Appointment(this);
+        let appointmentToDB = new Appointment(this, this.userService);
 
         appointmentToDB.title = appointmentCreationDTO.title;
         appointmentToDB.description = appointmentCreationDTO.description;
@@ -296,7 +292,7 @@ export class AppointmentService {
 
                 if (key === 'link') {
                     await appointment.setLink(changedValue);
-                } else{
+                } else {
                     appointment[key] = changedValue;
                 }
             }
@@ -329,15 +325,11 @@ export class AppointmentService {
      * @throws UnknownUserException if user to add does not exist
      */
     public async addAdministrator(_user: JWT_User, link: string, username: string) {
-        let appointment;
+        let appointment = await this.findByLink(link);
 
-        try {
-            appointment = await this.findByLink(link);
-        } catch (e) {
-            throw e;
-        }
+        const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
 
-        if (!appointment.isCreator(_user)) {
+        if (!appointmentPermissionChecker.userIsCreator(_user)) {
             throw new InsufficientPermissionsException(null, null,
                 {
                     'attribute': 'link',
@@ -348,33 +340,10 @@ export class AppointmentService {
             );
         }
 
-        let adminToAdd: KeycloakUser;
-
-        try {
-            adminToAdd = await this.userService.findByUsername(username);
-        } catch (e) {
-            throw new EntityNotFoundException(null, null, {
-                'attribute': 'username',
-                'in': 'path',
-                'value': username
-            });
-        }
-
-        const admin = new Administrator();
-        admin.userId = adminToAdd.id;
-
-        if (appointment._administrators.some((iAdmin) => iAdmin.userId === admin.userId)) {
-            throw new DuplicateValueException('DUPLICATE_ENTRY',
-                'Following values are duplicates and can not be used',
-                [{
-                    'attribute': 'username',
-                    'in': 'body',
-                    'value': username,
-                    'message': 'The specified user is already an administrator of this appointment'
-                }]);
-        }
-
-        appointment._administrators.push(admin);
+        const list = appointment.administrators;
+        list.setUserService(this.userService);
+        await list.addAdministrator(username);
+        appointment.administrators = list;
 
         return await this.appointmentRepository.save(appointment);
     }
@@ -612,14 +581,18 @@ export class AppointmentService {
         }
     }
 
-    private async userBasedAppointmentPreparation(appointment: Appointment, user: JWT_User, permissions: any, slim: boolean) {
+    private async userBasedAppointmentPreparation(appointment: Appointment, user: JWT_User, permissions: any, slim: boolean): Promise<Appointment> {
         const appointmentMapper = new AppointmentMapper(this.userService);
+
+        const enrollmentPermissionList = new EnrollmentPermissionList(permissions);
+
+        // const appointmentDTO = appointmentMapper.fullMapping(appointment, user, [], enrollmentPermissionList, slim);
 
         appointment.relations = AppointmentUtil.parseReferences(user, appointment, [], permissions); // empty pins because fnc is only called on single appointment get request
 
         appointment = await appointmentMapper.permission(appointment, user, permissions);
         appointment = appointmentMapper.slim(appointment, slim);
-        appointment = await appointmentMapper.basic(appointment);
+        appointment = await appointmentMapper.__basic(appointment);
 
         return appointment;
     }

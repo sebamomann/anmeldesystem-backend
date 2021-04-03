@@ -108,22 +108,22 @@ export class AppointmentUtil {
             relations.push('CREATOR');
         }
 
-        const hasPermissionForAtLeastOneEnrollment = appointment.enrollments?.some(sEnrollment => {
+        const hasPermissionForAtLeastOneEnrollment = appointment._enrollments?.some(sEnrollment => {
             return extractedIds.includes(sEnrollment.id);
         });
 
-        const isCreatorOfAnyEnrollment = appointment.enrollments?.some(sEnrollment => {
+        const isCreatorOfAnyEnrollment = appointment._enrollments?.some(sEnrollment => {
             return user
                 && sEnrollment.creatorId != null
                 && sEnrollment.creatorId === user.sub;
         });
 
-        if (appointment.enrollments
+        if (appointment._enrollments
             && (isCreatorOfAnyEnrollment || hasPermissionForAtLeastOneEnrollment)) {
             relations.push('ENROLLED');
         }
 
-        if ((appointment.pinners && appointment.pinners.some(sPinner => sPinner.userId === user.sub))
+        if ((appointment._pinners && appointment._pinners.some(sPinner => sPinner.userId === user.sub))
             || pins.includes(appointment._link)) {
             relations.push('PINNED');
         }
@@ -151,7 +151,7 @@ export class AppointmentUtil {
      *
      * @returns Enrollment[] ALl filtered enrollments
      */
-    public static filterPermittedEnrollments(user: JWT_User, permissions: any, enrollments: Enrollment[]) {
+    public static _filterPermittedEnrollments(user: JWT_User, permissions: any, enrollments: Enrollment[]) {
         let extractedIds = [];
         let extractedTokens = [];
         for (const queryKey of Object.keys(permissions)) {

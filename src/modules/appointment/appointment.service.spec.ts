@@ -20,7 +20,7 @@ import {PushService} from '../push/push.service';
 import {PushSubscription} from '../push/pushSubscription.entity';
 import {JWT_User} from '../user/user.model';
 import {anyString, instance, mock, spy, verify, when} from 'ts-mockito';
-import {Administrator} from './administrator.entity';
+import {Administrator} from '../adminsitrator/administrator.entity';
 
 describe('AppointmentService', () => {
     let module: TestingModule;
@@ -1303,7 +1303,7 @@ describe('AppointmentService', () => {
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.creatorId = __given_user.sub;
-                __existing_appointment.files = [];
+                __existing_appointment._files = [];
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
                 fileRepositoryMock.save.mockImplementationOnce((val) => val);
@@ -1319,7 +1319,7 @@ describe('AppointmentService', () => {
                 __expected_file.data = __given_data.data;
 
                 const __expected = {...__existing_appointment};
-                __expected.files = [__expected_file];
+                __expected._files = [__expected_file];
 
                 const __actual = await appointmentService.addFile(__given_user, __given_link, __given_data);
                 expect(__actual).toEqual(__expected);
@@ -1355,7 +1355,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creatorId = __existing_user.sub;
-                    __existing_appointment.files = [];
+                    __existing_appointment._files = [];
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
                     fileRepositoryMock.save.mockImplementationOnce((val) => val);
@@ -1371,7 +1371,7 @@ describe('AppointmentService', () => {
                     __expected_file.data = __given_data.data;
 
                     const __expected = {...__existing_appointment};
-                    __expected.files = [__expected_file];
+                    __expected._files = [__expected_file];
 
                     appointmentService.addFile(__given_user, __given_link, __given_data)
                         .then(() => {
@@ -1399,7 +1399,7 @@ describe('AppointmentService', () => {
 
                 const __existing_appointment = new Appointment();
                 __existing_appointment.creatorId = __given_user.sub;
-                __existing_appointment.files = [];
+                __existing_appointment._files = [];
 
                 appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
                 fileRepositoryMock.findOne.mockReturnValueOnce(__existing_file);
@@ -1410,7 +1410,7 @@ describe('AppointmentService', () => {
                 });
 
                 const __expected = {...__existing_appointment};
-                __expected.files = [];
+                __expected._files = [];
 
                 const __actual = await appointmentService.removeFile(__given_user, __given_link, __given_id);
                 expect(__actual).toEqual(__expected);
@@ -1447,7 +1447,7 @@ describe('AppointmentService', () => {
 
                     const __existing_appointment = new Appointment();
                     __existing_appointment.creatorId = __existing_creator.sub;
-                    __existing_appointment.files = [];
+                    __existing_appointment._files = [];
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(__existing_appointment);
 
@@ -1570,7 +1570,7 @@ describe('AppointmentService', () => {
                 const __existing_appointment = new Appointment();
                 __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';
                 __existing_appointment.creatorId = __given_user.sub;
-                __existing_appointment.enrollments = [];
+                __existing_appointment._enrollments = [];
 
                 jest.spyOn(appointmentService as any, 'getAppointments')
                     .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
@@ -1587,7 +1587,7 @@ describe('AppointmentService', () => {
                 const __existing_appointment = new Appointment();
                 __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';
                 __existing_appointment.creatorId = __given_user.sub;
-                __existing_appointment.enrollments = [];
+                __existing_appointment._enrollments = [];
 
                 jest.spyOn(appointmentService as any, 'getAppointments')
                     .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
@@ -1607,7 +1607,7 @@ describe('AppointmentService', () => {
                     __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';
                     __existing_appointment.creatorId = __given_user.sub;
                     __existing_appointment._link = __given_permissions.pin1;
-                    __existing_appointment.enrollments = [];
+                    __existing_appointment._enrollments = [];
 
                     jest.spyOn(appointmentService as any, 'getAppointments')
                         .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
@@ -1626,7 +1626,7 @@ describe('AppointmentService', () => {
                     __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';
                     __existing_appointment.creatorId = __given_user.sub;
                     __existing_appointment._link = 'anylink';
-                    __existing_appointment.enrollments = [];
+                    __existing_appointment._enrollments = [];
 
                     jest.spyOn(appointmentService as any, 'getAppointments')
                         .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
@@ -1651,7 +1651,7 @@ describe('AppointmentService', () => {
                 const __existing_appointment = new Appointment();
                 __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';
                 __existing_appointment.creatorId = __given_user.sub;
-                __existing_appointment.enrollments = [];
+                __existing_appointment._enrollments = [];
 
                 jest.spyOn(appointmentService as any, 'getAppointments')
                     .mockReturnValueOnce(Promise.resolve([__existing_appointment]));
@@ -1674,7 +1674,7 @@ describe('AppointmentService', () => {
                 const __existing_appointment = new Appointment();
                 __existing_appointment.id = '1657bd4e-c2d5-411a-8633-7ce9b3eca0cb';
                 __existing_appointment.creatorId = __given_user.sub;
-                __existing_appointment.enrollments = [];
+                __existing_appointment._enrollments = [];
 
                 const date = new Date();
                 jest.spyOn(global, 'Date').mockImplementationOnce(() => undefined);

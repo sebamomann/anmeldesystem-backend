@@ -1,5 +1,5 @@
 import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
-import {Appointment} from './appointment.entity';
+import {Appointment} from '../appointment/appointment.entity';
 
 @Entity()
 export class Pinner {

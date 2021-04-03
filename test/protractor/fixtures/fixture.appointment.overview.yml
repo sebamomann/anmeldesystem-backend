@@ -110,7 +110,7 @@ fixtures:
                 id: 2b9d4fe1-7855-4ad7-9219-05fe45dc9099
     -   Enrollment:
             id: 3c38f1cd-a740-4d26-b5d6-0cea92bb97dd
-            name: Unknown Appointment Overview No Permission
+            name: Unknown Appointment Overview No EnrollmentPermission
             comment: my comment
             iat: '2020-11-18 12:23:14'
             lud: '2020-11-18 12:23:14'

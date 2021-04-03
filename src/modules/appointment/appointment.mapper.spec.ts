@@ -17,7 +17,7 @@ import {PushService} from '../push/push.service';
 import {PushSubscription} from '../push/pushSubscription.entity';
 import {instance, mock, when} from 'ts-mockito';
 import {JWT_User} from '../user/user.model';
-import {Administrator} from './administrator.entity';
+import {Administrator} from '../adminsitrator/administrator.entity';
 
 const crypto = require('crypto');
 
@@ -179,7 +179,7 @@ describe('AppointmentMapper', () => {
                 const appointmentMapper = new AppointmentMapper(userService);
                 const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
 
-                expect(actual.enrollments).toEqual([]);
+                expect(actual._enrollments).toEqual([]);
             });
 
             describe('* correct permission for enrollment should result in spliced enrollment list', () => {
@@ -201,7 +201,7 @@ describe('AppointmentMapper', () => {
                     const appointmentMapper = new AppointmentMapper(userService);
                     const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
 
-                    expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1]);
+                    expect(actual._enrollments).toEqual([mockedEnrollmentInstance_1]);
                 });
 
                 it('* two permissions - both valid', async () => {
@@ -228,7 +228,7 @@ describe('AppointmentMapper', () => {
                     const appointmentMapper = new AppointmentMapper(userService);
                     const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
 
-                    expect(actual.enrollments)
+                    expect(actual._enrollments)
                         .toEqual([mockedEnrollmentInstance_1, mockedEnrollmentInstance_2]);
                 });
 
@@ -255,7 +255,7 @@ describe('AppointmentMapper', () => {
                         const appointmentMapper = new AppointmentMapper(userService);
                         const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
 
-                        expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1]);
+                        expect(actual._enrollments).toEqual([mockedEnrollmentInstance_1]);
                     });
 
                     it('* invalid id but correct token', async () => {
@@ -281,7 +281,7 @@ describe('AppointmentMapper', () => {
                         const appointmentMapper = new AppointmentMapper(userService);
                         const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_requester, permissions);
 
-                        expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1]);
+                        expect(actual._enrollments).toEqual([mockedEnrollmentInstance_1]);
                     });
                 });
             });
@@ -297,7 +297,7 @@ describe('AppointmentMapper', () => {
                 const appointmentMapper = new AppointmentMapper(userService);
                 const actual: Appointment = await appointmentMapper.permission(mockedAppointmentInstance, mockedUserInstance_creator, permissions);
 
-                expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1, mockedEnrollmentInstance_2]);
+                expect(actual._enrollments).toEqual([mockedEnrollmentInstance_1, mockedEnrollmentInstance_2]);
             });
         });
     });
@@ -360,7 +360,7 @@ describe('AppointmentMapper', () => {
             const appointmentMapper = new AppointmentMapper(userService);
             const actual: Appointment = appointmentMapper.slim(mockedAppointmentInstance, slim);
 
-            expect(actual.enrollments).toEqual([mockedEnrollmentInstance_1, mockedEnrollmentInstance_2]);
+            expect(actual._enrollments).toEqual([mockedEnrollmentInstance_1, mockedEnrollmentInstance_2]);
         });
     });
 
@@ -404,9 +404,9 @@ describe('AppointmentMapper', () => {
             const orig = {...mockedAppointmentInstance};
 
             const appointmentMapper = new AppointmentMapper(userService);
-            const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+            const actual = await appointmentMapper.__basic(mockedAppointmentInstance);
 
-            expect(actual.enrollments.length).toBe(orig.enrollments.length);
+            expect(actual._enrollments.length).toBe(orig.enrollments.length);
         });
 
         it('* correctly strip administrators', async () => {
@@ -447,7 +447,7 @@ describe('AppointmentMapper', () => {
             const orig = {...mockedAppointmentInstance};
 
             const appointmentMapper = new AppointmentMapper(userService);
-            const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+            const actual = await appointmentMapper.__basic(mockedAppointmentInstance);
 
             expect(actual.administrators.length).toBe(orig._administrators.length);
             expect(userService.findById).toHaveBeenCalledTimes(orig._administrators.length);
@@ -465,16 +465,16 @@ describe('AppointmentMapper', () => {
             mockedAppointmentInstance.enrollments = undefined;
 
             const appointmentMapper = new AppointmentMapper(userService);
-            const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+            const actual = await appointmentMapper.__basic(mockedAppointmentInstance);
 
-            expect(actual.enrollments).toEqual([]);
+            expect(actual._enrollments).toEqual([]);
         });
 
         it('* administrators undefined should be replaced by empty array', async () => {
             mockedAppointmentInstance._administrators = undefined;
 
             const appointmentMapper = new AppointmentMapper(userService);
-            const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+            const actual = await appointmentMapper.__basic(mockedAppointmentInstance);
 
             expect(actual.administrators).toEqual([]);
         });
@@ -489,21 +489,21 @@ describe('AppointmentMapper', () => {
                 mockedAppointmentInstance.files = [mockedFileInstance];
 
                 const appointmentMapper = new AppointmentMapper(userService);
-                const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+                const actual = await appointmentMapper.__basic(mockedAppointmentInstance);
 
                 const expected = {...mockedFileInstance};
                 delete expected.data;
 
-                expect(actual.files).toEqual([expected]);
+                expect(actual._files).toEqual([expected]);
             });
 
             it('* undefined files should be replaced by empty list', async () => {
                 mockedAppointmentInstance.files = undefined;
 
                 const appointmentMapper = new AppointmentMapper(userService);
-                const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+                const actual = await appointmentMapper.__basic(mockedAppointmentInstance);
 
-                expect(actual.files).toEqual([]);
+                expect(actual._files).toEqual([]);
             });
         });
 
@@ -529,7 +529,7 @@ describe('AppointmentMapper', () => {
             mockedAppointmentInstance.additions = [mockedAdditionInstance_2, mockedAdditionInstance_3, mockedAdditionInstance_1];
 
             const appointmentMapper = new AppointmentMapper(userService);
-            const actual = await appointmentMapper.basic(mockedAppointmentInstance);
+            const actual = await appointmentMapper.__basic(mockedAppointmentInstance);
 
             expect(actual._additions).toEqual([mockedAdditionInstance_1, mockedAdditionInstance_2, mockedAdditionInstance_3]);
         });

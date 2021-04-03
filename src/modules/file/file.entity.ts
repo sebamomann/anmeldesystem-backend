@@ -7,7 +7,7 @@ export class File {
     id: string;
 
     @ManyToOne(type => Appointment,
-        appointment => appointment.files
+        appointment => appointment._files
     )
     appointment: Appointment;
 

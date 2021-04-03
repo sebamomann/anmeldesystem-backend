@@ -4,15 +4,20 @@ import {Addition} from '../addition/addition.entity';
 import {File} from '../file/file.entity';
 import {Exclude} from 'class-transformer';
 import {PushSubscription} from '../push/pushSubscription.entity';
-import {IUserMinified} from '../user/IUserMinified';
+import {IUserDTO} from '../user/IUserDTO';
 import {JWT_User} from '../user/user.model';
-import {Administrator} from './administrator.entity';
-import {Pinner} from './pinner.entity';
+import {Administrator} from '../adminsitrator/administrator.entity';
+import {Pinner} from '../pinner/pinner.entity';
 import {AdditionList} from '../addition/additionList';
 import {AppointmentService} from './appointment.service';
 import {GeneratorUtil} from '../../util/generator.util';
 import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
 import {AppointmentUtil} from './appointment.util';
+import {UserService} from '../user/user.service';
+import {AdministratorList} from '../adminsitrator/administratorList';
+import {EnrollmentList} from '../enrollment/enrollmentList';
+import {PinnerList} from '../pinner/pinnerList';
+import {FileList} from '../file/fileList';
 
 @Entity()
 export class Appointment {
@@ -26,29 +31,6 @@ export class Appointment {
     location: string;
     @Column('boolean', {default: false})
     hidden: boolean;
-    @OneToMany(type => Enrollment,
-        enrollment => enrollment.appointment,
-        {
-            eager: true
-        })
-    enrollments: Enrollment[];
-    @OneToMany(type => Administrator,
-        administrator => administrator.appointment, {
-            eager: true,
-            cascade: true
-        })
-    _administrators: Administrator[];
-    @OneToMany(type => Pinner,
-        pinner => pinner.appointment, {
-            eager: true
-        })
-    pinners: Administrator[];
-    @OneToMany(type => File,
-        file => file.appointment,
-        {
-            eager: true,
-        })
-    files: File[];
     @Column({nullable: true, type: 'uuid'})
     creatorId: string;
     @CreateDateColumn()
@@ -60,20 +42,77 @@ export class Appointment {
     @ManyToMany(type => PushSubscription,
         pushSubscription => pushSubscription.appointments)
     subscriptions: PushSubscription[];
-    creator?: IUserMinified;
+    creator?: IUserDTO;
     relations?: string[] = [];
-    administrators: IUserMinified[] = [];
+    // administrators: IUserMinified[] = [];
     numberOfEnrollments?: number;
 
-    constructor(private appointmentService: AppointmentService) {
+    constructor(private appointmentService: AppointmentService, private userService: UserService) {
+    }
+
+    @OneToMany(type => File,
+        file => file.appointment,
+        {
+            eager: true,
+        })
+    _files: File[];
+
+    get files(): FileList {
+        return new FileList(this._files);
+    }
+
+    set files(list: FileList) {
+        this._files = list.getArray();
+    }
+
+    @OneToMany(type => Pinner,
+        pinner => pinner.appointment, {
+            eager: true
+        })
+    _pinners: Administrator[];
+
+    get pinners(): PinnerList {
+        return new PinnerList(this._pinners);
+    }
+
+    set pinners(list: PinnerList) {
+        this._pinners = list.getArray();
+    }
+
+    @OneToMany(type => Enrollment,
+        enrollment => enrollment.appointment,
+        {
+            eager: true
+        })
+    _enrollments: Enrollment[];
+
+    get enrollments() {
+        return new EnrollmentList(this._enrollments);
+    }
+
+    set enrollments(list: EnrollmentList) {
+        this._enrollments = list.getArray();
+    }
+
+    @OneToMany(type => Administrator,
+        administrator => administrator.appointment, {
+            eager: true,
+            cascade: true
+        })
+    _administrators: Administrator[];
+
+    get administrators() {
+        return new AdministratorList(this._administrators, this, this.userService);
+    }
+
+    set administrators(list: AdministratorList) {
+        this._administrators = list.getArray();
     }
 
     @Column({default: false, name: 'driverAddition'})
     _driverAddition: boolean;
 
     get driverAddition() {
-        console.log(this._driverAddition);
-
         return !!this._driverAddition;
     }
 
@@ -106,7 +145,6 @@ export class Appointment {
     set date(date: Date) {
         AppointmentUtil.handleDateValidation(date, this._deadline);
 
-        console.log(date, this._deadline);
         this._date = date;
     }
 
@@ -119,7 +157,6 @@ export class Appointment {
 
     set deadline(deadline: Date) {
         AppointmentUtil.handleDeadlineValidation(this._date, deadline);
-        console.log(this._date, deadline);
 
         this._deadline = deadline;
     }

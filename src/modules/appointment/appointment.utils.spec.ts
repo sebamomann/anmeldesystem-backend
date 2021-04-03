@@ -4,8 +4,8 @@ import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 import {AppointmentUtil} from './appointment.util';
 import {JWT_User} from '../user/user.model';
 import {instance, mock} from 'ts-mockito';
-import {Administrator} from './administrator.entity';
-import {Pinner} from './pinner.entity';
+import {Administrator} from '../adminsitrator/administrator.entity';
+import {Pinner} from '../pinner/pinner.entity';
 
 const crypto = require('crypto');
 
@@ -122,7 +122,7 @@ describe('Appointment util', () => {
                     const __given_appointment = new Appointment();
                     __given_appointment.id = '1';
                     __given_appointment.creatorId = __existing_creator.sub;
-                    __given_appointment.enrollments = [__existing_enrollment];
+                    __given_appointment._enrollments = [__existing_enrollment];
 
                     const __expected = ['ENROLLED'];
 
@@ -147,7 +147,7 @@ describe('Appointment util', () => {
                         const __given_appointment = new Appointment();
                         __given_appointment.id = '1';
                         __given_appointment.creatorId = __existing_creator.sub;
-                        __given_appointment.enrollments = [__existing_enrollment];
+                        __given_appointment._enrollments = [__existing_enrollment];
 
                         const __expected = ['ENROLLED'];
 
@@ -171,7 +171,7 @@ describe('Appointment util', () => {
                         const __given_appointment = new Appointment();
                         __given_appointment.id = '1';
                         __given_appointment.creatorId = __existing_creator.sub;
-                        __given_appointment.enrollments = [__existing_enrollment];
+                        __given_appointment._enrollments = [__existing_enrollment];
 
                         const __expected = ['ENROLLED'];
 
@@ -200,7 +200,7 @@ describe('Appointment util', () => {
                     mockedPinnerInstance.userId = __given_user.sub;
                     mockedPinnerInstance.appointment = __given_appointment;
 
-                    __given_appointment.pinners = [mockedPinnerInstance];
+                    __given_appointment._pinners = [mockedPinnerInstance];
 
                     const __expected = ['PINNED'];
 
@@ -240,7 +240,7 @@ describe('Appointment util', () => {
 
                 const __given_appointment = new Appointment();
                 __given_appointment.creatorId = __given_user.sub;
-                __given_appointment.enrollments = [__existing_enrollment];
+                __given_appointment._enrollments = [__existing_enrollment];
 
                 const __expected = ['CREATOR', 'ENROLLED'];
 
@@ -263,7 +263,7 @@ describe('Appointment util', () => {
                     mockedPinnerInstance.userId = __given_user.sub;
                     mockedPinnerInstance.appointment = __given_appointment;
 
-                    __given_appointment.pinners = [mockedPinnerInstance];
+                    __given_appointment._pinners = [mockedPinnerInstance];
 
                     const __expected = ['CREATOR', 'PINNED'];
 
@@ -283,7 +283,7 @@ describe('Appointment util', () => {
                     mockedPinnerInstance.userId = __given_user.sub;
                     mockedPinnerInstance.appointment = __given_appointment;
 
-                    __given_appointment.pinners = [mockedPinnerInstance];
+                    __given_appointment._pinners = [mockedPinnerInstance];
                     __given_appointment._link = 'link';
 
                     const __given_pins = [__given_appointment._link];
@@ -368,7 +368,7 @@ describe('Appointment util', () => {
                 __existing_enrollment_no_perm.name = 'not owning user';
 
                 const __given_appointment = new Appointment();
-                __given_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_no_perm];
+                __given_appointment._enrollments = [__existing_enrollment_perm, __existing_enrollment_no_perm];
 
                 const token = crypto.createHash('sha256')
                     .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
@@ -378,7 +378,7 @@ describe('Appointment util', () => {
 
                 const __expected = [__existing_enrollment_perm];
 
-                const __actual = AppointmentUtil.filterPermittedEnrollments(__given_permissions, __given_appointment.enrollments);
+                const __actual = AppointmentUtil._filterPermittedEnrollments(__given_permissions, __given_appointment._enrollments);
                 expect(__actual).toEqual(__expected);
             });
 
@@ -392,7 +392,7 @@ describe('Appointment util', () => {
                 __existing_enrollment_perm_2.name = 'not owning user';
 
                 const __given_appointment = new Appointment();
-                __given_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
+                __given_appointment._enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
 
                 const token = crypto.createHash('sha256')
                     .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
@@ -411,7 +411,7 @@ describe('Appointment util', () => {
 
                 const __expected = [__existing_enrollment_perm, __existing_enrollment_perm_2];
 
-                const __actual = AppointmentUtil.filterPermittedEnrollments(__given_permissions, __given_appointment.enrollments);
+                const __actual = AppointmentUtil._filterPermittedEnrollments(__given_permissions, __given_appointment._enrollments);
                 expect(__actual).toEqual(__expected);
             });
 
@@ -426,7 +426,7 @@ describe('Appointment util', () => {
                     __existing_enrollment_perm_2.name = 'not owning user';
 
                     const __given_appointment = new Appointment();
-                    __given_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
+                    __given_appointment._enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
 
                     const token = crypto.createHash('sha256')
                         .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
@@ -443,7 +443,7 @@ describe('Appointment util', () => {
 
                     const __expected = [__existing_enrollment_perm];
 
-                    const __actual = AppointmentUtil.filterPermittedEnrollments(__given_permissions, __given_appointment.enrollments);
+                    const __actual = AppointmentUtil._filterPermittedEnrollments(__given_permissions, __given_appointment._enrollments);
                     expect(__actual).toEqual(__expected);
                 });
 
@@ -457,7 +457,7 @@ describe('Appointment util', () => {
                     __existing_enrollment_perm_2.name = 'not owning user';
 
                     const __given_appointment = new Appointment();
-                    __given_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
+                    __given_appointment._enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
 
                     const token = crypto.createHash('sha256')
                         .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
@@ -478,7 +478,7 @@ describe('Appointment util', () => {
 
                     const __expected = [__existing_enrollment_perm];
 
-                    const __actual = AppointmentUtil.filterPermittedEnrollments(__given_permissions, __given_appointment.enrollments);
+                    const __actual = AppointmentUtil._filterPermittedEnrollments(__given_permissions, __given_appointment._enrollments);
                     expect(__actual).toEqual(__expected);
                 });
             });
@@ -495,7 +495,7 @@ describe('Appointment util', () => {
                 __existing_enrollment_perm_2.name = 'not owning user';
 
                 const __given_appointment = new Appointment();
-                __given_appointment.enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
+                __given_appointment._enrollments = [__existing_enrollment_perm, __existing_enrollment_perm_2];
 
                 const token = crypto.createHash('sha256')
                     .update(__existing_enrollment_perm.id + process.env.SALT_ENROLLMENT)
@@ -516,7 +516,7 @@ describe('Appointment util', () => {
 
                 const __expected = [__existing_enrollment_perm, __existing_enrollment_perm_2];
 
-                const __actual = AppointmentUtil.filterPermittedEnrollments(__given_permissions, __given_appointment.enrollments);
+                const __actual = AppointmentUtil._filterPermittedEnrollments(__given_permissions, __given_appointment._enrollments);
                 expect(__actual).toEqual(__expected);
             });
         });

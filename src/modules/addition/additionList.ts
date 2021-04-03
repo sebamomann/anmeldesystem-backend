@@ -23,6 +23,8 @@ export class AdditionList {
      * @return Array of {@link Addition}
      */
     public getArray(): Addition[] {
+        this.sortByOrder();
+
         return this.list;
     }
 
@@ -194,7 +196,7 @@ export class AdditionList {
     /**
      * Sort list by "order" attribute
      */
-    private sortByOrder() {
+    public sortByOrder() {
         this.list
             .sort(
                 (a, b) => {

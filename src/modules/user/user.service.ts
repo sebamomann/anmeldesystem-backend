@@ -90,6 +90,7 @@ export class UserService {
                 throw new Error();
             }
         } catch (e) {
+            console.log(e);
             throw new EntityNotFoundException(null, null, 'user');
         }
 

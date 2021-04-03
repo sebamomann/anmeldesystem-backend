@@ -231,11 +231,11 @@ export class EnrollmentService {
         let savedEnrollment = await this.enrollmentRepository.save(enrollment_updated);
 
         const enrollmentMapper = new EnrollmentMapper(this.userService);
-        savedEnrollment = await enrollmentMapper.basic(savedEnrollment);
+        const ret = await enrollmentMapper.basic(savedEnrollment);
 
         this.appointmentGateway.appointmentUpdated(enrollment_updated.appointment);
 
-        return savedEnrollment;
+        return ret;
     }
 
     /**

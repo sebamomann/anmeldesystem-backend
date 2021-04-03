@@ -1,5 +1,5 @@
 import {Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
-import {Appointment} from './appointment.entity';
+import {Appointment} from '../appointment/appointment.entity';
 
 @Entity()
 @Index('index_unique_userId_appointment', ['appointment', 'userId'], {unique: true}) // first style
