@@ -23,6 +23,7 @@ import {IAppointmentCreationDTO} from './IAppointmentCreationDTO';
 import {IAppointmentCreationAdditionDTO} from './IAppointmentCreationAdditionDTO';
 import {IAppointmentUpdateAdditionDTO} from './IAppointmentUpdateAdditionDTO';
 import {EnrollmentPermissionList} from '../enrollment/enrollmentPermissionList';
+import {PinList} from '../pinner/pinList';
 
 const logger = require('../../logger');
 
@@ -106,7 +107,7 @@ export class AppointmentService {
         const appointmentMapper = new AppointmentMapper(this.userService);
         const enrollmentPermissionList = new EnrollmentPermissionList(permissions);
 
-        return appointmentMapper.basic(appointment, user, [], enrollmentPermissionList, slim);
+        return appointmentMapper.basic(appointment, user, new PinList(), enrollmentPermissionList, slim);
     }
 
     /**
@@ -127,19 +128,19 @@ export class AppointmentService {
      * @returns Appointment[]
      */
     public async getAll(user: JWT_User, params: any, slim): Promise<Appointment[]> {
-        let pins = AppointmentUtil.parsePins(params);
+        let pinList = new PinList(params);
 
-        let appointments = await this.getAppointments(user, pins, undefined, null);
+        let appointments = await this.getAppointments(user, pinList, undefined, null);
 
-        const output = [];
+        const appointmentMapper = new AppointmentMapper(this.userService);
 
-        for (const appointment of appointments) {
-            output.push(
-                await this.userBasedAppointmentPreparation(appointment, user, {}, slim)
-            );
-        }
+        appointments = await appointments
+            .filter(
+                async (appointment) => {
+                    return await appointmentMapper.basic(appointment, user, pinList, new EnrollmentPermissionList({}), slim);
+                });
 
-        return output;
+        return appointments;
     }
 
     /**
@@ -162,7 +163,7 @@ export class AppointmentService {
      * @returns Appointment[]
      */
     public async getAllArchive(user: JWT_User, params: any, _slim: boolean, before: string, limit: number): Promise<Appointment[]> {
-        let pins: any[] = AppointmentUtil.parsePins(params);
+        let pinList = new PinList(params);
 
         let _before;
         const date = new Date(before);
@@ -175,10 +176,15 @@ export class AppointmentService {
             _before = new Date();
         }
 
-        let appointments = await this.getAppointments(user, pins, _before, limit);
-        appointments = await appointments.filter(async appointment => {
-            return await this.userBasedAppointmentPreparation(appointment, user, {}, _slim);
-        });
+        let appointments = await this.getAppointments(user, pinList, _before, limit);
+
+        const appointmentMapper = new AppointmentMapper(this.userService);
+
+        appointments = await appointments
+            .filter(
+                async (appointment) => {
+                    return await appointmentMapper.basic(appointment, user, pinList, new EnrollmentPermissionList({}), _slim);
+                });
 
         return appointments;
     }
@@ -581,25 +587,10 @@ export class AppointmentService {
         }
     }
 
-    private async userBasedAppointmentPreparation(appointment: Appointment, user: JWT_User, permissions: any, slim: boolean): Promise<Appointment> {
-        const appointmentMapper = new AppointmentMapper(this.userService);
-
-        const enrollmentPermissionList = new EnrollmentPermissionList(permissions);
-
-        // const appointmentDTO = appointmentMapper.fullMapping(appointment, user, [], enrollmentPermissionList, slim);
-
-        appointment.relations = AppointmentUtil.parseReferences(user, appointment, [], permissions); // empty pins because fnc is only called on single appointment get request
-
-        appointment = await appointmentMapper.permission(appointment, user, permissions);
-        appointment = appointmentMapper.slim(appointment, slim);
-        appointment = await appointmentMapper.__basic(appointment);
-
-        return appointment;
-    }
-
     /* istanbul ignore next */
-    private async getAppointments(user: JWT_User, pins, before: Date, limit) {
+    private async getAppointments(user: JWT_User, pinList, before: Date, limit) {
         // add value, cuz SQL cant process empty list
+        const pins = pinList.getArray();
         if (pins.length === 0) {
             pins.push('_');
         }

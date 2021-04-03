@@ -21,7 +21,7 @@ export class EnrollmentPermissionList {
             );
     }
 
-    private parsePermissions(permissions: {}) {
+    private parsePermissions(permissions: any) {
         const {extractedIds, extractedTokens} = this.filterIdsAndTokens(permissions);
 
         const enrollmentPermissionTokenGenerator = new EnrollmentPermissionTokenGeneratorUtil();

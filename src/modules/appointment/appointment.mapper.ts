@@ -1,207 +1,55 @@
 import {Appointment} from './appointment.entity';
-import {Enrollment} from '../enrollment/enrollment.entity';
-import {AppointmentUtil} from './appointment.util';
-import {UserUtil} from '../../util/user.util';
-import {EnrollmentMapper} from '../enrollment/enrollment.mapper';
-import {IUserDTO} from '../user/IUserDTO';
 import {JWT_User} from '../user/user.model';
 import {UserService} from '../user/user.service';
-import {KeycloakUser} from '../user/KeycloakUser';
 import {AppointmentPermissionChecker} from './appointmentPermission.checker';
 import {IAppointmentDTO} from './IAppointmentDTO';
 import {EnrollmentPermissionList} from '../enrollment/enrollmentPermissionList';
 import {Relation} from '../relationList.type';
 import {UserMapper} from '../user/user.mapper';
+import {PinList} from '../pinner/pinList';
+import {IAppointmentCreationResponseDTO} from './IAppointmentCreationResponseDTO';
+import {IEnrollmentDTO} from '../enrollment/IEnrollmentDTO';
 
 export class AppointmentMapper {
     constructor(private readonly userService: UserService) {
     }
 
     /**
-     * TODO
-     * mix with permission
-     *
-     * Basic mapping function. Used to strip {@link JWT_User} information.
-     * {@link JWT_User} information should just contain name and username. Other fields of {@link JWT_User} are
-     * not in interesting for requesting person.
-     * @deprecated
-     * @param appointment   {@link Appointment} that should be manipulated
-     */
-    public async __basic(appointment): Promise<Appointment> {
-        await this.stripAdministrators(appointment);
-        await this.mapEnrollments(appointment);
-
-        if (appointment.files) {
-            appointment.files.map(mFile => {
-                delete mFile.data;
-                mFile.url = process.env.API_URL + 'file/' + mFile.id;
-            });
-        } else {
-            appointment.files = [];
-        }
-
-        if (appointment.maxEnrollments === null) {
-            delete appointment.maxEnrollments;
-        }
-
-        if (appointment.additions?.length === 0) {
-            delete appointment.additions;
-        }
-
-        if (appointment.files?.length === 0) {
-            delete appointment.files;
-        }
-
-        if (appointment.administrators?.length === 0) {
-            delete appointment.administrators;
-        }
-
-        if (appointment.enrollments?.length === 0) {
-            delete appointment.enrollments;
-        }
-
-        return appointment;
-    }
-
-    /**
-     * If the slim parameter is set, remove all {@link Enrollment} from the {@link Appointment} list.
-     * @deprecated
-     * @param appointment   {@link Appointment} to manipulate
-     * @param slim          Boolean to remove or keep {@link Enrollment} list
-     */
-    public slim(appointment: Appointment, slim: boolean) {
-        if (slim) {
-            delete appointment._enrollments;
-        }
-
-        return appointment;
-    }
-
-    /**
-     * @deprecated
-     * @param _appointment
-     * @param _user
-     * @param permissions
-     */
-    public async permission(_appointment: Appointment, _user: JWT_User, permissions: any): Promise<any> {
-        let appointment: any;
-        let creatorObject = {};
-        let enrollmentsObject;
-
-        appointment = (({
-                            relations,
-                            id,
-                            title,
-                            description,
-                            link,
-                            location,
-                            date,
-                            deadline,
-                            maxEnrollments,
-                            hidden,
-                            driverAddition,
-                            additions,
-                            files,
-                            _administrators,
-                        }) => ({
-            relations,
-            id,
-            title,
-            description,
-            link,
-            location,
-            date,
-            deadline,
-            maxEnrollments,
-            hidden,
-            driverAddition,
-            additions,
-            files,
-            _administrators,
-        }))
-        (_appointment);
-
-        const appointmentPermissionChecker = new AppointmentPermissionChecker(_appointment);
-
-        if (appointmentPermissionChecker.userIsCreator(_user)) {
-            creatorObject = (({
-                                  iat,
-                                  lud,
-                              }) => ({
-                iat,
-                lud,
-            }))
-            (_appointment);
-        }
-
-        if (!_appointment.hidden
-            || appointmentPermissionChecker.userIsCreatorOrAdministrator(_user)) {
-            enrollmentsObject = (({
-                                      enrollments,
-                                  }) => ({
-                enrollments,
-            }))
-            (_appointment);
-        } else {
-            /**
-             * TODO can be made in request
-             */
-            const __enrollments = AppointmentUtil
-                ._filterPermittedEnrollments(_user, permissions, _appointment._enrollments);
-            enrollmentsObject = {enrollments: __enrollments};
-        }
-
-        appointment = Object.assign(appointment, creatorObject);
-        appointment = Object.assign(appointment, enrollmentsObject);
-
-        // TODO mapping user stripmin
-        const creator: KeycloakUser = await this.userService.findById(_appointment.creatorId);
-        const mUser: IUserDTO = UserUtil.stripUserMin(creator);
-
-        const obj = {
-            creator: {
-                name: mUser.name,
-                username: mUser.username,
-            }
-        };
-
-        appointment.additions.sortByOrder();
-        appointment.additions = appointment.additions.getArray();
-        delete appointment._additions;
-
-        appointment = Object.assign(appointment, obj);
-
-        return appointment;
-    }
-
-    /**
-     * Create a object only contained the important creation values of the passed {@link Appointment}. <br/>
-     * Those values are id and _link.
+     * Create a object only containing the important creation values of the passed {@link Appointment}.<br/>
+     * Those values are {@link Appointment.id} and {@link Appointment.link}.
      *
      * @param appointment       {@link Appointment} to minify
+     *
+     * @return {@link IAppointmentCreationResponseDTO} Minified object
      */
-    create(appointment: Appointment): { id: string, link: string } {
-        return (({
-                     id,
-                     link
-                 }) => ({
-            id,
-            link,
-        }))
-        (appointment);
+    public create({id, link}: Appointment): IAppointmentCreationResponseDTO {
+        const obj = {} as IAppointmentCreationResponseDTO;
+
+        obj.id = id;
+        obj.link = link;
+
+        return obj;
     }
 
     /**
-     * @param appointment
-     * @param user
-     * @param pins
-     * @param permissions
-     * @param slim
+     * Process {@link Appointment} into a user friendly format. <br/>
+     * Method recursively processes sub objects into their appropriate format.
+     * Unused values (null, undefined []) get removed. <br/>
+     * Includes permission checks. e.g. remove {@link Enrollment} user is not allowed to see.
+     *
+     * @param appointment           {@link Appointment} Object to process
+     * @param user                  {@link JWT_User} requesting user
+     * @param pinList               {@link PinList} List containing all links the user has provided (used for {@link Relation})
+     * @param permissionList        {@Link PermissionList} containing permission information for {@link Enrollment}
+     * @param slim                  Whether or not to remove large data structures ({@link Enrollment} and {@link file})
+     *
+     * @return {@link IAppointmentDTO} Object containing processed user information
      */
-    public async basic(appointment: Appointment, user: JWT_User, pins: string[], permissions: EnrollmentPermissionList, slim: boolean): Promise<IAppointmentDTO> {
+    public async basic(appointment: Appointment, user: JWT_User, pinList: PinList,
+                       permissionList: EnrollmentPermissionList, slim: boolean): Promise<IAppointmentDTO> {
         let appointmentDTO = {} as IAppointmentDTO;
 
-        appointmentDTO.relations = this.parseRelations(appointment, user, pins, permissions);
+        appointmentDTO.relations = this.parseRelations(appointment, user, pinList, permissionList);
         appointmentDTO.id = appointment.id;
         appointmentDTO.title = appointment.title;
         appointmentDTO.description = appointment.description;
@@ -224,7 +72,7 @@ export class AppointmentMapper {
 
         if (!slim) {
             appointmentDTO.files = appointment.files.getDTOArray();
-            appointmentDTO.enrollments = await this.enrollmentMapping(appointmentPermissionChecker, permissions, user, appointment);
+            appointmentDTO.enrollments = await this.enrollmentMapping(appointmentPermissionChecker, permissionList, user, appointment);
         }
 
         const userMapper = new UserMapper(this.userService);
@@ -236,75 +84,44 @@ export class AppointmentMapper {
     }
 
     /**
-     * Foreach {@link Enrollment} in {@link Appointment} strip the creator.
+     * Create a list of {@link Relation} showing the requesters relation to the {@link Appointment}
      *
-     * @param appointment   @link Appointment} to manipulate
+     * @param appointment           {@link Appointment} Object to process
+     * @param user                  {@link JWT_User} requesting user
+     * @param pinList               {@link PinList} List containing all links the user has provided (used for {@link Relation})
+     * @param permissionList        {@Link PermissionList} containing permission information for {@link Enrollment}
      *
-     * @deprecated
-     * @protected
+     * @return List of {@link Relation}
      */
-    private async mapEnrollments(appointment: Appointment): Promise<void> {
-        const enrollmentMapper = new EnrollmentMapper(this.userService);
-
-        if (appointment._enrollments) {
-            const enrollments = [];
-
-            for (const mEnrollment of appointment._enrollments) {
-                const enrollment = await enrollmentMapper.basic(mEnrollment);
-
-                enrollments.push(enrollment);
-            }
-
-            appointment._enrollments = enrollments;
-        } else {
-            appointment._enrollments = [];
-        }
-    }
-
-    /**
-     * Foreach administrator in {@link Appointment} fetch the user information and strip it to the minimum
-     *
-     * @param appointment   @link Appointment} to manipulate
-     *
-     * @deprecated
-     * @protected
-     */
-    private async stripAdministrators(appointment: Appointment): Promise<void> {
-        appointment._administrators = [];
-
-        if (appointment._administrators) {
-            for (const mAdmin of appointment._administrators) {
-                const user: KeycloakUser = await this.userService.findById(mAdmin.userId); // TODO admin extends class with this functionality
-
-                appointment._administrators.push(
-                    UserUtil.stripUserMin(user) as any
-                );
-            }
-
-            delete appointment._administrators;
-        }
-    }
-
-    private parseRelations(appointment: Appointment, user: JWT_User, pins: string[], permissions: EnrollmentPermissionList): string[] {
+    private parseRelations(appointment: Appointment, user: JWT_User, pinList: PinList, permissionList: EnrollmentPermissionList): Relation[] {
         const relations: Relation[] = [];
 
-        if (user === null && permissions.getArray().length === 0) {
+        if (user === null && permissionList.getArray().length === 0) {
             return [];
         }
 
         this.parseRelations_appointmentPermissions(appointment, user, relations);
-        this.parseRelations_appointmentPins(appointment, user, pins, relations);
-        this.parseRelations_enrollmentPermissions(appointment, permissions, user, relations);
+        this.parseRelations_appointmentPins(appointment, user, pinList, relations);
+        this.parseRelations_enrollmentPermissions(appointment, permissionList, user, relations);
 
         return relations;
     }
 
     // noinspection JSMethodCanBeStatic
-    private parseRelations_appointmentPins(appointment: Appointment, user: JWT_User, pins: string[], relations: Relation[]) {
+    /**
+     * Check if requester is a "PINNER" of the passed {@link Appointment}.<br/>
+     * Appends the {@link Relation} to the current array if verified
+     *
+     * @param appointment           {@link Appointment} Object to process
+     * @param user                  {@link JWT_User} requesting user
+     * @param pinList               {@link PinList} List containing all links the user has provided (used for {@link Relation})
+     * @param relations             {@Link Relation} List - current state of array
+     */
+    private parseRelations_appointmentPins(appointment: Appointment, user: JWT_User, pinList: PinList, relations: Relation[]): void {
         const pinnerList = appointment.pinners;
 
         const pinnedAsUser = pinnerList.containsPinByUser(user);
-        const pinnedByParameter = pins.includes(appointment._link);
+        const pinnedByParameter = pinList.includesLink(appointment.link);
 
         if (pinnedAsUser || pinnedByParameter) {
             relations.push('PINNED');
@@ -312,8 +129,18 @@ export class AppointmentMapper {
     }
 
     // noinspection JSMethodCanBeStatic
-    private parseRelations_enrollmentPermissions(appointment: Appointment, permissions: EnrollmentPermissionList, user: JWT_User, relations: Relation[]) {
-        const hasPermissionForAtLeastOneEnrollment = appointment.enrollments.containsPermittedEnrollment(permissions);
+    /**
+     * Check if requester is a "ENROLLED" into the passed {@link Appointment}.<br/>
+     * Appends the {@link Relation} to the current array if verified
+     *
+     * @param appointment           {@link Appointment} Object to process
+     * @param user                  {@link JWT_User} requesting user
+     * @param permissionList        {@Link PermissionList} containing permission information for {@link Enrollment}
+     * @param relations             {@Link Relation} List - current state of array
+     */
+    private parseRelations_enrollmentPermissions(appointment: Appointment, permissionList: EnrollmentPermissionList,
+                                                 user: JWT_User, relations: Relation[]): void {
+        const hasPermissionForAtLeastOneEnrollment = appointment.enrollments.containsPermittedEnrollment(permissionList);
         const isCreatorOfAnyEnrollment = appointment.enrollments.containsEnrollmentCreatedByUser(user);
 
         if (isCreatorOfAnyEnrollment || hasPermissionForAtLeastOneEnrollment) {
@@ -322,7 +149,15 @@ export class AppointmentMapper {
     }
 
     // noinspection JSMethodCanBeStatic
-    private parseRelations_appointmentPermissions(appointment: Appointment, user: JWT_User, relations: Relation[]) {
+    /**
+     * Check if requester is a "ADMIN" or the "CREATOR" of the passed {@link Appointment}.<br/>
+     * Appends the {@link Relation} to the current array if verified
+     *
+     * @param appointment           {@link Appointment} Object to process
+     * @param user                  {@link JWT_User} requesting user
+     * @param relations             {@Link Relation} List - current state of array
+     */
+    private parseRelations_appointmentPermissions(appointment: Appointment, user: JWT_User, relations: Relation[]): void {
         const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
 
         if (appointmentPermissionChecker.userIsAdministrator(user)) {
@@ -334,6 +169,14 @@ export class AppointmentMapper {
         }
     }
 
+    // noinspection JSMethodCanBeStatic
+    /**
+     * Create a object containing the fields, only the {@link Appointment} creator is allowed to see.
+     *
+     * @param appointmentPermissionChecker      {@link AppointmentPermissionChecker} existing instance for permission check
+     * @param user                              {@link JWT_User} user to check permission for
+     * @param appointment                       {@link Appointment} containing the fields to fetch
+     */
     private appointmentCreatorFields(appointmentPermissionChecker: AppointmentPermissionChecker, user: JWT_User, appointment: Appointment) {
         const obj = {} as any;
 
@@ -345,7 +188,19 @@ export class AppointmentMapper {
         return obj;
     }
 
-    private async enrollmentMapping(appointmentPermissionChecker: AppointmentPermissionChecker, permissions: EnrollmentPermissionList, user: JWT_User, appointment: Appointment) {
+    /**
+     * Get the {@link Enrollment} list containing the proper DTOs.<br/>
+     * Method checks if user is even allowed to see this list.
+     *
+     * @param appointmentPermissionChecker      {@link AppointmentPermissionChecker} existing instance for permission check
+     * @param permissionList                    {@Link PermissionList} containing permission information for {@link Enrollment}
+     * @param user                              {@link JWT_User} user to check permission for
+     * @param appointment                       {@link Appointment} containing the fields to fetch
+     *
+     * @return List of processed {@link Enrollment} in proper format (as {@Link IEnrollmentDTO})
+     */
+    private async enrollmentMapping(appointmentPermissionChecker: AppointmentPermissionChecker, permissionList: EnrollmentPermissionList,
+                                    user: JWT_User, appointment: Appointment): Promise<IEnrollmentDTO[]> {
         const enrollmentList = appointment.enrollments;
 
         const userIsAppointmentCreatorOrAdministrator = appointmentPermissionChecker.userIsCreatorOrAdministrator(user);
@@ -353,10 +208,15 @@ export class AppointmentMapper {
         if (!appointment.hidden || userIsAppointmentCreatorOrAdministrator) {
             return await enrollmentList.getDTOArray(this.userService);
         } else {
-            return await enrollmentList.getPermittedDTOArray(user, permissions, this.userService);
+            return await enrollmentList.getPermittedDTOArray(user, permissionList, this.userService);
         }
     }
 
+    /**
+     * Remove all fields containing null, undefined or []. Boolean fields are an exception.
+     *
+     * @param appointmentDTO        Finished {@link IAppointmentDTO} to strip.
+     */
     private stripEmptyFields(appointmentDTO: IAppointmentDTO) {
         const keys = Object.keys(appointmentDTO);
 
