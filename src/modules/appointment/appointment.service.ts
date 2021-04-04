@@ -2,7 +2,6 @@ import {Injectable} from '@nestjs/common';
 import {Appointment} from './appointment.entity';
 import {Brackets, getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
-import {Addition} from '../addition/addition.entity';
 import {File} from '../file/file.entity';
 import {AdditionService} from '../addition/addition.service';
 import {UserService} from '../user/user.service';
@@ -11,7 +10,6 @@ import {InsufficientPermissionsException} from '../../exceptions/InsufficientPer
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
-import {AppointmentUtil} from './appointment.util';
 import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
 import {JWT_User} from '../user/user.model';
@@ -19,12 +17,12 @@ import {AppointmentPermissionChecker} from './appointmentPermission.checker';
 import {AdditionList} from '../addition/addition.list';
 import {IAppointmentResponseDTO} from './DTOs/IAppointmentResponseDTO';
 import {IAppointmentCreationDTO} from './DTOs/IAppointmentCreationDTO';
-import {IAppointmentCreationAdditionDTO} from './DTOs/IAppointmentCreationAdditionDTO';
-import {IAppointmentUpdateAdditionDTO} from './DTOs/IAppointmentUpdateAdditionDTO';
 import {EnrollmentPermissionList} from '../enrollment/enrollmentPermissionList';
 import {PinList} from '../pinner/pinList';
 import {AppointmentRepository} from './appointment.repository';
 import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationResponseDTO';
+import {IAppointmentUpdateAdditionDTO} from './DTOs/IAppointmentUpdateAdditionDTO';
+import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
 
 const logger = require('../../logger');
 
@@ -40,20 +38,6 @@ export class AppointmentService {
         private appointmentGateway: AppointmentGateway,
         private pushService: PushService,
     ) {
-    }
-
-    /**
-     * Update the {@link AdditionList} of the passed {@link Appointment}
-     *
-     * @param mixedAdditions        A list of {@link IAppointmentUpdateAdditionDTO} containing the id of an existing {@link Addition}
-     *                              or a name for a new {@link Addition}
-     * @param appointment           Referenced {@link Appointment} to update
-     */
-    private static _handleAdditionUpdate(mixedAdditions: IAppointmentUpdateAdditionDTO[], appointment: Appointment) {
-        const additionList = appointment.additions;
-        additionList.updateList(mixedAdditions);
-
-        return additionList.getArray();
     }
 
     /**
@@ -198,13 +182,13 @@ export class AppointmentService {
     }
 
     /**
-     * Create appointment. <br/>
-     * Some fields like the list of {@link Administrator} needs to be set separately
+     * Create {@link Appointment}. <br/>
+     * Some fields like the list of {@link Administrator} needs to be set separately.
      *
      * @param appointmentCreationDTO        {@link AppointmentCreationDTO} object containing creation information
      * @param user Requester                {@link JWT_User} sending the request. User to be associated as creator with created {@link Appointment}
      *
-     * @returns Created appointment in minimalist format containing identifying information {@link IAppointmentCreationResponseDTO}
+     * @returns Created {@link Appointment} in minimalist format containing identifying information {@link IAppointmentCreationResponseDTO}
      *
      * @throws {@link DuplicateValueException} see {@link Appointment.setLink} if link is already in use
      */
@@ -233,14 +217,15 @@ export class AppointmentService {
     }
 
     /**
-     * Updated values passed by any object. Only overall data allowed to update like this.<br/>
-     * _additions, _link, _date _deadline need special validation.
+     * Updated values passed by object. User is allowed to change every value he provided at the creation {@link IAppointmentCreationDTO}.<br/>
      *
-     * @param toChange any {} with the values to change given Appointment with
-     * @param link Current _link of Appointment
-     * @param user Requester
+     * @param toChange              {@link IAppointmentCreationDTO} containing only the values that need to be changed
+     * @param link                  Link of the {@link Appointment} to change
+     * @param user                  {@link JWT_User} requesting user
+     *
+     * @return Saved {@link Appointment}
      */
-    public async update(toChange: any, link: string, user: JWT_User) { // TODO INVALID ATTRIBUTE
+    public async update(toChange: IAppointmentCreationDTO, link: string, user: JWT_User): Promise<Appointment> {
         let appointment;
 
         try {
@@ -257,56 +242,39 @@ export class AppointmentService {
 
         appointment.setAppointmentService(this);
 
-        const allowedValuesToChange = ['title', 'description', 'link',
-            'location', 'date', 'deadline', 'maxEnrollments', 'hidden', 'additions',
-            'driverAddition'];
+        const keyFunctionMapping = {
+            'title': 'title',
+            'description': 'description',
+            'link': '--',
+            'location': 'location',
+            'date': 'date',
+            'deadline': 'deadline',
+            'maxEnrollments': 'maxEnrollments',
+            'hidden': 'hidden',
+            'additions': '--',
+            'driverAddition': 'driverAddition'
+        };
 
         for (let [key, value] of Object.entries(toChange)) { // TODO REFACTOR LIKE AT USER AND ENROLLMENT
-            if (key in appointment
-                && appointment[key] !== value
-                && allowedValuesToChange.indexOf(key) > -1) {
-                let changedValue = value;
+            const attributeAllowedToChange = key in keyFunctionMapping;
 
-                if (key === 'additions') {
-                    changedValue = AppointmentService._handleAdditionUpdate(value as (IAppointmentCreationAdditionDTO | Addition)[], appointment);
-                }
-
-                if (key === 'date') {
-                    try {
-                        changedValue = await AppointmentUtil.handleDateValidation(value, appointment.deadline);
-                    } catch (e) {
-                        throw e;
-                    }
-                }
-
-                // TODO NEEDS TO ACCOUNT FOR DOUBLE CHANGE (DATE AND DEADLINE AT THE SAME TIME)
-                if (key === 'deadline') {
-                    try {
-                        changedValue = await AppointmentUtil.handleDeadlineValidation(appointment.date, value);
-                    } catch (e) {
-                        throw e;
-                    }
-                }
-
-                if (key === 'maxEnrollments') {
-                    if (value > 0) {
-                        changedValue = value;
-                    } else {
-                        changedValue = null;
-                    }
-                }
-
-                logger.log('debug', `[${appointment.id}] ${key} changed from ${JSON.stringify(appointment[key])} to ${JSON.stringify(changedValue)}`);
-
-                if (key === 'additions') {
-                    key = '_additions';
-                }
-
+            if (attributeAllowedToChange) {
                 if (key === 'link') {
-                    await appointment.setLink(changedValue);
+                    await appointment.setLink(value as string);
+                } else if (key === 'additions') {
+                    this.handleAdditionUpdate(appointment, value);
                 } else {
-                    appointment[key] = changedValue;
+                    appointment[keyFunctionMapping[key]] = value as any;
                 }
+            } else {
+                throw new InvalidAttributesException('INVALID_ATTRIBUTE',
+                    'Following attributes are not allowed to be updated',
+                    [{
+                        'attribute': key,
+                        'in': 'body',
+                        'value': value,
+                        'message': 'The specified attribute is not allowed to be modified'
+                    }]);
             }
         }
 
@@ -315,9 +283,13 @@ export class AppointmentService {
         this.appointmentGateway.appointmentUpdated(appointment);
         this.pushService
             .appointmentChanged(appointment)
-            .catch((err) => {
-                logger.error(' Push notifications could not be send', err);
-            });
+            .catch(
+                (err) => {
+                    logger.error('Push notifications could not be send', err);
+                }
+            );
+
+        console.log(appointment);
 
         return appointment;
     }
@@ -647,8 +619,6 @@ export class AppointmentService {
         builder = builder.where('appointment.link = :link', {link: link});
         builder = builder.select(select);
 
-        console.log(builder.getQueryAndParameters());
-
         const appointment = await builder.getOne();
 
         if (!appointment) {
@@ -789,5 +759,12 @@ export class AppointmentService {
         }
 
         return !!appointment.hidden;
+    }
+
+    private handleAdditionUpdate(appointment: Appointment, value: IAppointmentUpdateAdditionDTO[]) {
+        const additionList = appointment.additions;
+        additionList.updateList(value);
+
+        appointment.additions = additionList;
     }
 }

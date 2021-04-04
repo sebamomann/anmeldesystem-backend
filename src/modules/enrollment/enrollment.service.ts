@@ -187,8 +187,6 @@ export class EnrollmentService {
         const enrollment_referenced = await this.findById(enrollment_id);
         const enrollment_updated = {...enrollment_referenced};
 
-        console.log(enrollment_referenced);
-
         const enrollmentPermissionChecker = new EnrollmentPermissionChecker(enrollment_referenced)
 
         if (!enrollment_referenced.hasPermissionToManipulate(user, token)) {

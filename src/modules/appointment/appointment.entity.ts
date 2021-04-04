@@ -58,6 +58,19 @@ export class Appointment {
             eager: false,
         })
     _files: File[];
+
+    get files(): FileList {
+        return new FileList(this._files);
+    }
+
+    set files(list: FileList) {
+        this._files = list.getArray();
+    }
+
+    /* --------------------------- */
+
+    /* --------------------------- */
+
     @OneToMany(type => Pinner,
         pinner => pinner.appointment, {
             eager: false,
@@ -65,14 +78,23 @@ export class Appointment {
         })
     _pinners: Pinner[];
 
+    get pinners(): PinnerList {
+        return new PinnerList(this._pinners);
+    }
+
+    set pinners(list: PinnerList) {
+        this._pinners = list.getArray();
+    }
+
+    /* --------------------------- */
+
+    /* --------------------------- */
+
     @Column({
         default: false,
         name: 'driverAddition'
     })
     _driverAddition: boolean;
-
-    /* --------------------------- */
-    /* --------------------------- */
 
     get driverAddition() {
         return !!this._driverAddition;
@@ -82,14 +104,15 @@ export class Appointment {
         this._driverAddition = !!(value);
     }
 
+    /* --------------------------- */
+
+    /* --------------------------- */
+
     @Column('int', {
         default: null,
         name: 'maxEnrollments'
     })
     _maxEnrollments: number;
-
-    /* --------------------------- */
-    /* --------------------------- */
 
     get maxEnrollments() {
         return this._maxEnrollments;
@@ -103,15 +126,16 @@ export class Appointment {
         }
     }
 
+    /* --------------------------- */
+
+    /* --------------------------- */
+
     @Column('timestamp', {
         nullable: false,
         default: () => 'CURRENT_TIMESTAMP',
         name: 'date'
     })
     _date: Date;
-
-    /* --------------------------- */
-    /* --------------------------- */
 
     get date() {
         return this._date;
@@ -123,15 +147,16 @@ export class Appointment {
         this._date = date;
     }
 
+    /* --------------------------- */
+
+    /* --------------------------- */
+
     @Column('timestamp',
         {
             default: null,
             name: 'deadline'
         })
     _deadline: Date;
-
-    /* --------------------------- */
-    /* --------------------------- */
 
     get deadline() {
         return this._deadline;
@@ -143,15 +168,16 @@ export class Appointment {
         this._deadline = deadline;
     }
 
+    /* --------------------------- */
+
+    /* --------------------------- */
+
     @Column({
         nullable: false,
         unique: true,
         name: 'link'
     })
     _link: string;
-
-    /* --------------------------- */
-    /* --------------------------- */
 
     get link() {
         return this._link;
@@ -164,6 +190,10 @@ export class Appointment {
         throw new Error('DO NOT USE');
     }
 
+    /* --------------------------- */
+
+    /* --------------------------- */
+
     @OneToMany(type => Addition,
         addition => addition.appointment,
         {
@@ -171,9 +201,6 @@ export class Appointment {
             cascade: true,
         })
     _additions: Addition[];
-
-    /* --------------------------- */
-    /* --------------------------- */
 
     get additions(): AdditionList {
         return new AdditionList(this._additions);
@@ -183,6 +210,10 @@ export class Appointment {
         this._additions = list.getArray();
     }
 
+    /* --------------------------- */
+
+    /* --------------------------- */
+
     @OneToMany(type => Enrollment,
         enrollment => enrollment.appointment,
         {
@@ -190,34 +221,12 @@ export class Appointment {
         })
     _enrollments: Enrollment[];
 
-    /* --------------------------- */
-    /* --------------------------- */
-
     get enrollments() {
         return new EnrollmentList(this._enrollments);
     }
 
-    get files(): FileList {
-        return new FileList(this._files);
-    }
-
-    set files(list: FileList) {
-        this._files = list.getArray();
-    }
-
-    /* --------------------------- */
-    /* --------------------------- */
-
     set enrollments(list: EnrollmentList) {
         this._enrollments = list.getArray();
-    }
-
-    get pinners(): PinnerList {
-        return new PinnerList(this._pinners);
-    }
-
-    set pinners(list: PinnerList) {
-        this._pinners = list.getArray();
     }
 
     /* --------------------------- */
@@ -270,5 +279,4 @@ export class Appointment {
     public setAppointmentService(appointmentService: AppointmentService) {
         this.appointmentService = appointmentService;
     }
-
 }
