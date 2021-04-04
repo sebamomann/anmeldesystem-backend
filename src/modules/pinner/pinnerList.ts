@@ -17,10 +17,11 @@ export class PinnerList {
     }
 
     public containsPinByUser(user: JWT_User): boolean {
-        return this.list.some(
-            (sPinner) => {
-                return sPinner.userId === user.sub;
-            }
-        );
+        return this.list
+            .some(
+                (sPinner: Pinner) => {
+                    return sPinner.userId === user.sub;
+                }
+            );
     }
 }

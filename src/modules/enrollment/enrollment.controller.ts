@@ -26,7 +26,6 @@ export class EnrollmentController {
                 res.status(HttpStatus.OK).json(result);
             })
             .catch((err) => {
-                console.log(err);
                 throw err;
             });
     }
@@ -44,7 +43,6 @@ export class EnrollmentController {
                 res.status(HttpStatus.CREATED).json(tEnrollment);
             })
             .catch((err) => {
-                console.log(err);
                 throw err;
             });
     }
@@ -63,7 +61,6 @@ export class EnrollmentController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch((err) => {
-                console.log(err);
                 throw err;
             });
     }
@@ -80,7 +77,6 @@ export class EnrollmentController {
                 res.status(HttpStatus.NO_CONTENT).json();
             })
             .catch((err) => {
-                console.log(err);
                 throw err;
             });
     }

@@ -23,6 +23,7 @@ import {EnrollmentMapper} from './enrollment.mapper';
 import {JWT_User} from '../user/user.model';
 import {UserService} from '../user/user.service';
 import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
+import {EnrollmentPermissionChecker} from './enrollmentPermission.checker';
 
 const crypto = require('crypto');
 const logger = require('../../logger');
@@ -185,6 +186,10 @@ export class EnrollmentService {
     public async update(enrollment_to_change_values: any, enrollment_id: string, user: JWT_User, token: string) {
         const enrollment_referenced = await this.findById(enrollment_id);
         const enrollment_updated = {...enrollment_referenced};
+
+        console.log(enrollment_referenced);
+
+        const enrollmentPermissionChecker = new EnrollmentPermissionChecker(enrollment_referenced)
 
         if (!enrollment_referenced.hasPermissionToManipulate(user, token)) {
             throw new InsufficientPermissionsException(null, null, {

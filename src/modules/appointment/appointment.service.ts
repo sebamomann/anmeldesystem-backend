@@ -5,7 +5,6 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Addition} from '../addition/addition.entity';
 import {File} from '../file/file.entity';
 import {AdditionService} from '../addition/addition.service';
-import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
 import {UserService} from '../user/user.service';
 import {FileService} from '../file/file.service';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
@@ -17,13 +16,15 @@ import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
 import {JWT_User} from '../user/user.model';
 import {AppointmentPermissionChecker} from './appointmentPermission.checker';
-import {AdditionList} from '../addition/additionList';
-import {IAppointmentDTO} from './IAppointmentDTO';
-import {IAppointmentCreationDTO} from './IAppointmentCreationDTO';
-import {IAppointmentCreationAdditionDTO} from './IAppointmentCreationAdditionDTO';
-import {IAppointmentUpdateAdditionDTO} from './IAppointmentUpdateAdditionDTO';
+import {AdditionList} from '../addition/addition.list';
+import {IAppointmentResponseDTO} from './DTOs/IAppointmentResponseDTO';
+import {IAppointmentCreationDTO} from './DTOs/IAppointmentCreationDTO';
+import {IAppointmentCreationAdditionDTO} from './DTOs/IAppointmentCreationAdditionDTO';
+import {IAppointmentUpdateAdditionDTO} from './DTOs/IAppointmentUpdateAdditionDTO';
 import {EnrollmentPermissionList} from '../enrollment/enrollmentPermissionList';
 import {PinList} from '../pinner/pinList';
+import {AppointmentRepository} from './appointment.repository';
+import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationResponseDTO';
 
 const logger = require('../../logger');
 
@@ -32,6 +33,7 @@ export class AppointmentService {
     constructor(
         @InjectRepository(Appointment)
         private readonly appointmentRepository: Repository<Appointment>,
+        private readonly _appointmentRepository: AppointmentRepository,
         private additionService: AdditionService,
         private fileService: FileService,
         private userService: UserService,
@@ -54,12 +56,10 @@ export class AppointmentService {
         return additionList.getArray();
     }
 
-    /** MAIN FUNCTIONS  **/
-
-    /** MAIN FUNCTIONS  **/
-
     /**
-     * Find {@link Appointment} its unique _link.
+     * TODO (with permission and shit)
+     *
+     * Find {@link Appointment} by its unique link.
      *
      * @param link          Link of {@link Appointment}
      *
@@ -84,28 +84,36 @@ export class AppointmentService {
     }
 
     /**
-     * TODO
-     * Dont fetch enrollments when slim
+     * Get {@ink Appointment} by its link. <br/>
+     * Checking for permissions by analysing query parameter, being creator or being administrator.
      *
-     * Get an Appointment by its _link. Checking for permissions by analysing query parameter,
-     * being creator or being administrator.
+     * @param user              {@link JWT_User} requesting user
+     * @param link              Link of {@link Appointment} to get
+     * @param permissions       Raw object of permissions the user has for specific {@link Enrollment}
+     * @param slim              Exclude enrollments and files to save bandwidth
      *
-     * @param user Requester
-     * @param link Link of appointment to fetch for
-     * @param permissions Needed if appointment is hidden. Gives permission for enrollment
-     * @param slim Exclude enrollments and files to save bandwidth
+     * @returns {@link IAppointmentResponseDTO} - striped {@link Appointment}
      *
-     * @returns Appointment after applying filters
-     *
-     * @throws EntityNotFoundException if appointment not found
+     * @throws {@link EntityNotFoundException} if {@link Appointment} could not be found by link
      */
-    public async get(user: JWT_User, link: string, permissions: any, slim: boolean): Promise<IAppointmentDTO> {
+    public async get(user: JWT_User, link: string, permissions: any, slim: boolean): Promise<IAppointmentResponseDTO> {
+        const enrollmentPermissionList = new EnrollmentPermissionList(permissions);
+
         let appointment;
 
-        appointment = await this.findByLink(link);
+        try {
+            appointment = await this.getAppointmentIncludingPermissionAndSlimCheck(link, user, enrollmentPermissionList, slim);
+
+        } catch (e) {
+            throw new EntityNotFoundException(null, null, {
+                'attribute': 'link',
+                'in': 'path',
+                'value': link,
+                'message': e.data?.message
+            });
+        }
 
         const appointmentMapper = new AppointmentMapper(this.userService);
-        const enrollmentPermissionList = new EnrollmentPermissionList(permissions);
 
         return appointmentMapper.basic(appointment, user, new PinList(), enrollmentPermissionList, slim);
     }
@@ -191,17 +199,16 @@ export class AppointmentService {
 
     /**
      * Create appointment. <br/>
-     * Not all options are passed here. Only the core information gets processed.
-     * All other information are getting set via the specific options
+     * Some fields like the list of {@link Administrator} needs to be set separately
      *
-     * @param appointmentCreationDTO
-     * @param user Requester
+     * @param appointmentCreationDTO        {@link AppointmentCreationDTO} object containing creation information
+     * @param user Requester                {@link JWT_User} sending the request. User to be associated as creator with created {@link Appointment}
      *
-     * @returns Created appointment after applying filters
+     * @returns Created appointment in minimalist format containing identifying information {@link IAppointmentCreationResponseDTO}
      *
-     * @throws DuplicateValueException if _link is already in use
+     * @throws {@link DuplicateValueException} see {@link Appointment.setLink} if link is already in use
      */
-    public async create(appointmentCreationDTO: IAppointmentCreationDTO, user: JWT_User): Promise<{ id: string, link: string }> {
+    public async create(appointmentCreationDTO: IAppointmentCreationDTO, user: JWT_User): Promise<IAppointmentCreationResponseDTO> {
         let appointmentToDB = new Appointment(this, this.userService);
 
         appointmentToDB.title = appointmentCreationDTO.title;
@@ -226,7 +233,6 @@ export class AppointmentService {
     }
 
     /**
-     *
      * Updated values passed by any object. Only overall data allowed to update like this.<br/>
      * _additions, _link, _date _deadline need special validation.
      *
@@ -237,9 +243,9 @@ export class AppointmentService {
     public async update(toChange: any, link: string, user: JWT_User) { // TODO INVALID ATTRIBUTE
         let appointment;
 
-        appointment = await this.findByLink(link);
-
-        if (!appointment.isCreatorOrAdministrator(user)) {
+        try {
+            appointment = await this.getAppointmentCoreInformationIfValidPermission(link, user);
+        } catch (e) {
             throw new InsufficientPermissionsException(null, null, {
                     'attribute': 'link',
                     'in': 'path',
@@ -587,6 +593,118 @@ export class AppointmentService {
         }
     }
 
+    async getAppointmentIncludingPermissionAndSlimCheck(link: string, user: JWT_User, enrollmentPermissionList:
+        EnrollmentPermissionList, slim: boolean): Promise<Appointment> {
+        let select = ['appointment', 'additions', 'files', 'administrators', 'pinners'];
+
+        let builder = getRepository(Appointment).createQueryBuilder('appointment');
+
+        builder = builder.leftJoinAndSelect('appointment._additions', 'additions');
+        builder = builder.leftJoinAndSelect('appointment._pinners', 'pinners');
+        builder = builder.leftJoinAndSelect('appointment._administrators', 'administrators');
+
+        const permittedEnrollmentsIds = enrollmentPermissionList.getPermittedEnrollments();
+        if (permittedEnrollmentsIds.length === 0) {
+            permittedEnrollmentsIds.push('0');
+        }
+        if (!slim) {
+            const cond = `
+            CASE 
+                WHEN appointment.hidden = 1
+                THEN (
+                    CASE
+                        WHEN (
+                            appointment.creatorId = :userId
+                            OR
+                            administrators.userId = :userId 
+                        )
+                        THEN enrollments.appointmentId = appointment.id
+                        ELSE (
+                            enrollments.id IN (:...ids)
+                            OR
+                            enrollments.creatorId = :userId
+                        )
+                    END  
+                ) 
+                ELSE enrollments.appointmentId = appointment.id
+            END 
+            `;
+
+            builder = builder.leftJoinAndSelect('appointment._enrollments', 'enrollments', cond, {
+                userId: user?.sub || 0,
+                ids: permittedEnrollmentsIds
+            })
+                .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
+                .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
+                .leftJoinAndSelect('enrollments.additions', 'enrollment_additions');
+
+            select = [...select, 'enrollments', 'enrollment_additions', 'enrollment_passenger', 'enrollment_driver'];
+
+            // data is never selected, if not specified
+            builder = builder.leftJoinAndSelect('appointment._files', 'files');
+        }
+
+        builder = builder.where('appointment.link = :link', {link: link});
+        builder = builder.select(select);
+
+        console.log(builder.getQueryAndParameters());
+
+        const appointment = await builder.getOne();
+
+        if (!appointment) {
+            throw new EntityNotFoundException(null, null, {
+                'attribute': 'link',
+                'value': link,
+                'message': 'Specified appointment does not exist'
+            });
+        }
+
+        return appointment;
+    }
+
+    async getAppointmentCoreInformationIfValidPermission(link: string, user: JWT_User): Promise<Appointment> {
+        let select = ['appointment', 'additions', 'administrators'];
+
+        let builder = getRepository(Appointment).createQueryBuilder('appointment');
+
+        builder = builder.leftJoinAndSelect('appointment._additions', 'additions')
+            .leftJoinAndSelect('appointment._administrators', 'administrators');
+
+        builder = builder.where('appointment.link = :link', {link: link});
+
+        const cond = `
+        ( 
+            CASE
+                WHEN (
+                    appointment.creatorId = :userId
+                    OR
+                    administrators.userId = :userId 
+                )
+                THEN 1=1
+                ELSE 1=2
+            END  
+        )`;
+
+        builder = builder.andWhere(cond, {
+            userId: user?.sub || 0,
+            link: link
+        });
+
+        builder = builder.select(select);
+
+        const appointment = await builder.getOne();
+
+        if (!appointment) {
+            throw new EntityNotFoundException(null, null, {
+                'attribute': 'link',
+                'value': link,
+                'message': 'Specified appointment does not exist'
+            });
+        }
+
+        return appointment;
+    }
+
     /* istanbul ignore next */
     private async getAppointments(user: JWT_User, pinList, before: Date, limit) {
         // add value, cuz SQL cant process empty list
@@ -653,5 +771,23 @@ export class AppointmentService {
         //         },
         //     }
         // );
+    }
+
+    private async appointmentIsHidden(link: string): Promise<boolean> {
+        const appointment = await getRepository(Appointment)
+            .createQueryBuilder('appointment')
+            .select(['appointment.hidden'])
+            .where('appointment.link = :link', {link})
+            .getOne();
+
+        if (!appointment) {
+            throw new EntityNotFoundException(null, null, {
+                'attribute': 'link',
+                'value': link,
+                'message': 'Specified appointment does not exist'
+            });
+        }
+
+        return !!appointment.hidden;
     }
 }

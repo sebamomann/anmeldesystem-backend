@@ -41,8 +41,6 @@ export class UserService {
                 });
 
                 setInterval(async () => {
-                    console.log('REFRESH');
-                    console.log(tokenSet);
                     const refreshToken = tokenSet.refresh_token;
                     tokenSet = await client.refresh(refreshToken);
                     this.kcAdminClient.setAccessToken(tokenSet.access_token);

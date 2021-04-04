@@ -6,9 +6,10 @@ import {DuplicateValueException} from '../../exceptions/DuplicateValueException'
 import {Appointment} from '../appointment/appointment.entity';
 import {UserMapper} from '../user/user.mapper';
 import {IUserDTO} from '../user/IUserDTO';
+import {JWT_User} from '../user/user.model';
 
 export class AdministratorList {
-    private userService;
+    private userService: UserService;
 
     private readonly list: Administrator[];
     private appointment: Appointment;
@@ -75,5 +76,14 @@ export class AdministratorList {
         }
 
         return output;
+    }
+
+    public userIsAdministrator(user: JWT_User) {
+        return this.list
+            .some(
+                (sAdministrator: Administrator) => {
+                    return sAdministrator.userId === user.sub;
+                }
+            );
     }
 }

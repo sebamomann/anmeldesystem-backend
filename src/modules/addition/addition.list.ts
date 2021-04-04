@@ -1,10 +1,10 @@
 import {Addition} from './addition.entity';
 import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
-import {IAppointmentCreationAdditionDTO} from '../appointment/IAppointmentCreationAdditionDTO';
+import {IAppointmentCreationAdditionDTO} from '../appointment/DTOs/IAppointmentCreationAdditionDTO';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {Appointment} from '../appointment/appointment.entity';
 import {MissingValuesException} from '../../exceptions/MissingValuesException';
-import {IAppointmentUpdateAdditionDTO} from '../appointment/IAppointmentUpdateAdditionDTO';
+import {IAppointmentUpdateAdditionDTO} from '../appointment/DTOs/IAppointmentUpdateAdditionDTO';
 
 export class AdditionList {
     private list: Addition[];
@@ -116,6 +116,18 @@ export class AdditionList {
     }
 
     /**
+     * Sort list by "order" attribute
+     */
+    public sortByOrder() {
+        this.list
+            .sort(
+                (a, b) => {
+                    return a.order < b.order ? -1 : 1;
+                }
+            );
+    }
+
+    /**
      * Get a string array all names of the passed {@link IAppointmentCreationAdditionDTO} or {@link IAppointmentUpdateAdditionDTO}.<br/>
      * When {@link IAppointmentUpdateAdditionDTO} is not providing a name, search for existing {@link Addition} in {@link Appointment} and use
      * found name
@@ -137,7 +149,8 @@ export class AdditionList {
                 } catch (e) {
                     //
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -191,18 +204,6 @@ export class AdditionList {
             }
         }
         return duplicates;
-    }
-
-    /**
-     * Sort list by "order" attribute
-     */
-    public sortByOrder() {
-        this.list
-            .sort(
-                (a, b) => {
-                    return a.order < b.order ? -1 : 1;
-                }
-            );
     }
 
     /**

@@ -2,12 +2,12 @@ import {Appointment} from './appointment.entity';
 import {JWT_User} from '../user/user.model';
 import {UserService} from '../user/user.service';
 import {AppointmentPermissionChecker} from './appointmentPermission.checker';
-import {IAppointmentDTO} from './IAppointmentDTO';
+import {IAppointmentResponseDTO} from './DTOs/IAppointmentResponseDTO';
 import {EnrollmentPermissionList} from '../enrollment/enrollmentPermissionList';
 import {Relation} from '../relationList.type';
 import {UserMapper} from '../user/user.mapper';
 import {PinList} from '../pinner/pinList';
-import {IAppointmentCreationResponseDTO} from './IAppointmentCreationResponseDTO';
+import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationResponseDTO';
 import {IEnrollmentDTO} from '../enrollment/IEnrollmentDTO';
 
 export class AppointmentMapper {
@@ -43,11 +43,11 @@ export class AppointmentMapper {
      * @param permissionList        {@Link PermissionList} containing permission information for {@link Enrollment}
      * @param slim                  Whether or not to remove large data structures ({@link Enrollment} and {@link file})
      *
-     * @return {@link IAppointmentDTO} Object containing processed user information
+     * @return {@link IAppointmentResponseDTO} Object containing processed user information
      */
     public async basic(appointment: Appointment, user: JWT_User, pinList: PinList,
-                       permissionList: EnrollmentPermissionList, slim: boolean): Promise<IAppointmentDTO> {
-        let appointmentDTO = {} as IAppointmentDTO;
+                       permissionList: EnrollmentPermissionList, slim: boolean): Promise<IAppointmentResponseDTO> {
+        let appointmentDTO = {} as IAppointmentResponseDTO;
 
         appointmentDTO.relations = this.parseRelations(appointment, user, pinList, permissionList);
         appointmentDTO.id = appointment.id;
@@ -215,16 +215,18 @@ export class AppointmentMapper {
     /**
      * Remove all fields containing null, undefined or []. Boolean fields are an exception.
      *
-     * @param appointmentDTO        Finished {@link IAppointmentDTO} to strip.
+     * @param appointmentDTO        Finished {@link IAppointmentResponseDTO} to strip.
      */
-    private stripEmptyFields(appointmentDTO: IAppointmentDTO) {
+    private stripEmptyFields(appointmentDTO: IAppointmentResponseDTO) {
         const keys = Object.keys(appointmentDTO);
 
-        keys.forEach((key) => {
-            if (typeof appointmentDTO[key] !== 'boolean' && (!appointmentDTO[key] || appointmentDTO[key].length === 0)) {
-                delete appointmentDTO[key];
+        keys.forEach(
+            (key: string) => {
+                if (typeof appointmentDTO[key] !== 'boolean' && (!appointmentDTO[key] || appointmentDTO[key].length === 0)) {
+                    delete appointmentDTO[key];
+                }
             }
-        });
+        );
 
         return appointmentDTO;
     }

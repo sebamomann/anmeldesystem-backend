@@ -1,23 +1,22 @@
 import {Column, CreateDateColumn, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn} from 'typeorm';
-import {Enrollment} from '../enrollment/enrollment.entity';
-import {Addition} from '../addition/addition.entity';
 import {File} from '../file/file.entity';
 import {Exclude} from 'class-transformer';
 import {PushSubscription} from '../push/pushSubscription.entity';
 import {IUserDTO} from '../user/IUserDTO';
-import {JWT_User} from '../user/user.model';
 import {Administrator} from '../adminsitrator/administrator.entity';
 import {Pinner} from '../pinner/pinner.entity';
-import {AdditionList} from '../addition/additionList';
 import {AppointmentService} from './appointment.service';
 import {GeneratorUtil} from '../../util/generator.util';
 import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
 import {AppointmentUtil} from './appointment.util';
 import {UserService} from '../user/user.service';
 import {AdministratorList} from '../adminsitrator/administratorList';
-import {EnrollmentList} from '../enrollment/enrollmentList';
 import {PinnerList} from '../pinner/pinnerList';
 import {FileList} from '../file/fileList';
+import {Addition} from '../addition/addition.entity';
+import {AdditionList} from '../addition/addition.list';
+import {Enrollment} from '../enrollment/enrollment.entity';
+import {EnrollmentList} from '../enrollment/enrollmentList';
 
 @Entity()
 export class Appointment {
@@ -50,67 +49,30 @@ export class Appointment {
     constructor(private appointmentService: AppointmentService, private userService: UserService) {
     }
 
+    /* --------------------------- */
+    /* --------------------------- */
+
     @OneToMany(type => File,
         file => file.appointment,
         {
-            eager: true,
+            eager: false,
         })
     _files: File[];
-
-    get files(): FileList {
-        return new FileList(this._files);
-    }
-
-    set files(list: FileList) {
-        this._files = list.getArray();
-    }
-
     @OneToMany(type => Pinner,
         pinner => pinner.appointment, {
-            eager: true
-        })
-    _pinners: Administrator[];
-
-    get pinners(): PinnerList {
-        return new PinnerList(this._pinners);
-    }
-
-    set pinners(list: PinnerList) {
-        this._pinners = list.getArray();
-    }
-
-    @OneToMany(type => Enrollment,
-        enrollment => enrollment.appointment,
-        {
-            eager: true
-        })
-    _enrollments: Enrollment[];
-
-    get enrollments() {
-        return new EnrollmentList(this._enrollments);
-    }
-
-    set enrollments(list: EnrollmentList) {
-        this._enrollments = list.getArray();
-    }
-
-    @OneToMany(type => Administrator,
-        administrator => administrator.appointment, {
-            eager: true,
+            eager: false,
             cascade: true
         })
-    _administrators: Administrator[];
+    _pinners: Pinner[];
 
-    get administrators() {
-        return new AdministratorList(this._administrators, this, this.userService);
-    }
-
-    set administrators(list: AdministratorList) {
-        this._administrators = list.getArray();
-    }
-
-    @Column({default: false, name: 'driverAddition'})
+    @Column({
+        default: false,
+        name: 'driverAddition'
+    })
     _driverAddition: boolean;
+
+    /* --------------------------- */
+    /* --------------------------- */
 
     get driverAddition() {
         return !!this._driverAddition;
@@ -120,8 +82,14 @@ export class Appointment {
         this._driverAddition = !!(value);
     }
 
-    @Column('int', {default: null, name: 'maxEnrollments'})
+    @Column('int', {
+        default: null,
+        name: 'maxEnrollments'
+    })
     _maxEnrollments: number;
+
+    /* --------------------------- */
+    /* --------------------------- */
 
     get maxEnrollments() {
         return this._maxEnrollments;
@@ -135,8 +103,15 @@ export class Appointment {
         }
     }
 
-    @Column('timestamp', {nullable: false, default: () => 'CURRENT_TIMESTAMP', name: 'date'})
+    @Column('timestamp', {
+        nullable: false,
+        default: () => 'CURRENT_TIMESTAMP',
+        name: 'date'
+    })
     _date: Date;
+
+    /* --------------------------- */
+    /* --------------------------- */
 
     get date() {
         return this._date;
@@ -148,8 +123,15 @@ export class Appointment {
         this._date = date;
     }
 
-    @Column('timestamp', {default: null, name: 'deadline'})
+    @Column('timestamp',
+        {
+            default: null,
+            name: 'deadline'
+        })
     _deadline: Date;
+
+    /* --------------------------- */
+    /* --------------------------- */
 
     get deadline() {
         return this._deadline;
@@ -161,15 +143,22 @@ export class Appointment {
         this._deadline = deadline;
     }
 
-    @Column({nullable: false, unique: true, name: 'link'})
+    @Column({
+        nullable: false,
+        unique: true,
+        name: 'link'
+    })
     _link: string;
+
+    /* --------------------------- */
+    /* --------------------------- */
 
     get link() {
         return this._link;
     }
 
     /**
-     * @deprecated DO NOT USE DUE TO MISSING IN USE CHECK. ASYNC SETTER NOT POSSIBLE
+     * @deprecated DO NOT USE DUE TO MISSING IN USE CHECK. ASYNC SETTER NOT POSSIBLE. SEE {@link Appointment.setLink}
      */
     set link(_link: string) {
         throw new Error('DO NOT USE');
@@ -178,10 +167,13 @@ export class Appointment {
     @OneToMany(type => Addition,
         addition => addition.appointment,
         {
-            eager: true,
+            eager: true, // is core information
             cascade: true,
         })
     _additions: Addition[];
+
+    /* --------------------------- */
+    /* --------------------------- */
 
     get additions(): AdditionList {
         return new AdditionList(this._additions);
@@ -191,9 +183,64 @@ export class Appointment {
         this._additions = list.getArray();
     }
 
-    public setAppointmentService(appointmentService: AppointmentService) {
-        this.appointmentService = appointmentService;
+    @OneToMany(type => Enrollment,
+        enrollment => enrollment.appointment,
+        {
+            eager: false
+        })
+    _enrollments: Enrollment[];
+
+    /* --------------------------- */
+    /* --------------------------- */
+
+    get enrollments() {
+        return new EnrollmentList(this._enrollments);
     }
+
+    get files(): FileList {
+        return new FileList(this._files);
+    }
+
+    set files(list: FileList) {
+        this._files = list.getArray();
+    }
+
+    /* --------------------------- */
+    /* --------------------------- */
+
+    set enrollments(list: EnrollmentList) {
+        this._enrollments = list.getArray();
+    }
+
+    get pinners(): PinnerList {
+        return new PinnerList(this._pinners);
+    }
+
+    set pinners(list: PinnerList) {
+        this._pinners = list.getArray();
+    }
+
+    /* --------------------------- */
+    /* --------------------------- */
+
+    @OneToMany(type => Administrator,
+        administrator => administrator.appointment, {
+            eager: true, // like always needed for permission checks
+            cascade: true
+        })
+    _administrators: Administrator[];
+
+    get administrators(): AdministratorList {
+        return new AdministratorList(this._administrators, this, this.userService);
+    }
+
+    set administrators(list: AdministratorList) {
+        this._administrators = list.getArray();
+    }
+
+    /* --------------------------- */
+
+    /* --------------------------- */
 
     public async setLink(_link: string): Promise<void> {
         let link = '';
@@ -220,50 +267,8 @@ export class Appointment {
         return Promise.resolve();
     }
 
-    /**
-     * Check if {@link JWT_User} is the creator or administrator of this object
-     *
-     * @param user          {@link JWT_User} to check ownership for
-     * @deprecated          Use {@link AppointmentPermissionChecker}
-     */
-    public isCreatorOrAdministrator(user: JWT_User) {
-        const isAppointmentCreator = this.isCreator(user);
-        const isAdministrator = this.isAdministrator(user);
-
-        return isAppointmentCreator || isAdministrator;
+    public setAppointmentService(appointmentService: AppointmentService) {
+        this.appointmentService = appointmentService;
     }
 
-    /**
-     * Check if {@link JWT_User} is the creator of this object
-     *
-     * @param user          {@link JWT_User} to check ownership for
-     * @deprecated          Use {@link AppointmentPermissionChecker}
-     */
-    public isCreator(user: JWT_User) {
-        if (!user) {
-            return false;
-        }
-
-        return this.creatorId === user.sub;
-    }
-
-    /**
-     * Check if {@link JWT_User} is administrator of this object
-     *
-     * @param user          {@link JWT_User} to check ownership for
-     * @deprecated          Use {@link AppointmentPermissionChecker}
-     */
-    public isAdministrator(user: JWT_User) {
-        if (!this._administrators) {
-            return false;
-        }
-
-        if (!user) {
-            return false;
-        }
-
-        return this._administrators?.some(
-            sAdministrator => sAdministrator.userId === user.sub
-        );
-    }
 }

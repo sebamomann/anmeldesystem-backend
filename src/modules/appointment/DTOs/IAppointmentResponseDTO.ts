@@ -1,9 +1,9 @@
 import {IAppointmentCreationAdditionDTO} from './IAppointmentCreationAdditionDTO';
-import {IUserDTO} from '../user/IUserDTO';
-import {IFileDTO} from '../file/IFileDTO';
-import {IEnrollmentDTO} from '../enrollment/IEnrollmentDTO';
+import {IUserDTO} from '../../user/IUserDTO';
+import {IFileDTO} from '../../file/IFileDTO';
+import {IEnrollmentDTO} from '../../enrollment/IEnrollmentDTO';
 
-export interface IAppointmentDTO {
+export interface IAppointmentResponseDTO {
     relations: string[];
     id: string;
     title: string;

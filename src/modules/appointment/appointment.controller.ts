@@ -24,7 +24,7 @@ import {InsufficientPermissionsException} from '../../exceptions/InsufficientPer
 import {AuthOptGuard} from '../../auth/auth-opt.gurad';
 import {JWT_User} from '../user/user.model';
 import {AuthGuard} from '../../auth/auth.gurad';
-import {IAppointmentCreationDTO} from './IAppointmentCreationDTO';
+import {IAppointmentCreationDTO} from './DTOs/IAppointmentCreationDTO';
 
 @Controller('appointments')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)

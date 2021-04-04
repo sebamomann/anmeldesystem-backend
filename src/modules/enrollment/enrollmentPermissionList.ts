@@ -21,6 +21,19 @@ export class EnrollmentPermissionList {
             );
     }
 
+    public getPermittedEnrollments(): string[] {
+        const output = [];
+
+        this.list
+            .forEach(
+                (fPermission: EnrollmentPermission) => {
+                    output.push(fPermission.enrollmentId);
+                }
+            );
+
+        return output;
+    }
+
     private parsePermissions(permissions: any) {
         const {extractedIds, extractedTokens} = this.filterIdsAndTokens(permissions);
 
