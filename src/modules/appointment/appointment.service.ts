@@ -8,7 +8,6 @@ import {UserService} from '../user/user.service';
 import {FileService} from '../file/file.service';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
-import {UnknownUserException} from '../../exceptions/UnknownUserException';
 import {AppointmentGateway} from './appointment.gateway';
 import {AppointmentMapper} from './appointment.mapper';
 import {PushService} from '../push/push.service';
@@ -24,6 +23,7 @@ import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationRespon
 import {IAppointmentUpdateAdditionDTO} from './DTOs/IAppointmentUpdateAdditionDTO';
 import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
 import {AdministratorService} from '../adminsitrator/administrator.service';
+import {IFileCreationDTO} from '../file/IFileCreationDTO';
 
 const logger = require('../../logger');
 
@@ -304,11 +304,11 @@ export class AppointmentService {
      * @param link          Link of {@link Appointment}
      * @param username      Username of user to add as {@link Administrator}
      *
-     * @throws See {@link checkForAppointmentExistenceAndOwnership}
+     * @throws See {@link checkForAppointmentExistenceAndOwnershipAndReturnForRelation}
      * @throws See {@link AdministratorList.addAdministrator}
      */
     public async addAdministrator(user: JWT_User, link: string, username: string): Promise<void> {
-        let appointment = await this.checkForAppointmentExistenceAndOwnership(link, user);
+        let appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
 
         const list = appointment.administrators;
         list.setUserService(this.userService);
@@ -325,11 +325,11 @@ export class AppointmentService {
      * @param link          Link of {@link Appointment}
      * @param username      Username of user to add as {@link Administrator}
      *
-     * @throws See {@link checkForAppointmentExistenceAndOwnership}
+     * @throws See {@link checkForAppointmentExistenceAndOwnershipAndReturnForRelation}
      * @throws See {@link AdministratorList.removeAdministrator}
      */
     public async removeAdministrator(user: JWT_User, link: string, username: string): Promise<void> {
-        let appointment = await this.checkForAppointmentExistenceAndOwnership(link, user);
+        let appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
 
         const list = appointment.administrators;
         list.setUserService(this.userService);
@@ -339,86 +339,45 @@ export class AppointmentService {
     }
 
     /**
-     * Add File to a specific appointment. <br />
-     * Operation can only be executed by the owner of the Appointment.
+     * Add {@link File} to {@link Appointment}. <br />
+     * Operation can only be executed by the owner of the {@link Appointment}.
      *
-     * @param _user Requester (should be owner of appointment)
-     * @param link Link of appointment
-     * @param data Contains information about the name of the file and its data
+     * @param user          {@link JWT_User} Requester (should be owner of {@link Appointment})
+     * @param link          Link of {@link Appointment}
+     * @param data          Contains information about the name of the file and its data
      *
-     * @returns void if successful
-     *
-     * @throws See {@link findByLink} for relations
-     * @throws InsufficientPermissionsException if user is not the owner
-     * @throws UnknownUserException if user to add does not exist
+     * @throws See {@link checkForAppointmentExistenceAndOwnershipAndReturnForRelation}
      */
-    public async addFile(_user: JWT_User, link: string, data: any) {
-        let appointment;
+    public async addFile(user: JWT_User, link: string, data: IFileCreationDTO) {
+        let appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
 
-        try {
-            appointment = await this.findByLink(link);
-        } catch (e) {
-            throw e;
-        }
+        const list = appointment.files;
+        list.setFileService(this.fileService);
 
-        if (!appointment.isCreator(_user)) {
-            throw new InsufficientPermissionsException();
-        }
-
-        const file = new File();
-        file.name = data.name;
-        file.data = data.data;
-
-        const savedFile = await this.fileService.__save(file);
-        appointment.files.push(savedFile);
+        await list.addFile(data);
 
         this.appointmentGateway.appointmentUpdated(appointment);
-
-        return await this.appointmentRepository.save(appointment);
     }
 
     /**
-     * Remove an file of a specific appointment. <br />
-     * Operation can only be executed by the owner of the Appointment. <br/>
-     * In contrast to removing administrators, here the entire database entry can be removed since a file is not used in multiple appointments.
+     * Remove {@link File} by its unique ID.
+     * Operation can only be executed by the owner of the {@link Appointment}.
      *
-     * @param _user Requester  (should be owner of appointment)
-     * @param link Link of appointment
-     * @param id Id of file
+     * @param user          {@link JWT_User} Requester (should be owner of {@link Appointment})
+     * @param link          Link of {@link Appointment}
+     * @param fileId        Unique {@link File} identifier
      *
-     * @returns void if successful
-     *
-     * @throws See {@link findByLink} for relations
-     * @throws InsufficientPermissionsException if user is not the owner
+     * @throws See {@link checkForAppointmentExistenceAndOwnershipAndReturnForRelation}
      */
-    public async removeFile(_user: JWT_User, link: string, id: string) {
-        let appointment;
+    public async removeFile(user: JWT_User, link: string, fileId: string) {
+        let appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
 
-        try {
-            appointment = await this.findByLink(link);
-        } catch (e) {
-            throw e;
-        }
+        const list = appointment.files;
+        list.setFileService(this.fileService);
 
-        if (!appointment.isCreator(appointment, _user)) {
-            throw new InsufficientPermissionsException();
-        }
+        await list.removeFileById(fileId);
 
-        let file;
-
-        try {
-            file = await this.fileService.findById(id);
-            await this.fileService.__remove(file);
-
-            const index = appointment.files.indexOf(file);
-            appointment.files.splice(index, 1);
-
-            this.appointmentGateway.appointmentUpdated(appointment);
-        } catch (e) {
-            //
-        }
-
-        return appointment;
+        this.appointmentGateway.appointmentUpdated(appointment);
     }
 
     /**
@@ -460,17 +419,17 @@ export class AppointmentService {
     }
 
     /**
-     * Check if passed {@link JWT_User} is administrator or creator of the referenced {@link Appointment}<br/>
+     * Check if passed {@link JWT_User} is {@link Administrator} or creator of the referenced {@link Appointment}
      *
      * @param user          {@link JWT_User} to check permissions for
      * @param ref           Link of  {@link Appointment}
      *
-     * @returns boolean     true if creator or admin - false if not
+     * @returns boolean     representing condition
      *
      * @throws              See {@link findByLink} for relations
      */
     public async isCreatorOrAdministrator(user: JWT_User, ref: string): Promise<boolean> {
-        const appointment = await this.findByLink(ref);
+        const appointment = await this.getAppointmentForPermissionCheckAndReferenceAsRelation(ref);
 
         const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
 
@@ -637,7 +596,7 @@ export class AppointmentService {
         return appointment;
     }
 
-    private async checkForAppointmentExistenceAndOwnership(link: string, user: JWT_User) {
+    private async checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link: string, user: JWT_User) {
         let appointment;
 
         try {

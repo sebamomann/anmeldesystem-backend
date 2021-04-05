@@ -10,8 +10,13 @@ export class FileService {
                 private fileRepository: Repository<File>) {
     }
 
-    public async __save(file: File) {
+    public async save(file: File) {
         return await this.fileRepository.save(file);
+    }
+
+
+    public async delete(id: string) {
+        return await this.fileRepository.delete({id})
     }
 
     public async __remove(file: any) {

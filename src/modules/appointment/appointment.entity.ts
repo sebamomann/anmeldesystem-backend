@@ -60,7 +60,7 @@ export class Appointment {
     _files: File[];
 
     get files(): FileList {
-        return new FileList(this._files);
+        return new FileList(this._files, this);
     }
 
     set files(list: FileList) {
