@@ -83,7 +83,7 @@ export class AdministratorList {
         adminUserDataFromKeycloak = await this.userService.findByUsername(username);
 
         if (this.userIsAdministratorKeycloakUser(adminUserDataFromKeycloak)) {
-            await this.administratorService.deleteAdministratorByUserIdAndAppointment(adminUserDataFromKeycloak.id, this.appointment);
+            await this.administratorService.removeAdministratorByUserIdAndAppointment(adminUserDataFromKeycloak.id, this.appointment);
         }
     }
 

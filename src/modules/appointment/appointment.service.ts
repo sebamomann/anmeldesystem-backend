@@ -22,7 +22,6 @@ import {AppointmentRepository} from './appointment.repository';
 import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationResponseDTO';
 import {IAppointmentUpdateAdditionDTO} from './DTOs/IAppointmentUpdateAdditionDTO';
 import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
-import {AdministratorService} from '../adminsitrator/administrator.service';
 import {IFileCreationDTO} from '../file/IFileCreationDTO';
 
 const logger = require('../../logger');
@@ -34,7 +33,6 @@ export class AppointmentService {
         private readonly appointmentRepository: Repository<Appointment>,
         private readonly _appointmentRepository: AppointmentRepository,
         private additionService: AdditionService,
-        private administratorService: AdministratorService,
         private fileService: FileService,
         private userService: UserService,
         private appointmentGateway: AppointmentGateway,
@@ -295,48 +293,6 @@ export class AppointmentService {
     }
 
     /**
-     * Add an {@link Administrator} to a specific {@link Appointment}. <br />
-     * Operation can only be executed by the owner of the {@link Appointment}.
-     *
-     * @param user          {@link JWT_User} Requester (should be owner of {@link Appointment})
-     * @param link          Link of {@link Appointment}
-     * @param username      Username of user to add as {@link Administrator}
-     *
-     * @throws See {@link checkForAppointmentExistenceAndOwnershipAndReturnForRelation}
-     * @throws See {@link AdministratorList.addAdministrator}
-     */
-    public async addAdministrator(user: JWT_User, link: string, username: string): Promise<void> {
-        const appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
-
-        const list = appointment.administrators;
-        list.setUserService(this.userService);
-        list.setAdministratorService(this.administratorService);
-
-        await list.addAdministrator(username);
-    }
-
-    /**
-     * Remove {@link Administrator} from the {@link Appointment}. <br />
-     * Operation can only be executed by the owner of the Appointment.
-     *
-     * @param user          {@link JWT_User} Requester (should be owner of {@link Appointment})
-     * @param link          Link of {@link Appointment}
-     * @param username      Username of user to add as {@link Administrator}
-     *
-     * @throws See {@link checkForAppointmentExistenceAndOwnershipAndReturnForRelation}
-     * @throws See {@link AdministratorList.removeAdministrator}
-     */
-    public async removeAdministrator(user: JWT_User, link: string, username: string): Promise<void> {
-        const appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
-
-        const list = appointment.administrators;
-        list.setUserService(this.userService);
-        list.setAdministratorService(this.administratorService);
-
-        await list.removeAdministrator(username);
-    }
-
-    /**
      * Add {@link File} to {@link Appointment}. <br />
      * Operation can only be executed by the owner of the {@link Appointment}.
      *
@@ -594,7 +550,7 @@ export class AppointmentService {
         return appointment;
     }
 
-    private async checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link: string, user: JWT_User) {
+    async checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link: string, user: JWT_User) {
         let appointment;
 
         try {
