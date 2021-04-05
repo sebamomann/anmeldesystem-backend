@@ -68,6 +68,8 @@ export class FileList {
     public getDTOArray() {
         const output: IFileDTO[] = [];
 
+        this.sortByName();
+
         for (const fFile of this.list) {
             const fileURL = process.env.API_URL + 'files/' + fFile.id;
 
@@ -81,10 +83,15 @@ export class FileList {
         return output;
     }
 
-    private existsInListById(id: string) {
-        return this.list
-            .some(
-                (fFile: File) => fFile.id === id
+    /**
+     * Sort list by "name" attribute
+     */
+    public sortByName() {
+        this.list
+            .sort(
+                (a, b) => {
+                    return a.name < b.name ? -1 : 1;
+                }
             );
     }
 }
