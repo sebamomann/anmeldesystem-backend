@@ -25,6 +25,7 @@ import {AuthOptGuard} from '../../auth/auth-opt.gurad';
 import {JWT_User} from '../user/user.model';
 import {AuthGuard} from '../../auth/auth.gurad';
 import {IAppointmentCreationDTO} from './DTOs/IAppointmentCreationDTO';
+import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 
 @Controller('appointments')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
@@ -145,6 +146,15 @@ export class AppointmentController {
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             }).catch((err) => {
+                if (err instanceof EntityNotFoundException) {
+                    throw new EntityNotFoundException(null, null, {
+                        'attribute': 'username',
+                        'in': 'body',
+                        'value': username,
+                        'message': 'Specified user could not be found'
+                    });
+                }
+
                 throw err;
             });
     }
@@ -160,6 +170,15 @@ export class AppointmentController {
             .then(() => {
                 res.status(HttpStatus.NO_CONTENT).json();
             }).catch((err) => {
+                if (err instanceof EntityNotFoundException) {
+                    throw new EntityNotFoundException(null, null, {
+                        'attribute': 'username',
+                        'in': 'path',
+                        'value': username,
+                        'message': 'Specified user could not be found'
+                    });
+                }
+
                 throw err;
             });
     }

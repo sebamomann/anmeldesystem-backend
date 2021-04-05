@@ -23,6 +23,7 @@ import {AppointmentRepository} from './appointment.repository';
 import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationResponseDTO';
 import {IAppointmentUpdateAdditionDTO} from './DTOs/IAppointmentUpdateAdditionDTO';
 import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
+import {AdministratorService} from '../adminsitrator/administrator.service';
 
 const logger = require('../../logger');
 
@@ -33,6 +34,7 @@ export class AppointmentService {
         private readonly appointmentRepository: Repository<Appointment>,
         private readonly _appointmentRepository: AppointmentRepository,
         private additionService: AdditionService,
+        private administratorService: AdministratorService,
         private fileService: FileService,
         private userService: UserService,
         private appointmentGateway: AppointmentGateway,
@@ -295,106 +297,45 @@ export class AppointmentService {
     }
 
     /**
-     * Add an administrator to a specific appointment. <br />
-     * Operation can only be executed by the owner of the Appointment.
+     * Add an {@link Administrator} to a specific {@link Appointment}. <br />
+     * Operation can only be executed by the owner of the {@link Appointment}.
      *
-     * @param _user Requester (should be owner of appointment)
-     * @param link Link of appointment
-     * @param username Username of administrator to add
+     * @param user          {@link JWT_User} Requester (should be owner of {@link Appointment})
+     * @param link          Link of {@link Appointment}
+     * @param username      Username of user to add as {@link Administrator}
      *
-     * @returns void if successful
-     *
-     * @throws See {@link findByLink} for relations
-     * @throws InsufficientPermissionsException if user is not the owner
-     * @throws UnknownUserException if user to add does not exist
+     * @throws See {@link checkForAppointmentExistenceAndOwnership}
+     * @throws See {@link AdministratorList.addAdministrator}
      */
-    public async addAdministrator(_user: JWT_User, link: string, username: string) {
-        let appointment = await this.findByLink(link);
-
-        const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
-
-        if (!appointmentPermissionChecker.userIsCreator(_user)) {
-            throw new InsufficientPermissionsException(null, null,
-                {
-                    'attribute': 'link',
-                    'in': 'path',
-                    'value': link,
-                    'message': 'Specified appointment is not in your ownership. You are not allowed to manage administrators as administrator.'
-                }
-            );
-        }
+    public async addAdministrator(user: JWT_User, link: string, username: string): Promise<void> {
+        let appointment = await this.checkForAppointmentExistenceAndOwnership(link, user);
 
         const list = appointment.administrators;
         list.setUserService(this.userService);
-        await list.addAdministrator(username);
-        appointment.administrators = list;
+        list.setAdministratorService(this.administratorService);
 
-        return await this.appointmentRepository.save(appointment);
+        await list.addAdministrator(username);
     }
 
     /**
-     * Remove an administrator of a specific appointment. <br />
+     * Remove {@link Administrator} from the {@link Appointment}. <br />
      * Operation can only be executed by the owner of the Appointment.
      *
-     * @param _user Requester  (should be owner of appointment)
-     * @param link Link of appointment
-     * @param username Username of administrator to add
+     * @param user          {@link JWT_User} Requester (should be owner of {@link Appointment})
+     * @param link          Link of {@link Appointment}
+     * @param username      Username of user to add as {@link Administrator}
      *
-     * @returns void if successful
-     *
-     * @throws See {@link findByLink} for relations
-     * @throws InsufficientPermissionsException if user is not the owner
-     *
-     * TODO
-     * go over admin directly?
+     * @throws See {@link checkForAppointmentExistenceAndOwnership}
+     * @throws See {@link AdministratorList.removeAdministrator}
      */
-    public async removeAdministrator(_user: JWT_User, link: string, username: string): Promise<void> {
-        const appointment = await this.findByLink(link);
-        const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
+    public async removeAdministrator(user: JWT_User, link: string, username: string): Promise<void> {
+        let appointment = await this.checkForAppointmentExistenceAndOwnership(link, user);
 
-        if (!appointmentPermissionChecker.userIsCreator(_user)) {
-            throw new InsufficientPermissionsException(null, null,
-                {
-                    'attribute': 'link',
-                    'in': 'path',
-                    'value': link,
-                    'message': 'Specified appointment is not in your ownership. You are not allowed to manage administrators as administrator.'
-                }
-            );
-        }
+        const list = appointment.administrators;
+        list.setUserService(this.userService);
+        list.setAdministratorService(this.administratorService);
 
-        let adminToDelete;
-
-        try {
-            adminToDelete = await this.userService.findByUsername(username);
-        } catch (e) {
-            throw new EntityNotFoundException(null, null, {
-                'attribute': 'username',
-                'in': 'path',
-                'value': username
-            });
-        }
-
-        const currentLength = appointment._administrators.length;
-
-        appointment._administrators = appointment._administrators.filter(
-            fAdministrator => {
-                return fAdministrator.userId !== adminToDelete.id;
-            }
-        );
-
-        const updatedLength = appointment._administrators.length;
-
-        if (currentLength === updatedLength) {
-            throw new EntityNotFoundException(null, null, {
-                'attribute': 'username',
-                'in': 'path',
-                'value': username,
-                'message': 'Specified user was no administrator for this appointment'
-            });
-        }
-
-        await this.appointmentRepository.save(appointment);
+        await list.removeAdministrator(username);
     }
 
     /**
@@ -672,6 +613,58 @@ export class AppointmentService {
             });
         }
 
+        return appointment;
+    }
+
+    async getAppointmentForPermissionCheckAndReferenceAsRelation(link: string): Promise<Appointment> {
+        let select = ['appointment.id', 'administrators', 'appointment.creatorId'];
+
+        let builder = getRepository(Appointment).createQueryBuilder('appointment');
+        builder = builder.leftJoinAndSelect('appointment._administrators', 'administrators');
+        builder = builder.where('appointment.link = :link', {link: link});
+        builder = builder.select(select);
+
+        const appointment = await builder.getOne();
+
+        if (!appointment) {
+            throw new EntityNotFoundException(null, null, {
+                'attribute': 'link',
+                'value': link,
+                'message': 'Specified appointment does not exist'
+            });
+        }
+
+        return appointment;
+    }
+
+    private async checkForAppointmentExistenceAndOwnership(link: string, user: JWT_User) {
+        let appointment;
+
+        try {
+            appointment = await this.getAppointmentForPermissionCheckAndReferenceAsRelation(link);
+        } catch (e) {
+            throw new EntityNotFoundException(null, null,
+                {
+                    'attribute': 'link',
+                    'in': 'path',
+                    'value': link,
+                    'message': 'Specified appointment does not exist'
+                }
+            );
+        }
+
+        const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
+
+        if (!appointmentPermissionChecker.userIsCreator(user)) {
+            throw new InsufficientPermissionsException(null, null,
+                {
+                    'attribute': 'link',
+                    'in': 'path',
+                    'value': link,
+                    'message': 'Specified appointment is not in your ownership. You are not allowed to manage administrators as administrator.'
+                }
+            );
+        }
         return appointment;
     }
 

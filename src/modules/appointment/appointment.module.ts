@@ -9,9 +9,10 @@ import {UserModule} from '../user/user.module';
 import {AppointmentGateway} from './appointment.gateway';
 import {PushModule} from '../push/push.module';
 import {AuthModule} from '../../auth/auth.module';
+import {AdministratorModule} from '../adminsitrator/adminsitrator.module';
 
 @Module({
-    imports: [AuthModule, TypeOrmModule.forFeature([Appointment]), AdditionModule, FileModule, UserModule, PushModule, HttpModule],
+    imports: [AuthModule, TypeOrmModule.forFeature([Appointment]), AdministratorModule, AdditionModule, FileModule, UserModule, PushModule, HttpModule],
     providers: [AppointmentService, AppointmentGateway],
     exports: [AppointmentService, AppointmentGateway],
     controllers: [AppointmentController],

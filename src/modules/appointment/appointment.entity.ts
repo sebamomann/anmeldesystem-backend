@@ -244,7 +244,7 @@ export class Appointment {
     }
 
     set administrators(list: AdministratorList) {
-        this._administrators = list.getArray();
+        this._administrators = list.getRawArray();
     }
 
     /* --------------------------- */
