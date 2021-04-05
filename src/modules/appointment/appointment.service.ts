@@ -291,8 +291,6 @@ export class AppointmentService {
                 }
             );
 
-        console.log(appointment);
-
         return appointment;
     }
 
@@ -308,7 +306,7 @@ export class AppointmentService {
      * @throws See {@link AdministratorList.addAdministrator}
      */
     public async addAdministrator(user: JWT_User, link: string, username: string): Promise<void> {
-        let appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
+        const appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
 
         const list = appointment.administrators;
         list.setUserService(this.userService);
@@ -329,7 +327,7 @@ export class AppointmentService {
      * @throws See {@link AdministratorList.removeAdministrator}
      */
     public async removeAdministrator(user: JWT_User, link: string, username: string): Promise<void> {
-        let appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
+        const appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
 
         const list = appointment.administrators;
         list.setUserService(this.userService);
@@ -344,17 +342,19 @@ export class AppointmentService {
      *
      * @param user          {@link JWT_User} Requester (should be owner of {@link Appointment})
      * @param link          Link of {@link Appointment}
-     * @param data          Contains information about the name of the file and its data
+     * @param files         Array with objects containing information about the name of the file and its data {@ink as IFileCreationDTO}
      *
      * @throws See {@link checkForAppointmentExistenceAndOwnershipAndReturnForRelation}
      */
-    public async addFile(user: JWT_User, link: string, data: IFileCreationDTO) {
-        let appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
+    public async addFiles(user: JWT_User, link: string, files: IFileCreationDTO[]) {
+        const appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
 
         const list = appointment.files;
         list.setFileService(this.fileService);
 
-        await list.addFile(data);
+        for (const fFiles of files) {
+            await list.addNew(fFiles);
+        }
 
         this.appointmentGateway.appointmentUpdated(appointment);
     }
@@ -370,7 +370,7 @@ export class AppointmentService {
      * @throws See {@link checkForAppointmentExistenceAndOwnershipAndReturnForRelation}
      */
     public async removeFile(user: JWT_User, link: string, fileId: string) {
-        let appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
+        const appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
 
         const list = appointment.files;
         list.setFileService(this.fileService);
@@ -521,6 +521,8 @@ export class AppointmentService {
 
         const appointment = await builder.getOne();
 
+        console.log(appointment);
+
         if (!appointment) {
             throw new EntityNotFoundException(null, null, {
                 'attribute': 'link',
@@ -586,11 +588,7 @@ export class AppointmentService {
         const appointment = await builder.getOne();
 
         if (!appointment) {
-            throw new EntityNotFoundException(null, null, {
-                'attribute': 'link',
-                'value': link,
-                'message': 'Specified appointment does not exist'
-            });
+            throw new EntityNotFoundException(null, null, 'appointment');
         }
 
         return appointment;
@@ -602,28 +600,15 @@ export class AppointmentService {
         try {
             appointment = await this.getAppointmentForPermissionCheckAndReferenceAsRelation(link);
         } catch (e) {
-            throw new EntityNotFoundException(null, null,
-                {
-                    'attribute': 'link',
-                    'in': 'path',
-                    'value': link,
-                    'message': 'Specified appointment does not exist'
-                }
-            );
+            throw new EntityNotFoundException(null, null, 'appointment');
         }
 
         const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
 
         if (!appointmentPermissionChecker.userIsCreator(user)) {
-            throw new InsufficientPermissionsException(null, null,
-                {
-                    'attribute': 'link',
-                    'in': 'path',
-                    'value': link,
-                    'message': 'Specified appointment is not in your ownership. You are not allowed to manage administrators as administrator.'
-                }
-            );
+            throw new InsufficientPermissionsException(null, null, null);
         }
+
         return appointment;
     }
 

@@ -3,7 +3,7 @@ import {IFileDTO} from './IFileDTO';
 import {FileService} from './file.service';
 import {Appointment} from '../appointment/appointment.entity';
 import {IFileCreationDTO} from './IFileCreationDTO';
-import {ExtractJwt} from 'passport-jwt';
+import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 
 export class FileList {
     private list: File[];
@@ -30,7 +30,7 @@ export class FileList {
     }
 
     public add(file: File) {
-        this.list.push(file)
+        this.list.push(file);
     }
 
     /**
@@ -40,8 +40,8 @@ export class FileList {
      */
     public async addNew(data: IFileCreationDTO): Promise<void> {
         const file = new File();
-        file.name = data.name;
-        file.data = data.data;
+        file.name = data.originalname;
+        file.data = data.buffer;
         file.appointment = this.appointment;
 
         const savedFile = await this.fileService.save(file);
@@ -55,17 +55,21 @@ export class FileList {
      * @param id      Unique {@link} file identifier
      */
     public async removeFileById(id: string): Promise<void> {
-        await this.fileService.delete(id);
+        const affected = (await this.fileService.delete(id)).affected;
 
-        this.list = this.list
-            .filter( (fFile: File) =>  fFile.id !== id );
+        if (affected > 0) {
+                this.list = this.list
+                .filter((fFile: File) => fFile.id !== id);
+        } else {
+            throw new EntityNotFoundException(null, null, 'file');
+        }
     }
 
     public getDTOArray() {
         const output: IFileDTO[] = [];
 
         for (const fFile of this.list) {
-            const fileURL = process.env.API_URL + 'file/' + fFile.id;
+            const fileURL = process.env.API_URL + 'files/' + fFile.id;
 
             output.push({
                 name: fFile.name,
@@ -75,5 +79,12 @@ export class FileList {
         }
 
         return output;
+    }
+
+    private existsInListById(id: string) {
+        return this.list
+            .some(
+                (fFile: File) => fFile.id === id
+            );
     }
 }

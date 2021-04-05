@@ -1,4 +1,8 @@
 export interface IFileCreationDTO {
-    name: string;
-    data: string;
+    fieldname: string;
+    originalname: string;
+    buffer: string;
+    encoding: string;
+    mimetype: string;
+    size: number;
 }

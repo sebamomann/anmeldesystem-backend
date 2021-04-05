@@ -17,7 +17,7 @@ export class FileController {
             .findById(id, true)
             .then(tFile => {
                 if (tFile != null) {
-                    var img = Buffer.from(tFile.data.toString().split(',')[1], 'base64');
+                    var img = tFile.data;
                     var stream = new Readable();
 
                     stream.push(img);
@@ -25,7 +25,7 @@ export class FileController {
 
                     res.header('Content-Type', 'application/octet-stream');
                     res.header('Content-Length', img.length + '');
-                    res.header('Content-Disposition', 'attatchment; filename=' + tFile.name);
+                    res.header('Content-Disposition', 'filename=' + tFile.name);
 
                     stream.pipe(res);
                 }

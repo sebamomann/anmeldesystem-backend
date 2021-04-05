@@ -1,5 +1,5 @@
 import {Injectable} from '@nestjs/common';
-import {Repository} from 'typeorm';
+import {DeleteResult, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {File} from './file.entity';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
@@ -15,8 +15,8 @@ export class FileService {
     }
 
 
-    public async delete(id: string) {
-        return await this.fileRepository.delete({id})
+    public async delete(id: string): Promise<DeleteResult> {
+        return await this.fileRepository.delete({id});
     }
 
     public async __remove(file: any) {
@@ -39,6 +39,8 @@ export class FileService {
         if (file === undefined) {
             throw new EntityNotFoundException(null, null, 'file');
         }
+
+        console.log(file);
 
         return file;
     }

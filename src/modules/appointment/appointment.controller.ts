@@ -11,6 +11,7 @@ import {
     Query,
     Request,
     Res,
+    UploadedFile,
     UseGuards,
     UseInterceptors
 } from '@nestjs/common';
@@ -26,6 +27,8 @@ import {JWT_User} from '../user/user.model';
 import {AuthGuard} from '../../auth/auth.gurad';
 import {IAppointmentCreationDTO} from './DTOs/IAppointmentCreationDTO';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
+import {FileFieldsInterceptor} from '@nestjs/platform-express';
+import {IFileCreationDTO} from '../file/IFileCreationDTO';
 
 @Controller('appointments')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
@@ -134,7 +137,6 @@ export class AppointmentController {
             });
     }
 
-    // TODO currently can be addeded multioople times ?
     @Post(':link/administrators')
     @UseGuards(AuthGuard)
     addAdministrator(@Usr() user: JWT_User,
@@ -143,20 +145,41 @@ export class AppointmentController {
                      @Res() res: Response,) {
         return this.appointmentService
             .addAdministrator(user, link, username)
-            .then(() => {
-                res.status(HttpStatus.NO_CONTENT).json();
-            }).catch((err) => {
-                if (err instanceof EntityNotFoundException) {
-                    throw new EntityNotFoundException(null, null, {
-                        'attribute': 'username',
-                        'in': 'body',
-                        'value': username,
-                        'message': 'Specified user could not be found'
-                    });
+            .then(
+                () => {
+                    res.status(HttpStatus.NO_CONTENT).json();
                 }
+            )
+            .catch(
+                (e) => {
+                    if (e instanceof InsufficientPermissionsException) {
+                        throw new InsufficientPermissionsException(null, null, {
+                            'attribute': 'link',
+                            'in': 'path',
+                            'value': link,
+                            'message': 'Specified appointment is not in your ownership. You are not allowed to manage administrators as administrator.'
+                        });
+                    } else if (e instanceof EntityNotFoundException) {
+                        if (e.data === 'appointment') {
+                            throw new EntityNotFoundException(null, null, {
+                                'attribute': 'link',
+                                'in': 'path',
+                                'value': username,
+                                'message': 'Specified appointment does not exist'
+                            });
+                        } else if (e.data === 'user') {
+                            throw new EntityNotFoundException(null, null, {
+                                'attribute': 'username',
+                                'in': 'body',
+                                'value': username,
+                                'message': 'Specified user does not exist'
+                            });
+                        }
+                    }
 
-                throw err;
-            });
+                    throw e;
+                }
+            );
     }
 
     @Delete(':link/administrators/:username')
@@ -167,20 +190,41 @@ export class AppointmentController {
                         @Res() res: Response) {
         return this.appointmentService
             .removeAdministrator(user, link, username)
-            .then(() => {
-                res.status(HttpStatus.NO_CONTENT).json();
-            }).catch((err) => {
-                if (err instanceof EntityNotFoundException) {
-                    throw new EntityNotFoundException(null, null, {
-                        'attribute': 'username',
-                        'in': 'path',
-                        'value': username,
-                        'message': 'Specified user could not be found'
-                    });
+            .then(
+                () => {
+                    res.status(HttpStatus.NO_CONTENT).json();
                 }
+            )
+            .catch(
+                (e) => {
+                    if (e instanceof InsufficientPermissionsException) {
+                        throw new InsufficientPermissionsException(null, null, {
+                            'attribute': 'link',
+                            'in': 'path',
+                            'value': link,
+                            'message': 'Specified appointment is not in your ownership. You are not allowed to manage administrators as administrator.'
+                        });
+                    } else if (e instanceof EntityNotFoundException) {
+                        if (e.data === 'appointment') {
+                            throw new EntityNotFoundException(null, null, {
+                                'attribute': 'link',
+                                'in': 'path',
+                                'value': link,
+                                'message': 'Specified appointment does not exist'
+                            });
+                        } else if (e.data === 'user') {
+                            throw new EntityNotFoundException(null, null, {
+                                'attribute': 'username',
+                                'in': 'path',
+                                'value': username,
+                                'message': 'Specified user does not exist'
+                            });
+                        }
+                    }
 
-                throw err;
-            });
+                    throw e;
+                }
+            );
     }
 
     @Get(':link/permission')
@@ -203,24 +247,52 @@ export class AppointmentController {
             });
     }
 
-    @Post(':link/file')
+    @Post(':link/files')
     @UseGuards(AuthGuard)
+    @UseInterceptors(FileFieldsInterceptor([{name: 'files', maxCount: 5}]))
     addFile(@Usr() user: JWT_User,
             @Param('link') link: string,
-            @Body() data: { name: string, data: string },
+            @UploadedFile('files') files: { files: IFileCreationDTO[] } | IFileCreationDTO,
             @Res() res: Response) {
+        let fileArray: IFileCreationDTO[];
+
+        if (!Object.keys(files).includes('files')) {
+            fileArray = [(files as IFileCreationDTO)];
+        } else {
+            fileArray = (files as { files: IFileCreationDTO[] }).files;
+        }
+
         return this.appointmentService
-            .addFile(user, link, data)
-            .then(() => {
-                res.status(HttpStatus.NO_CONTENT).json();
-            })
-            .catch((err) => {
-                console.log(err);
-                throw err;
-            });
+            .addFiles(user, link, fileArray as IFileCreationDTO[])
+            .then(
+                () => {
+                    res.status(HttpStatus.NO_CONTENT).json();
+                }
+            )
+            .catch(
+                (e) => {
+                    if (e instanceof InsufficientPermissionsException) {
+                        throw new InsufficientPermissionsException(null, null, {
+                            'attribute': 'link',
+                            'in': 'path',
+                            'value': link,
+                            'message': 'Specified appointment is not in your ownership. You are not allowed to manage files as administrator.'
+                        });
+                    } else if (e instanceof EntityNotFoundException) {
+                        throw new EntityNotFoundException(null, null, {
+                            'attribute': 'link',
+                            'in': 'path',
+                            'value': link,
+                            'message': 'Specified appointment does not exist'
+                        });
+                    }
+
+                    throw e;
+                }
+            );
     }
 
-    @Delete(':link/file/:id')
+    @Delete(':link/files/:id')
     @UseGuards(AuthGuard)
     removeFile(@Usr() user: JWT_User,
                @Param('link') link: string,
@@ -228,12 +300,41 @@ export class AppointmentController {
                @Res() res: Response) {
         return this.appointmentService
             .removeFile(user, link, id)
-            .then(() => {
-                res.status(HttpStatus.NO_CONTENT).json();
-            })
-            .catch((err) => {
-                throw err;
-            });
+            .then(
+                () => {
+                    res.status(HttpStatus.NO_CONTENT).json();
+                }
+            )
+            .catch(
+                (e) => {
+                    if (e instanceof InsufficientPermissionsException) {
+                        throw new InsufficientPermissionsException(null, null, {
+                            'attribute': 'link',
+                            'in': 'path',
+                            'value': link,
+                            'message': 'Specified appointment is not in your ownership. You are not allowed to manage files as administrator.'
+                        });
+                    } else if (e instanceof EntityNotFoundException) {
+                        if (e.data === 'appointment') {
+                            throw new EntityNotFoundException(null, null, {
+                                'attribute': 'link',
+                                'in': 'path',
+                                'value': link,
+                                'message': 'Specified appointment does not exist'
+                            });
+                        } else if (e.data === 'file') {
+                            throw new EntityNotFoundException(null, null, {
+                                'attribute': 'id',
+                                'in': 'path',
+                                'value': id,
+                                'message': 'Specified file does not exist'
+                            });
+                        }
+                    }
+
+                    throw e;
+                }
+            );
     }
 
     @Get(':link/pin')

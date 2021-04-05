@@ -1321,7 +1321,7 @@ describe('AppointmentService', () => {
                 const __expected = {...__existing_appointment};
                 __expected._files = [__expected_file];
 
-                const __actual = await appointmentService.addFile(__given_user, __given_link, __given_data);
+                const __actual = await appointmentService.addFiles(__given_user, __given_link, __given_data);
                 expect(__actual).toEqual(__expected);
             });
 
@@ -1334,7 +1334,7 @@ describe('AppointmentService', () => {
 
                     appointmentRepositoryMock.findOne.mockReturnValueOnce(undefined);
 
-                    appointmentService.addFile(__given_user, __given_link, __given_data)
+                    appointmentService.addFiles(__given_user, __given_link, __given_data)
                         .then(() => {
                             throw new Error('I have failed you, Anakin. Should have returned EntityNotFoundException');
                         })
@@ -1373,7 +1373,7 @@ describe('AppointmentService', () => {
                     const __expected = {...__existing_appointment};
                     __expected._files = [__expected_file];
 
-                    appointmentService.addFile(__given_user, __given_link, __given_data)
+                    appointmentService.addFiles(__given_user, __given_link, __given_data)
                         .then(() => {
                             throw new Error('I have failed you, Anakin. Should have returned InsufficientPermissionsException');
                         })

@@ -728,7 +728,7 @@ describe('Appointment Controller', () => {
         describe('* add file', () => {
             describe('* successful should return nothing 204 status code', () => {
                 it('successful request', async () => {
-                    jest.spyOn(appointmentService, 'addFile')
+                    jest.spyOn(appointmentService, 'addFiles')
                         .mockImplementation(async (): Promise<void> => Promise.resolve());
 
                     const mockUserToSatisfyParameter = new JWT_User();
@@ -748,7 +748,7 @@ describe('Appointment Controller', () => {
                 it('not permitted for appointment', async () => {
                     const result = new InsufficientPermissionsException();
 
-                    jest.spyOn(appointmentService, 'addFile')
+                    jest.spyOn(appointmentService, 'addFiles')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockUserToSatisfyParameter = new JWT_User();
@@ -769,7 +769,7 @@ describe('Appointment Controller', () => {
                 it('appointment not found', async () => {
                     const result = new EntityNotFoundException(null, null, 'appointment');
 
-                    jest.spyOn(appointmentService, 'addFile')
+                    jest.spyOn(appointmentService, 'addFiles')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockUserToSatisfyParameter = new JWT_User();
@@ -790,7 +790,7 @@ describe('Appointment Controller', () => {
                 it('undefined error has occurred', async () => {
                     const result = new Error();
 
-                    jest.spyOn(appointmentService, 'addFile')
+                    jest.spyOn(appointmentService, 'addFiles')
                         .mockImplementation(async (): Promise<void> => Promise.reject(result));
 
                     const mockUserToSatisfyParameter = new JWT_User();
