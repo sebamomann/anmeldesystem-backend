@@ -40,7 +40,7 @@ describe('FileService', () => {
 
                 fileRepositoryMock.findOne.mockReturnValue(file);
 
-                const actual = await fileService.findById(id);
+                const actual = await fileService.getById(id);
                 expect(actual).toBe(file);
             });
         });
@@ -51,7 +51,7 @@ describe('FileService', () => {
                 fileRepositoryMock.findOne.mockReturnValue(undefined);
 
                 fileService
-                    .findById(id)
+                    .getById(id)
                     .then(() => {
                         throw new Error('I have failed you, Anakin. Should have gotten an EntityNotFoundException');
                     })

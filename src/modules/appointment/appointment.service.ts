@@ -2,10 +2,8 @@ import {Injectable} from '@nestjs/common';
 import {Appointment} from './appointment.entity';
 import {Brackets, getRepository, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
-import {File} from '../file/file.entity';
 import {AdditionService} from '../addition/addition.service';
 import {UserService} from '../user/user.service';
-import {FileService} from '../file/file.service';
 import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {AppointmentGateway} from './appointment.gateway';
@@ -22,7 +20,6 @@ import {AppointmentRepository} from './appointment.repository';
 import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationResponseDTO';
 import {IAppointmentUpdateAdditionDTO} from './DTOs/IAppointmentUpdateAdditionDTO';
 import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
-import {IFileCreationDTO} from '../file/IFileCreationDTO';
 
 const logger = require('../../logger');
 
@@ -33,7 +30,6 @@ export class AppointmentService {
         private readonly appointmentRepository: Repository<Appointment>,
         private readonly _appointmentRepository: AppointmentRepository,
         private additionService: AdditionService,
-        private fileService: FileService,
         private userService: UserService,
         private appointmentGateway: AppointmentGateway,
         private pushService: PushService,
@@ -293,50 +289,6 @@ export class AppointmentService {
     }
 
     /**
-     * Add {@link File} to {@link Appointment}. <br />
-     * Operation can only be executed by the owner of the {@link Appointment}.
-     *
-     * @param user          {@link JWT_User} Requester (should be owner of {@link Appointment})
-     * @param link          Link of {@link Appointment}
-     * @param files         Array with objects containing information about the name of the file and its data {@ink as IFileCreationDTO}
-     *
-     * @throws See {@link checkForAppointmentExistenceAndOwnershipAndReturnForRelation}
-     */
-    public async addFiles(user: JWT_User, link: string, files: IFileCreationDTO[]) {
-        const appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
-
-        const list = appointment.files;
-        list.setFileService(this.fileService);
-
-        for (const fFiles of files) {
-            await list.addNew(fFiles);
-        }
-
-        this.appointmentGateway.appointmentUpdated(appointment);
-    }
-
-    /**
-     * Remove {@link File} by its unique ID.
-     * Operation can only be executed by the owner of the {@link Appointment}.
-     *
-     * @param user          {@link JWT_User} Requester (should be owner of {@link Appointment})
-     * @param link          Link of {@link Appointment}
-     * @param fileId        Unique {@link File} identifier
-     *
-     * @throws See {@link checkForAppointmentExistenceAndOwnershipAndReturnForRelation}
-     */
-    public async removeFile(user: JWT_User, link: string, fileId: string) {
-        const appointment = await this.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
-
-        const list = appointment.files;
-        list.setFileService(this.fileService);
-
-        await list.removeFileById(fileId);
-
-        this.appointmentGateway.appointmentUpdated(appointment);
-    }
-
-    /**
      * Toggle the pinning state of an appointment in relation to the user. <br/>
      * Update user entity instead of appointment entity
      *
@@ -477,8 +429,6 @@ export class AppointmentService {
 
         const appointment = await builder.getOne();
 
-        console.log(appointment);
-
         if (!appointment) {
             throw new EntityNotFoundException(null, null, {
                 'attribute': 'link',
@@ -551,18 +501,12 @@ export class AppointmentService {
     }
 
     async checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link: string, user: JWT_User) {
-        let appointment;
-
-        try {
-            appointment = await this.getAppointmentForPermissionCheckAndReferenceAsRelation(link);
-        } catch (e) {
-            throw new EntityNotFoundException(null, null, 'appointment');
-        }
+        const appointment = await this.getAppointmentForPermissionCheckAndReferenceAsRelation(link);
 
         const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
 
         if (!appointmentPermissionChecker.userIsCreator(user)) {
-            throw new InsufficientPermissionsException(null, null, null);
+            throw new InsufficientPermissionsException(null, "You need to be creator to execute this operation", null);
         }
 
         return appointment;

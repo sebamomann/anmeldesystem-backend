@@ -1,4 +1,4 @@
-import {forwardRef, HttpModule, Module} from '@nestjs/common';
+import {HttpModule, Module} from '@nestjs/common';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {Administrator} from './administrator.entity';
 import {AdministratorService} from './administrator.service';
@@ -8,7 +8,7 @@ import {AuthModule} from '../../auth/auth.module';
 import {UserModule} from '../user/user.module';
 
 @Module({
-    imports: [AuthModule, TypeOrmModule.forFeature([Administrator]), forwardRef(() => AppointmentModule), UserModule, HttpModule],
+    imports: [AuthModule, TypeOrmModule.forFeature([Administrator]), AppointmentModule, UserModule, HttpModule],
     providers: [AdministratorService],
     exports: [AdministratorService],
     controllers: [AdministratorController],

@@ -293,7 +293,14 @@ INSERT INTO `administrator` (`id`, `userId`, `appointmentId`) VALUES
 ('80615bcb-3dad-46b8-8de5-dbead120c3f8', '16167e00-8998-4a95-a24a-b45a0a5c37c5', 'ce3fa150-49e8-4173-9166-2e368bc5d0ea');
 COMMIT;
 
-
+-- --------------
+-- MANAGE FILES -
+-- --------------
+-- ---------
+-- DEFAULT -
+-- ---------
+-- JWT_User with ID ce1898da-4e02-47f3-af1b-7a2d65e4790d // APPOINTMENT CREATOR
+-- JWT_User with ID 6300a257-4230-4f45-8b52-de1a62a0c9c8 // ADMIN
 
 
 
