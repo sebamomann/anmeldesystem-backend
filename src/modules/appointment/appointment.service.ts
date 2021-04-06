@@ -289,44 +289,6 @@ export class AppointmentService {
     }
 
     /**
-     * Toggle the pinning state of an appointment in relation to the user. <br/>
-     * Update user entity instead of appointment entity
-     *
-     * @param user Requester, wanting to pin the appointment
-     * @param link Link of appointment to pin
-     */
-    // TODO reimplement with keycloak
-    public async togglePinningAppointment(user: JWT_User, link: string) {
-        let appointment;
-
-        try {
-            appointment = await this.findByLink(link);
-        } catch (e) {
-            throw e;
-        }
-
-        let _user;
-
-        // TODO obsolete, due to external user management
-        try {
-            _user = await this.userService.findById(user.sub); // check if user even exists anymore or not
-        } catch (e) {
-            throw e;
-        }
-
-        if (_user.pinned.some(sPinned => sPinned.id === appointment.id)) {
-            const removeIndex = _user.pinned.indexOf(appointment);
-            _user.pinned.splice(removeIndex, 1);
-        } else {
-            _user.pinned.push(appointment);
-        }
-
-        _user = await this.userService.__save(_user);
-
-        return _user;
-    }
-
-    /**
      * Check if passed {@link JWT_User} is {@link Administrator} or creator of the referenced {@link Appointment}
      *
      * @param user          {@link JWT_User} to check permissions for
@@ -483,12 +445,41 @@ export class AppointmentService {
         return appointment;
     }
 
-    async getAppointmentForPermissionCheckAndReferenceAsRelation(link: string): Promise<Appointment> {
+    public async getAppointmentForPermissionCheckAndReferenceAsRelation(link: string): Promise<Appointment> {
         let select = ['appointment.id', 'administrators', 'appointment.creatorId'];
 
         let builder = getRepository(Appointment).createQueryBuilder('appointment');
         builder = builder.leftJoinAndSelect('appointment._administrators', 'administrators');
         builder = builder.where('appointment.link = :link', {link: link});
+        builder = builder.select(select);
+
+        const appointment = await builder.getOne();
+
+        if (!appointment) {
+            throw new EntityNotFoundException(null, null, 'appointment');
+        }
+
+        return appointment;
+    }
+
+    public async getAppointmentWithPinByUser(link: string, user: JWT_User) {
+        let select = ['appointment.id'];
+
+        let builder = getRepository(Appointment).createQueryBuilder('appointment');
+        builder = builder.where('appointment.link = :link', {link: link});
+
+        const cond = `
+            CASE 
+                WHEN pinners.id = :userId
+                THEN pinners.id = :userId
+                ELSE pinners.id = 0
+            END 
+            `;
+
+        builder = builder.leftJoinAndSelect('appointment._pinners', 'pinners', cond, {
+            userId: user?.sub || 0
+        })
+
         builder = builder.select(select);
 
         const appointment = await builder.getOne();
@@ -506,7 +497,7 @@ export class AppointmentService {
         const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
 
         if (!appointmentPermissionChecker.userIsCreator(user)) {
-            throw new InsufficientPermissionsException(null, "You need to be creator to execute this operation", null);
+            throw new InsufficientPermissionsException(null, 'You need to be creator to execute this operation', null);
         }
 
         return appointment;

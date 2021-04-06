@@ -302,6 +302,14 @@ COMMIT;
 -- JWT_User with ID ce1898da-4e02-47f3-af1b-7a2d65e4790d // APPOINTMENT CREATOR
 -- JWT_User with ID 6300a257-4230-4f45-8b52-de1a62a0c9c8 // ADMIN
 
+-- ------
+-- PINS -
+-- ------
+-- ---------
+-- DEFAULT -
+-- ---------
+-- JWT_User with ID 23ea4a81-fa16-4371-925e-115f7208be6f // PINNER
+
 
 
 

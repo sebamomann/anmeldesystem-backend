@@ -16,6 +16,7 @@ import * as path from 'path';
 import {ReleasenoteModule} from './modules/releasenote/releasenote.module';
 import {PushModule} from './modules/push/push.module';
 import {AdministratorModule} from './modules/adminsitrator/adminsitrator.module';
+import {PinModule} from './modules/pinner/pin.module';
 
 require('dotenv').config();
 
@@ -41,6 +42,7 @@ const _mail = process.env.MAIL_GJM;
         AuthModule,
         AdministratorModule,
         UserModule,
+        PinModule,
         AppointmentModule,
         AdditionModule,
         EnrollmentModule,

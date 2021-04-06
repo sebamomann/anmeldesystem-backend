@@ -115,7 +115,7 @@ export class FileController {
                 (e) => {
                     if (e instanceof InsufficientPermissionsException) {
                         throw new InsufficientPermissionsException(null, null, {
-                            'attribute': 'link',
+                            'attribute': 'appointment',
                             'in': 'query',
                             'value': link,
                             'message': 'Specified appointment is not in your ownership. You are not allowed to manage files as administrator.'
@@ -123,7 +123,7 @@ export class FileController {
                     } else if (e instanceof EntityNotFoundException) {
                         if (e.data === 'appointment') {
                             throw new EntityNotFoundException(null, null, {
-                                'attribute': 'link',
+                                'attribute': 'appointment',
                                 'in': 'query',
                                 'value': link,
                                 'message': 'Specified appointment does not exist'

@@ -60,8 +60,6 @@ export class FileService {
     public async removeFile(user: JWT_User, link: string, fileId: string) {
         const appointment = await this.appointmentService.checkForAppointmentExistenceAndOwnershipAndReturnForRelation(link, user);
 
-        console.log(appointment);
-
         const list = appointment.files;
         list.setFileService(this);
 
