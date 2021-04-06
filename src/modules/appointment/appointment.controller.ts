@@ -19,11 +19,11 @@ import {AppointmentService} from './appointment.service';
 
 import {Response} from 'express';
 import {BusinessToHttpExceptionInterceptor} from '../../interceptor/BusinessToHttpException.interceptor';
-import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
 import {AuthOptGuard} from '../../auth/auth-opt.gurad';
 import {JWT_User} from '../user/user.model';
 import {AuthGuard} from '../../auth/auth.gurad';
 import {IAppointmentCreationDTO} from './DTOs/IAppointmentCreationDTO';
+import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 
 @Controller('appointments')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
@@ -129,23 +129,31 @@ export class AppointmentController {
             });
     }
 
-    @Get(':link/permission')
+    @Get(':link/management-relations')
     @UseGuards(AuthGuard)
     hasPermission(@Usr() user: JWT_User,
                   @Param('link') link: string,
                   @Res() res: Response,) {
         return this.appointmentService
-            .isCreatorOrAdministrator(user, link)
-            .then((result) => {
-                if (result) {
-                    res.status(HttpStatus.NO_CONTENT).json();
-                    return;
+            .getAppointmentManagementRelation(user, link)
+            .then(
+                (result) => {
+                    res.status(HttpStatus.OK).json(result);
                 }
+            )
+            .catch(
+                (err) => {
+                    if (err instanceof EntityNotFoundException) {
+                        throw new EntityNotFoundException(null, null, {
+                            'attribute': 'link',
+                            'in': 'path',
+                            'value': link,
+                            'message': 'Specified appointment does not exist'
+                        });
+                    }
 
-                throw new InsufficientPermissionsException();
-            })
-            .catch((err) => {
-                throw err;
-            });
+                    throw err;
+                }
+            );
     }
 }

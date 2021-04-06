@@ -20,6 +20,7 @@ import {AppointmentRepository} from './appointment.repository';
 import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationResponseDTO';
 import {IAppointmentUpdateAdditionDTO} from './DTOs/IAppointmentUpdateAdditionDTO';
 import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
+import {PermissionRelation} from '../PermissionRelation.type';
 
 const logger = require('../../logger');
 
@@ -298,12 +299,21 @@ export class AppointmentService {
      *
      * @throws              See {@link findByLink} for relations
      */
-    public async isCreatorOrAdministrator(user: JWT_User, ref: string): Promise<boolean> {
+    public async getAppointmentManagementRelation(user: JWT_User, ref: string): Promise<PermissionRelation[]> {
         const appointment = await this.getAppointmentForPermissionCheckAndReferenceAsRelation(ref);
 
         const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
 
-        return appointmentPermissionChecker.userIsCreatorOrAdministrator(user);
+        const output: PermissionRelation[] = [];
+        if(appointmentPermissionChecker.userIsAdministrator(user)) {
+            output.push("ADMIN");
+        }
+
+        if(appointmentPermissionChecker.userIsCreator(user)) {
+            output.push("CREATOR");
+        }
+
+        return output;
     }
 
     public async removeSubscriptionsByUser(appointment: any, user: JWT_User) {

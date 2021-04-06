@@ -4,7 +4,7 @@ import {UserService} from '../user/user.service';
 import {AppointmentPermissionChecker} from './appointmentPermission.checker';
 import {IAppointmentResponseDTO} from './DTOs/IAppointmentResponseDTO';
 import {EnrollmentPermissionList} from '../enrollment/enrollmentPermissionList';
-import {Relation} from '../relationList.type';
+import {Relation} from '../Relation.type';
 import {UserMapper} from '../user/user.mapper';
 import {PinList} from '../pinner/pinList';
 import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationResponseDTO';
