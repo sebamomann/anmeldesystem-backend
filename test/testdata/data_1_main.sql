@@ -223,9 +223,14 @@ COMMIT;
 -- DEFAULT -
 -- ---------
 -- JWT_User with ID 1eeae237-1baf-4e79-9d46-85f6354aa521 // APPOINTMENT CREATOR
+-- JWT_User with ID cb833f06-24ec-4078-97f8-a0ee888d670b // APPOINTMENT ADMIN
 
 INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
 ('a878bc77-f012-418a-a3f3-c13a8556d3b8', 'test-updateappointment-title', 'test-updateappointment-description', 'test-updateappointment-link', 'test-updateappointment-location', '2021-03-01 10:05:23', '2021-01-01 20:05:23', NULL, '0', '0', '1eeae237-1baf-4e79-9d46-85f6354aa521', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `administrator` (`id`, `userId`, `appointmentId`) VALUES
+('27fec157-9afd-4fb3-a89c-7e8203ac45a9', 'cb833f06-24ec-4078-97f8-a0ee888d670b', 'a878bc77-f012-418a-a3f3-c13a8556d3b8');
 COMMIT;
 
 -- ---------
