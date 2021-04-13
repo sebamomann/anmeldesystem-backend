@@ -50,43 +50,6 @@ export class Appointment {
     }
 
     /* --------------------------- */
-    /* --------------------------- */
-
-    @OneToMany(type => File,
-        file => file.appointment,
-        {
-            eager: false,
-        })
-    _files: File[];
-
-    get files(): FileList {
-        return new FileList(this._files, this);
-    }
-
-    set files(list: FileList) {
-        this._files = list.getArray();
-    }
-
-    /* --------------------------- */
-
-    /* --------------------------- */
-
-    @OneToMany(type => Pinner,
-        pinner => pinner.appointment, {
-            eager: false,
-            cascade: true
-        })
-    _pinners: Pinner[];
-
-    get pinners(): PinnerList {
-        return new PinnerList(this._pinners);
-    }
-
-    set pinners(list: PinnerList) {
-        this._pinners = list.getArray();
-    }
-
-    /* --------------------------- */
 
     /* --------------------------- */
 
@@ -198,7 +161,6 @@ export class Appointment {
         addition => addition.appointment,
         {
             eager: true, // is core information
-            cascade: true,
         })
     _additions: Addition[];
 
@@ -230,12 +192,12 @@ export class Appointment {
     }
 
     /* --------------------------- */
+
     /* --------------------------- */
 
     @OneToMany(type => Administrator,
         administrator => administrator.appointment, {
             eager: true, // like always needed for permission checks
-            cascade: true
         })
     _administrators: Administrator[];
 
@@ -245,6 +207,44 @@ export class Appointment {
 
     set administrators(list: AdministratorList) {
         this._administrators = list.getRawArray();
+    }
+
+    /* --------------------------- */
+
+    /* --------------------------- */
+
+    @OneToMany(type => File,
+        file => file.appointment,
+        {
+            eager: false,
+        })
+    _files: File[];
+
+    get files(): FileList {
+        return new FileList(this._files, this);
+    }
+
+    set files(list: FileList) {
+        this._files = list.getArray();
+    }
+
+    /* --------------------------- */
+
+    /* --------------------------- */
+
+    @OneToMany(type => Pinner,
+        pinner => pinner.appointment, {
+            eager: false,
+            cascade: true
+        })
+    _pinners: Pinner[];
+
+    get pinners(): PinnerList {
+        return new PinnerList(this._pinners);
+    }
+
+    set pinners(list: PinnerList) {
+        this._pinners = list.getArray();
     }
 
     /* --------------------------- */

@@ -223,7 +223,7 @@ export class AppointmentService {
      * @return Saved {@link Appointment}
      */
     public async update(toChange: IAppointmentCreationDTO, link: string, user: JWT_User): Promise<Appointment> {
-        let appointment;
+        let appointment: Appointment;
 
         try {
             appointment = await this.getAppointmentCoreInformationIfValidPermission(link, user);
@@ -305,6 +305,7 @@ export class AppointmentService {
         const appointmentPermissionChecker = new AppointmentPermissionChecker(appointment);
 
         const output: PermissionRelation[] = [];
+
         if(appointmentPermissionChecker.userIsAdministrator(user)) {
             output.push("ADMIN");
         }
