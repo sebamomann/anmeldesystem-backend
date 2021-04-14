@@ -17,18 +17,11 @@ export class UserService {
             }
         );
 
-        setTimeout(() => {
-            this.kcAdminClient.auth({
-                username: process.env.KEYCLOAK_ADMIN_USERNAME,
-                password: process.env.KEYCLOAK_ADMIN_PASSWORD,
-                grantType: 'password',
-                clientId: process.env.KEYCLOAK_ADMIN_CLIENT_ID,
-            })
-                .then(async () => {
+        this.refreshAuth();
 
-                })
-                .catch(async (err) => {
-                });
+        setInterval(() => {
+            console.log("refresh auth");
+            this.refreshAuth();
         }, 58 * 1000);
     }
 
@@ -41,6 +34,7 @@ export class UserService {
         try {
             user = await this.kcAdminClient.users.findOne({id});
         } catch (e) {
+            console.log(e);
             throw new EntityNotFoundException(null, null, 'user');
         }
 
@@ -72,5 +66,19 @@ export class UserService {
         }
 
         return user;
+    }
+
+    private refreshAuth() {
+        this.kcAdminClient.auth({
+            username: process.env.KEYCLOAK_ADMIN_USERNAME,
+            password: process.env.KEYCLOAK_ADMIN_PASSWORD,
+            grantType: 'password',
+            clientId: process.env.KEYCLOAK_ADMIN_CLIENT_ID,
+        })
+            .then(async (res) => {
+            })
+            .catch(async (err) => {
+                console.log(err);
+            });
     }
 }
