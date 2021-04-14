@@ -6,9 +6,10 @@ import {IAppointmentResponseDTO} from './DTOs/IAppointmentResponseDTO';
 import {EnrollmentPermissionList} from '../enrollment/enrollmentPermissionList';
 import {Relation} from '../Relation.type';
 import {UserMapper} from '../user/user.mapper';
-import {PinList} from '../pinner/pinList';
+import {AppointmentPinList} from '../pinner/appointmentPinList';
 import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationResponseDTO';
 import {IEnrollmentDTO} from '../enrollment/IEnrollmentDTO';
+import {IUserDTO} from '../user/IUserDTO';
 
 export class AppointmentMapper {
     constructor(private readonly userService: UserService) {
@@ -45,7 +46,7 @@ export class AppointmentMapper {
      *
      * @return {@link IAppointmentResponseDTO} Object containing processed user information
      */
-    public async basic(appointment: Appointment, user: JWT_User, pinList: PinList,
+    public async basic(appointment: Appointment, user: JWT_User, pinList: AppointmentPinList,
                        permissionList: EnrollmentPermissionList, slim: boolean): Promise<IAppointmentResponseDTO> {
         let appointmentDTO = {} as IAppointmentResponseDTO;
 
@@ -76,7 +77,12 @@ export class AppointmentMapper {
         }
 
         const userMapper = new UserMapper(this.userService);
-        appointmentDTO.creator = await userMapper.getMinifiedUserById(appointment.creatorId);
+        try {
+            appointmentDTO.creator = await userMapper.getMinifiedUserById(appointment.creatorId);
+        } catch (e) {
+            appointmentDTO.creator = {} as IUserDTO;
+            console.log('user (creator) with id not found ' + appointment.creatorId);
+        }
 
         appointmentDTO = this.stripEmptyFields(appointmentDTO);
 
@@ -93,7 +99,7 @@ export class AppointmentMapper {
      *
      * @return List of {@link Relation}
      */
-    private parseRelations(appointment: Appointment, user: JWT_User, pinList: PinList, permissionList: EnrollmentPermissionList): Relation[] {
+    private parseRelations(appointment: Appointment, user: JWT_User, pinList: AppointmentPinList, permissionList: EnrollmentPermissionList): Relation[] {
         const relations: Relation[] = [];
 
         if (user === null && permissionList.getArray().length === 0) {
@@ -117,7 +123,7 @@ export class AppointmentMapper {
      * @param pinList               {@link PinList} List containing all links the user has provided (used for {@link Relation})
      * @param relations             {@Link Relation} List - current state of array
      */
-    private parseRelations_appointmentPins(appointment: Appointment, user: JWT_User, pinList: PinList, relations: Relation[]): void {
+    private parseRelations_appointmentPins(appointment: Appointment, user: JWT_User, pinList: AppointmentPinList, relations: Relation[]): void {
         const pinnerList = appointment.pinners;
 
         const pinnedAsUser = pinnerList.containsPinByUser(user);

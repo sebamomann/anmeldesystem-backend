@@ -15,7 +15,7 @@ import {AdditionList} from '../addition/addition.list';
 import {IAppointmentResponseDTO} from './DTOs/IAppointmentResponseDTO';
 import {IAppointmentCreationDTO} from './DTOs/IAppointmentCreationDTO';
 import {EnrollmentPermissionList} from '../enrollment/enrollmentPermissionList';
-import {PinList} from '../pinner/pinList';
+import {AppointmentPinList} from '../pinner/appointmentPinList';
 import {AppointmentRepository} from './appointment.repository';
 import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationResponseDTO';
 import {IAppointmentUpdateAdditionDTO} from './DTOs/IAppointmentUpdateAdditionDTO';
@@ -96,86 +96,38 @@ export class AppointmentService {
 
         const appointmentMapper = new AppointmentMapper(this.userService);
 
-        return appointmentMapper.basic(appointment, user, new PinList(), enrollmentPermissionList, slim);
+        return appointmentMapper.basic(appointment, user, new AppointmentPinList(), enrollmentPermissionList, slim);
     }
 
     /**
-     * Fetch all !!active!! Appointments, the user is allowed to see.
-     * This includes being the creator, an administrator or being enrolled into this Appointment.
-     * Additionally, pinned appointments get returned. Further an array of links can be passed
-     * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
+     * Fetch all {@link }Appointments}, the requester is allowed to see.<br/>
+     * This includes being the creator, an {@link Administrator} or being enrolled into this {@link Appointment}.
+     * Includes pinned {@link Appointment}. List of links can be passed. Treated as "PINNED" in response.
      * <br />
-     * When passing a _link with this request, the corresponding Appointment gets marked as "PINNED"
-     * <br />
-     * <br />
-     * All appointments include a relations. See {@link parseReferences} for more information
-     *
-     * @param user      Requester (if existing)
-     * @param params    All query parameters to parse pinned links
-     * @param slim      Delete information overhead. See {@link AppointmentMapper.slim} for more information.
+     * @param user              Requester - ** can be null **
+     * @param queryParameter    Query parameters containing links as \pin\d\
+     * @param before            Date to filter selection. Date of {@link Appointment} needs to be before this date
+     * @param after             Date to filter selection. Date of {@link Appointment} needs to be after this date
+     * @param limit             Number of elements to return
+     * @param slim              Exclude enrollments and files to save bandwidth
      *
      * @returns Appointment[]
      */
-    public async getAll(user: JWT_User, params: any, slim): Promise<Appointment[]> {
-        let pinList = new PinList(params);
+    public async getAll(user: JWT_User, queryParameter: any, before: Date, after: Date, limit: number, slim: boolean): Promise<IAppointmentResponseDTO[]> {
+        let pinList = new AppointmentPinList(queryParameter);
+        let permissionList = new EnrollmentPermissionList(queryParameter);
 
-        let appointments = await this.getAppointments(user, pinList, undefined, null);
+        let appointments = await this.getAppointments(user, pinList, permissionList, before, after, limit, slim);
 
         const appointmentMapper = new AppointmentMapper(this.userService);
 
-        appointments = await appointments
-            .filter(
-                async (appointment) => {
-                    return await appointmentMapper.basic(appointment, user, pinList, new EnrollmentPermissionList({}), slim);
-                });
+        const output = [];
 
-        return appointments;
-    }
-
-    /**
-     * Fetch all Appointments from the past, the user is allowed to see.
-     * This includes being the creator, an administrator or being enrolled into this Appointment.
-     * Additionally, pinned appointments get returned. Further an array of links can be passed
-     * with this request to show, that you know this Appointment too. (e.g. pinned in frontend).-
-     * <br />
-     * When passing a _link with this request, the corresponding Appointment gets marked as "PINNED"
-     * <br />
-     * <br />
-     * All appointments include a relations. See {@link parseReferences} for more information
-     *
-     * @param user      Requester (if existing)
-     * @param params    All query parameters to parse pinned links
-     * @param _slim     Delete information overhead. See {@link AppointmentMapper.slim} for more information.
-     * @param before    Date (string) for pagination. Return elements that took place before this particular _date
-     * @param limit     Number of elements to return
-     *
-     * @returns Appointment[]
-     */
-    public async getAllArchive(user: JWT_User, params: any, _slim: boolean, before: string, limit: number): Promise<Appointment[]> {
-        let pinList = new PinList(params);
-
-        let _before;
-        const date = new Date(before);
-        try {
-            if (!date.getTime()) {
-                throw new Error();
-            }
-            _before = date;
-        } catch (e) {
-            _before = new Date();
+        for (const appointment of appointments) {
+            output.push(await appointmentMapper.basic(appointment, user, pinList, permissionList, slim));
         }
 
-        let appointments = await this.getAppointments(user, pinList, _before, limit);
-
-        const appointmentMapper = new AppointmentMapper(this.userService);
-
-        appointments = await appointments
-            .filter(
-                async (appointment) => {
-                    return await appointmentMapper.basic(appointment, user, pinList, new EnrollmentPermissionList({}), _slim);
-                });
-
-        return appointments;
+        return output;
     }
 
     /**
@@ -306,12 +258,12 @@ export class AppointmentService {
 
         const output: PermissionRelation[] = [];
 
-        if(appointmentPermissionChecker.userIsAdministrator(user)) {
-            output.push("ADMIN");
+        if (appointmentPermissionChecker.userIsAdministrator(user)) {
+            output.push('ADMIN');
         }
 
-        if(appointmentPermissionChecker.userIsCreator(user)) {
-            output.push("CREATOR");
+        if (appointmentPermissionChecker.userIsCreator(user)) {
+            output.push('CREATOR');
         }
 
         return output;
@@ -348,7 +300,7 @@ export class AppointmentService {
 
     async getAppointmentIncludingPermissionAndSlimCheck(link: string, user: JWT_User, enrollmentPermissionList:
         EnrollmentPermissionList, slim: boolean): Promise<Appointment> {
-        let select = ['appointment', 'additions', 'files', 'administrators', 'pinners'];
+        let select = ['appointment', 'additions', 'files', 'administrators', 'pinners']; // TODO DO NOT SELECT PINNER
 
         let builder = getRepository(Appointment).createQueryBuilder('appointment');
 
@@ -481,15 +433,15 @@ export class AppointmentService {
 
         const cond = `
             CASE 
-                WHEN pinners.id = :userId
-                THEN pinners.id = :userId
-                ELSE pinners.id = 0
+                WHEN pinners.userId = :userId
+                THEN pinners.userId = :userId
+                ELSE pinners.userId = 0
             END 
             `;
 
         builder = builder.leftJoinAndSelect('appointment._pinners', 'pinners', cond, {
             userId: user?.sub || 0
-        })
+        });
 
         builder = builder.select(select);
 
@@ -514,72 +466,111 @@ export class AppointmentService {
         return appointment;
     }
 
-    /* istanbul ignore next */
-    private async getAppointments(user: JWT_User, pinList, before: Date, limit) {
-        // add value, cuz SQL cant process empty list
-        const pins = pinList.getArray();
-        if (pins.length === 0) {
-            pins.push('_');
+    isValidDate(d) {
+        // @ts-ignore
+        return d instanceof Date && !isNaN(d);
+    }
+
+    private async getAppointments(user: JWT_User, pinList: AppointmentPinList, permissionList: EnrollmentPermissionList,
+                                  before: Date, after: Date,
+                                  limit: number, slim: boolean) {
+        let select = ['appointment', 'additions', 'files', 'administrators', 'pinners'];
+
+        let builder = getRepository(Appointment).createQueryBuilder('appointment');
+
+        builder = builder.leftJoinAndSelect('appointment._additions', 'additions');
+        builder = builder.leftJoinAndSelect('appointment._administrators', 'administrators');
+
+        const permittedEnrollmentsIds = permissionList.getPermittedEnrollments();
+
+        // List in select needs to have at leas 1 item
+        if (permittedEnrollmentsIds.length === 0) {
+            permittedEnrollmentsIds.push('0');
         }
 
-        const output = await getRepository(Appointment)
-            .createQueryBuilder('appointment')
-            .leftJoinAndSelect('appointment.creator', 'creator')
-            .leftJoinAndSelect('appointment._additions', 'additions')
-            .leftJoinAndSelect('appointment.enrollments', 'enrollments')
-            .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
-            .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
-            .leftJoinAndSelect('enrollments._additions', 'enrollment_additions')
-            .leftJoinAndSelect('enrollments.creator', 'enrollment_creator')
-            .leftJoinAndSelect('appointment.files', 'files')
-            .leftJoinAndSelect('appointment.administrators', 'administrators')
-            .leftJoinAndSelect('appointment.pinners', 'pinners')
-            .select(['appointment', 'additions', 'enrollments',
-                'enrollment_passenger', 'enrollment_driver', 'enrollment_creator',
-                'creator.username', 'creator.name', 'files', 'administrators.username', 'administrators.name',
-                'enrollment_additions', 'pinners'])
-            .where(new Brackets(br => {
-                br.where('creator.id = :creatorId', {creatorId: user.sub})
-                    .orWhere('administrators.id = :admin', {admin: user.sub})
-                    .orWhere('enrollments.creatorId = :user', {user: user.sub})
-                    .orWhere('pinners.id = :user', {user: user.sub})
-                    .orWhere('appointment._link IN (:...links)', {links: pins});
-            }))
-            .andWhere(before ? 'UNIX_TIMESTAMP(appointment._date) < UNIX_TIMESTAMP(:_date)' : 'UNIX_TIMESTAMP(appointment._date) > UNIX_TIMESTAMP(:date2)', {
-                date: before,
-                date2: new Date()
+        if (!slim) {
+            const cond = `
+            CASE 
+                WHEN appointment.hidden = 1
+                THEN (
+                    CASE
+                        WHEN (
+                            appointment.creatorId = :userId
+                            OR
+                            administrators.userId = :userId 
+                        )
+                        THEN enrollments.appointmentId = appointment.id
+                        ELSE (
+                            enrollments.id IN (:...ids)
+                            OR
+                            enrollments.creatorId = :userId
+                        )
+                    END  
+                ) 
+                ELSE enrollments.appointmentId = appointment.id
+            END 
+            `;
+
+            builder = builder.leftJoinAndSelect('appointment._enrollments', 'enrollments', cond, {
+                userId: user?.sub || 0,
+                ids: permittedEnrollmentsIds
             })
-            .orderBy('appointment._date', 'DESC')
-            .getMany();
+                .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
+                .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
+                .leftJoinAndSelect('enrollments.additions', 'enrollment_additions');
 
-        if (!limit) {
-            limit = output.length;
+            select = [...select, 'enrollments', 'enrollment_additions', 'enrollment_passenger', 'enrollment_driver'];
+
+            // data is never selected, if not specified
+            builder = builder.leftJoinAndSelect('appointment._files', 'files');
         }
 
-        return output.splice(0, limit); // needed because .limit or .take break the joins
+        const cond2 = `
+            CASE 
+                WHEN pinners.userId = :userId
+                THEN pinners.userId = :userId
+                ELSE pinners.userId = 0
+            END 
+            `;
 
-        // return await this.appointmentRepository.find(
-        //     {
-        //         join: {
-        //             alias: 'appointment', innerJoin: {
-        //                 administrators: 'appointment.administrators',
-        //                 enrollments: 'appointment.enrollments',
-        //                 enrollmentsCreator: 'enrollments.creator',
-        //                 pinners: 'appointment.pinners'
-        //             }
-        //         },
-        //         where: [
-        //             {creator: {id: user.id}},
-        //             {administrators: {id: user.id}},
-        //             {enrollmentsCreator: {id: user.id}},
-        //             {pinners: {id: user.id}},
-        //             {_link: In(pins)},
-        //         ],
-        //         order: {
-        //             _date: 'DESC'
-        //         },
-        //     }
-        // );
+        builder = builder.leftJoinAndSelect('appointment._pinners', 'pinners', cond2, {
+            userId: user?.sub || 0
+        })
+
+        builder = builder.where(
+            new Brackets(
+                (br) => {
+                    br.where('appointment.link IN (:...pinnedLinks)', {pinnedLinks: pinList.getArray().length > 0 ? pinList.getArray() : ['0']});
+                    br.orWhere('appointment.creatorId = :userId', {userId: user.sub});
+                    br.orWhere('administrators.userId = :userId', {userId: user.sub});
+                    br.orWhere('enrollments.creatorId = :userId', {userId: user.sub});
+                    br.orWhere('enrollments.id IN (:...enrollmentIds)', {enrollmentIds: permittedEnrollmentsIds});
+                    br.orWhere('pinners.userId = (:...userId)', {userId: user.sub});
+                }
+            )
+        );
+
+        if (this.isValidDate(before)) {
+            builder = builder.andWhere('UNIX_TIMESTAMP(appointment.date) < UNIX_TIMESTAMP(:date)', {
+                date: before
+            });
+        }
+
+        if (this.isValidDate(after)) {
+            builder = builder.andWhere('UNIX_TIMESTAMP(appointment.date) < UNIX_TIMESTAMP(:date)', {
+                date: after
+            });
+        }
+
+        builder = builder.orderBy('appointment.date', 'DESC');
+
+        if (limit > 0) {
+            builder = builder.limit(limit = limit);
+        }
+
+        builder = builder.select(select);
+
+        return await builder.getMany();
     }
 
     private async appointmentIsHidden(link: string): Promise<boolean> {

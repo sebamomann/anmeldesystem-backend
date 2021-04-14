@@ -101,7 +101,14 @@ export class AdministratorList {
         const userMapper = new UserMapper(this.userService);
 
         for (const fAdmin of this.getRawArray()) {
-            const user: KeycloakUser = await this.userService.findById(fAdmin.userId);
+            let user: KeycloakUser = {} as KeycloakUser;
+
+            try {
+                user = await this.userService.findById(fAdmin.userId);
+            } catch (e) {
+                console.log('user (admin) with id not found ' + fAdmin.userId);
+            }
+
             const minifiedUser = await userMapper.minifyUser(user);
 
             output.push(minifiedUser);

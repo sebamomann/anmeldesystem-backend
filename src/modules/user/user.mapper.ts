@@ -8,6 +8,7 @@ export class UserMapper {
 
     public async getMinifiedUserById(id: string): Promise<IUserDTO> {
         const creator: KeycloakUser = await this.userService.findById(id);
+
         return this.minifyUser(creator);
     }
 

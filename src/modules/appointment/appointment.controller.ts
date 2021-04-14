@@ -1,18 +1,4 @@
-import {
-    Body,
-    ClassSerializerInterceptor,
-    Controller,
-    Get,
-    HttpStatus,
-    Param,
-    Post,
-    Put,
-    Query,
-    Request,
-    Res,
-    UseGuards,
-    UseInterceptors
-} from '@nestjs/common';
+import {Body, Controller, Get, HttpStatus, Param, Post, Put, Query, Request, Res, UseGuards, UseInterceptors} from '@nestjs/common';
 
 import {Usr} from '../user/user.decorator';
 import {AppointmentService} from './appointment.service';
@@ -24,6 +10,7 @@ import {JWT_User} from '../user/user.model';
 import {AuthGuard} from '../../auth/auth.gurad';
 import {IAppointmentCreationDTO} from './DTOs/IAppointmentCreationDTO';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
+import {IAppointmentResponseDTO} from './DTOs/IAppointmentResponseDTO';
 
 @Controller('appointments')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
@@ -33,42 +20,27 @@ export class AppointmentController {
 
     @Get()
     @UseGuards(AuthOptGuard)
-    @UseInterceptors(ClassSerializerInterceptor)
     getAll(@Usr() user: JWT_User,
            @Query() params: any,
+           @Query('before') before: string,
+           @Query('after') after: string,
+           @Query('limit') limit: number,
            @Query('slim') slim: string,
            @Res() res: Response,) {
         let _slim = slim === 'true';
 
         return this.appointmentService
-            .getAll(user, params, _slim)
-            .then(result => {
-                res.status(HttpStatus.OK).json(result);
-            })
-            .catch(err => {
-                throw err;
-            });
-    }
-
-    @Get('archive')
-    @UseGuards(AuthOptGuard)
-    @UseInterceptors(ClassSerializerInterceptor)
-    getAllArchive(@Usr() user: JWT_User,
-                  @Query() params: any,
-                  @Query('slim') slim: string,
-                  @Query('before') before: string,
-                  @Query('limit') limit: number,
-                  @Res() res: Response,) {
-        let _slim = slim === 'true';
-
-        return this.appointmentService
-            .getAllArchive(user, params, _slim, before, limit)
-            .then(result => {
-                res.status(HttpStatus.OK).json(result);
-            })
-            .catch(err => {
-                throw err;
-            });
+            .getAll(user, params, new Date(before), new Date(after), limit, _slim)
+            .then(
+                (result: IAppointmentResponseDTO[]) => {
+                    res.status(HttpStatus.OK).json(result);
+                }
+            )
+            .catch(
+                (err) => {
+                    throw err;
+                }
+            );
     }
 
     @Get(':link')

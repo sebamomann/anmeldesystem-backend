@@ -211,7 +211,40 @@ COMMIT;
 
 
 
+-- ###########################
+-- # GET APPOINTMENT BY LINK #
+-- ###########################
 
+-- ---------
+-- DEFAULT -
+-- ---------
+-- JWT_User with ID b5c8a93e-2f01-4d79-8c4a-e4c55943be54 // DEFAULT USER
+-- JWT_User with ID 17b2a5de-8c66-42bd-bf67-ece49a49e90c // ALTERNATIVE APPOINTMENT CREATOR
+
+-- ---------
+-- DEFAULT -
+-- ---------
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('a11d01ff-455b-485f-887c-7a1a7417d253', 'test-getappointments-default-creator-title', 'test-getappointments-default-creator-description', 'test-getappointments-default-creator-link', 'test-getappointments-default-creator-location', '2021-03-01 10:05:24', '2021-01-01 20:05:23', NULL, '0', '0', 'b5c8a93e-2f01-4d79-8c4a-e4c55943be54', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000'),
+('d077a95d-cce1-4714-93ac-44972da078cb', 'test-getappointments-default-admin-title', 'test-getappointments-default-admin-description', 'test-getappointments-default-admin-link', 'test-getappointments-default-admin-location', '2021-03-01 10:05:25', '2021-01-01 20:05:23', NULL, '0', '0', '17b2a5de-8c66-42bd-bf67-ece49a49e90c', '2021-03-14 20:05:24.000000', '2021-03-14 20:05:23.000000'),
+('40f3206a-1bd1-4bc3-b289-0852b742248f', 'test-getappointments-default-enrollmentcreator-title', 'test-getappointments-default-enrollmentcreator-description', 'test-getappointments-default-enrollmentcreator-link', 'test-getappointments-default-enrollmentcreator-location', '2021-03-01 10:05:26', '2021-01-01 20:05:23', NULL, '0', '0', '17b2a5de-8c66-42bd-bf67-ece49a49e90c', '2021-03-14 20:05:25.000000', '2021-03-14 20:05:23.000000'),
+('4c81a2ee-a103-4a93-9595-ad63f14faa3e', 'test-getappointments-default-enrollmentpermission-title', 'test-getappointments-default-enrollmentpermission-description', 'test-getappointments-default-enrollmentpermission-link', 'test-getappointments-default-enrollmentpermission-location', '2021-03-01 10:05:27', '2021-01-01 20:05:23', NULL, '0', '0', '17b2a5de-8c66-42bd-bf67-ece49a49e90c', '2021-03-14 20:05:26.000000', '2021-03-14 20:05:23.000000'),
+('92a7b4f6-42cf-4758-9b9e-7c9f0bab7698', 'test-getappointments-default-pin-user-title', 'test-getappointments-default-pin-user-description', 'test-getappointments-default-pin-user-link', 'test-getappointments-default-pin-user-location', '2021-03-01 10:05:28', '2021-01-01 20:05:23', NULL, '0', '0', '17b2a5de-8c66-42bd-bf67-ece49a49e90c', '2021-03-14 20:05:27.000000', '2021-03-14 20:05:23.000000'),
+('97405398-baca-43b8-8b90-cf5e16f33e41', 'test-getappointments-default-pin-link-title', 'test-getappointments-default-pin-link-description', 'test-getappointments-default-pin-link-link', 'test-getappointments-default-pin-link-location', '2021-03-01 10:05:29', '2021-01-01 20:05:23', NULL, '0', '0', '17b2a5de-8c66-42bd-bf67-ece49a49e90c', '2021-03-14 20:05:28.000000', '2021-03-14 20:05:23.000000');
+COMMIT;
+
+INSERT INTO `administrator` (`id`, `userId`, `appointmentId`) VALUES
+('203b7251-edb3-4485-9342-37d4ee723741', 'b5c8a93e-2f01-4d79-8c4a-e4c55943be54', 'd077a95d-cce1-4714-93ac-44972da078cb');
+COMMIT;
+
+INSERT INTO `enrollment` (`id`, `name`, `comment`, `creatorId`, `iat`, `lud`, `appointmentId`) VALUES
+('2e93ca6f-6c2b-47da-97a5-17a87f8eacbc', 'test-getappointments-default-creator-name', 'test-getappointments-default-creator-comment', 'b5c8a93e-2f01-4d79-8c4a-e4c55943be54', '2021-01-01 05:07:23', '2021-03-01 05:07:23', '40f3206a-1bd1-4bc3-b289-0852b742248f'),
+('4bc8aa7c-6cc8-4811-b672-2bd6601254aa', 'test-getappointments-default-enrollmentpermission-name', 'test-getappointments-default-enrollmentpermission-comment', NULL, '2021-01-01 05:07:23', '2021-03-01 05:07:23', '4c81a2ee-a103-4a93-9595-ad63f14faa3e');
+COMMIT;
+
+INSERT INTO `pinner` (`id`, `userId`, `appointmentId`) VALUES
+('8e132a64-04f2-4dfa-a0f0-6224e0a56c0c', 'b5c8a93e-2f01-4d79-8c4a-e4c55943be54', '92a7b4f6-42cf-4758-9b9e-7c9f0bab7698');
+COMMIT;
 
 
 

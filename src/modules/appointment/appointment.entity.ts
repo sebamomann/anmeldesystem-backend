@@ -160,7 +160,8 @@ export class Appointment {
     @OneToMany(type => Addition,
         addition => addition.appointment,
         {
-            eager: true, // is core information
+            eager: true, // is core information,
+            cascade: ['insert', 'update']
         })
     _additions: Addition[];
 

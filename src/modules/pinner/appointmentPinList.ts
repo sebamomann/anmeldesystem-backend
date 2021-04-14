@@ -1,4 +1,4 @@
-export class PinList {
+export class AppointmentPinList {
     private list: string[];
 
     constructor(pins: any = {}) {
