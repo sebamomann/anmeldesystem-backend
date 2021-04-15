@@ -21,6 +21,7 @@ import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationRespon
 import {IAppointmentUpdateAdditionDTO} from './DTOs/IAppointmentUpdateAdditionDTO';
 import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
 import {PermissionRelation} from '../PermissionRelation.type';
+import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
 
 const logger = require('../../logger');
 
@@ -113,11 +114,23 @@ export class AppointmentService {
      *
      * @returns Appointment[]
      */
-    public async getAll(user: JWT_User, queryParameter: any, before: Date, after: Date, limit: number, slim: boolean): Promise<IAppointmentResponseDTO[]> {
+    public async getAll(user: JWT_User, queryParameter: any, before: string, after: string, limit: number, slim: boolean): Promise<IAppointmentResponseDTO[]> {
         let pinList = new AppointmentPinList(queryParameter);
         let permissionList = new EnrollmentPermissionList(queryParameter);
 
-        let appointments = await this.getAppointments(user, pinList, permissionList, before, after, limit, slim);
+        if (!this.isValidDate(new Date(before)) && before) {
+            throw new InvalidValuesException(null, null, ['before']);
+        }
+
+        if (!this.isValidDate(new Date(after)) && after) {
+            throw new InvalidValuesException(null, null, ['after']);
+        }
+
+        if (isNaN(limit) || (+limit < 0 && limit)) {
+            throw new InvalidValuesException(null, null, ['limit']);
+        }
+
+        let appointments = await this.getAppointments(user, pinList, permissionList, new Date(before), new Date(after), +limit, slim);
 
         const appointmentMapper = new AppointmentMapper(this.userService);
 
@@ -535,7 +548,7 @@ export class AppointmentService {
 
         builder = builder.leftJoinAndSelect('appointment._pinners', 'pinners', cond2, {
             userId: user?.sub || 0
-        })
+        });
 
         builder = builder.where(
             new Brackets(
@@ -551,7 +564,7 @@ export class AppointmentService {
         );
 
         if (this.isValidDate(before)) {
-            builder = builder.andWhere('UNIX_TIMESTAMP(appointment.date) < UNIX_TIMESTAMP(:date)', {
+            builder = builder.andWhere('UNIX_TIMESTAMP(appointment.date) > UNIX_TIMESTAMP(:date)', {
                 date: before
             });
         }
@@ -565,7 +578,7 @@ export class AppointmentService {
         builder = builder.orderBy('appointment.date', 'DESC');
 
         if (limit > 0) {
-            builder = builder.limit(limit = limit);
+            builder = builder.limit(limit);
         }
 
         builder = builder.select(select);

@@ -211,9 +211,9 @@ COMMIT;
 
 
 
--- ###########################
--- # GET APPOINTMENT BY LINK #
--- ###########################
+-- ####################
+-- # GET APPOINTMENTS #
+-- ####################
 
 -- ---------
 -- DEFAULT -
@@ -244,6 +244,28 @@ COMMIT;
 
 INSERT INTO `pinner` (`id`, `userId`, `appointmentId`) VALUES
 ('8e132a64-04f2-4dfa-a0f0-6224e0a56c0c', 'b5c8a93e-2f01-4d79-8c4a-e4c55943be54', '92a7b4f6-42cf-4758-9b9e-7c9f0bab7698');
+COMMIT;
+
+-- ####################
+-- # GET APPOINTMENTS #
+-- ####################
+
+-- --------
+-- FILTER -
+-- --------
+-- JWT_User with ID c1138c7f-82e3-4288-b2e7-c26346727d94 // DEFAULT USER
+
+INSERT INTO `appointment` (`id`, `title`, `description`, `link`, `location`, `date`, `deadline`, `maxEnrollments`, `hidden`, `driverAddition`, `creatorId`, `iat`, `lud`) VALUES
+('9aeb317b-cdd2-4a10-bdd2-0d9229e56bc1', 'test-getappointments-filter-title-1', 'test-getappointments-filter-description-1', 'test-getappointments-filter-link-1', 'test-getappointments-filter-location-1', '2021-05-01 10:05:24', '2021-01-01 20:05:23', NULL, '0', '0', 'c1138c7f-82e3-4288-b2e7-c26346727d94', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000'),
+('9f43348a-a986-4dd4-8198-1f7156b8fdf2', 'test-getappointments-filter-title-2', 'test-getappointments-filter-description-2', 'test-getappointments-filter-link-2', 'test-getappointments-filter-location-2', '2021-05-02 10:05:24', '2021-01-01 20:05:23', NULL, '0', '0', 'c1138c7f-82e3-4288-b2e7-c26346727d94', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000'),
+('f7354764-cb87-4bde-9b44-b972e53b4433', 'test-getappointments-filter-title-3', 'test-getappointments-filter-description-3', 'test-getappointments-filter-link-3', 'test-getappointments-filter-location-3', '2021-05-03 10:05:24', '2021-01-01 20:05:23', NULL, '0', '0', 'c1138c7f-82e3-4288-b2e7-c26346727d94', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000'),
+('8d529e14-e15a-47f8-b2fb-e9271d6f7290', 'test-getappointments-filter-title-4', 'test-getappointments-filter-description-4', 'test-getappointments-filter-link-4', 'test-getappointments-filter-location-4', '2021-05-04 10:05:24', '2021-01-01 20:05:23', NULL, '0', '0', 'c1138c7f-82e3-4288-b2e7-c26346727d94', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000'),
+('ca503e46-a8a0-4df9-b9c2-81644ebdca40', 'test-getappointments-filter-title-5', 'test-getappointments-filter-description-5', 'test-getappointments-filter-link-5', 'test-getappointments-filter-location-5', '2021-05-05 10:05:24', '2021-01-01 20:05:23', NULL, '0', '0', 'c1138c7f-82e3-4288-b2e7-c26346727d94', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000'),
+('2773d5c1-f3db-4a90-9a9f-c87a9f1c4ef8', 'test-getappointments-filter-title-6', 'test-getappointments-filter-description-6', 'test-getappointments-filter-link-6', 'test-getappointments-filter-location-6', '2021-05-06 10:05:24', '2021-01-01 20:05:23', NULL, '0', '0', 'c1138c7f-82e3-4288-b2e7-c26346727d94', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000'),
+('4a57d328-e71f-420b-a201-abc90289772f', 'test-getappointments-filter-title-7', 'test-getappointments-filter-description-7', 'test-getappointments-filter-link-7', 'test-getappointments-filter-location-7', '2021-05-07 10:05:24', '2021-01-01 20:05:23', NULL, '0', '0', 'c1138c7f-82e3-4288-b2e7-c26346727d94', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000'),
+('25f5d2e8-e704-405d-b924-7c075673142b', 'test-getappointments-filter-title-8', 'test-getappointments-filter-description-8', 'test-getappointments-filter-link-8', 'test-getappointments-filter-location-8', '2021-05-08 10:05:24', '2021-01-01 20:05:23', NULL, '0', '0', 'c1138c7f-82e3-4288-b2e7-c26346727d94', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000'),
+('ac674487-19d3-4d80-b509-11be90c33247', 'test-getappointments-filter-title-9', 'test-getappointments-filter-description-9', 'test-getappointments-filter-link-9', 'test-getappointments-filter-location-9', '2021-05-09 10:05:24', '2021-01-01 20:05:23', NULL, '0', '0', 'c1138c7f-82e3-4288-b2e7-c26346727d94', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000'),
+('1048e197-99a0-4401-a9d6-5efe3f72715b', 'test-getappointments-filter-title-10', 'test-getappointments-filter-description-10', 'test-getappointments-filter-link-10', 'test-getappointments-filter-location-10', '2021-05-10 10:05:24', '2021-01-01 20:05:23', NULL, '0', '0', 'c1138c7f-82e3-4288-b2e7-c26346727d94', '2021-03-14 20:05:23.000000', '2021-03-14 20:05:23.000000');
 COMMIT;
 
 

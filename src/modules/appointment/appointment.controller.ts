@@ -11,6 +11,8 @@ import {AuthGuard} from '../../auth/auth.gurad';
 import {IAppointmentCreationDTO} from './DTOs/IAppointmentCreationDTO';
 import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
 import {IAppointmentResponseDTO} from './DTOs/IAppointmentResponseDTO';
+import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
+import {InvalidParametersException} from '../../exceptions/InvalidParametersException';
 
 @Controller('appointments')
 @UseInterceptors(BusinessToHttpExceptionInterceptor)
@@ -24,13 +26,15 @@ export class AppointmentController {
            @Query() params: any,
            @Query('before') before: string,
            @Query('after') after: string,
-           @Query('limit') limit: number,
+           @Query('limit') limit: number ,
            @Query('slim') slim: string,
            @Res() res: Response,) {
         let _slim = slim === 'true';
 
+        limit = limit ? limit : 0;
+
         return this.appointmentService
-            .getAll(user, params, new Date(before), new Date(after), limit, _slim)
+            .getAll(user, params, before, after, limit, _slim)
             .then(
                 (result: IAppointmentResponseDTO[]) => {
                     res.status(HttpStatus.OK).json(result);
@@ -38,6 +42,32 @@ export class AppointmentController {
             )
             .catch(
                 (err) => {
+                    if (err instanceof InvalidValuesException) {
+                        if (err.data[0] === 'before') {
+                            throw new InvalidParametersException(null, null, {
+                                'attribute': 'before',
+                                'in': 'query',
+                                'value': before,
+                                'message': 'The provided Date can not be parsed'
+                            });
+                        } else if (err.data[0] === 'after') {
+                            throw new InvalidParametersException(null, null, {
+                                'attribute': 'after',
+                                'in': 'query',
+                                'value': after,
+                                'message': 'The provided Date can not be parsed'
+                            });
+
+                        } else if (err.data[0] === 'limit') {
+                            throw new InvalidParametersException(null, null, {
+                                'attribute': 'limit',
+                                'in': 'query',
+                                'value': limit,
+                                'message': 'The provided number can not be processed'
+                            });
+                        }
+                    }
+
                     throw err;
                 }
             );

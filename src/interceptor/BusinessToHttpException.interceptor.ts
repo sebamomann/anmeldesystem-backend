@@ -27,6 +27,7 @@ import {InvalidAttributesException} from '../exceptions/InvalidAttributesExcepti
 import {UnknownUserException} from '../exceptions/UnknownUserException';
 import {MissingAuthenticationException} from '../exceptions/MissingAuthenticationException';
 import {MissingValuesException} from '../exceptions/MissingValuesException';
+import {InvalidParametersException} from '../exceptions/InvalidParametersException';
 
 @Injectable()
 export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
@@ -49,7 +50,8 @@ export class BusinessToHttpExceptionInterceptor implements NestInterceptor {
                             throw new ForbiddenException(exception.parse());
                         } else if (exception instanceof AlreadyUsedException) {
                             throw new ConflictException(exception.parse());
-                        } else if (exception instanceof InvalidValuesException) {
+                        } else if (exception instanceof InvalidValuesException
+                            || exception instanceof InvalidParametersException) {
                             throw new UnprocessableEntityException(exception.parse());
                         } else if (exception instanceof EntityGoneException) {
                             throw new GoneException(exception.parse());
