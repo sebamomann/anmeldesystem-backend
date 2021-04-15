@@ -68,17 +68,21 @@ export class EnrollmentController {
     @Delete(':id/:token*?')
     @UseGuards(AuthOptGuard)
     delete(@Param('id') id: string,
-           @Param('token') token: string,
+           @Headers('x-enrollment-token') token: string,
            @Usr() user: JWT_User,
            @Res() res: Response) {
         return this.enrollmentService
             .delete(id, token, user)
-            .then(() => {
-                res.status(HttpStatus.NO_CONTENT).json();
-            })
-            .catch((err) => {
-                throw err;
-            });
+            .then(
+                () => {
+                    res.status(HttpStatus.NO_CONTENT).json();
+                }
+            )
+            .catch(
+                (err) => {
+                    throw err;
+                }
+            );
     }
 
     @Get('/:id/check-permission')

@@ -283,11 +283,7 @@ export class EnrollmentService {
     public async checkPermissions(id: string, user: JWT_User, token: string) {
         let enrollment;
 
-        try {
-            enrollment = await this.findById(id);
-        } catch (e) {
-            throw e;
-        }
+        enrollment = await this.findById(id);
 
         let allowances = [];
 
