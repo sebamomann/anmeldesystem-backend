@@ -357,10 +357,10 @@ export class AppointmentService {
                 .leftJoinAndSelect('enrollments.additions', 'enrollment_additions');
 
             select = [...select, 'enrollments', 'enrollment_additions', 'enrollment_passenger', 'enrollment_driver'];
-
-            // data is never selected, if not specified
-            builder = builder.leftJoinAndSelect('appointment._files', 'files');
         }
+
+        // data is never selected, if not specified
+        builder = builder.leftJoinAndSelect('appointment._files', 'files');
 
         builder = builder.where('appointment.link = :link', {link: link});
         builder = builder.select(select);
@@ -532,11 +532,11 @@ export class AppointmentService {
                 .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
                 .leftJoinAndSelect('enrollments.additions', 'enrollment_additions');
 
-            select = [...select, 'enrollments', 'enrollment_additions', 'enrollment_passenger', 'enrollment_driver'];
-
-            // data is never selected, if not specified
-            builder = builder.leftJoinAndSelect('appointment._files', 'files');
+            select = [...select, 'enrollments', 'enrollment_additions', 'enrollment_passenger', 'enrollment_driver', 'files'];
         }
+
+        // data is never selected, if not specified
+        builder = builder.leftJoinAndSelect('appointment._files', 'files');
 
         const cond2 = `
             CASE 
@@ -554,11 +554,13 @@ export class AppointmentService {
             new Brackets(
                 (br) => {
                     br.where('appointment.link IN (:...pinnedLinks)', {pinnedLinks: pinList.getArray().length > 0 ? pinList.getArray() : ['0']});
-                    br.orWhere('appointment.creatorId = :userId', {userId: user.sub});
-                    br.orWhere('administrators.userId = :userId', {userId: user.sub});
-                    br.orWhere('enrollments.creatorId = :userId', {userId: user.sub});
-                    br.orWhere('enrollments.id IN (:...enrollmentIds)', {enrollmentIds: permittedEnrollmentsIds});
-                    br.orWhere('pinners.userId = (:...userId)', {userId: user.sub});
+                    br.orWhere('appointment.creatorId = :userId', {userId: user?.sub || 0});
+                    br.orWhere('administrators.userId = :userId', {userId: user?.sub || 0});
+                    if (!slim) {
+                        br.orWhere('enrollments.creatorId = :userId', {userId: user?.sub || 0});
+                        br.orWhere('enrollments.id IN (:...enrollmentIds)', {enrollmentIds: permittedEnrollmentsIds});
+                    }
+                    br.orWhere('pinners.userId = (:...userId)', {userId: user?.sub || 0});
                 }
             )
         );
