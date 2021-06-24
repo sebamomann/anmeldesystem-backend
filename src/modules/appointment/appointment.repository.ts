@@ -48,7 +48,7 @@ export class AppointmentRepository {
                 'WHEN appointment.creatorId = :creatorId ' +
                 'THEN (:...ids) ' +
                 'ELSE (0) OR 1=1 ' +
-                'END', {creatorId: user.sub, ids: permittedEnrollmentsIds});
+                'END', {creatorId: user?.sub, ids: permittedEnrollmentsIds});
         }
 
         builder = builder.select(select);

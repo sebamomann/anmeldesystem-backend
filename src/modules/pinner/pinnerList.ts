@@ -17,6 +17,10 @@ export class PinnerList {
     }
 
     public containsPinByUser(user: JWT_User): boolean {
+        if(!user) {
+            return false;
+        }
+
         return this.list
             .some(
                 (sPinner: Pinner) => {

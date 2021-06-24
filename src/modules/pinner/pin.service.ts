@@ -31,7 +31,7 @@ export class PinService {
     public async pinAppointment(user: JWT_User, link: string) {
         const appointment = await this.appointmentService.getAppointmentWithPinByUser(link, user);
 
-        if (!appointment.pinners.containsPinByUser(user)) {
+        if (user && !appointment.pinners.containsPinByUser(user)) {
             const pinner = new Pinner();
             pinner.userId = user.sub;
             pinner.appointment = appointment;

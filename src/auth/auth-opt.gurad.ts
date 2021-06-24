@@ -15,7 +15,7 @@ export class AuthOptGuard implements CanActivate {
             try {
                 await this.guard.canActivate(context);
             } catch {
-                request.user = null;
+                request.user = {};
                 // request.headers["X-Valid-Authorization"] = false;
             }
         } else {
