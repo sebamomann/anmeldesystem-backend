@@ -94,6 +94,7 @@ export class AppointmentController {
                 res.status(HttpStatus.OK).json(tAppointment);
             })
             .catch((err) => {
+                console.log(err);
                 throw err;
             });
     }
