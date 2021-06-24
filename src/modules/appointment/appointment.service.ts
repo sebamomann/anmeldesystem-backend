@@ -532,7 +532,7 @@ export class AppointmentService {
                 .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
                 .leftJoinAndSelect('enrollments.additions', 'enrollment_additions');
 
-            select = [...select, 'enrollments', 'enrollment_additions', 'enrollment_passenger', 'enrollment_driver', 'files'];
+            select = [...select, 'enrollments', 'enrollment_additions', 'enrollment_passenger', 'enrollment_driver'];
         }
 
         // data is never selected, if not specified
