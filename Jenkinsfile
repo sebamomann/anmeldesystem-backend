@@ -91,12 +91,12 @@ pipeline {
             steps {
                 script {
                     sh 'docker run ' +
-                            '-v /var/www/vhosts/sebamomann.dankoe.de/additional_testing.dein.li/dein-li-newman.postman_environment:/etc/newman/environment.json.postman_environment ' + // TODO volume?
+                            '-v /var/www/vhosts/sebamomann.dankoe.de/additional_testing.dein.li/gjm.postman_environment:/etc/newman/environment.json.postman_environment ' + // TODO volume?
                             '--name ' + container_newman_name + ' ' +
                             '-p 3000:3000 ' +
                             '--net ' + network_name + ' ' +
                             '-t postman/newman:alpine ' +
-                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + commit_hash + '/test/collection/gjm.postman_collection.json" ' +
+                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + commit_hash + '/test/collection/gjm-newman.postman_collection.json" ' +
                             '--environment="environment.json.postman_environment" ' +
                             '--env-var baseUrl=' + container_backend_name + ':3000 ' +
                             '-n 1 ' +
