@@ -13,6 +13,7 @@ WORKDIR /app
 
 COPY ./package.json ./
 
+RUN rm -rf node_modules
 RUN npm install
 
 COPY . .
@@ -20,7 +21,6 @@ COPY . .
 # testing
 # RUN npm run test:cov
 # build
-RUN rm -rf node_modules
 RUN npm run prebuild
 RUN npm run build
 RUN npm prune --production
