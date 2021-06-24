@@ -3,6 +3,8 @@ def branch_name = "${env.BRANCH_NAME}" as String
 def build_number = "${env.BUILD_NUMBER}" as String
 def commit_hash
 
+def tag_name = 'jb_' + branch_name + "_" + build_number
+
 def api_image_name = 'anmeldesystem/anmeldesystem-backend:' + tag_name
 def container_database_name = 'anmeldesystem_newman-testing_db_' + tag_name
 def container_newman_name = 'anmeldesystem_newman-testing_newman_' + tag_name
