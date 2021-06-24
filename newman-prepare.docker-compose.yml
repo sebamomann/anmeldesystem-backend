@@ -1,0 +1,53 @@
+version: "2.2"
+services:
+  mysql:
+    image: 'mariadb:10.3'
+    container_name: ${MYSQL_CONTAINER_NAME}
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=anmeldesystem-api-newman
+      - SESSION_SECRET
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    networks:
+      - network
+  backend:
+    image: ${API_IMAGE_NAME}
+    container_name: ${BACKEND_CONTAINER_NAME}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - SALT_JWT=salt
+      - SALT_MAIL=salt
+      - TYPEORM_CONNECTION=mysql
+      - TYPEORM_HOST=${MYSQL_CONTAINER_NAME}
+      - TYPEORM_PORT=3306
+      - TYPEORM_USERNAME=user
+      - TYPEORM_PASSWORD=password
+      - TYPEORM_DATABASE=anmeldesystem-api-newman
+      - TYPEORM_SYNCHRONIZE=true
+      - TYPEORM_ENTITIES=dist/**/*.entity.js
+      - NODE_ENV=newman
+      - API_URL=${BACKEND_CONTAINER_NAME}:3000/
+      - KEYCLOAK_URL=https://account.sebamomann.de/
+      - KEYCLOAK_REALM=test
+      - KEYCLOAK_CLIENT_ID=test
+      - TZ=Europe/Berlin
+    healthcheck:
+      test: ["CMD", "curl", "localhost:3000/healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - network
+networks:
+  network:
+    name: ${NETWORK_NAME}
+    external: true

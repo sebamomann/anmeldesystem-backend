@@ -1,13 +1,13 @@
 def image
-def branch_name = "${env.BRANCH_NAME}"
-def github_token = "${env.GITHUB_STATUS_ACCESS_TOKEN}"
-def build_number = "${env.BUILD_NUMBER}"
+def branch_name = "${env.BRANCH_NAME}" as String
+def build_number = "${env.BUILD_NUMBER}" as String
+def commit_hash
 
-def tagName = 'jb_' + branch_name + "_" + build_number
-def dbName = 'newman_db_' + tagName
-def newmanName = 'newman_' + tagName
-def netName = 'newman_net_' + tagName
-def apiName = 'newman_backend'
+def api_image_name = 'anmeldesystem/anmeldesystem-backend:' + tag_name
+def container_database_name = 'anmeldesystem_newman-testing_db_' + tag_name
+def container_newman_name = 'anmeldesystem_newman-testing_newman_' + tag_name
+def container_backend_name = 'anmeldesystem_newman-testing_backend_' + tag_name
+def network_name = 'anmeldesystem_newman-testing_network_' + tag_name
 
 pipeline {
     agent any
@@ -24,7 +24,17 @@ pipeline {
         stage('Preamble') {
             steps {
                 script {
+                    echo 'Updating status'
                     updateStatus("pending")
+                }
+                script {
+                    commit_hash = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+
+                    echo 'Control Variables'
+                    echo '-------------------'
+                    echo "COMMIT HASH: ${commit_hash}"
+                    echo "BRANCH NAME: ${branch_name}"
+                    echo "BUILD NUMBER: ${build_number}"
                 }
             }
         }
@@ -33,79 +43,62 @@ pipeline {
         stage('Build Docker image') {
             steps {
                 script {
-                    image = docker.build("anmeldesystem/anmeldesystem-backend:" + tagName)
+                    image = docker.build(api_image_name)
                 }
             }
         }
 
-        stage('Newman prepare') {
+        stage('Newman - prepare API') {
             steps {
                 script {
+                    echo 'Spinup network'
+
                     try {
-                        sh 'docker network create ' + netName
+                        sh 'docker network create ' + network_name
                     } catch (err) {
                         echo err.getMessage()
                     }
+                }
+                script {
+                    sh 'MYSQL_CONTAINER_NAME=' + container_database_name + ' ' +
+                            'BACKEND_CONTAINER_NAME=' + container_backend_name + ' ' +
+                            'API_IMAGE_NAME=' + api_image_name + ' ' +
+                            'NEWMAN_CONTAINER_NAME=' + container_newman_name + ' ' +
+                            'NETWORK_NAME=' + network_name + ' ' +
+                            'docker-compose -f newman-prepare.docker-compose.yml up ' +
+                            '--detach'
 
-                    sh 'docker run -d ' +
-                            '--name ' + dbName + ' ' +
-                            '--env MYSQL_ROOT_PASSWORD=password ' +
-                            '--env MYSQL_DATABASE=anmeldesystem-api-newman ' +
-                            '--env MYSQL_USER=user ' +
-                            '--env MYSQL_PASSWORD=password ' +
-                            '--network ' + netName + ' ' +
-                            '--health-cmd=\'mysqladmin ping --silent\' ' +
-                            'mysql ' +
-                            'mysqld --default-authentication-plugin=mysql_native_password'
-
-                    timeout(60) {
+                    timeout(5) {
                         waitUntil {
                             "healthy" == sh(returnStdout: true,
-                                    script: "docker inspect " + dbName + " --format=\"{{ .State.Health.Status }}\"").trim()
-                        }
-                    }
-
-                    sh 'docker run -d ' +
-                            '--name ' + apiName + ' ' +
-                            '--env DB_USERNAME=root ' +
-                            '--env DB_PASSWORD=password ' +
-                            '--env DB_HOST=' + dbName + ' ' +
-                            '--env DB_PORT=3306 ' +
-                            '--env DB_DATABASE=anmeldesystem-api-newman ' +
-                            '--env SALT_JWT=salt ' +
-                            '--env SALT_MAIL=salt ' +
-                            '--env SALT_ENROLLMENT=salt ' +
-                            '--env DOMAIN=go-join.me ' +
-                            '--env NODE_ENV=postman ' +
-                            '--network ' + netName + ' ' +
-                            '--health-cmd=\'curl localhost:3000/healthcheck || exit 1 \' ' +
-                            '--health-interval=2s ' +
-                            'anmeldesystem/anmeldesystem-backend:' + tagName
-
-                    timeout(60) {
-                        waitUntil {
-                            "healthy" == sh(returnStdout: true,
-                                    script: "docker inspect " + apiName + " --format=\"{{ .State.Health.Status }}\"").trim()
+                                    script: "docker inspect " + container_backend_name + " --format=\"{{ .State.Health.Status }}\"").trim()
                         }
                     }
                 }
             }
         }
-        stage('Newman exec') {
+        //Needs to be in extra step, because the backend is creating the DB Schema
+        stage('Newman - populate database') {
             steps {
                 script {
-//                    def text = readFile file: "./gjm-test.postman_collection.json"
-//                    text = text.replaceAll("localhost", "anmeldesystem-backend-newman_build_" + build_number)
-//                    writeFile file: "./gjm-test.postman_collection.json", text: text
-//                    sh 'ls -la $(pwd)'
-//                    sh 'chmod 777 gjm-test.postman_collection.json'
-//                    sh 'ls -la $(pwd)'
+                    sh 'docker exec -i ' + container_database_name + ' mysql -uuser -ppassword anmeldesystem-newman < $(pwd)/test/testdata/data_I_main.sql'
+                }
+            }
+        }
+        stage('Newman - execute') {
+            steps {
+                script {
                     sh 'docker run ' +
-                            '-v $(pwd)/gjm-test.postman_collection.json:/etc/newman/collection.json ' +
-                            '--name ' + newmanName + ' ' +
-                            '--net ' + netName + ' ' +
+                            '-v /var/www/vhosts/sebamomann.dankoe.de/additional_testing.dein.li/dein-li-newman.postman_environment:/etc/newman/environment.json.postman_environment ' + // TODO volume?
+                            '--name ' + container_newman_name + ' ' +
+                            '-p 3000:3000 ' +
+                            '--net ' + network_name + ' ' +
                             '-t postman/newman:alpine ' +
-                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + branch_name + '/gjm-test.postman_collection.json" --delay-request 100 -n 1 --bail --delay-request 100'
+                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + commit_hash + '/test/collection/gjm.postman_collection.json" ' +
+                            '--environment="environment.json.postman_environment" ' +
+                            '--env-var baseUrl=' + container_backend_name + ':3000 ' +
+                            '-n 1 ' +
+                            '--bail'
                 }
             }
         }
@@ -143,31 +136,31 @@ pipeline {
         always {
             script {
                 try {
-                    sh 'docker container rm ' + apiName + ' -f'
+                    sh 'docker container rm ' + container_backend_name + ' -f -v'
                 } catch (err) {
                     echo err.getMessage()
                 }
 
                 try {
-                    sh 'docker container rm ' + newmanName + ' -f'
+                    sh 'docker container rm ' + container_newman_name + ' -f -v'
                 } catch (err) {
                     echo err.getMessage()
                 }
 
                 try {
-                    sh 'docker container rm ' + dbName + ' -f'
+                    sh 'docker container rm ' + container_database_name + ' -f -v'
                 } catch (err) {
                     echo err.getMessage()
                 }
 
                 try {
-                    sh 'docker network rm ' + netName
+                    sh 'docker network rm ' + network_name
                 } catch (err) {
                     echo err.getMessage()
                 }
 
                 try {
-                    sh 'docker image rm anmeldesystem/anmeldesystem-backend:' + tagName + ' -f'
+                    sh 'docker image rm ' + api_image_name + ' -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
@@ -178,7 +171,7 @@ pipeline {
                 updateStatus("success")
 
                 try {
-                    sh 'docker image prune --filter label=stage=intermediate -f'
+                    sh 'docker image prune --filter label=stage=intermediate -f --volumes'
                 } catch (err) {
                     echo err.getMessage()
                 }
