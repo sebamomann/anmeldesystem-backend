@@ -14788,7 +14788,7 @@
 					"postman.setGlobalVariable(\"function_getSchemaStringRecursively\",",
 					" (schemaName) => {",
 					"    let schema = pm.variables.get(schemaName);",
-					"	 console.log(schema);",
+					"    console.log(schema);",
 					"    let myRegexp = /\\#\\#REPLACE_SCHEMA\\((schema_.*)\\)\\#\\#/gm;",
 					"    matches = schema.matchAll(myRegexp);",
 					"    for (let match of matches) {",
