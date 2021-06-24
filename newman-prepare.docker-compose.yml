@@ -7,7 +7,7 @@ services:
       - MYSQL_ROOT_PASSWORD=password
       - MYSQL_USER=user
       - MYSQL_PASSWORD=password
-      - MYSQL_DATABASE=anmeldesystem-api-newman
+      - MYSQL_DATABASE=anmeldesystem-newman
       - SESSION_SECRET
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "--silent"]
@@ -31,7 +31,7 @@ services:
       - TYPEORM_PORT=3306
       - TYPEORM_USERNAME=user
       - TYPEORM_PASSWORD=password
-      - TYPEORM_DATABASE=anmeldesystem-api-newman
+      - TYPEORM_DATABASE=anmeldesystem-newman
       - TYPEORM_SYNCHRONIZE=true
       - TYPEORM_ENTITIES=dist/**/*.entity.js
       - NODE_ENV=newman
