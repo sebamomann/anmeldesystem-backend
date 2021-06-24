@@ -345,7 +345,7 @@ export class EnrollmentService {
     private async _findByCreatorAndAppointment(creator: JWT_User, appointment: Appointment) {
         let enrollment = await this.enrollmentRepository.findOne({
             where: {
-                creator: creator,
+                creatorId: creator.sub,
                 appointment: {
                     id: appointment.id
                 }
