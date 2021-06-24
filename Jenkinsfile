@@ -50,60 +50,60 @@ pipeline {
             }
         }
 
-        stage('Newman - prepare API') {
-            steps {
-                script {
-                    echo 'Spinup network'
-
-                    try {
-                        sh 'docker network create ' + network_name
-                    } catch (err) {
-                        echo err.getMessage()
-                    }
-                }
-                script {
-                    sh 'MYSQL_CONTAINER_NAME=' + container_database_name + ' ' +
-                            'BACKEND_CONTAINER_NAME=' + container_backend_name + ' ' +
-                            'API_IMAGE_NAME=' + api_image_name + ' ' +
-                            'NEWMAN_CONTAINER_NAME=' + container_newman_name + ' ' +
-                            'NETWORK_NAME=' + network_name + ' ' +
-                            'docker-compose -f newman-prepare.docker-compose.yml up ' +
-                            '--detach'
-
-                    timeout(5) {
-                        waitUntil {
-                            "healthy" == sh(returnStdout: true,
-                                    script: "docker inspect " + container_backend_name + " --format=\"{{ .State.Health.Status }}\"").trim()
-                        }
-                    }
-                }
-            }
-        }
-        //Needs to be in extra step, because the backend is creating the DB Schema
-        stage('Newman - populate database') {
-            steps {
-                script {
-                    sh 'docker exec -i ' + container_database_name + ' mysql -uuser -ppassword anmeldesystem-newman < $(pwd)/test/testdata/data_I_main.sql'
-                }
-            }
-        }
-        stage('Newman - execute') {
-            steps {
-                script {
-                    sh 'docker run ' +
-                            '-v /var/www/vhosts/sebamomann.dankoe.de/additional_testing.dein.li/gjm-newman.postman_environment:/etc/newman/environment.json.postman_environment ' + // TODO volume?
-                            '--name ' + container_newman_name + ' ' +
-                            '-p 3000:3000 ' +
-                            '--net ' + network_name + ' ' +
-                            '-t postman/newman:alpine ' +
-                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + commit_hash + '/test/collection/gjm.postman_collection.json" ' +
-                            '--environment="environment.json.postman_environment" ' +
-                            '--env-var baseUrl=' + container_backend_name + ':3000 ' +
-                            '-n 1 ' +
-                            '--bail'
-                }
-            }
-        }
+//        stage('Newman - prepare API') {
+//            steps {
+//                script {
+//                    echo 'Spinup network'
+//
+//                    try {
+//                        sh 'docker network create ' + network_name
+//                    } catch (err) {
+//                        echo err.getMessage()
+//                    }
+//                }
+//                script {
+//                    sh 'MYSQL_CONTAINER_NAME=' + container_database_name + ' ' +
+//                            'BACKEND_CONTAINER_NAME=' + container_backend_name + ' ' +
+//                            'API_IMAGE_NAME=' + api_image_name + ' ' +
+//                            'NEWMAN_CONTAINER_NAME=' + container_newman_name + ' ' +
+//                            'NETWORK_NAME=' + network_name + ' ' +
+//                            'docker-compose -f newman-prepare.docker-compose.yml up ' +
+//                            '--detach'
+//
+//                    timeout(5) {
+//                        waitUntil {
+//                            "healthy" == sh(returnStdout: true,
+//                                    script: "docker inspect " + container_backend_name + " --format=\"{{ .State.Health.Status }}\"").trim()
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        //Needs to be in extra step, because the backend is creating the DB Schema
+//        stage('Newman - populate database') {
+//            steps {
+//                script {
+//                    sh 'docker exec -i ' + container_database_name + ' mysql -uuser -ppassword anmeldesystem-newman < $(pwd)/test/testdata/data_I_main.sql'
+//                }
+//            }
+//        }
+//        stage('Newman - execute') {
+//            steps {
+//                script {
+//                    sh 'docker run ' +
+//                            '-v /var/www/vhosts/sebamomann.dankoe.de/additional_testing.dein.li/gjm-newman.postman_environment:/etc/newman/environment.json.postman_environment ' + // TODO volume?
+//                            '--name ' + container_newman_name + ' ' +
+//                            '-p 3000:3000 ' +
+//                            '--net ' + network_name + ' ' +
+//                            '-t postman/newman:alpine ' +
+//                            'run "https://raw.githubusercontent.com/sebamomann/anmeldesystem-backend/' + commit_hash + '/test/collection/gjm.postman_collection.json" ' +
+//                            '--environment="environment.json.postman_environment" ' +
+//                            '--env-var baseUrl=' + container_backend_name + ':3000 ' +
+//                            '-n 1 ' +
+//                            '--bail'
+//                }
+//            }
+//        }
         stage('Publish to registry') {
             when {
                 expression {
