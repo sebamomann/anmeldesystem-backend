@@ -40,4 +40,4 @@ COPY --from=builder /app/node_modules ./node_modules
 
 RUN apk --no-cache add curl
 
-CMD ["node", "./dist/src/main.js"]
+CMD ["node", "./dist/main.js"]
