@@ -118,7 +118,7 @@ pipeline {
             steps {
                 script {
                     sh 'docker run ' +
-                            '-v ' + volume_name + '/collection.json:/etc/newman/collection.json ' +
+                            '-v ' + volume_name + ':/etc/newman ' +
                             '-v /var/www/vhosts/sebamomann.dankoe.de/additional_testing.dein.li/gjm-newman.postman_environment:/etc/newman/environment.json.postman_environment ' +
                             '--name ' + container_newman_name + ' ' +
                             '-p 3000:3000 ' +
