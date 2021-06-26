@@ -14789,7 +14789,7 @@
 					" (schemaName) => {",
 					"    let schema = pm.variables.get(schemaName);",
 					"",
-					"    let myRegexp = /\\\\#\\\\#REPLACE_SCHEMA\\\\((schema_.*)\\\\)\\\\#\\\\#/;",
+					"    let myRegexp = new Regexp(\"\\#\\#REPLACE_SCHEMA\\((schema_.*)\\)\\#\\#\", \"gm\");",
 					"    while ((match = myRegexp.exec(schema)) !== null) {",
 					"        const subSchemaName = match[1];",
 					"        const getSchemaString = eval(pm.globals.get(\"function_getSchemaStringRecursively\"));",
