@@ -107,7 +107,7 @@ pipeline {
         stage('Newman - prepare volume') {
             steps {
                 script {
-                    sh 'docker cp jenkins:$(pwd)/test/collection/gjm.postman_collection.json ~/var/lib/docker/volumes/' + volume_name + '/_data/gjm.postman_collection.json'
+                    sh 'docker cp jenkins:$(pwd)/test/collection/gjm.postman_collection.json ./var/lib/docker/volumes/' + volume_name + '/_data/gjm.postman_collection.json'
                 }
             }
         }
