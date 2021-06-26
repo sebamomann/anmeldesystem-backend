@@ -398,7 +398,7 @@
 									"response": []
 								},
 								{
-									"name": "get appointments - success - filter (before) Copy 2",
+									"name": "get appointments - success - filter (before)",
 									"event": [
 										{
 											"listen": "prerequest",
@@ -456,69 +456,6 @@
 												{
 													"key": "limit",
 													"value": "5"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "get appointments - failure - filter (before) Copy",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													"pm.variables.set(\"appointment_filter_limit\", \"assadsda\");"
-												],
-												"type": "text/javascript"
-											}
-										},
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Status Code 422\", function () {\r",
-													"    pm.response.to.have.status(422);\r",
-													"});\r",
-													"\r",
-													"const testSchema = eval(pm.globals.get(\"test_correctErrorResponseSchema\"));\r",
-													"testSchema(pm.response);\r",
-													"\r",
-													"pm.test(\"Correct JSON response data\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"\r",
-													"    pm.expect(jsonData).to.eql({\r",
-													"        \"code\": \"INVALID_PARAMETERS\",\r",
-													"        \"message\": \"Given parameters can not be processed\",\r",
-													"        \"data\": {\r",
-													"            \"attribute\": \"limit\",\r",
-													"            \"in\": \"query\",\r",
-													"            \"value\": pm.variables.get(\"appointment_filter_limit\"),\r",
-													"            \"message\": \"The provided number can not be processed\"\r",
-													"        }\r",
-													"    });\r",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/appointments?limit={{appointment_filter_limit}}",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"appointments"
-											],
-											"query": [
-												{
-													"key": "limit",
-													"value": "{{appointment_filter_limit}}"
 												}
 											]
 										}
@@ -13079,7 +13016,7 @@
 											"response": []
 										},
 										{
-											"name": "VAILDATION - update Entollment - enrollment creator Copy",
+											"name": "VAILDATION - update Entollment",
 											"event": [
 												{
 													"listen": "test",
@@ -13201,7 +13138,7 @@
 											"response": []
 										},
 										{
-											"name": "VAILDATION - update Entollment - enrollment creator Copy 2",
+											"name": "VAILDATION - update Entollment",
 											"event": [
 												{
 													"listen": "test",
@@ -13321,7 +13258,7 @@
 											"response": []
 										},
 										{
-											"name": "VAILDATION - update Entollment - enrollment creator Copy 3",
+											"name": "VAILDATION - update Entollment",
 											"event": [
 												{
 													"listen": "test",
