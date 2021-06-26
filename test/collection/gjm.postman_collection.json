@@ -4073,22 +4073,21 @@
 															"\r",
 															"pm.test(\"Correct JSON response data\", function () {\r",
 															"    const jsonData = pm.response.json();\r",
-															"    console.log(jsonData);\r",
 															"\r",
 															"    pm.expect(jsonData.files).to.eql([\r",
 															"        {\r",
 															"            \"name\": \"testfile-1.pdf\",\r",
-															"            \"url\": \"localhost:3000/files/2e57b350-78fa-472b-b42f-b1de84dac157\",\r",
+															"            \"url\": pm.environment.get(\"baseUrl\") + \"/files/2e57b350-78fa-472b-b42f-b1de84dac157\",\r",
 															"            \"id\": \"2e57b350-78fa-472b-b42f-b1de84dac157\"\r",
 															"        },\r",
 															"        {\r",
 															"            \"name\": \"testfile-2.pdf\",\r",
-															"            \"url\": \"localhost:3000/files/eea571f9-e374-46ad-bda4-4b9191db5961\",\r",
+															"            \"url\": pm.environment.get(\"baseUrl\") + \"/files/eea571f9-e374-46ad-bda4-4b9191db5961\",\r",
 															"            \"id\": \"eea571f9-e374-46ad-bda4-4b9191db5961\"\r",
 															"        },\r",
 															"        {\r",
 															"            \"name\": \"testfile-3.pdf\",\r",
-															"            \"url\": \"localhost:3000/files/3b3fee67-51ae-4fa8-a303-7251bd28d7ce\",\r",
+															"            \"url\": pm.environment.get(\"baseUrl\") + \"/files/3b3fee67-51ae-4fa8-a303-7251bd28d7ce\",\r",
 															"            \"id\": \"3b3fee67-51ae-4fa8-a303-7251bd28d7ce\"\r",
 															"        }\r",
 															"    ]);\r",
@@ -14777,6 +14776,494 @@
 		{
 			"key": "schema_error",
 			"value": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"code\": { \"type\": \"string\"},\n\t\t\"message\": { \"type\": \"string\" },\n\t\t\"data\":  {\n\t\t\t\"anyOf\": [\n\t\t\t\t{ \n\t\t\t\t\t\"type\": \"object\",\n\t\t\t\t\t\"properties\": {\n\t\t\t\t\t    \"object\": { \"type\": \"string\" },\n\t\t\t\t\t\t\"attribute\": { \"type\": \"string\" },\n\t\t\t\t\t\t\"value\": { \"type\": \"string\" },\n\t\t\t\t\t\t\"in\": { \"type\": \"string\" },\n\t\t\t\t\t\t\"message\": { \"type\": \"string\" }\n\t\t\t\t\t},\n\t\t\t\t\t\"required\": [\n\t\t\t\t\t\t\"attribute\",\n\t\t\t\t\t\t\"value\"\n\t\t\t\t\t] \n\t\t\t\t},\n\t\t\t\t{ \"type\": \"string\" },\n\t\t\t\t{ \n\t\t\t\t\t\"type\": \"array\",\n\t\t\t\t\t\"items\": {\n\t\t\t\t\t\t\"anyOf\": [\n\t\t\t\t\t\t\t{ \"type\": \"object\" },\n\t\t\t\t\t\t\t{ \"type\": \"string\" }\n\t\t\t\t\t\t]\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t},\n\t\"required\": [\"code\", \"message\"],\n\t\"additionalProperties\": false\n}"
+		},
+		{
+			"key": "bearer_getappointments",
+			"value": ""
+		},
+		{
+			"key": "bearer_getappointments_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_getappointments_filter",
+			"value": ""
+		},
+		{
+			"key": "bearer_getappointments_filter_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_createappointment",
+			"value": ""
+		},
+		{
+			"key": "bearer_createappointment_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_creation_location_header",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_creation_id",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_creation_link",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_creation_title",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_creation_location",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_creation_description",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_creation_date",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_creation_deadline",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_creation_driverAddition",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_creation_addition_1_name",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_creation_addition_2_name",
+			"value": ""
+		},
+		{
+			"key": "bearer_getappointment",
+			"value": ""
+		},
+		{
+			"key": "bearer_getappointment_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_getappointment-admin",
+			"value": ""
+		},
+		{
+			"key": "bearer_getappointment-admin_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_getappointment-enrollmentcreator",
+			"value": ""
+		},
+		{
+			"key": "bearer_getappointment-enrollmentcreator_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_getappointment-pinner",
+			"value": ""
+		},
+		{
+			"key": "bearer_getappointment-pinner_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateappointment",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateappointment_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_update_location_header",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_update_title",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_update_description",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_update_location",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateappointment-admin",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateappointment-admin_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_link",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_update_link_original",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_update_link_header",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_update_link",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_update_addition_1_name",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_update_addition_2_name",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_1",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_2",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_location_header",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_id",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_1_name",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_2_name",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_3_name",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_4_name",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_5_name",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_6_name",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_1_id",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_2_id",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_3_id",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_4_id",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_5_id",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_update_addition_6_id",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_update_date",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_update_deadline",
+			"value": ""
+		},
+		{
+			"key": "RESET_appointment_update_link_header",
+			"value": ""
+		},
+		{
+			"key": "bearer_appointment_managementrelations",
+			"value": ""
+		},
+		{
+			"key": "bearer_appointment_managementrelations_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_appointment_managementrelations-admin",
+			"value": ""
+		},
+		{
+			"key": "bearer_appointment_managementrelations-admin_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_appointment_managementrelations-regularuser",
+			"value": ""
+		},
+		{
+			"key": "bearer_appointment_managementrelations-regularuser_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_managefiles",
+			"value": ""
+		},
+		{
+			"key": "bearer_managefiles_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_files_link",
+			"value": ""
+		},
+		{
+			"key": "bearer_managefiles-admin",
+			"value": ""
+		},
+		{
+			"key": "bearer_managefiles-admin_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_file_creation_id_1",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_file_creation_id_2",
+			"value": ""
+		},
+		{
+			"key": "bearer_manageadministrators",
+			"value": ""
+		},
+		{
+			"key": "bearer_manageadministrators_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_administrators_link",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_appointment_adminsitrators_administrator_username",
+			"value": ""
+		},
+		{
+			"key": "bearer_manageadministrators-admin",
+			"value": ""
+		},
+		{
+			"key": "bearer_manageadministrators-admin_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_pins",
+			"value": ""
+		},
+		{
+			"key": "bearer_pins_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_appointment_pins_link",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_location_header",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_id",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_token",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_name",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_appointment_link",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_comment",
+			"value": ""
+		},
+		{
+			"key": "bearer_createenrollment-enrollmentcreator",
+			"value": ""
+		},
+		{
+			"key": "bearer_createenrollment-enrollmentcreator_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_enrollment_creation_appointment_link",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_addition_1_id",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_addition_1_name",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_addition_3_id",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_addition_3_name",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_addition_2_id",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_addition_2_name",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_addition_4_id",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_addition_4_name",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_driver_service",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_driver_seats",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_creation_passenger_requirement",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateenrollment-enrollmentcreator",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateenrollment-enrollmentcreator_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_update_location_header",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_update_comment",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateenrollment-appointmentcreator",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateenrollment-appointmentcreator_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateenrollment-appointmentadmin",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateenrollment-appointmentadmin_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateenrollment-regularuser",
+			"value": ""
+		},
+		{
+			"key": "bearer_updateenrollment-regularuser_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_update_name",
+			"value": ""
+		},
+		{
+			"key": "PREPARATION_enrollment_creation_id",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_update_additions_addition_1_name",
+			"value": ""
+		},
+		{
+			"key": "VALIDATION_enrollment_update_additions_addition_2_name",
+			"value": ""
+		},
+		{
+			"key": "bearer_enrollmentpermission-appointmentcreator",
+			"value": ""
+		},
+		{
+			"key": "bearer_enrollmentpermission-appointmentcreator_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_enrollmentpermission-appointmentadmin",
+			"value": ""
+		},
+		{
+			"key": "bearer_enrollmentpermission-appointmentadmi_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_enrollmentpermission-enrollmentcreator",
+			"value": ""
+		},
+		{
+			"key": "bearer_enrollmentpermission-enrollmentcreator_expiry_date",
+			"value": ""
+		},
+		{
+			"key": "bearer_enrollmentpermission-regularuser",
+			"value": ""
+		},
+		{
+			"key": "bearer_enrollmentpermission-regularuser_expiry_date",
+			"value": ""
 		}
 	]
 }
