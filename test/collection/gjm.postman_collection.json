@@ -4073,6 +4073,7 @@
 															"\r",
 															"pm.test(\"Correct JSON response data\", function () {\r",
 															"    const jsonData = pm.response.json();\r",
+															"    console.log(jsonData);\r",
 															"\r",
 															"    pm.expect(jsonData.files).to.eql([\r",
 															"        {\r",
