@@ -82,6 +82,7 @@ pipeline {
                             'API_IMAGE_NAME=' + api_image_name + ' ' +
                             'NEWMAN_CONTAINER_NAME=' + container_newman_name + ' ' +
                             'NETWORK_NAME=' + network_name + ' ' +
+                            'KEYCLOAK_ADMIN_PASSWORD=' + credentials('KEYCLOAK_TEST_GJM_ADMIN_PASSWORD') + ' ' +
                             'docker-compose -f newman-prepare.docker-compose.yml up ' +
                             '--detach'
 

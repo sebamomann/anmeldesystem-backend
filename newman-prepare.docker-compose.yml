@@ -39,6 +39,9 @@ services:
       - KEYCLOAK_URL=https://account.sebamomann.de/
       - KEYCLOAK_REALM=test
       - KEYCLOAK_CLIENT_ID=test
+      - KEYCLOAK_ADMIN_CLIENT_ID=gjm-admin
+      - KEYCLOAK_ADMIN_USERNAME=gjm-admin
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - TZ=Europe/Berlin
     healthcheck:
       test: ["CMD", "curl", "localhost:3000/healthcheck"]
