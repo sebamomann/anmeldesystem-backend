@@ -104,7 +104,7 @@ pipeline {
             }
         }
 
-        stage('Newman - populate database') {
+        stage('Newman - prepare volume') {
             steps {
                 script {
                     sh 'docker cp jenkins:$(pwd)/test/collection/gjm.postman_collection.json /var/lib/docker/volumes/' + volume_name + '/_data/gjm.postman_collection.json'
@@ -183,6 +183,12 @@ pipeline {
 
                 try {
                     sh 'docker network rm ' + network_name
+                } catch (err) {
+                    echo err.getMessage()
+                }
+
+                try {
+                    sh 'docker volume rm ' + volume_name + ' -f'
                 } catch (err) {
                     echo err.getMessage()
                 }
