@@ -66,7 +66,7 @@ pipeline {
                     echo 'Spinup volume'
 
                     try {
-                        sh 'docker network volume ' + volume_name
+                        sh 'docker volume create ' + volume_name
                     } catch (err) {
                         echo err.getMessage()
                     }
