@@ -107,7 +107,9 @@ pipeline {
         stage('Newman - prepare volume') {
             steps {
                 script {
-                    sh 'docker cp jenkins:$(pwd)/test/collection/gjm.postman_collection.json ./var/lib/docker/volumes/' + volume_name + '/_data/gjm.postman_collection.json'
+                    sh 'docker container create --name temp' + container_newman_name + ' -v ' + volume_name + ':/data busybox'
+                    sh 'docker cp $(pwd)/test/collection/gjm.postman_collection.json ' + container_newman_name + ':/data/collection.json'
+                    sh 'docker rm temp' + container_newman_name
                 }
             }
         }
@@ -116,7 +118,7 @@ pipeline {
             steps {
                 script {
                     sh 'docker run ' +
-                            '-v ' + volume_name + '/gjm.postman_collection.json:/etc/newman/collection.json ' +
+                            '-v ' + volume_name + '/collection.json:/etc/newman/collection.json ' +
                             '-v /var/www/vhosts/sebamomann.dankoe.de/additional_testing.dein.li/gjm-newman.postman_environment:/etc/newman/environment.json.postman_environment ' +
                             '--name ' + container_newman_name + ' ' +
                             '-p 3000:3000 ' +
