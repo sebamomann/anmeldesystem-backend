@@ -107,9 +107,9 @@ pipeline {
         stage('Newman - prepare volume') {
             steps {
                 script {
-                    sh 'docker container create --name temp' + container_newman_name + ' -v ' + volume_name + ':/data busybox'
-                    sh 'docker cp $(pwd)/test/collection/gjm.postman_collection.json ' + container_newman_name + ':/data/collection.json'
-                    sh 'docker rm temp' + container_newman_name
+                    sh 'docker container create --name temp_' + container_newman_name + ' -v ' + volume_name + ':/data busybox'
+                    sh 'docker cp $(pwd)/test/collection/gjm.postman_collection.json temp_' + container_newman_name + ':/data/collection.json'
+                    sh 'docker rm temp_' + container_newman_name
                 }
             }
         }
