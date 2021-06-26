@@ -24,8 +24,9 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      - SALT_JWT=salt
-      - SALT_MAIL=salt
+      - SALT_JWT=salt_jwt
+      - SALT_MAIL=salt_mail
+      - SALT_ENROLLMENT=salt_enrollment
       - TYPEORM_CONNECTION=mysql
       - TYPEORM_HOST=${MYSQL_CONTAINER_NAME}
       - TYPEORM_PORT=3306

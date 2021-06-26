@@ -500,6 +500,86 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "get appointments (creator, admin, enrollmentCreator, enrollmentPermission, pin as user, pin with link)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valid schema\", () => {\r",
+											"    const getSchemaString = eval(pm.globals.get(\"function_getSchemaStringRecursively\"));\r",
+											"    const appointmentSchema = JSON.parse(getSchemaString(\"schema_appointment\"));\r",
+											"\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        \"type\": \"array\",\r",
+											"        \"items\": appointmentSchema\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Correct JSON response data\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(jsonData[0].relations).lengthOf(1);\r",
+											"    pm.expect(jsonData[0].relations[0]).to.eql(\"PINNED\");\r",
+											"    pm.expect(jsonData[1].relations).lengthOf(1);\r",
+											"    pm.expect(jsonData[1].relations[0]).to.eql(\"PINNED\");\r",
+											"    pm.expect(jsonData[2].relations).lengthOf(1);\r",
+											"    pm.expect(jsonData[2].relations[0]).to.eql(\"ENROLLED\");\r",
+											"    pm.expect(jsonData[3].relations).lengthOf(1);\r",
+											"    pm.expect(jsonData[3].relations[0]).to.eql(\"ENROLLED\");\r",
+											"    pm.expect(jsonData[4].relations).lengthOf(1);\r",
+											"    pm.expect(jsonData[4].relations[0]).to.eql(\"ADMIN\");\r",
+											"    pm.expect(jsonData[5].relations).lengthOf(1);\r",
+											"    pm.expect(jsonData[5].relations[0]).to.eql(\"CREATOR\");\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/appointments?pin1=test-getappointments-default-pin-link-link&perm1=4bc8aa7c-6cc8-4811-b672-2bd6601254aa&token1=a4a06bcd38b56c027015b00284c7b5a394467215afbc51936f8b6026776acb80",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"appointments"
+									],
+									"query": [
+										{
+											"key": "pin1",
+											"value": "test-getappointments-default-pin-link-link"
+										},
+										{
+											"key": "perm1",
+											"value": "4bc8aa7c-6cc8-4811-b672-2bd6601254aa"
+										},
+										{
+											"key": "token1",
+											"value": "a4a06bcd38b56c027015b00284c7b5a394467215afbc51936f8b6026776acb80"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"auth": {
@@ -1234,7 +1314,6 @@
 										},
 										"url": {
 											"raw": "{{baseUrl}}/appointments",
-											"protocol": "http",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -1321,7 +1400,6 @@
 										},
 										"url": {
 											"raw": "{{baseUrl}}/appointments",
-											"protocol": "http",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -1551,7 +1629,6 @@
 										},
 										"url": {
 											"raw": "{{baseUrl}}/appointments",
-											"protocol": "http",
 											"host": [
 												"{{baseUrl}}"
 											],
