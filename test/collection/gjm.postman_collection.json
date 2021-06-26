@@ -1320,12 +1320,11 @@
 											}
 										},
 										"url": {
-											"raw": "http://localhost:3000/appointments",
+											"raw": "{{baseUrl}}/appointments",
 											"protocol": "http",
 											"host": [
-												"localhost"
+												"{{baseUrl}}"
 											],
-											"port": "3000",
 											"path": [
 												"appointments"
 											]
@@ -1551,12 +1550,11 @@
 											}
 										},
 										"url": {
-											"raw": "http://localhost:3000/appointments",
+											"raw": "{{baseUrl}}/appointments",
 											"protocol": "http",
 											"host": [
-												"localhost"
+												"{{baseUrl}}"
 											],
-											"port": "3000",
 											"path": [
 												"appointments"
 											]
