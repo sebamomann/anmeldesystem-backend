@@ -14791,6 +14791,7 @@
 					"",
 					"    let myRegexp = new RegExp(\"\\#\\#REPLACE_SCHEMA\\((schema_.*)\\)\\#\\#\", \"gm\");",
 					"    while ((match = myRegexp.exec(schema)) !== null) {",
+					"        console.log(match);",
 					"        const subSchemaName = match;",
 					"        const getSchemaString = eval(pm.globals.get(\"function_getSchemaStringRecursively\"));",
 					"        const subSchema = getSchemaString(subSchemaName);",
