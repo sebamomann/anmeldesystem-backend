@@ -111,7 +111,8 @@ pipeline {
                 script {
                     sh 'docker container create --name temp_' + container_newman_name + ' -v ' + volume_name + ':/data busybox'
                     sh 'docker cp $(pwd)/test/collection/gjm.postman_collection.json temp_' + container_newman_name + ':/data/collection.json'
-                    sh 'docker cp $(pwd)/test/testdata/files temp_' + container_newman_name + ':/data/testdata/files'
+                    sh 'docker cp $(pwd)/test/testdata/files/testfile.pdf temp_' + container_newman_name + ':/data/testfile.pdf'
+                    sh 'docker cp $(pwd)/test/testdata/files/testfile.txt temp_' + container_newman_name + ':/data/testfile.txt'
                     sh 'docker rm temp_' + container_newman_name
                 }
             }
