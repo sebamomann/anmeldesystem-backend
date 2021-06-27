@@ -6088,9 +6088,9 @@
 																	"pm.test(\"Correct JSON response data\", function () {\r",
 																	"    const jsonData = pm.response.json();\r",
 																	"\r",
-																	"    date_final_orig = moment(jsonData.date).zone(-120).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+																	"    date_final_orig = moment(jsonData.date).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
 																	"\r",
-																	"    var date_final = moment(pm.collectionVariables.get(\"VALIDATION_appointment_update_date\")).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+																	"    var date_final = moment(pm.collectionVariables.get(\"VALIDATION_appointment_update_date\")).subtract({hours: 2}).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
 																	"\r",
 																	"    pm.expect(date_final_orig).to.eql(date_final);\r",
 																	"});"
