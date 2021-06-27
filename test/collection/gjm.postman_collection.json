@@ -6090,7 +6090,7 @@
 																	"\r",
 																	"    date_final_orig = moment(jsonData.date).zone(\"Europe/Berlin\").format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
 																	"\r",
-																	"    var date_final = moment(pm.collectionVariables.get(\"VALIDATION_appointment_update_date\")).subtract({hours: 2}).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+																	"    var date_final = moment(pm.collectionVariables.get(\"VALIDATION_appointment_update_date\")).subtract({hours: 1}).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
 																	"\r",
 																	"    pm.expect(date_final_orig).to.eql(date_final);\r",
 																	"});"
