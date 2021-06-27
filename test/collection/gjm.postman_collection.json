@@ -6194,7 +6194,7 @@
 																"exec": [
 																	"pm.variables.set(\"appointment_update_link\", \"test-updateappointment-date-link\");\r",
 																	"\r",
-																	"pm.variables.set(\"appointment_update_deadline_new\", \"2020-12-30 10:05:23\");"
+																	"pm.variables.set(\"appointment_update_deadline_new\", \"2020-04-30 10:05:23\");"
 																],
 																"type": "text/javascript"
 															}
