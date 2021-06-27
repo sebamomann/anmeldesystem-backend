@@ -6088,9 +6088,8 @@
 																	"pm.test(\"Correct JSON response data\", function () {\r",
 																	"    const jsonData = pm.response.json();\r",
 																	"\r",
-																	"    date_final_orig = moment(jsonData.date).zone(\"Europe/Berlin\").format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
-																	"\r",
-																	"    var date_final = moment(pm.collectionVariables.get(\"VALIDATION_appointment_update_date\")).subtract({hours: 2}).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+																	"    const date_final_orig = moment(jsonData.date).zone(\"Europe/Berlin\").format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+																	"    const date_final = moment(pm.collectionVariables.get(\"VALIDATION_appointment_update_date\")).zone(\"Europe/Berlin\").format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
 																	"\r",
 																	"    pm.expect(date_final_orig).to.eql(date_final);\r",
 																	"});"
@@ -6246,7 +6245,7 @@
 													"response": []
 												},
 												{
-													"name": "VALIDATION - get updated appointment - date",
+													"name": "VALIDATION - get updated appointment - deadline",
 													"event": [
 														{
 															"listen": "test",
@@ -6268,11 +6267,8 @@
 																	"pm.test(\"Correct JSON response data\", function () {\r",
 																	"    const jsonData = pm.response.json();\r",
 																	"\r",
-																	"    var deadline_unix_orig = Date.parse(jsonData.deadline);\r",
-																	"    var deadline_final_orig = moment(deadline_unix_orig).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
-																	"\r",
-																	"    var deadline_unix = Date.parse(pm.collectionVariables.get(\"VALIDATION_appointment_update_deadline\"));\r",
-																	"    var deadline_final = moment(deadline_unix).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+																	"    const deadline_final_orig = moment(jsonData.deadline).zone(\"Europe/Berlin\").format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+																	"    const deadline_final = moment(pm.collectionVariables.get(\"VALIDATION_appointment_update_deadline\")).zone(\"Europe/Berlin\").format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
 																	"\r",
 																	"    pm.expect(deadline_final_orig).to.eql(deadline_final);\r",
 																	"});"
