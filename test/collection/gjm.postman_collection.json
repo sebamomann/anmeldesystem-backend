@@ -7162,7 +7162,7 @@
 														{
 															"key": "files",
 															"type": "file",
-															"src": "/etc/newman/testdata/files/testfile.pdf"
+															"src": "testfile.pdf"
 														},
 														{
 															"key": "appointment",
@@ -7395,8 +7395,8 @@
 															"key": "files",
 															"type": "file",
 															"src": [
-																"/etc/newman/testdata/files/testfile.pdf",
-																"/etc/newman/testdata/files/testfile.txt"
+																"testfile.pdf",
+																"testfile.txt"
 															]
 														},
 														{
@@ -7536,8 +7536,8 @@
 															"key": "files",
 															"type": "file",
 															"src": [
-																"/etc/newman/testdata/files/testfile.pdf",
-																"/etc/newman/testdata/files/testfile.txt"
+																"testfile.pdf",
+																"testfile.txt"
 															]
 														},
 														{
@@ -7611,8 +7611,8 @@
 															"key": "files",
 															"type": "file",
 															"src": [
-																"/etc/newman/testdata/files/testfile.pdf",
-																"/etc/newman/testdata/files/testfile.txt"
+																"testfile.pdf",
+																"testfile.txt"
 															]
 														},
 														{
@@ -7803,8 +7803,8 @@
 													"key": "files",
 													"type": "file",
 													"src": [
-														"/etc/newman/testdata/files/testfile.pdf",
-														"/etc/newman/testdata/files/testfile.txt"
+														"testfile.pdf",
+														"testfile.txt"
 													]
 												},
 												{
