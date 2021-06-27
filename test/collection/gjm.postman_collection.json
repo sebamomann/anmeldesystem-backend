@@ -6089,7 +6089,7 @@
 																	"    const jsonData = pm.response.json();\r",
 																	"\r",
 																	"    const date_final_orig = moment(jsonData.date).zone(\"Europe/Berlin\").format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
-																	"    const date_final = moment(pm.collectionVariables.get(\"VALIDATION_appointment_update_date\")).subtract({hours: 1}).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+																	"    const date_final = moment(pm.collectionVariables.get(\"VALIDATION_appointment_update_date\")).subtract({hours: 0}).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
 																	"\r",
 																	"    pm.expect(date_final_orig).to.eql(date_final);\r",
 																	"});"
@@ -6268,7 +6268,7 @@
 																	"    const jsonData = pm.response.json();\r",
 																	"\r",
 																	"    const deadline_final_orig = moment(jsonData.deadline).zone(\"Europe/Berlin\").format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
-																	"    const deadline_final = moment(pm.collectionVariables.get(\"VALIDATION_appointment_update_deadline\")).subtract({hours: 1}).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
+																	"    const deadline_final = moment(pm.collectionVariables.get(\"VALIDATION_appointment_update_deadline\")).subtract({hours: 0}).format(\"YYYY-MM-DDThh:mm:ss.sZ\");\r",
 																	"\r",
 																	"    pm.expect(deadline_final_orig).to.eql(deadline_final);\r",
 																	"});"
