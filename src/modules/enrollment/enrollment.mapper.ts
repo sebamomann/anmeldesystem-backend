@@ -66,7 +66,6 @@ export class EnrollmentMapper {
         });
 
         enrollment.additions?.map((fAddition) => {
-            delete fAddition.name;
             delete fAddition.order;
         });
 
