@@ -387,7 +387,10 @@ export class EnrollmentService {
         await this.mailerService
             .sendMail({
                 to: savedEnrollment.mail.mail,
-                from: process.env.MAIL_ECA,
+                from: {
+                    name: "GJM-Bot",
+                    address: process.env.MAIL_GJM
+                },
                 subject: 'Deine Anmeldung zu ' + appointment.title,
                 template: 'enroll', // The `.pug` or `.hbs` extension is appended automatically.
                 context: {  // Data to be sent to template engine.
@@ -398,7 +401,8 @@ export class EnrollmentService {
             })
             .then(() => {
             })
-            .catch(() => {
+            .catch((e) => {
+                console.log(e);
                 logger.log('error', 'Could not send enrollment mail to %s', savedEnrollment.mail.mail);
             });
     }
