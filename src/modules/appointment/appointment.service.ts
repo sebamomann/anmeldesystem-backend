@@ -566,13 +566,13 @@ export class AppointmentService {
         );
 
         if (this.isValidDate(before)) {
-            builder = builder.andWhere('UNIX_TIMESTAMP(appointment.date) > UNIX_TIMESTAMP(:date)', {
+            builder = builder.andWhere('UNIX_TIMESTAMP(appointment.date) < UNIX_TIMESTAMP(:date)', {
                 date: before
             });
         }
 
         if (this.isValidDate(after)) {
-            builder = builder.andWhere('UNIX_TIMESTAMP(appointment.date) < UNIX_TIMESTAMP(:date)', {
+            builder = builder.andWhere('UNIX_TIMESTAMP(appointment.date) > UNIX_TIMESTAMP(:date)', {
                 date: after
             });
         }
