@@ -1,27 +1,27 @@
-import {Injectable} from '@nestjs/common';
-import {Appointment} from './appointment.entity';
-import {Brackets, getRepository, Repository} from 'typeorm';
-import {InjectRepository} from '@nestjs/typeorm';
-import {AdditionService} from '../addition/addition.service';
-import {UserService} from '../user/user.service';
-import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
-import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
-import {AppointmentGateway} from './appointment.gateway';
-import {AppointmentMapper} from './appointment.mapper';
-import {PushService} from '../push/push.service';
-import {JWT_User} from '../user/user.model';
-import {AppointmentPermissionChecker} from './appointmentPermission.checker';
-import {AdditionList} from '../addition/addition.list';
-import {IAppointmentResponseDTO} from './DTOs/IAppointmentResponseDTO';
-import {IAppointmentCreationDTO} from './DTOs/IAppointmentCreationDTO';
-import {EnrollmentPermissionList} from '../enrollment/enrollmentPermissionList';
-import {AppointmentPinList} from '../pinner/appointmentPinList';
-import {AppointmentRepository} from './appointment.repository';
-import {IAppointmentCreationResponseDTO} from './DTOs/IAppointmentCreationResponseDTO';
-import {IAppointmentUpdateAdditionDTO} from './DTOs/IAppointmentUpdateAdditionDTO';
-import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
-import {PermissionRelation} from '../PermissionRelation.type';
-import {InvalidValuesException} from '../../exceptions/InvalidValuesException';
+import { Injectable } from '@nestjs/common';
+import { Appointment } from './appointment.entity';
+import { Brackets, getRepository, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AdditionService } from '../addition/addition.service';
+import { UserService } from '../user/user.service';
+import { InsufficientPermissionsException } from '../../exceptions/InsufficientPermissionsException';
+import { EntityNotFoundException } from '../../exceptions/EntityNotFoundException';
+import { AppointmentGateway } from './appointment.gateway';
+import { AppointmentMapper } from './appointment.mapper';
+import { PushService } from '../push/push.service';
+import { JWT_User } from '../user/user.model';
+import { AppointmentPermissionChecker } from './appointmentPermission.checker';
+import { AdditionList } from '../addition/addition.list';
+import { IAppointmentResponseDTO } from './DTOs/IAppointmentResponseDTO';
+import { IAppointmentCreationDTO } from './DTOs/IAppointmentCreationDTO';
+import { EnrollmentPermissionList } from '../enrollment/enrollmentPermissionList';
+import { AppointmentPinList } from '../pinner/appointmentPinList';
+import { AppointmentRepository } from './appointment.repository';
+import { IAppointmentCreationResponseDTO } from './DTOs/IAppointmentCreationResponseDTO';
+import { IAppointmentUpdateAdditionDTO } from './DTOs/IAppointmentUpdateAdditionDTO';
+import { InvalidAttributesException } from '../../exceptions/InvalidAttributesException';
+import { PermissionRelation } from '../PermissionRelation.type';
+import { InvalidValuesException } from '../../exceptions/InvalidValuesException';
 
 const logger = require('../../logger');
 
@@ -194,11 +194,11 @@ export class AppointmentService {
             appointment = await this.getAppointmentCoreInformationIfValidPermission(link, user);
         } catch (e) {
             throw new InsufficientPermissionsException(null, null, {
-                    'attribute': 'link',
-                    'in': 'path',
-                    'value': link,
-                    'message': 'Specified appointment is not in your ownership. You are also not permitted to administrate this appointment.'
-                }
+                'attribute': 'link',
+                'in': 'path',
+                'value': link,
+                'message': 'Specified appointment is not in your ownership. You are also not permitted to administrate this appointment.'
+            }
             );
         }
 
@@ -362,7 +362,7 @@ export class AppointmentService {
         // data is never selected, if not specified
         builder = builder.leftJoinAndSelect('appointment._files', 'files');
 
-        builder = builder.where('appointment.link = :link', {link: link});
+        builder = builder.where('appointment.link = :link', { link: link });
         builder = builder.select(select);
 
         const appointment = await builder.getOne();
@@ -386,7 +386,7 @@ export class AppointmentService {
         builder = builder.leftJoinAndSelect('appointment._additions', 'additions')
             .leftJoinAndSelect('appointment._administrators', 'administrators');
 
-        builder = builder.where('appointment.link = :link', {link: link});
+        builder = builder.where('appointment.link = :link', { link: link });
 
         const cond = `
         ( 
@@ -426,7 +426,7 @@ export class AppointmentService {
 
         let builder = getRepository(Appointment).createQueryBuilder('appointment');
         builder = builder.leftJoinAndSelect('appointment._administrators', 'administrators');
-        builder = builder.where('appointment.link = :link', {link: link});
+        builder = builder.where('appointment.link = :link', { link: link });
         builder = builder.select(select);
 
         const appointment = await builder.getOne();
@@ -442,7 +442,7 @@ export class AppointmentService {
         let select = ['appointment.id'];
 
         let builder = getRepository(Appointment).createQueryBuilder('appointment');
-        builder = builder.where('appointment.link = :link', {link: link});
+        builder = builder.where('appointment.link = :link', { link: link });
 
         const cond = `
             CASE 
@@ -485,8 +485,8 @@ export class AppointmentService {
     }
 
     private async getAppointments(user: JWT_User, pinList: AppointmentPinList, permissionList: EnrollmentPermissionList,
-                                  before: Date, after: Date,
-                                  limit: number, slim: boolean) {
+        before: Date, after: Date,
+        limit: number, slim: boolean) {
         let select = ['appointment', 'additions', 'files', 'administrators', 'pinners'];
 
         let builder = getRepository(Appointment).createQueryBuilder('appointment');
@@ -553,14 +553,14 @@ export class AppointmentService {
         builder = builder.where(
             new Brackets(
                 (br) => {
-                    br.where('appointment.link IN (:...pinnedLinks)', {pinnedLinks: pinList.getArray().length > 0 ? pinList.getArray() : ['0']});
-                    br.orWhere('appointment.creatorId = :userId', {userId: user?.sub || 0});
-                    br.orWhere('administrators.userId = :userId', {userId: user?.sub || 0});
+                    br.where('appointment.link IN (:...pinnedLinks)', { pinnedLinks: pinList.getArray().length > 0 ? pinList.getArray() : ['0'] });
+                    br.orWhere('appointment.creatorId = :userId', { userId: user?.sub || '0' });
+                    br.orWhere('administrators.userId = :userId', { userId: user?.sub || '0' });
                     if (!slim) {
-                        br.orWhere('enrollments.creatorId = :userId', {userId: user?.sub || 0});
-                        br.orWhere('enrollments.id IN (:...enrollmentIds)', {enrollmentIds: permittedEnrollmentsIds});
+                        br.orWhere('enrollments.creatorId = :userId', { userId: user?.sub || '0' });
+                        br.orWhere('enrollments.id IN (:...enrollmentIds)', { enrollmentIds: permittedEnrollmentsIds });
                     }
-                    br.orWhere('pinners.userId = (:...userId)', {userId: user?.sub || 0});
+                    br.orWhere('pinners.userId = (:...userId)', { userId: user?.sub || '0' });
                 }
             )
         );
@@ -592,7 +592,7 @@ export class AppointmentService {
         const appointment = await getRepository(Appointment)
             .createQueryBuilder('appointment')
             .select(['appointment.hidden'])
-            .where('appointment.link = :link', {link})
+            .where('appointment.link = :link', { link })
             .getOne();
 
         if (!appointment) {
