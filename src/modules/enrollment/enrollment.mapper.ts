@@ -1,8 +1,8 @@
-import {UserUtil} from '../../util/user.util';
-import {Enrollment} from './enrollment.entity';
-import {UserService} from '../user/user.service';
-import {KeycloakUser} from '../user/KeycloakUser';
-import {IEnrollmentDTO} from './IEnrollmentDTO';
+import { UserUtil } from '../../util/user.util';
+import { Enrollment } from './enrollment.entity';
+import { UserService } from '../user/user.service';
+import { KeycloakUser } from '../user/KeycloakUser';
+import { IEnrollmentDTO } from './IEnrollmentDTO';
 
 const passengerMapper = require('./passenger/passenger.mapper');
 const driverMapper = require('./driver/driver.mapper');
@@ -20,11 +20,11 @@ export class EnrollmentMapper {
      */
     create(enrollment: Enrollment): { id: string, token?: string } { // INTERFACE
         const _enrollment = (({
-                                  id,
-                              }) => ({
+            id,
+        }) => ({
             id,
         } as any))
-        (enrollment);
+            (enrollment);
 
         if (enrollment.token) {
             _enrollment.token = enrollment.token;
@@ -37,14 +37,14 @@ export class EnrollmentMapper {
         let enrollment;
 
         enrollment = (({
-                           id,
-                           name,
-                           comment,
-                           additions,
-                           comments,
-                           creatorId,
-                           iat
-                       }) => ({
+            id,
+            name,
+            comment,
+            additions,
+            comments,
+            creatorId,
+            iat
+        }) => ({
             id,
             name,
             comment,
@@ -53,7 +53,7 @@ export class EnrollmentMapper {
             creatorId,
             iat
         }))
-        (_enrollment);
+            (_enrollment);
 
         enrollment.additions.sort((a, b) => {
             if (a.order < b.order) {
@@ -66,7 +66,7 @@ export class EnrollmentMapper {
         });
 
         enrollment.additions?.map((fAddition) => {
-            delete fAddition.id;
+            delete fAddition.name;
             delete fAddition.order;
         });
 

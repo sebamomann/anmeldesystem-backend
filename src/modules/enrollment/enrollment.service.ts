@@ -1,29 +1,29 @@
-import {Injectable} from '@nestjs/common';
-import {Enrollment} from './enrollment.entity';
-import {Repository} from 'typeorm';
-import {InjectRepository} from '@nestjs/typeorm';
-import {Appointment} from '../appointment/appointment.entity';
-import {AppointmentService} from '../appointment/appointment.service';
-import {AdditionService} from '../addition/addition.service';
-import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
-import {PassengerService} from './passenger/passenger.service';
-import {DriverService} from './driver/driver.service';
-import {Mail} from './mail/mail.entity';
-import {MailerService} from '@nest-modules/mailer';
-import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
-import {InsufficientPermissionsException} from '../../exceptions/InsufficientPermissionsException';
-import {EntityGoneException} from '../../exceptions/EntityGoneException';
-import {AppointmentGateway} from '../appointment/appointment.gateway';
-import {DomainUtil} from '../../util/domain.util';
-import {EnrollmentUtil} from './enrollment.util';
-import {MissingAuthenticationException} from '../../exceptions/MissingAuthenticationException';
-import {StringUtil} from '../../util/string.util';
-import {InvalidAttributesException} from '../../exceptions/InvalidAttributesException';
-import {EnrollmentMapper} from './enrollment.mapper';
-import {JWT_User} from '../user/user.model';
-import {UserService} from '../user/user.service';
-import {AlreadyUsedException} from '../../exceptions/AlreadyUsedException';
-import {EnrollmentPermissionChecker} from './enrollmentPermission.checker';
+import { JWT_User } from './../user/user.model';
+import { Injectable } from '@nestjs/common';
+import { Enrollment } from './enrollment.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Appointment } from '../appointment/appointment.entity';
+import { AppointmentService } from '../appointment/appointment.service';
+import { AdditionService } from '../addition/addition.service';
+import { DuplicateValueException } from '../../exceptions/DuplicateValueException';
+import { PassengerService } from './passenger/passenger.service';
+import { DriverService } from './driver/driver.service';
+import { Mail } from './mail/mail.entity';
+import { MailerService } from '@nest-modules/mailer';
+import { EntityNotFoundException } from '../../exceptions/EntityNotFoundException';
+import { InsufficientPermissionsException } from '../../exceptions/InsufficientPermissionsException';
+import { EntityGoneException } from '../../exceptions/EntityGoneException';
+import { AppointmentGateway } from '../appointment/appointment.gateway';
+import { DomainUtil } from '../../util/domain.util';
+import { EnrollmentUtil } from './enrollment.util';
+import { MissingAuthenticationException } from '../../exceptions/MissingAuthenticationException';
+import { StringUtil } from '../../util/string.util';
+import { InvalidAttributesException } from '../../exceptions/InvalidAttributesException';
+import { EnrollmentMapper } from './enrollment.mapper';
+import { UserService } from '../user/user.service';
+import { AlreadyUsedException } from '../../exceptions/AlreadyUsedException';
+import { EnrollmentPermissionChecker } from './enrollmentPermission.checker';
 
 const crypto = require('crypto');
 const logger = require('../../logger');
@@ -31,16 +31,16 @@ const logger = require('../../logger');
 @Injectable()
 export class EnrollmentService {
     constructor(@InjectRepository(Enrollment)
-                private readonly enrollmentRepository: Repository<Enrollment>,
-                @InjectRepository(Mail)
-                private readonly mailRepository: Repository<Mail>,
-                private readonly appointmentService: AppointmentService,
-                private readonly userService: UserService,
-                private readonly additionService: AdditionService,
-                private readonly passengerService: PassengerService,
-                private readonly driverService: DriverService,
-                private readonly mailerService: MailerService,
-                private readonly appointmentGateway: AppointmentGateway) {
+    private readonly enrollmentRepository: Repository<Enrollment>,
+        @InjectRepository(Mail)
+        private readonly mailRepository: Repository<Mail>,
+        private readonly appointmentService: AppointmentService,
+        private readonly userService: UserService,
+        private readonly additionService: AdditionService,
+        private readonly passengerService: PassengerService,
+        private readonly driverService: DriverService,
+        private readonly mailerService: MailerService,
+        private readonly appointmentGateway: AppointmentGateway) {
     }
 
     public async get(id: string, user: JWT_User, token: string) {
@@ -49,7 +49,7 @@ export class EnrollmentService {
             .leftJoinAndSelect('enrollment.additions', 'additions')
             .leftJoinAndSelect('enrollment.driver', 'driver')
             .leftJoinAndSelect('enrollment.passenger', 'passenger')
-            .where('enrollment.id = :enrollmentId', {enrollmentId: id})
+            .where('enrollment.id = :enrollmentId', { enrollmentId: id })
             .select(['enrollment', 'appointment._link', 'additions.name', 'additions.order', 'driver', 'passenger', 'appointment.hidden'])
             .getOne();
 
@@ -83,8 +83,8 @@ export class EnrollmentService {
 
     /**
      * Create a new enrollment. <br />
-     * The Enrollment can either be created by a logged in JWT_User, or by providing an email address.
-     * When providing an email address, then a mail with the edit token gets send to it.
+     * The {@link Enrollment} can either be created by a logged in {@link JWT_User}, or by providing an email address.
+     * When providing an email address, an email with the edit token gets send to it.
      *
      * @param enrollment_raw Enrollment data to save into database
      * @param user optional logged in user
@@ -95,6 +95,10 @@ export class EnrollmentService {
      * @throws See {@link findByLink} for relations
      * @throws DuplicateValueException if name is already in use
      * @throws See {@link parseEnrollmentObject} for relations
+     * 
+     * @todo
+     * Store information in db if logged in user creates a non self enrollment instead of sending the token back
+     * Requires extra db call when validation permission to modify enrollment afterwards
      */
     public async create(enrollment_raw: Enrollment, user: JWT_User, domain: string) {
         let appointment_referenced: Appointment;
@@ -185,17 +189,17 @@ export class EnrollmentService {
      */
     public async update(enrollment_to_change_values: any, enrollment_id: string, user: JWT_User, token: string) {
         const enrollment_referenced = await this.findById(enrollment_id);
-        const enrollment_updated = {...enrollment_referenced};
+        const enrollment_updated = { ...enrollment_referenced };
 
         const enrollmentPermissionChecker = new EnrollmentPermissionChecker(enrollment_referenced)
 
         if (!enrollment_referenced.hasPermissionToManipulate(user, token)) {
             throw new InsufficientPermissionsException(null, null, {
-                    'attribute': 'id',
-                    'in': 'path',
-                    'value': enrollment_id,
-                    'message': 'Specified enrollment is not in your ownership. You are also not permitted by being a manager of the related appointment.'
-                }
+                'attribute': 'id',
+                'in': 'path',
+                'value': enrollment_id,
+                'message': 'Specified enrollment is not in your ownership. You are also not permitted by being a manager of the related appointment.'
+            }
             );
         }
 
@@ -215,7 +219,7 @@ export class EnrollmentService {
                         throw e;
                     }
                 }
-                
+
                 if (changedValue === undefined) {
                     changedValue = value;
                 }
@@ -297,11 +301,11 @@ export class EnrollmentService {
 
         if (allowances.length === 0) {
             throw new InsufficientPermissionsException(null, null, {
-                    'attribute': 'id',
-                    'in': 'path',
-                    'value': enrollment.id,
-                    'message': 'Specified enrollment is not in your ownership. You are also not permitted by being a manager of the related appointment.'
-                }
+                'attribute': 'id',
+                'in': 'path',
+                'value': enrollment.id,
+                'message': 'Specified enrollment is not in your ownership. You are also not permitted by being a manager of the related appointment.'
+            }
             );
         }
 
