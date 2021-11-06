@@ -12627,8 +12627,8 @@
                           "listen": "test",
                           "script": {
                             "exec": [
-                              "pm.test(\"Status code 400\", function () {\r",
-                              "    pm.response.to.have.status(400);\r",
+                              "pm.test(\"Status code 409\", function () {\r",
+                              "    pm.response.to.have.status(409);\r",
                               "});\r",
                               "\r",
                               "const testSchema = eval(pm.globals.get(\"test_correctErrorResponseSchema\"));\r",
@@ -12638,7 +12638,7 @@
                               "    var jsonData = pm.response.json();\r",
                               "    \r",
                               "    pm.expect(jsonData).to.eql({\r",
-                              "        \"code\": \"DUPLICATE_ENTRY\",\r",
+                              "        \"code\": \"DUPLICATE_VALUES\",\r",
                               "        \"message\": \"Following values are duplicates and can not be used\",\r",
                               "        \"data\": [\r",
                               "            {\r",

@@ -438,7 +438,7 @@ export class EnrollmentService {
     private async _updateName(enrollment_to_change_values: any, enrollment_referenced: Enrollment) {
         if (!enrollment_referenced.creatorId) {
             if (await this._existsByName(enrollment_to_change_values.name, enrollment_referenced.appointment)) {
-                throw new DuplicateValueException('DUPLICATE_ENTRY',
+                throw new AlreadyUsedException('DUPLICATE_VALUES',
                     'Following values are duplicates and can not be used',
                     [{
                         'attribute': 'name',

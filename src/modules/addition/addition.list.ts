@@ -1,10 +1,11 @@
-import {Addition} from './addition.entity';
-import {DuplicateValueException} from '../../exceptions/DuplicateValueException';
-import {IAppointmentCreationAdditionDTO} from '../appointment/DTOs/IAppointmentCreationAdditionDTO';
-import {EntityNotFoundException} from '../../exceptions/EntityNotFoundException';
-import {Appointment} from '../appointment/appointment.entity';
-import {MissingValuesException} from '../../exceptions/MissingValuesException';
-import {IAppointmentUpdateAdditionDTO} from '../appointment/DTOs/IAppointmentUpdateAdditionDTO';
+import { AlreadyUsedException } from './../../exceptions/AlreadyUsedException';
+import { Addition } from './addition.entity';
+import { DuplicateValueException } from '../../exceptions/DuplicateValueException';
+import { IAppointmentCreationAdditionDTO } from '../appointment/DTOs/IAppointmentCreationAdditionDTO';
+import { EntityNotFoundException } from '../../exceptions/EntityNotFoundException';
+import { Appointment } from '../appointment/appointment.entity';
+import { MissingValuesException } from '../../exceptions/MissingValuesException';
+import { IAppointmentUpdateAdditionDTO } from '../appointment/DTOs/IAppointmentUpdateAdditionDTO';
 
 export class AdditionList {
     private list: Addition[];
