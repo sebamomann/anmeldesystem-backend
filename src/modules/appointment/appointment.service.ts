@@ -545,7 +545,7 @@ export class AppointmentService {
             `;
 
         builder = builder.leftJoinAndSelect('appointment._pinners', 'pinners', cond2, {
-            userId: user?.sub || 0
+            userId: user?.sub || '0'
         });
 
         builder = builder.where(
@@ -576,6 +576,7 @@ export class AppointmentService {
         builder = builder.orderBy('appointment.date', 'DESC');
 
         if (limit > 0) {
+            console.log(limit);
             builder = builder.limit(limit);
         }
 
