@@ -177,7 +177,7 @@ export class AdditionList {
         );
 
         if (duplicates.length > 0) {
-            throw new DuplicateValueException('DUPLICATE_ENTRY',
+            throw new DuplicateValueException('DUPLICATE_VALUES',
                 'Following values are duplicates and can not be used',
                 errors);
         }
