@@ -501,8 +501,7 @@ export class AppointmentService {
             permittedEnrollmentsIds.push('0');
         }
 
-        if (!slim) {
-            const cond = `
+        const cond = `
             CASE 
                 WHEN appointment.hidden = 1
                 THEN (
@@ -524,16 +523,15 @@ export class AppointmentService {
             END 
             `;
 
-            builder = builder.leftJoinAndSelect('appointment._enrollments', 'enrollments', cond, {
-                userId: user?.sub || 0,
-                ids: permittedEnrollmentsIds
-            })
-                .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
-                .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
-                .leftJoinAndSelect('enrollments.additions', 'enrollment_additions');
+        builder = builder.leftJoinAndSelect('appointment._enrollments', 'enrollments', cond, {
+            userId: user?.sub || '0',
+            ids: permittedEnrollmentsIds
+        })
+            .leftJoinAndSelect('enrollments.passenger', 'enrollment_passenger')
+            .leftJoinAndSelect('enrollments.driver', 'enrollment_driver')
+            .leftJoinAndSelect('enrollments.additions', 'enrollment_additions');
 
-            select = [...select, 'enrollments', 'enrollment_additions', 'enrollment_passenger', 'enrollment_driver'];
-        }
+        select = [...select, 'enrollments', 'enrollment_additions', 'enrollment_passenger', 'enrollment_driver'];
 
         // data is never selected, if not specified
         builder = builder.leftJoinAndSelect('appointment._files', 'files');
@@ -556,10 +554,8 @@ export class AppointmentService {
                     br.where('appointment.link IN (:...pinnedLinks)', { pinnedLinks: pinList.getArray().length > 0 ? pinList.getArray() : ['0'] });
                     br.orWhere('appointment.creatorId = :userId', { userId: user?.sub || '0' });
                     br.orWhere('administrators.userId = :userId', { userId: user?.sub || '0' });
-                    if (!slim) {
-                        br.orWhere('enrollments.creatorId = :userId', { userId: user?.sub || '0' });
-                        br.orWhere('enrollments.id IN (:...enrollmentIds)', { enrollmentIds: permittedEnrollmentsIds });
-                    }
+                    br.orWhere('enrollments.creatorId = :userId', { userId: user?.sub || '0' });
+                    br.orWhere('enrollments.id IN (:...enrollmentIds)', { enrollmentIds: permittedEnrollmentsIds });
                     br.orWhere('pinners.userId = (:...userId)', { userId: user?.sub || '0' });
                 }
             )
