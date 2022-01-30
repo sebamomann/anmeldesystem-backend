@@ -35,7 +35,7 @@
     "@nestjs/platform-express": "^6.11.11",
     "@nestjs/platform-socket.io": "^7.3.2",
     "@nestjs/typeorm": "^6.3.4",
-    "@nestjs/websockets": "^7.3.2",
+    "@nestjs/websockets": "^7.6.18",
     "atob": "^2.1.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "latest",
