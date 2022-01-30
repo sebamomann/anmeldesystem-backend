@@ -42,7 +42,7 @@
     "btoa": "^1.2.1",
     "class-transformer": "^0.3.1",
     "connect-history-api-fallback": "^1.6.0",
-    "date-fns": "^2.15.0",
+    "date-fns": "^2.28.0",
     "dotenv": "^8.2.0",
     "ical-generator": "^1.10.0",
     "js-yaml": "^3.14.0",
