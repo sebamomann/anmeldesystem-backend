@@ -46,7 +46,7 @@
     "dotenv": "^8.2.0",
     "ical-generator": "^1.10.0",
     "js-yaml": "^3.14.0",
-    "keycloak-admin": "^1.14.10",
+    "keycloak-admin": "^1.14.22",
     "mysql": "^2.18.1",
     "nestjs-easyconfig": "^1.8.10",
     "nodemailer": "^6.4.16",
